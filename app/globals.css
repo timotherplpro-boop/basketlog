@@ -193,7 +193,7 @@ button { font: inherit; color: inherit; }
 .cover .t-sec { line-height: 1; }
 .marquee { margin-top: 56px; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent); mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent); }
 .marquee-track { display: flex; align-items: center; gap: 80px; width: max-content; animation: scroll 55s linear infinite; }
-.marquee-track img { width: 54px; height: 54px; object-fit: contain; filter: brightness(0) invert(1); opacity: .9; transition: filter .3s, transform .3s; }
+.marquee-track img { width: 58px; height: 58px; object-fit: contain; filter: grayscale(1) brightness(1.5) contrast(1.05); opacity: .85; transition: filter .3s, transform .3s; }
 .marquee-track img:hover { filter: none; transform: scale(1.25); }
 .marquee:hover .marquee-track { animation-play-state: paused; }
 
@@ -214,9 +214,9 @@ button { font: inherit; color: inherit; }
 .stats3 { display: flex; justify-content: center; gap: clamp(30px, 8vw, 120px); margin-top: 60px; flex-wrap: wrap; }
 .stat { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .stat strong { font-family: var(--head); font-weight: 500; font-size: clamp(54px, 5vw, 72px); line-height: 1; letter-spacing: .02em; }
-.stat span { font-size: 18px; color: #fff; }
+.stat > span { font-size: 18px; color: #fff; }
 .demo .btn-ball { margin-top: 56px; }
-.demo-note { margin: 22px auto 0; font-size: 16px; color: var(--peach); max-width: 320px; }
+.demo-note { margin: 22px auto 0; font-size: 16px; color: var(--peach); max-width: 460px; }
 @media (max-width: 760px) { .demo-side { opacity: .3; width: 130px; } .stats3 { flex-direction: column; gap: 30px; } }
 
 /* Compteur "machine à sous" */
@@ -288,7 +288,8 @@ button { font: inherit; color: inherit; }
    ========================================================= */
 .sources { position: relative; text-align: center; padding: 120px 16px 0; overflow: hidden; isolation: isolate; }
 .sources-bg { position: absolute; inset: 160px 0 0 0; z-index: -1; background: url("https://images.unsplash.com/photo-1504450758481-7338eba7524a?w=2400&q=75&auto=format") center 60% / cover no-repeat; }
-.sources-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, var(--bg) 0%, rgba(4,8,23,.55) 30%, rgba(4,8,23,.55) 70%, var(--bg) 100%); }
+.sources-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, var(--bg) 0%, rgba(4,8,23,.72) 28%, rgba(4,8,23,.66) 70%, var(--bg) 100%); }
+.sources-bg { filter: saturate(.65); }
 .sources .t-sec { margin-top: 26px; }
 .sources .lead { max-width: 470px; margin: 30px auto 0; }
 .sources .marquee { margin: 100px 0 0; padding-bottom: 220px; }
