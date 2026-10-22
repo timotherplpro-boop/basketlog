@@ -4,12 +4,15 @@ import { aiNarrative } from "../lib/narrative";
 import { TeamLogo, ProbBar, StatusTag } from "./ui";
 import Gate from "./Gate";
 import AppTabs from "./AppTabs";
+import MatchExtras from "./MatchExtras";
 
 function Signed({ v }) {
   return <span className={v > 0.05 ? "pos" : v < -0.05 ? "neg" : ""}>{fmt(v)}</span>;
 }
 
-export default async function MatchView({ a, backHref = "/app" }) {
+export default async function MatchView({ a, backHref = "/app", league = "NBA", extras = null }) {
+  const isNBA = league === "NBA";
+  const teamHref = (t) => (isNBA ? `/app/equipe/${t.id}` : `/app/euroleague/equipe/${t.id}`);
   const g = a.game;
   const h = a.home, aw = a.away;
   const narrative = await aiNarrative(a);
@@ -24,12 +27,12 @@ export default async function MatchView({ a, backHref = "/app" }) {
     ["10 derniers matchs", aw.cur?.last10 || "–", h.cur?.last10 || "–"],
     ["Bilan dom. / ext.", aw.cur?.road ? `${aw.cur.road} ext.` : "–", h.cur?.home ? `${h.cur.home} dom.` : "–"],
     ["Saison passée", aw.prev ? `${aw.prev.wins}-${aw.prev.losses} (${fmt(aw.prev.diff)})` : "–", h.prev ? `${h.prev.wins}-${h.prev.losses} (${fmt(h.prev.diff)})` : "–"],
-    ...(g.hypothetical ? [] : [["A joué hier", aw.b2b ? "Oui" : "Non", h.b2b ? "Oui" : "Non"]]),
+    ...(g.hypothetical || league !== "NBA" ? [] : [["A joué hier", aw.b2b ? "Oui" : "Non", h.b2b ? "Oui" : "Non"]]),
   ];
 
   return (
     <main className="app-page">
-      <AppTabs active="analyse" />
+      <AppTabs active={isNBA ? "analyse" : "euroleague"} />
       <Link href={backHref} className="back">← Retour</Link>
 
       <div className="card match-hero">
@@ -38,13 +41,13 @@ export default async function MatchView({ a, backHref = "/app" }) {
           <span className="team-rec">{[g.venue, g.broadcast].filter(Boolean).join(" · ")}</span>
         </div>
         <div className="match-teams">
-          <div className="team"><TeamLogo team={g.away} size={92} /><div className="team-name">{g.away.name}</div><div className="team-rec mono">{g.away.record || "0-0"} · extérieur</div></div>
+          <Link href={teamHref(g.away)} className="team"><TeamLogo team={g.away} size={92} /><div className="team-name">{g.away.name}</div><div className="team-rec mono">{g.away.record || "0-0"} · extérieur</div></Link>
           <div className="proj">
             <div className="label">{showScore ? (g.state === "in" ? "Score en direct" : "Score final") : "Score projeté"}</div>
             <div className="score">{showScore ? `${g.away.score}-${g.home.score}` : `${Math.round(a.awayPts)}-${Math.round(a.homePts)}`}</div>
             {showScore && <div className="team-rec mono">Projeté : {Math.round(a.awayPts)}-{Math.round(a.homePts)}</div>}
           </div>
-          <div className="team"><TeamLogo team={g.home} size={92} /><div className="team-name">{g.home.name}</div><div className="team-rec mono">{g.home.record || "0-0"} · domicile</div></div>
+          <Link href={teamHref(g.home)} className="team"><TeamLogo team={g.home} size={92} /><div className="team-name">{g.home.name}</div><div className="team-rec mono">{g.home.record || "0-0"} · domicile</div></Link>
         </div>
         <div style={{ marginTop: 26 }}>
           <ProbBar pAway={a.pAway} pHome={a.pHome} away={g.away} home={g.home} />
@@ -95,14 +98,17 @@ export default async function MatchView({ a, backHref = "/app" }) {
           </div>
         </div>
 
+        {isNBA ? <MatchExtras a={a} /> : extras}
+
         <div className="card block">
-          <h2>Face-à-face statistique</h2>
+          <h2>Fiche des deux équipes</h2>
           <table className="cmp">
             <thead><tr><th>{g.away.abbr}</th><th></th><th>{g.home.abbr}</th></tr></thead>
             <tbody>{rows.map(([l, x, y]) => <tr key={l}><td className="mono">{x}</td><td>{l}</td><td className="mono">{y}</td></tr>)}</tbody>
           </table>
         </div>
 
+        {isNBA && (
         <div className="grid2">
           {[aw, h].map((s) => (
             <div className="card block" key={s.team.id}>
@@ -119,6 +125,7 @@ export default async function MatchView({ a, backHref = "/app" }) {
             </div>
           ))}
         </div>
+        )}
       </Gate>
 
       <p className="disclaimer">

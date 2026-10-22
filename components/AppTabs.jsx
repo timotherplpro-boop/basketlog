@@ -4,7 +4,8 @@ export default function AppTabs({ active }) {
   const tabs = [
     ["analyse", "/app", "Analyse de match"],
     ["matchs", "/app/matchs", "Matchs du jour"],
-    ["classement", "/app/classement", "Classement"],
+    ["classement", "/app/classement", "Classement NBA"],
+    ["euroleague", "/app/euroleague", "EuroLeague"],
   ];
   return (
     <div className="app-tabs">

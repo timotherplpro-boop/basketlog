@@ -35,7 +35,7 @@ export default function RootLayout({ children }) {
           <div className="foot">
             <Link href="/" className="logo"><span className="ball" aria-hidden /> Basketlog</Link>
             <div>Analyses statistiques, pas un service de paris. Les probabilités sont des estimations, jamais des certitudes.</div>
-            <div>Données : flux publics NBA · Photos : Unsplash · © {new Date().getFullYear()} Basketlog</div>
+            <div>Données : flux publics NBA et EuroLeague · Photos : Unsplash · © {new Date().getFullYear()} Basketlog</div>
           </div>
         </footer>
       </body>

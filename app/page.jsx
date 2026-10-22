@@ -2,6 +2,7 @@ import Link from "next/link";
 import { recentAccuracy, upcomingAnalyses, conferenceStandings } from "../lib/data";
 import { TEAMS, teamById } from "../lib/teams";
 import { nbaToday } from "../lib/espn";
+import { getELGames } from "../lib/euroleague";
 import TeamSearch from "../components/TeamSearch";
 import PhoneHero from "../components/PhoneHero";
 import SlotNumber from "../components/SlotNumber";
@@ -39,7 +40,7 @@ function BallButton({ href, children }) {
 }
 
 export default async function Home() {
-  const [up, acc, std, reviews] = await Promise.all([upcomingAnalyses(7), recentAccuracy(7), conferenceStandings(), getReviews(30)]);
+  const [up, acc, std, reviews, elGames] = await Promise.all([upcomingAnalyses(7), recentAccuracy(7), conferenceStandings(), getReviews(30), getELGames()]);
   const pre = up.filter((g) => !g.live);
 
   // Téléphone : les Lakers (ou l'équipe qui joue le plus cette semaine)
@@ -65,13 +66,17 @@ export default async function Home() {
   const todayCount = up.filter((g) => g.d === today).length;
   const accPct = acc.n ? Math.round((acc.ok / acc.n) * 100) : 0;
   const cards = pre.slice(0, 12);
+  const elCrests = [...new Map(elGames.flatMap((g) => [g.home, g.away]).filter((c) => c.logo).map((c) => [c.id, c.logo])).values()];
   const LOGOS = TEAMS.map((t) => t.logo);
+  const MIX = LOGOS.flatMap((l, i) => (elCrests[i] ? [l, elCrests[i]] : [l]));
+  const nTeams = 30 + elCrests.length;
 
   const faq = [
     { q: "1. Basketlog est-il gratuit ?", a: "Oui. Les probabilités de tous les matchs sont gratuites et tu as 3 analyses complètes offertes chaque jour. Une formule Pro débloquera bientôt tout, sans limite." },
     { q: "2. Comment fonctionnent les analyses ?", a: "Le modèle part du niveau réel de chaque équipe (écart de points, attaque, défense, saison passée), puis ajoute l'avantage du terrain, la fatigue des back-to-back et les absences. La marge attendue est convertie en probabilité de victoire et en scénarios." },
     { q: "3. Est-ce que Basketlog permet de parier ?", a: "Non. Basketlog est un outil d'analyse pour mieux comprendre les matchs. Aucune prise de pari ne se fait ici et aucune probabilité n'est une garantie." },
-    { q: "4. Les avis affichés sont-ils réels ?", a: "Oui. Chaque avis est déposé par un utilisateur via le bouton « Donner mon avis », puis publié tel quel après une simple relecture anti-spam. Nous n'en écrivons aucun nous-mêmes." },
+    { q: "4. Quelles compétitions sont couvertes ?", a: "La NBA (les 30 franchises, avec stats de tirs, joueurs clés, forme récente et confrontations) et l'EuroLeague (les 20 clubs, avec probabilités, forme et classement). D'autres championnats arriveront ensuite." },
+    { q: "5. Les avis affichés sont-ils réels ?", a: "Oui. Chaque avis est déposé par un utilisateur via le bouton « Donner mon avis », puis publié tel quel après une simple relecture anti-spam. Nous n'en écrivons aucun nous-mêmes." },
     { q: "Les données sont-elles fiables ?", a: "Oui. Les analyses s'appuient sur des données NBA réelles (calendrier, scores, classements, infirmerie), mises à jour en continu. Le taux de réussite affiché est calculé sur les vrais matchs terminés." },
   ];
 
@@ -133,11 +138,11 @@ export default async function Home() {
 
       {/* ================= ÉQUIPES COUVERTES ================= */}
       <section className="cover">
-        <h2 className="t-sec reveal">Les 30 franchises<br /><span className="accent">NBA couvertes</span></h2>
+        <h2 className="t-sec reveal">{nTeams > 30 ? `${nTeams} équipes` : "Les 30 franchises"}<br /><span className="accent">{nTeams > 30 ? "NBA et EuroLeague" : "NBA couvertes"}</span></h2>
         <div className="marquee reveal" style={{ "--d": "150ms" }}>
           <div className="marquee-track">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            {[...LOGOS, ...LOGOS].map((l, i) => <img key={i} src={l} alt="" loading="lazy" />)}
+            {[...MIX, ...MIX].map((l, i) => <img key={i} src={l} alt="" loading="lazy" />)}
           </div>
         </div>
       </section>
@@ -215,7 +220,7 @@ export default async function Home() {
         <div className="sources-bg" aria-hidden />
         <span className="pill-badge plain reveal">+1 230 matchs par saison</span>
         <h2 className="t-sec reveal" style={{ "--d": "100ms" }}>Nous analysons<br />chaque match NBA</h2>
-        <p className="lead reveal" style={{ "--d": "200ms" }}>Calendrier, scores, classements et infirmerie : les données NBA sont croisées en continu pour prédire chaque match.</p>
+        <p className="lead reveal" style={{ "--d": "200ms" }}>Calendrier, scores, stats de tirs, joueurs clés, classements et infirmerie : les données NBA et EuroLeague sont croisées en continu pour prédire chaque match.</p>
         <div className="marquee">
           <div className="marquee-track" style={{ animationDirection: "reverse", animationDuration: "65s" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}

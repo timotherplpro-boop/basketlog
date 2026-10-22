@@ -12,7 +12,7 @@ function parts(iso) {
 }
 
 // Liste des matchs façon "Prochains matchs", regroupés par jour (heure de Paris).
-export default function UpcomingList({ games, title = "Prochains matchs", grouped = true }) {
+export default function UpcomingList({ games, title = "Prochains matchs", grouped = true, href = (g) => `/app/match/${g.id}?d=${g.d}` }) {
   if (!games.length) return <div className="empty">Aucun match au programme.</div>;
   const groups = [];
   for (const g of games) {
@@ -33,7 +33,7 @@ export default function UpcomingList({ games, title = "Prochains matchs", groupe
             const favHome = g.pHome >= 0.5;
             const done = g.state === "post" && g.home.score != null;
             return (
-              <Link key={g.id} href={`/app/match/${g.id}?d=${g.d}`} className="up-row" style={{ animationDelay: `${Math.min(n++, 12) * 50}ms` }}>
+              <Link key={g.id} href={href(g)} className="up-row" style={{ animationDelay: `${Math.min(n++, 12) * 50}ms` }}>
                 <div className="when">{d}<b>{g.live ? <span className="live">LIVE</span> : done ? "FIN" : h}</b></div>
                 <div className="m">
                   <span className="t">

@@ -16,7 +16,7 @@ function Table({ title, rows }) {
             <tr key={t.id} className={i === 6 || i === 10 ? "cut" : ""} style={{ animationDelay: `${i * 35}ms` }}>
               <td className="rk">{i + 1}</td>
               <td className="tm">
-                <Link href={`/app?team=${t.id}`}>
+                <Link href={`/app/equipe/${t.id}`}>
                   <span>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={t.logo} alt="" />
@@ -44,7 +44,7 @@ export default async function ClassementPage() {
       <div className="app-head">
         <h1>Classement</h1>
         <p>Découvre les conférences en cours</p>
-        <p className="note">Clique sur une équipe pour voir ses prochains matchs et l&apos;analyser.</p>
+        <p className="note">Clique sur une équipe pour voir sa fiche : stats, joueurs, calendrier.</p>
       </div>
       <div className="std-grid">
         <Table title="CONFÉRENCE EST" rows={east} />

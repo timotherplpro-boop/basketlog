@@ -24,6 +24,7 @@ export default function Nav() {
             <div className="nav-box">
               <Link href="/app/matchs">Matchs du jour</Link>
               <Link href="/app/classement">Classement</Link>
+              <Link href="/app/euroleague">EuroLeague</Link>
             </div>
             <button className={`burger ${open ? "open" : ""}`} onClick={() => setOpen(!open)} aria-label={open ? "Fermer le menu" : "Ouvrir le menu"} aria-expanded={open}>
               <i /><i />
@@ -35,7 +36,8 @@ export default function Nav() {
         <button className="mclose" aria-label="Fermer le menu">×</button>
         <Link href="/app">Analyser un match</Link>
         <Link href="/app/matchs">Matchs du jour</Link>
-        <Link href="/app/classement">Classement</Link>
+        <Link href="/app/classement">Classement NBA</Link>
+        <Link href="/app/euroleague">EuroLeague</Link>
         <Link href="/#faq">FAQ</Link>
       </div>
     </>
