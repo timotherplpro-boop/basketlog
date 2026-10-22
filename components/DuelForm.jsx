@@ -86,7 +86,7 @@ export default function DuelForm({ teams, initialHome }) {
       <Combo teams={teams} value={home} onChange={setHome} exclude={away?.id} placeholder="Cherche une équipe (ex : Lakers, Celtics)" />
       <div className="vs-sep">vs</div>
       <Combo teams={teams} value={away} onChange={setAway} exclude={home?.id} placeholder="Cherche une équipe (ex : Knicks, Warriors)" />
-      <p className="home-hint">S&apos;ils se jouent dans les 30 prochains jours, tu tombes sur le vrai match. Sinon, la 1re équipe reçoit.</p>
+      <p className="home-hint">S&apos;ils se jouent dans les 3 prochaines semaines, tu tombes sur le vrai match. Sinon, la 1re équipe reçoit.</p>
       <button className="btn-solid" disabled={!home || !away || busy}>{busy ? "Analyse en cours…" : "Analyser le match"}</button>
     </form>
   );

@@ -100,10 +100,10 @@ button { font: inherit; color: inherit; }
    ========================================================= */
 .hero { position: relative; padding: 138px 16px 0; display: flex; flex-direction: column; align-items: center; isolation: isolate; }
 .hero-bg { position: absolute; inset: 0 0 auto 0; height: 1400px; z-index: -1; overflow: hidden; }
-.hero-bg .photo { position: absolute; inset: 0; background: url("https://images.unsplash.com/photo-1527527753602-fb58e749276a?w=2400&q=75&auto=format") center 64% / cover no-repeat; opacity: .5; transform: scale(1.06); animation: kenburns 30s ease-in-out infinite alternate; }
+.hero-bg .photo { position: absolute; inset: 0; background: url("https://images.unsplash.com/photo-1527527753602-fb58e749276a?w=2400&q=75&auto=format") center 70% / cover no-repeat; opacity: .38; filter: saturate(.8) brightness(.8); transform: scale(1.06); animation: kenburns 30s ease-in-out infinite alternate; }
 .hero-bg .shade { position: absolute; inset: 0; background:
   radial-gradient(ellipse 42% 30% at 50% 14%, rgba(235, 245, 255, .15), transparent 70%),
-  linear-gradient(180deg, rgba(4,8,23,.5) 0%, rgba(4,8,23,.35) 35%, rgba(4,8,23,.55) 60%, var(--bg) 92%); }
+  linear-gradient(180deg, rgba(4,8,23,.78) 0%, rgba(4,8,23,.62) 30%, rgba(4,8,23,.35) 52%, rgba(4,8,23,.5) 70%, var(--bg) 94%); }
 .hero-bg .lamp { position: absolute; top: 118px; left: 50%; width: 74px; height: 40px; transform: translateX(-50%); border-radius: 40%; background: radial-gradient(closest-side, #fff, rgba(220,235,255,.8) 45%, transparent 80%); filter: blur(4px); animation: flicker 2.2s ease-out both; }
 .hero-bg .cone { position: absolute; top: 135px; left: 50%; width: 800px; height: 760px; transform: translateX(-50%); background: conic-gradient(from 150deg at 50% 0%, transparent 0deg, rgba(220,235,255,.09) 20deg, rgba(220,235,255,.15) 30deg, rgba(220,235,255,.09) 40deg, transparent 60deg); filter: blur(18px); animation: flicker 2.2s ease-out .15s both; }
 .hero-bg .dust i { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: #ffd9b0; opacity: 0; animation: dust 9s linear infinite; }

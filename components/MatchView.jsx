@@ -56,7 +56,7 @@ export default async function MatchView({ a, backHref = "/app" }) {
       </div>
 
       {g.hypothetical && (
-        <div className="hypo">Ces deux équipes ne se jouent pas dans les 30 prochains jours : voici l&apos;analyse d&apos;un match hypothétique, avec les {g.home.short} à domicile.</div>
+        <div className="hypo">Ces deux équipes ne se jouent pas dans les 3 prochaines semaines : voici l&apos;analyse d&apos;un match hypothétique, avec les {g.home.short} à domicile.</div>
       )}
 
       <div className="kpis">
