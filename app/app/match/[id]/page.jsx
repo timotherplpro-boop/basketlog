@@ -57,7 +57,7 @@ export default async function MatchPage({ params, searchParams }) {
   ];
 
   return (
-    <main className="wrap">
+    <main className="wrap app-page">
       <Link href={`/app?d=${date}`} className="back">← Tous les matchs</Link>
 
       <div className="card match-hero">

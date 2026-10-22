@@ -22,11 +22,11 @@ export default async function AppPage({ searchParams }) {
   const sorted = [...analyses].sort((x, y) => new Date(x.game.date) - new Date(y.game.date));
 
   return (
-    <main className="wrap">
+    <main className="wrap app-page">
       <div className="app-head">
         <div>
           <div className="team-rec">Programme NBA · heures de Paris</div>
-          <h1>{label(date, today)} · {analyses.length} match{analyses.length > 1 ? "s" : ""}</h1>
+          <h1>{label(date, today)} · <em>{analyses.length} match{analyses.length > 1 ? "s" : ""}</em></h1>
         </div>
         <div className="datenav">
           <Link href={`/app?d=${shiftDate(date, -1)}`} aria-label="Jour précédent">←</Link>

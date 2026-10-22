@@ -45,7 +45,7 @@ export function GameCard({ a, date }) {
     <Link href={`/app/match/${g.id}?d=${date}`} className="card game">
       <div className="game-top">
         <StatusTag game={g} />
-        {Math.max(a.pHome, a.pAway) > 0.72 ? <span className="tag hot">Favori net</span> : Math.abs(a.pHome - 0.5) < 0.06 ? <span className="tag hot">Indécis</span> : <span className="mono">{a.confidence}</span>}
+        {Math.max(a.pHome, a.pAway) > 0.72 ? <span className="tag hot">Favori net</span> : Math.abs(a.pHome - 0.5) < 0.06 ? <span className="tag hot">Indécis</span> : <span>Confiance {a.confidence.toLowerCase()}</span>}
       </div>
       {[g.away, g.home].map((t, i) => {
         const p = i === 0 ? a.pAway : a.pHome;
