@@ -62,6 +62,7 @@ button { font: inherit; color: inherit; }
 .burger.open i:first-child { top: 20px; transform: rotate(45deg); } .burger.open i:last-child { top: 20px; transform: rotate(-45deg); }
 .mmenu { position: fixed; inset: 0; z-index: 55; background: rgba(4,8,23,.97); backdrop-filter: blur(10px); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 26px; opacity: 0; pointer-events: none; transition: opacity .35s var(--ease); }
 .mmenu.open { opacity: 1; pointer-events: auto; }
+.mclose { position: absolute; top: 18px; right: 20px; width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--line-2); background: rgba(255,255,255,.06); color: var(--peach); font-size: 30px; line-height: 1; cursor: pointer; }
 .mmenu a { font-family: var(--title); font-size: 34px; color: #fff; transform: translateY(16px); opacity: 0; transition: transform .45s var(--ease), opacity .45s var(--ease); }
 .mmenu.open a { transform: none; opacity: 1; }
 .mmenu.open a:nth-child(2) { transition-delay: .05s; } .mmenu.open a:nth-child(3) { transition-delay: .1s; } .mmenu.open a:nth-child(4) { transition-delay: .15s; }
@@ -217,7 +218,7 @@ button { font: inherit; color: inherit; }
 .stat > span { font-size: 18px; color: #fff; }
 .demo .btn-ball { margin-top: 56px; }
 .demo-note { margin: 22px auto 0; font-size: 16px; color: var(--peach); max-width: 460px; }
-@media (max-width: 760px) { .demo-side { opacity: .3; width: 130px; } .stats3 { flex-direction: column; gap: 30px; } }
+@media (max-width: 760px) { .demo-side { width: 150px; } .demo-side img { opacity: .22; } .stats3 { flex-direction: column; gap: 30px; } }
 
 /* Compteur "machine à sous" */
 .slot { display: inline-flex; font-variant-numeric: tabular-nums; }

@@ -32,6 +32,7 @@ export default function Nav() {
         </div>
       </nav>
       <div className={`mmenu ${open ? "open" : ""}`} onClick={() => setOpen(false)}>
+        <button className="mclose" aria-label="Fermer le menu">×</button>
         <Link href="/app">Analyser un match</Link>
         <Link href="/app/matchs">Matchs du jour</Link>
         <Link href="/app/classement">Classement</Link>
