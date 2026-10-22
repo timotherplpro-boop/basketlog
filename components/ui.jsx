@@ -32,6 +32,7 @@ export function parisDay(iso) {
 }
 
 export function StatusTag({ game }) {
+  if (game.hypothetical) return <span className="tag hot">Match hypothétique</span>;
   if (game.state === "in") return <span className="tag live">● En direct</span>;
   if (game.state === "post") return <span className="tag">Terminé</span>;
   return <span className="tag">{parisDay(game.date)} · {parisTime(game.date)}</span>;

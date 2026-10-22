@@ -1,212 +1,244 @@
 import Link from "next/link";
-import { analyzeDay, recentAccuracy, upcomingGames } from "../lib/data";
-import { nbaToday, shiftDate } from "../lib/espn";
-import { pct } from "../lib/model";
-import { parisTime, parisDay } from "../components/ui";
+import { recentAccuracy, upcomingAnalyses, conferenceStandings } from "../lib/data";
+import { TEAMS, teamById } from "../lib/teams";
+import { nbaToday } from "../lib/espn";
+import { ruleNarrative } from "../lib/narrative";
 import TeamSearch from "../components/TeamSearch";
-import CountUp from "../components/CountUp";
-import Reveal from "../components/Reveal";
+import PhoneHero from "../components/PhoneHero";
+import SlotNumber from "../components/SlotNumber";
+import StickyStandings from "../components/StickyStandings";
+import RevealObserver from "../components/RevealObserver";
+import Faq from "../components/Faq";
 
 export const dynamic = "force-dynamic";
 
-const TEAMS = ["atl","bos","bkn","cha","chi","cle","dal","den","det","gs","hou","ind","lac","lal","mem","mia","mil","min","no","ny","okc","orl","phi","phx","por","sac","sa","tor","utah","wsh"];
-const logo = (a) => `https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/${a}.png`;
-
-async function pickFeatured() {
-  const today = nbaToday();
-  for (const d of [today, shiftDate(today, 1), shiftDate(today, 2)]) {
-    const { analyses } = await analyzeDay(d);
-    const pool = analyses.filter((a) => a.game.state === "pre");
-    if (pool.length) {
-      const byEdge = [...pool].sort((x, y) => Math.abs(y.pHome - 0.5) - Math.abs(x.pHome - 0.5));
-      return { phone: byEdge[byEdge.length - 1], big: byEdge[0], date: d, count: analyses.length };
-    }
-  }
-  return { phone: null, big: null, date: today, count: 0 };
+const pct = (p) => Math.round(p * 100);
+function shortDay(iso) {
+  try {
+    return new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", weekday: "short", day: "numeric", month: "short" }).format(new Date(iso));
+  } catch { return ""; }
 }
 
-// Lumières de salle (positions fixes pour un rendu stable)
-const LIGHTS = Array.from({ length: 46 }, (_, i) => {
+// Grains de lumière dans le faisceau du projecteur
+const DUST = Array.from({ length: 26 }, (_, i) => {
   const r = (n) => ((Math.sin(i * 12.9898 + n * 78.233) * 43758.5453) % 1 + 1) % 1;
-  return { x: r(1) * 100, y: 38 + r(2) * 40, s: 2 + r(3) * 4, o: 0.25 + r(4) * 0.6, d: r(5) * 6, warm: r(6) > 0.35 };
+  return { x: 30 + r(1) * 40, y: 18 + r(2) * 40, d: r(3) * 9 };
 });
 
-function Phone({ a, date }) {
-  if (!a) return null;
-  const g = a.game;
+function BallButton({ href, children }) {
   return (
-    <div className="phone">
-      <div className="phone-notch" />
-      <div className="phone-screen">
-        <div className="ps-head">
-          <span className="ps-logo"><span className="logo-ball spin" /> Basketlog</span>
-          <span className="ps-menu" aria-hidden><i /><i /><i /></span>
-        </div>
-        <div className="ps-title">Analyse de match</div>
-        <div className="ps-sub">Entre les équipes que tu veux analyser</div>
-        <div className="ps-note">Le modèle croise forme, niveau, absences et fatigue pour chaque match.</div>
-        <div className="ps-card">
-          <div className="ps-scan" aria-hidden />
-          <div className="ps-teams">
-            <div className="ps-t l">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={g.away.logo} alt="" width={44} height={44} /><span>{g.away.abbr}</span></div>
-            <div className="ps-time">{parisDay(g.date)}<b>{parisTime(g.date)}</b></div>
-            <div className="ps-t r">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={g.home.logo} alt="" width={44} height={44} /><span>{g.home.abbr}</span></div>
-          </div>
-          <div className="ps-probs">
-            <b><CountUp value={Math.round(a.pAway * 100)} suffix="%" delay={1300} /></b>
-            <div className="ps-bar"><i style={{ "--w": `${a.pAway * 100}%` }} /></div>
-            <b className="hot"><CountUp value={Math.round(a.pHome * 100)} suffix="%" delay={1300} /></b>
-          </div>
-          <div className="ps-rows">
-            <div style={{ "--d": "1.7s" }}><span>Score projeté</span><b>{Math.round(a.awayPts)}–{Math.round(a.homePts)}</b></div>
-            <div style={{ "--d": "1.85s" }}><span>Total de points</span><b>{Math.round(a.total)}</b></div>
-            <div style={{ "--d": "2s" }}><span>Match serré (≤ 5 pts)</span><b>{pct(a.scenarios[1].p)}</b></div>
-          </div>
-        </div>
-        <Link href={`/app/match/${g.id}?d=${date}`} className="ps-cta shine">Voir l&apos;analyse</Link>
-      </div>
-    </div>
+    <Link href={href} className="btn-ball">
+      <span className="ball" aria-hidden />
+      <span className="pill">{children}</span>
+    </Link>
   );
 }
 
 export default async function Home() {
-  const [{ phone, big, date, count }, acc, upcoming] = await Promise.all([pickFeatured(), recentAccuracy(7), upcomingGames(7)]);
+  const [up, acc, std] = await Promise.all([upcomingAnalyses(7), recentAccuracy(7), conferenceStandings()]);
+  const pre = up.filter((g) => !g.live);
+
+  // Téléphone : les Lakers (ou l'équipe qui joue le plus cette semaine)
+  const count = {};
+  pre.forEach((g) => { count[g.home.id] = (count[g.home.id] || 0) + 1; count[g.away.id] = (count[g.away.id] || 0) + 1; });
+  const heroId = (count["13"] || 0) >= 2 ? "13" : Object.entries(count).sort((a, b) => b[1] - a[1])[0]?.[0] || "13";
+  const heroTeam = teamById(heroId);
+  const heroRows = pre.filter((g) => g.home.id === heroId || g.away.id === heroId);
+  const rows = heroRows.length >= 2 ? heroRows : pre;
+  const rivals = (heroRows.length ? heroRows.map((g) => (g.home.id === heroId ? g.away : g.home)) : [teamById("2"), teamById("18")])
+    .filter(Boolean)
+    .map((t) => ({ id: t.id, name: t.name, logo: t.logo }));
+
+  // Notifications : les deux plus gros favoris de la semaine
+  const byEdge = [...pre].sort((a, b) => Math.abs(b.pHome - 0.5) - Math.abs(a.pHome - 0.5));
+  const notifs = byEdge.slice(0, 2);
+
+  // Démo géante : le match le plus déséquilibré
+  const big = byEdge[0];
+  const nameFor = (t) => t.abbr.toUpperCase();
+
+  const today = nbaToday();
+  const todayCount = up.filter((g) => g.d === today).length;
   const accPct = acc.n ? Math.round((acc.ok / acc.n) * 100) : 0;
+  const cards = pre.slice(0, 12);
+  const LOGOS = TEAMS.map((t) => t.logo);
+
+  const faq = [
+    { q: "1. Basketlog est-il gratuit ?", a: "Oui. Les probabilités de tous les matchs sont gratuites et tu as 3 analyses complètes offertes chaque jour. Une formule Pro débloquera bientôt tout, sans limite." },
+    { q: "2. Comment fonctionnent les analyses ?", a: "Le modèle part du niveau réel de chaque équipe (écart de points, attaque, défense, saison passée), puis ajoute l'avantage du terrain, la fatigue des back-to-back et les absences. La marge attendue est convertie en probabilité de victoire et en scénarios." },
+    { q: "3. Est-ce que Basketlog permet de parier ?", a: "Non. Basketlog est un outil d'analyse pour mieux comprendre les matchs. Aucune prise de pari ne se fait ici et aucune probabilité n'est une garantie." },
+    { q: "Les données sont-elles fiables ?", a: "Oui. Les analyses s'appuient sur des données NBA réelles (calendrier, scores, classements, infirmerie), mises à jour en continu. Le taux de réussite affiché est calculé sur les vrais matchs terminés." },
+  ];
 
   return (
-    <main className="home">
-      {/* ===== HERO ===== */}
-      <section className="hx">
-        <div className="hx-bg" aria-hidden>
-          <div className="hx-flood l" /><div className="hx-flood r" /><div className="hx-beam" />
-          {LIGHTS.map((l, i) => (
-            <span key={i} className={`hx-dot ${l.warm ? "warm" : ""}`} style={{ left: `${l.x}%`, top: `${l.y}%`, width: l.s, height: l.s, opacity: l.o, animationDelay: `${l.d}s` }} />
-          ))}
-          <div className="hx-floor"><svg viewBox="0 0 1000 400" preserveAspectRatio="none"><rect x="40" y="20" width="920" height="360" /><line x1="500" y1="20" x2="500" y2="380" /><circle cx="500" cy="200" r="70" /><circle cx="500" cy="200" r="18" /><path d="M40 90 h170 v220 h-170" /><path d="M960 90 h-170 v220 h170" /><path d="M40 40 a260 160 0 0 1 0 320" /><path d="M960 40 a260 160 0 0 0 0 320" /></svg></div>
-          <div className="hx-vignette" />
+    <main>
+      <RevealObserver />
+
+      {/* ================= HERO ================= */}
+      <section className="hero">
+        <div className="hero-bg" aria-hidden>
+          <div className="photo" />
+          <div className="cone" />
+          <div className="lamp" />
+          <div className="shade" />
+          <div className="dust">{DUST.map((p, i) => <i key={i} style={{ left: `${p.x}%`, top: `${p.y}%`, animationDelay: `${p.d}s` }} />)}</div>
         </div>
 
-        <div className="hx-in">
-          <div className="hx-pill rise" style={{ "--d": "100ms" }}><span className="star"><span className="logo-ball spin" /></span> {count ? `${count} matchs NBA analysés ce soir` : "Toute la NBA analysée chaque soir"}</div>
-          <h1 className="hx-title">
-            <span className="ln"><span style={{ "--d": "250ms" }}>Prédis chaque</span></span>
-            <span className="ln"><span style={{ "--d": "380ms" }}>match avant</span></span>
-            <span className="ln"><span style={{ "--d": "510ms" }}>l&apos;<em className="glow">entre-deux.</em></span></span>
+        <div className="hero-in">
+          <div className="pill-badge rise" style={{ "--d": "100ms" }}>
+            <span className="ico"><span className="ball" /></span>
+            {todayCount ? `${todayCount} matchs NBA analysés ce soir` : "Toute la NBA analysée chaque soir"}
+          </div>
+          <h1 className="t-hero">
+            <span className="ln"><span style={{ "--d": "200ms" }}>Prédis chaque</span></span>
+            <span className="ln"><span style={{ "--d": "320ms" }}>match avant qu&apos;il</span></span>
+            <span className="ln"><span style={{ "--d": "440ms" }}>ne <span className="accent">commence.</span></span></span>
           </h1>
-          <p className="hx-sub rise" style={{ "--d": "750ms" }}>Probabilités, score projeté, absences et scénarios de match pour anticiper les résultats et mieux comprendre le jeu.</p>
-          <div className="rise search-wrap" style={{ "--d": "900ms" }}><TeamSearch games={upcoming} /></div>
-          <p className="hx-proof rise" style={{ "--d": "1050ms" }}>
-            {acc.n >= 5 ? (
-              <><b><CountUp value={accPct} suffix="%" delay={1100} /></b> de bons pronostics sur les <b>{acc.n}</b> derniers matchs terminés</>
-            ) : (
-              <><b>{upcoming.length}</b> matchs NBA à analyser cette semaine</>
-            )}
+          <p className="lead rise" style={{ "--d": "650ms" }}>Probabilités, statistiques avancées et scénarios de match pour anticiper les résultats et mieux comprendre le jeu.</p>
+          <div className="rise" style={{ "--d": "800ms", width: "100%", display: "flex", justifyContent: "center" }}><TeamSearch games={up.map(({ a, ...r }) => r)} /></div>
+          <p className="proof rise" style={{ "--d": "950ms" }}>
+            {acc.n >= 5
+              ? <><b>{accPct}%</b> de bons pronostics sur les <b>{acc.n}</b> matchs terminés la semaine dernière</>
+              : <><b>{up.length}</b> matchs NBA à analyser cette semaine</>}
           </p>
         </div>
 
-        <div className="hx-stage">
-          <div className="ball-bounce" aria-hidden><span className="logo-ball big" /><i className="ball-shadow" /></div>
-          {phone && (
-            <>
-              <div className="hx-team-wrap l">{/* eslint-disable-next-line @next/next/no-img-element */}<img className="hx-team" src={phone.game.away.logo} alt={phone.game.away.name} /></div>
-              <div className="hx-team-wrap r">{/* eslint-disable-next-line @next/next/no-img-element */}<img className="hx-team" src={phone.game.home.logo} alt={phone.game.home.name} /></div>
-            </>
-          )}
-          <div className="phone-wrap"><Phone a={phone} date={date} /></div>
+        <div className="stage">
+          <div className="flogo f1"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={teamById("2").logo} alt="" /></div></div>
+          <div className="flogo f2"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={teamById("9").logo} alt="" /></div></div>
+          <div className="flogo f3"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={teamById("18").logo} alt="" /></div></div>
+          <div className="flogo f4"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={teamById("4").logo} alt="" /></div></div>
+          <div className="phone-in"><PhoneHero team={{ id: heroTeam.id, name: heroTeam.name, logo: heroTeam.logo }} rivals={rivals} rows={rows.map(({ a, ...r }) => r)} /></div>
+          {notifs.map((g, i) => {
+            const fav = g.pHome >= 0.5 ? g.home : g.away;
+            return (
+              <Link key={g.id} href={`/app/match/${g.id}?d=${g.d}`} className={`notif n${i + 1}`}>
+                <span className="nico"><span className="ball" /></span>
+                <span>
+                  <small>BASKETLOG</small>
+                  <b>🏀 {g.home.short} - {g.away.short}</b>
+                  <span>Victoire {fav.abbr} {pct(Math.max(g.pHome, 1 - g.pHome))}% 🔥</span>
+                </span>
+                <time>{shortDay(g.date)}</time>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
-      {/* ===== FRANCHISES ===== */}
-      <section className="teams-strip">
-        <Reveal as="h3">Les 30 franchises NBA couvertes</Reveal>
-        <div className="marquee">
+      {/* ================= ÉQUIPES COUVERTES ================= */}
+      <section className="cover">
+        <h2 className="t-sec reveal">Les 30 franchises<br /><span className="accent">NBA couvertes</span></h2>
+        <div className="marquee reveal" style={{ "--d": "150ms" }}>
           <div className="marquee-track">
-            {[...TEAMS, ...TEAMS].map((t, i) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img key={i} src={logo(t)} alt="" width={64} height={64} loading="lazy" />
-            ))}
-          </div>
-        </div>
-        <div className="marquee rev">
-          <div className="marquee-track">
-            {[...TEAMS.slice().reverse(), ...TEAMS.slice().reverse()].map((t, i) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img key={i} src={logo(t)} alt="" width={64} height={64} loading="lazy" />
-            ))}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {[...LOGOS, ...LOGOS].map((l, i) => <img key={i} src={l} alt="" loading="lazy" />)}
           </div>
         </div>
       </section>
 
-      {/* ===== DEMO CHIFFRÉE ===== */}
+      {/* ================= DÉMO SCORE ================= */}
       {big && (
-        <section className="bigdemo">
-          <div className="bigdemo-bg" aria-hidden><span className="sweep" /></div>
-          <div className="wrap center">
-            <Reveal as="h2" className="bigscore zoom">
-              {big.game.home.abbr} <CountUp value={Math.round(big.homePts)} duration={1800} /> – <CountUp value={Math.round(big.awayPts)} duration={1800} /> {big.game.away.abbr}
-            </Reveal>
-            <Reveal as="p" className="bigdemo-sub" delay={150}>Score projeté par le modèle pour {big.game.away.short} @ {big.game.home.short}, {parisDay(big.game.date)} à {parisTime(big.game.date)}.</Reveal>
-            <div className="bigstats">
-              <Reveal delay={200}><strong><CountUp value={Math.round(big.pHome * 100)} suffix="%" /></strong><span>Victoire {big.game.home.short}</span></Reveal>
-              <Reveal delay={350}><strong><CountUp value={Math.round(big.scenarios[1].p * 100)} suffix="%" /></strong><span>Match serré</span></Reveal>
-              <Reveal delay={500}><strong><CountUp value={Math.round(big.pAway * 100)} suffix="%" /></strong><span>Victoire {big.game.away.short}</span></Reveal>
+        <section className="demo">
+          <div className="demo-bg" aria-hidden />
+          <div className="demo-side l reveal left"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={big.home.logo} alt={big.home.name} /></div></div>
+          <div className="demo-side r reveal right"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={big.away.logo} alt={big.away.name} /></div></div>
+          <div className="demo-in">
+            <h2 className="t-big reveal zoom">{nameFor(big.home)} {Math.round(big.homePts)} - {Math.round(big.awayPts)} {nameFor(big.away)}</h2>
+            <p className="lead reveal" style={{ "--d": "120ms" }}>Le score projeté par notre modèle pour {big.away.short} @ {big.home.short} ({shortDay(big.date)}). Niveau, forme, absences et fatigue : tout est pris en compte.</p>
+            <div className="stats3">
+              <div className="stat reveal" style={{ "--d": "150ms" }}><strong><SlotNumber value={pct(big.pHome)} suffix="%" /></strong><span>Victoire {big.home.short}</span></div>
+              <div className="stat reveal" style={{ "--d": "300ms" }}><strong><SlotNumber value={pct(big.close)} suffix="%" /></strong><span>Match serré</span></div>
+              <div className="stat reveal" style={{ "--d": "450ms" }}><strong><SlotNumber value={pct(1 - big.pHome)} suffix="%" /></strong><span>Victoire {big.away.short}</span></div>
             </div>
-            <Reveal delay={600}><Link href={`/app/match/${big.game.id}?d=${date}`} className="btn-ready shine pulse-ring">Analyse prête</Link></Reveal>
-            <p className="bigdemo-note">Les probabilités de tous les matchs sont gratuites. 3 analyses complètes offertes chaque jour.</p>
+            <div className="reveal" style={{ "--d": "500ms" }}><BallButton href={`/app/match/${big.id}?d=${big.d}`}>Analyse prête</BallButton></div>
+            <p className="demo-note reveal" style={{ "--d": "600ms" }}>3 analyses complètes offertes chaque jour, sans inscription</p>
           </div>
         </section>
       )}
 
-      {/* ===== COMMENT ===== */}
-      <section id="comment" className="how">
-        <div className="wrap">
-          <Reveal as="h2" className="h-sec">Un vrai modèle derrière <em>chaque chiffre.</em></Reveal>
-          <Reveal as="p" className="p-sec" delay={100}>Les probabilités sortent d&apos;un modèle statistique alimenté chaque soir par les données NBA, puis on te les explique en clair.</Reveal>
-          <div className="how-grid">
-            <Reveal className="how-card" delay={0}><span className="how-ic">📊</span><span className="how-n">01</span><h3>Niveau réel des équipes</h3><p>Écart de points, attaque, défense. En début de saison, le modèle s&apos;appuie aussi sur la saison passée pour ne pas surréagir à 2 matchs.</p></Reveal>
-            <Reveal className="how-card" delay={150}><span className="how-ic">🩹</span><span className="how-n">02</span><h3>Contexte du soir</h3><p>Avantage du terrain, back-to-back et joueurs absents ou incertains, mis à jour avant chaque match.</p></Reveal>
-            <Reveal className="how-card" delay={300}><span className="how-ic">🎯</span><span className="how-n">03</span><h3>Scénarios lisibles</h3><p>Victoire, score projeté, total de points, chances d&apos;un match serré ou d&apos;une large victoire, et les clés du match.</p></Reveal>
+      {/* ================= CE QUE BASKETLOG ANALYSE ================= */}
+      <section className="voices">
+        <div className="avatars reveal">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          {["13", "2", "9", "25", "18"].map((id) => <img key={id} src={teamById(id).logo} alt="" />)}
+        </div>
+        <h2 className="t-80 reveal">Ce que Basketlog prévoit cette semaine</h2>
+        <p className="lead reveal" style={{ "--d": "120ms" }}>Chaque match de la semaine est déjà analysé par le modèle. Voici ses verdicts.</p>
+
+        <div className="arc reveal" style={{ "--d": "150ms" }} aria-hidden>
+          <div className="arc-ring">
+            {cards.slice(0, 12).map((g, i, arr) => {
+              const n = Math.max(arr.length, 10);
+              return (
+                <div className="arc-card" key={g.id} style={{ transform: `rotateY(${(360 / n) * i}deg) translateZ(560px)` }}>
+                  <div className="ah"><span className="logo"><span className="ball" />Basketlog</span><span>{shortDay(g.date)}</span></div>
+                  <div className="at">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <div><img src={g.away.logo} alt="" /><b>{g.away.abbr}</b></div>
+                    <em>@</em>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <div><img src={g.home.logo} alt="" /><b>{g.home.abbr}</b></div>
+                  </div>
+                  <div className="ap">{pct(Math.max(g.pHome, 1 - g.pHome))}%<small>victoire {(g.pHome >= 0.5 ? g.home : g.away).short}</small></div>
+                  <div className="abar"><i style={{ width: `${(1 - g.pHome) * 100}%` }} /></div>
+                  <div className="arow"><span>Score projeté</span><b>{Math.round(g.awayPts)}-{Math.round(g.homePts)}</b></div>
+                  <div className="arow"><span>Total</span><b>{Math.round(g.total)}</b></div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="arc-fade" />
+        </div>
+
+        <div className="reveal"><BallButton href="/app/matchs">Analyse prête</BallButton></div>
+
+        <div className="cards-wrap">
+          <div className="cards">
+            {cards.slice(0, 9).map((g, i) => {
+              const fav = g.pHome >= 0.5 ? g.home : g.away;
+              const first = ruleNarrative(g.a).text.split(/(?<=\.)\s/)[0];
+              const txt = `${first} Victoire ${fav.short} à ${pct(Math.max(g.pHome, 1 - g.pHome))} %, score projeté ${Math.round(g.awayPts)}-${Math.round(g.homePts)}.`;
+              return (
+                <Link key={g.id} href={`/app/match/${g.id}?d=${g.d}`} className="vcard reveal" style={{ "--d": `${(i % 3) * 120}ms` }}>
+                  <p>{txt}</p>
+                  <div className="who">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <span className="duo"><img src={g.away.logo} alt="" /><img src={g.home.logo} alt="" /></span>
+                    <span><small>{g.away.short} @ {g.home.short}</small><b>{shortDay(g.date)}</b></span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+          <div className="cards-mask" />
+          <Link href="/app/matchs" className="btn-white cards-more">Voir tous</Link>
+        </div>
+      </section>
+
+      {/* ================= ANALYSES + CLASSEMENT ================= */}
+      <StickyStandings east={std.east} west={std.west} />
+
+      {/* ================= SOURCES ================= */}
+      <section className="sources">
+        <div className="sources-bg" aria-hidden />
+        <span className="pill-badge plain reveal">+1 230 matchs par saison</span>
+        <h2 className="t-sec reveal" style={{ "--d": "100ms" }}>Nous analysons<br />chaque match NBA</h2>
+        <p className="lead reveal" style={{ "--d": "200ms" }}>Calendrier, scores, classements et infirmerie : les données NBA sont croisées en continu pour prédire chaque match.</p>
+        <div className="marquee">
+          <div className="marquee-track" style={{ animationDirection: "reverse", animationDuration: "65s" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {[...LOGOS.slice().reverse(), ...LOGOS.slice().reverse()].map((l, i) => <img key={i} src={l} alt="" loading="lazy" />)}
           </div>
         </div>
       </section>
 
-      {/* ===== TARIFS ===== */}
-      <section id="tarifs" className="pricing">
-        <div className="wrap">
-          <Reveal as="h2" className="h-sec center">Commence <em>gratuitement.</em></Reveal>
-          <div className="price-grid">
-            <Reveal className="pcard" delay={0}>
-              <h3>Gratuit</h3>
-              <div className="pamount">0 €</div>
-              <ul><li>Probabilités de tous les matchs</li><li>3 analyses complètes par jour</li><li>Score et total projetés</li></ul>
-              <Link href="/app" className="pbtn ghost">Commencer</Link>
-            </Reveal>
-            <Reveal className="pcard pro" delay={150}>
-              <span className="pbadge">Bientôt</span>
-              <h3>Pro</h3>
-              <div className="pamount">6,99 € <small>/ mois</small></div>
-              <ul><li>Analyses illimitées chaque soir</li><li>Analyse d&apos;avant-match rédigée par IA</li><li>Alertes absences de dernière minute</li><li>Euroleague et Betclic Élite à venir</li></ul>
-              <span className="pbtn shine" aria-disabled="true">Accès anticipé bientôt</span>
-            </Reveal>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== FAQ ===== */}
-      <section className="faq2">
-        <div className="wrap narrow">
-          <Reveal as="h2" className="h-sec center">Questions <em>fréquentes</em></Reveal>
-          <Reveal delay={0}><details><summary>Basketlog est-il gratuit ?</summary><p>Oui. Les probabilités de tous les matchs sont visibles gratuitement et tu as 3 analyses complètes offertes chaque jour. La formule Pro débloque tout, sans limite.</p></details></Reveal>
-          <Reveal delay={80}><details><summary>Comment fonctionnent les analyses ?</summary><p>Le modèle part de l&apos;écart de points moyen de chaque équipe (corrigé en début de saison avec la saison précédente), puis ajoute l&apos;avantage du terrain, la fatigue des back-to-back et les absences. La marge attendue est convertie en probabilité de victoire.</p></details></Reveal>
-          <Reveal delay={160}><details><summary>Est-ce que Basketlog permet de parier ?</summary><p>Non. Basketlog est un outil d&apos;analyse pour mieux comprendre les matchs. Aucune prise de pari ne se fait ici, et aucune probabilité n&apos;est une garantie.</p></details></Reveal>
-          <Reveal delay={240}><details><summary>Les données sont-elles fiables ?</summary><p>Elles viennent des flux publics NBA, mis à jour en continu : calendrier, résultats, classements et infirmerie. Le taux de réussite affiché est calculé sur les vrais matchs terminés.</p></details></Reveal>
-        </div>
-      </section>
-
-      <section className="final">
-        <div className="wrap center">
-          <Reveal as="h2" className="h-sec">Le match de ce soir est <em>déjà analysé.</em></Reveal>
-          <Reveal delay={150}><Link href="/app" className="btn-ready shine pulse-ring">Voir les matchs du jour</Link></Reveal>
+      {/* ================= FAQ ================= */}
+      <section className="faq" id="faq">
+        <div className="faq-in">
+          <h2 className="t-sec reveal">Question fréquente</h2>
+          <p className="lead reveal" style={{ "--d": "100ms" }}>Une réponse claire à toutes vos questions sur Basketlog.</p>
+          <div className="reveal" style={{ "--d": "200ms" }}><Faq items={faq} /></div>
         </div>
       </section>
     </main>

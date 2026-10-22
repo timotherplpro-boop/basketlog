@@ -41,8 +41,8 @@ export default function Gate({ matchId, children }) {
           <div className="gate-overlay">
             <div className="gate-box">
               <h3>Tes 3 analyses gratuites du jour sont utilisées</h3>
-              <p>Passe à Basketlog Pro pour débloquer toutes les analyses, chaque soir, sans limite.</p>
-              <Link href="/#tarifs" className="btn btn-primary">Débloquer Pro</Link>
+              <p>Reviens demain pour 3 nouvelles analyses complètes. Les probabilités de tous les matchs restent gratuites, et la formule Pro illimitée arrive bientôt.</p>
+              <Link href="/app/matchs" className="btn-solid">Voir tous les matchs</Link>
             </div>
           </div>
         )}

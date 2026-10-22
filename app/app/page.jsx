@@ -1,50 +1,30 @@
-import Link from "next/link";
-import { analyzeDay } from "../../lib/data";
-import { nbaToday, shiftDate, isValidDate } from "../../lib/espn";
-import { GameCard } from "../../components/ui";
+import { upcomingAnalyses } from "../../lib/data";
+import { TEAMS, teamById } from "../../lib/teams";
+import DuelForm from "../../components/DuelForm";
+import UpcomingList from "../../components/UpcomingList";
+import AppTabs from "../../components/AppTabs";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Matchs NBA du jour – Basketlog" };
+export const metadata = { title: "Analyse de match – Basketlog" };
 
-function label(d, today) {
-  if (d === today) return "Ce soir";
-  if (d === shiftDate(today, 1)) return "Demain";
-  if (d === shiftDate(today, -1)) return "Hier";
-  const dt = new Date(Date.UTC(+d.slice(0, 4), +d.slice(4, 6) - 1, +d.slice(6, 8), 12));
-  return new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }).format(dt);
-}
-
-export default async function AppPage({ searchParams }) {
+export default async function AnalysePage({ searchParams }) {
   const sp = (await searchParams) || {};
-  const today = nbaToday();
-  const date = isValidDate(sp.d) ? sp.d : today;
-  const { analyses } = await analyzeDay(date);
-  const sorted = [...analyses].sort((x, y) => new Date(x.game.date) - new Date(y.game.date));
+  const up = await upcomingAnalyses(7);
+  const initial = teamById(sp.team);
+  const list = (initial ? up.filter((g) => g.home.id === initial.id || g.away.id === initial.id) : up)
+    .slice(0, 14)
+    .map(({ a, ...g }) => ({ ...g, state: g.live ? "in" : "pre" }));
 
   return (
-    <main className="wrap app-page">
+    <main className="app-page">
+      <AppTabs active="analyse" />
       <div className="app-head">
-        <div>
-          <div className="team-rec">Programme NBA · heures de Paris</div>
-          <h1>{label(date, today)} · <em>{analyses.length} match{analyses.length > 1 ? "s" : ""}</em></h1>
-        </div>
-        <div className="datenav">
-          <Link href={`/app?d=${shiftDate(date, -1)}`} aria-label="Jour précédent">←</Link>
-          <span>{label(date, today)}</span>
-          <Link href={`/app?d=${shiftDate(date, 1)}`} aria-label="Jour suivant">→</Link>
-        </div>
+        <h1>Analyse de match</h1>
+        <p>Entre les équipes que tu veux analyser</p>
+        <p className="note">Notre modèle croise niveau, forme, absences et fatigue pour chaque pronostic.</p>
       </div>
-      {sorted.length ? (
-        <div className="games">
-          {sorted.map((a) => (
-            <GameCard key={a.id} a={a} date={date} />
-          ))}
-        </div>
-      ) : (
-        <div className="card empty" style={{ marginBottom: 60 }}>
-          Pas de match NBA ce jour-là. <Link href={`/app?d=${shiftDate(date, 1)}`} style={{ color: "var(--orange)" }}>Voir le jour suivant →</Link>
-        </div>
-      )}
+      <DuelForm teams={TEAMS} initialHome={initial} />
+      <UpcomingList games={list} title={initial ? `Prochains matchs · ${initial.short}` : "Prochains matchs"} />
     </main>
   );
 }

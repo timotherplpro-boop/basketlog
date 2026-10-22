@@ -16,7 +16,7 @@ export default function TeamSearch({ games }) {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const box = useRef(null);
-  const [ph, setPh] = useState("Recherche une équipe (ex : Lakers, Celtics…)");
+  const [ph, setPh] = useState("Recherchez l'une des équipes (par exemple, les Lakers)");
   const [focus, setFocus] = useState(false);
 
   // Placeholder qui s'écrit tout seul : "Recherche : Lakers", "Celtics"…
@@ -28,13 +28,13 @@ export default function TeamSearch({ games }) {
     const step = () => {
       const word = words[w];
       i += del ? -1 : 1;
-      setPh(`Recherche une équipe : ${word.slice(0, i)}|`);
+      setPh(`Recherchez une équipe : ${word.slice(0, i)}|`);
       let wait = del ? 45 : 95;
       if (!del && i === word.length) { del = true; wait = 1300; }
       else if (del && i === 0) { del = false; w = (w + 1) % words.length; wait = 300; }
       t = setTimeout(step, wait);
     };
-    t = setTimeout(step, 1400);
+    t = setTimeout(step, 4200);
     return () => clearTimeout(t);
   }, [focus, q]);
 
@@ -54,8 +54,7 @@ export default function TeamSearch({ games }) {
 
   return (
     <div className="search" ref={box}>
-      <svg className="search-ic" viewBox="0 0 24 24" aria-hidden><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-      <input
+      <div className="search-field"><input
         type="search"
         value={q}
         onChange={(e) => { setQ(e.target.value); setOpen(true); }}
@@ -64,7 +63,7 @@ export default function TeamSearch({ games }) {
         placeholder={focus ? "Tape le nom d'une équipe" : ph}
         aria-label="Rechercher une équipe NBA"
         autoComplete="off"
-      />
+      /></div>
       {open && q.trim().length >= 2 && (
         <div className="search-drop" role="listbox">
           {results.length ? (
@@ -74,7 +73,7 @@ export default function TeamSearch({ games }) {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={g.away.logo} alt="" width={26} height={26} />
                   <b>{g.away.short}</b>
-                  <span className="at">@</span>
+                  <span className="vs">@</span>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={g.home.logo} alt="" width={26} height={26} />
                   <b>{g.home.short}</b>
@@ -83,7 +82,7 @@ export default function TeamSearch({ games }) {
               </Link>
             ))
           ) : (
-            <div className="search-empty">Aucun match à venir cette semaine pour « {q} ».</div>
+            <div className="search-empty">Aucun match à venir cette semaine pour « {q} ». <Link href="/app" style={{ color: "var(--orange-2)" }}>Analyser un duel →</Link></div>
           )}
         </div>
       )}
