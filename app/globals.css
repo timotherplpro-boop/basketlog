@@ -547,3 +547,19 @@ button.btn-white { border: 0; cursor: pointer; font-family: var(--body); }
 .stars button:hover { transform: scale(1.15); }
 .hp { position: absolute !important; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* Avis en colonnes décalées (façon Visifoot) */
+.cards.masonry { display: block; columns: 3 300px; column-gap: 30px; max-width: 1080px; margin: 0 auto; max-height: none; overflow: visible; }
+.cards.masonry.clip { max-height: 900px; overflow: hidden; }
+.cards.masonry .vcard { display: flex; break-inside: avoid; margin: 0 0 30px; background: #000; border: 1px solid rgba(255,255,255,.03); border-radius: 18px; padding: 30px 28px 26px; gap: 22px; }
+.cards.masonry .vcard p { font-size: 19px; line-height: 1.38; font-weight: 500; }
+.vcard .who { display: flex; align-items: center; gap: 12px; }
+.vcard .who .avatar { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; flex: none; }
+.vcard .who .initial { width: 52px; height: 52px; font-size: 20px; border: 0; }
+.vcard .who .id { flex: 1; min-width: 0; }
+.vcard .who .id small { display: block; font-size: 13px; color: #fff; }
+.vcard .who .id b { display: block; font-weight: 500; font-size: 19px; line-height: 1.25; color: var(--orange-2); }
+.social { flex: none; width: 40px; height: 40px; border-radius: 50%; background: #fff; color: #000; display: grid; place-items: center; transition: transform .2s var(--ease), background .2s; }
+.social svg { width: 20px; height: 20px; }
+.social:hover { transform: scale(1.1); background: var(--peach); }
+@media (max-width: 700px) { .cards.masonry { columns: 1; } .cards.masonry .vcard p { font-size: 17px; } }
