@@ -41,7 +41,7 @@ export default function Gate({ matchId, children }) {
           <div className="gate-overlay">
             <div className="gate-box">
               <h3>Tes 3 analyses gratuites du jour sont utilisées</h3>
-              <p>Passe à HoopSight Pro pour débloquer toutes les analyses, chaque soir, sans limite.</p>
+              <p>Passe à Basketlog Pro pour débloquer toutes les analyses, chaque soir, sans limite.</p>
               <Link href="/#tarifs" className="btn btn-primary">Débloquer Pro</Link>
             </div>
           </div>

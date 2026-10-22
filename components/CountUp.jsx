@@ -1,20 +1,18 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
-// Compteur animé façon "machine à sous" déclenché quand il devient visible.
-export default function CountUp({ value, suffix = "", duration = 1400 }) {
+// Compteur animé déclenché quand il devient visible. Le rendu serveur affiche la vraie valeur
+// (utile sans JavaScript), puis le compteur repart de 0 et défile jusqu'à elle.
+export default function CountUp({ value, suffix = "", duration = 1400, delay = 0 }) {
   const [v, setV] = useState(value);
   const ref = useRef(null);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) { setV(value); return; }
-    let raf;
-    const r = el.getBoundingClientRect();
-    if (r.top > window.innerHeight) setV(0); // pas encore visible : on part de 0
-    else return;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    setV(0);
+    let raf, timer;
     const run = () => {
       const t0 = performance.now();
       const tick = (t) => {
@@ -25,10 +23,22 @@ export default function CountUp({ value, suffix = "", duration = 1400 }) {
       };
       raf = requestAnimationFrame(tick);
     };
-    const io = new IntersectionObserver(([en]) => { if (en.isIntersecting) { run(); io.disconnect(); } }, { threshold: 0.4 });
+    const io = new IntersectionObserver(
+      ([en]) => {
+        if (en.isIntersecting) {
+          timer = setTimeout(run, delay);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.3 }
+    );
     io.observe(el);
-    return () => { io.disconnect(); cancelAnimationFrame(raf); };
-  }, [value, duration]);
+    return () => {
+      io.disconnect();
+      clearTimeout(timer);
+      cancelAnimationFrame(raf);
+    };
+  }, [value, duration, delay]);
 
-  return <span ref={ref}>{v}{suffix}</span>;
+  return <span ref={ref} className="countup">{v}{suffix}</span>;
 }

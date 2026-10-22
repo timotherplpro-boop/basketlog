@@ -24,9 +24,9 @@ export async function generateMetadata({ params, searchParams }) {
   const { id } = await params;
   const sp = (await searchParams) || {};
   const found = await findAnalysis(id, sp.d);
-  if (!found) return { title: "Match introuvable – HoopSight" };
+  if (!found) return { title: "Match introuvable – Basketlog" };
   const g = found.a.game;
-  return { title: `${g.away.short} @ ${g.home.short} : analyse et probabilités – HoopSight` };
+  return { title: `${g.away.short} @ ${g.home.short} : analyse et probabilités – Basketlog` };
 }
 
 function Signed({ v }) {
@@ -158,7 +158,7 @@ export default async function MatchPage({ params, searchParams }) {
       </Gate>
 
       <p className="disclaimer">
-        Probabilités estimées par le modèle HoopSight v0.1 à partir des données publiques disponibles{a.minSample < 5 ? " ; en début de saison, elles s'appuient largement sur la saison précédente" : ""}. Elles ne constituent ni une certitude ni un conseil de pari.
+        Probabilités estimées par le modèle Basketlog v0.1 à partir des données publiques disponibles{a.minSample < 5 ? " ; en début de saison, elles s'appuient largement sur la saison précédente" : ""}. Elles ne constituent ni une certitude ni un conseil de pari.
       </p>
     </main>
   );

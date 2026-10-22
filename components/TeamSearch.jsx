@@ -16,6 +16,27 @@ export default function TeamSearch({ games }) {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   const box = useRef(null);
+  const [ph, setPh] = useState("Recherche une équipe (ex : Lakers, Celtics…)");
+  const [focus, setFocus] = useState(false);
+
+  // Placeholder qui s'écrit tout seul : "Recherche : Lakers", "Celtics"…
+  useEffect(() => {
+    if (focus || q) return;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const words = ["Lakers", "Celtics", "Warriors", "Thunder", "Knicks", "Nuggets", "Spurs", "Bulls"];
+    let w = 0, i = 0, del = false, t;
+    const step = () => {
+      const word = words[w];
+      i += del ? -1 : 1;
+      setPh(`Recherche une équipe : ${word.slice(0, i)}|`);
+      let wait = del ? 45 : 95;
+      if (!del && i === word.length) { del = true; wait = 1300; }
+      else if (del && i === 0) { del = false; w = (w + 1) % words.length; wait = 300; }
+      t = setTimeout(step, wait);
+    };
+    t = setTimeout(step, 1400);
+    return () => clearTimeout(t);
+  }, [focus, q]);
 
   useEffect(() => {
     const close = (e) => box.current && !box.current.contains(e.target) && setOpen(false);
@@ -38,8 +59,9 @@ export default function TeamSearch({ games }) {
         type="search"
         value={q}
         onChange={(e) => { setQ(e.target.value); setOpen(true); }}
-        onFocus={() => setOpen(true)}
-        placeholder="Recherche une équipe (ex : Lakers, Celtics…)"
+        onFocus={() => { setOpen(true); setFocus(true); }}
+        onBlur={() => setFocus(false)}
+        placeholder={focus ? "Tape le nom d'une équipe" : ph}
         aria-label="Rechercher une équipe NBA"
         autoComplete="off"
       />

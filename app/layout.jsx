@@ -2,11 +2,11 @@ import "./globals.css";
 import Link from "next/link";
 
 export const metadata = {
-  title: "HoopSight – Prédis chaque match NBA avant l'entre-deux",
+  title: "Basketlog – Prédis chaque match NBA avant l'entre-deux",
   description:
     "Analyses NBA : probabilités de victoire, score projeté, absences, back-to-back et scénarios pour chaque match du jour.",
   openGraph: {
-    title: "HoopSight – Prédis chaque match NBA avant l'entre-deux",
+    title: "Basketlog – Prédis chaque match NBA avant l'entre-deux",
     description: "Probabilités, score projeté et scénarios pour chaque match NBA.",
     type: "website",
   },
@@ -24,12 +24,13 @@ export default function RootLayout({ children }) {
           href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap"
           rel="stylesheet"
         />
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
       </head>
       <body>
         <nav className="nav">
           <div className="nav-in">
             <Link href="/" className="logo">
-              <span className="logo-ball" aria-hidden /> HoopSight
+              <span className="logo-ball" aria-hidden /> Basketlog
             </Link>
             <div className="nav-right">
               <Link href="/#tarifs" className="nav-link hide-sm">Tarifs</Link>
@@ -43,9 +44,9 @@ export default function RootLayout({ children }) {
         {children}
         <footer>
           <div className="wrap foot">
-            <div className="logo small"><span className="logo-ball" aria-hidden /> HoopSight</div>
+            <div className="logo small"><span className="logo-ball" aria-hidden /> Basketlog</div>
             <div>Analyses statistiques, pas un service de paris. Les probabilités sont des estimations, jamais des certitudes.</div>
-            <div>Données : flux publics NBA · © {new Date().getFullYear()} HoopSight</div>
+            <div>Données : flux publics NBA · © {new Date().getFullYear()} Basketlog</div>
           </div>
         </footer>
       </body>

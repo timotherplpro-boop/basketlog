@@ -4,7 +4,7 @@ import { nbaToday, shiftDate, isValidDate } from "../../lib/espn";
 import { GameCard } from "../../components/ui";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Matchs NBA du jour – HoopSight" };
+export const metadata = { title: "Matchs NBA du jour – Basketlog" };
 
 function label(d, today) {
   if (d === today) return "Ce soir";
