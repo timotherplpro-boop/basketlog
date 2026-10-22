@@ -21,7 +21,7 @@ function Players({ team, list, title }) {
           <span className="pl-id"><b>{p.name}</b><small>{p.pos}{p.jersey ? ` · #${p.jersey}` : ""}</small></span>
           <span className="pl-val"><strong>{p.value}</strong><small>{catFr(p.cat)}</small></span>
         </div>
-      )) : <div className="team-rec">{title === "game" ? "Pas encore de données." : "Données joueurs bientôt disponibles."}</div>}
+      )) : <div className="team-rec">{title === "game" ? "Pas encore de données." : "Pas encore de match joué cette saison."}</div>}
     </div>
   );
 }

@@ -597,11 +597,11 @@ a.team:hover .team-name { color: var(--peach); }
 .pl-val { text-align: right; } .pl-val strong { display: block; font-family: var(--title); font-weight: 400; font-size: 24px; color: var(--peach); line-height: 1; }
 .pl-val small { font-size: 11px; color: var(--muted); }
 
-.form-row { display: grid; grid-template-columns: 70px 1fr; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
+.form-row { display: grid; grid-template-columns: 62px 1fr; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
 .form-team { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 13px; }
 .form-team img { width: 22px; height: 22px; object-fit: contain; }
-.form-chips { display: flex; gap: 6px; flex-wrap: wrap; }
-.chip { display: grid; justify-items: center; gap: 2px; width: 52px; padding: 6px 2px; border-radius: 10px; background: rgba(255,255,255,.04); border: 1px solid var(--line); }
+.form-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+.chip { display: grid; justify-items: center; gap: 2px; width: 46px; padding: 6px 2px; border-radius: 10px; background: rgba(255,255,255,.04); border: 1px solid var(--line); }
 .chip em { font-style: normal; font-weight: 800; font-size: 12px; width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center; background: #3a3f4c; }
 .chip.w em { background: rgba(74,222,128,.18); color: var(--green); }
 .chip.l em { background: rgba(252,165,165,.15); color: var(--red); }
