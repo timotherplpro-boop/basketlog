@@ -59,7 +59,7 @@ export default function ReviewForm({ label = "Donner mon avis", className = "btn
                   ))}
                 </div>
                 <label>Prénom<input name="prenom" required minLength={2} maxLength={40} placeholder="Ex : Karim" autoComplete="given-name" /></label>
-                <label>Qui es-tu ? <small>(facultatif)</small><input name="profil" maxLength={60} placeholder="Ex : Fan des Celtics depuis 2008" /></label>
+                <label><span>Qui es-tu ? <small>(facultatif)</small></span><input name="profil" maxLength={60} placeholder="Ex : Fan des Celtics depuis 2008" /></label>
                 <label>Ton avis<textarea name="texte" required minLength={15} maxLength={500} rows={4} placeholder="Qu'est-ce que Basketlog t'apporte ?" /></label>
                 <input name="site" tabIndex={-1} autoComplete="off" className="hp" aria-hidden="true" />
                 {state.error && <p className="modal-err">{state.error}</p>}

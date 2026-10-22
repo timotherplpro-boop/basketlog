@@ -252,7 +252,7 @@ button { font: inherit; color: inherit; }
 .arc-card .arow span { color: var(--muted); }
 .arc-fade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, var(--bg) 0%, transparent 22%, transparent 78%, var(--bg) 100%); }
 .cards-wrap { position: relative; max-width: 1000px; margin: 60px auto 0; padding: 0 16px; }
-.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; text-align: left; max-height: 760px; overflow: hidden; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 316px)); justify-content: center; gap: 26px; text-align: left; max-height: 760px; overflow: hidden; }
 .vcard { background: #070c19; border: 1px solid rgba(255,255,255,.05); border-radius: 18px; padding: 24px 22px; display: flex; flex-direction: column; justify-content: space-between; gap: 22px; transition: transform .35s var(--ease), border-color .3s; }
 .vcard:hover { transform: translateY(-6px); border-color: rgba(255,122,26,.4); }
 .vcard p { margin: 0; font-family: var(--head); font-weight: 500; font-size: 18px; line-height: 1.38; }
@@ -262,7 +262,7 @@ button { font: inherit; color: inherit; }
 .vcard .who b { display: block; font-weight: 500; font-size: 16px; color: var(--orange-2); }
 .cards-mask { position: absolute; left: 0; right: 0; bottom: 0; height: 220px; background: linear-gradient(180deg, transparent, var(--bg) 80%); pointer-events: none; z-index: 2; }
 .cards-more { position: absolute; left: 50%; bottom: 60px; transform: translateX(-50%); z-index: 3; }
-@media (max-width: 900px) { .cards { grid-template-columns: 1fr; max-width: 520px; margin: 0 auto; max-height: 820px; } }
+@media (max-width: 900px) { .cards { grid-template-columns: minmax(0, 520px); max-height: 820px; } }
 
 /* =========================================================
    ANALYSES + TÉLÉPHONE CLASSEMENT (défilement lié)
