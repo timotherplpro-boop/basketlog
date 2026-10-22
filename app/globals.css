@@ -509,3 +509,41 @@ footer { border-top: 1px solid var(--line); padding: 34px 16px 40px; color: var(
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .js .reveal, .js .notif:not(.in) { opacity: 1; transform: none; }
 }
+
+/* =========================================================
+   AVIS
+   ========================================================= */
+.initial { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; color: #fff; font-weight: 800; font-size: 16px; border: 2px solid var(--bg); flex: none; }
+.avatars .initial { margin-left: -10px; } .avatars .initial:first-child { margin-left: 0; }
+.vcard .who .initial { width: 38px; height: 38px; border: 0; }
+.rstars { display: block; color: var(--amber); letter-spacing: 2px; font-size: 16px; margin-bottom: 10px; }
+.rstars i { font-style: normal; color: rgba(255,255,255,.18); }
+.cards-more.static { position: static; transform: none; display: flex; justify-content: center; gap: 10px; margin-top: 34px; }
+.cards-more { display: flex; gap: 10px; }
+.cards-empty { max-width: 560px; margin: 60px auto 0; padding: 40px 28px; border-radius: 22px; background: #070c19; border: 1px dashed rgba(255,122,26,.35); text-align: center; }
+.cards-empty .ce-stars { color: var(--amber); font-size: 26px; letter-spacing: 4px; }
+.cards-empty h3 { margin: 12px 0 8px; font-family: var(--head); font-weight: 800; font-size: 24px; }
+.cards-empty p { margin: 0 0 22px; color: var(--muted); }
+button.btn-white { border: 0; cursor: pointer; font-family: var(--body); }
+
+.modal { position: fixed; inset: 0; z-index: 80; background: rgba(2,4,12,.72); backdrop-filter: blur(6px); display: grid; place-items: center; padding: 16px; animation: fadeIn .2s ease; }
+.modal-box { position: relative; width: min(460px, 100%); max-height: 92vh; overflow: auto; background: #0b1020; border: 1px solid rgba(255,255,255,.12); border-radius: 22px; padding: 28px 24px; box-shadow: 0 40px 100px -20px rgba(0,0,0,.8); animation: popIn .35s var(--ease) both; text-align: left; }
+.modal-box h3 { margin: 0; font-family: var(--head); font-weight: 800; font-size: 24px; }
+.modal-sub { margin: 6px 0 16px; color: var(--muted); font-size: 14px; }
+.modal-x { position: absolute; top: 14px; right: 14px; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line-2); background: rgba(255,255,255,.05); color: #fff; font-size: 22px; cursor: pointer; }
+.modal label { display: grid; gap: 6px; margin-top: 14px; font-size: 14px; font-weight: 600; color: rgba(255,255,255,.9); }
+.modal label small { color: var(--dim); font-weight: 400; }
+.modal input, .modal textarea { width: 100%; padding: 12px 14px; border-radius: 12px; background: #050913; border: 1.5px solid rgba(255,255,255,.12); color: #fff; font: 400 15px var(--body); outline: none; resize: vertical; transition: border-color .2s, box-shadow .2s; }
+.modal input:focus, .modal textarea:focus { border-color: var(--orange); box-shadow: 0 0 0 4px rgba(255,122,26,.15); }
+.modal .btn-solid { width: 100%; margin-top: 18px; height: 50px; }
+.modal-err { margin: 12px 0 0; color: var(--red); font-size: 14px; }
+.modal-done { text-align: center; padding: 10px 0; }
+.modal-done .big-ball { width: 56px; height: 56px; animation: ballSpin 3s linear infinite; }
+.modal-done h3 { margin-top: 16px; }
+.modal-done p { color: var(--muted); }
+.stars { display: flex; gap: 4px; }
+.stars button { background: none; border: 0; cursor: pointer; font-size: 34px; line-height: 1; color: rgba(255,255,255,.18); padding: 0 2px; transition: transform .15s var(--ease), color .15s; }
+.stars button.on { color: var(--amber); }
+.stars button:hover { transform: scale(1.15); }
+.hp { position: absolute !important; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }

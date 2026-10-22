@@ -2,13 +2,17 @@ import Link from "next/link";
 import { recentAccuracy, upcomingAnalyses, conferenceStandings } from "../lib/data";
 import { TEAMS, teamById } from "../lib/teams";
 import { nbaToday } from "../lib/espn";
-import { ruleNarrative } from "../lib/narrative";
 import TeamSearch from "../components/TeamSearch";
 import PhoneHero from "../components/PhoneHero";
 import SlotNumber from "../components/SlotNumber";
 import StickyStandings from "../components/StickyStandings";
 import RevealObserver from "../components/RevealObserver";
 import Faq from "../components/Faq";
+import ReviewCards from "../components/ReviewCards";
+import { getReviews } from "../lib/reviews";
+
+const AV = ["#ff7a1a", "#7c5cff", "#22c55e", "#0ea5e9", "#e11d48", "#eab308"];
+const avatarColor = (s) => AV[[...s].reduce((a, c) => a + c.charCodeAt(0), 0) % AV.length];
 
 export const dynamic = "force-dynamic";
 
@@ -35,7 +39,7 @@ function BallButton({ href, children }) {
 }
 
 export default async function Home() {
-  const [up, acc, std] = await Promise.all([upcomingAnalyses(7), recentAccuracy(7), conferenceStandings()]);
+  const [up, acc, std, reviews] = await Promise.all([upcomingAnalyses(7), recentAccuracy(7), conferenceStandings(), getReviews(30)]);
   const pre = up.filter((g) => !g.live);
 
   // Téléphone : les Lakers (ou l'équipe qui joue le plus cette semaine)
@@ -67,6 +71,7 @@ export default async function Home() {
     { q: "1. Basketlog est-il gratuit ?", a: "Oui. Les probabilités de tous les matchs sont gratuites et tu as 3 analyses complètes offertes chaque jour. Une formule Pro débloquera bientôt tout, sans limite." },
     { q: "2. Comment fonctionnent les analyses ?", a: "Le modèle part du niveau réel de chaque équipe (écart de points, attaque, défense, saison passée), puis ajoute l'avantage du terrain, la fatigue des back-to-back et les absences. La marge attendue est convertie en probabilité de victoire et en scénarios." },
     { q: "3. Est-ce que Basketlog permet de parier ?", a: "Non. Basketlog est un outil d'analyse pour mieux comprendre les matchs. Aucune prise de pari ne se fait ici et aucune probabilité n'est une garantie." },
+    { q: "4. Les avis affichés sont-ils réels ?", a: "Oui. Chaque avis est déposé par un utilisateur via le bouton « Donner mon avis », puis publié tel quel après une simple relecture anti-spam. Nous n'en écrivons aucun nous-mêmes." },
     { q: "Les données sont-elles fiables ?", a: "Oui. Les analyses s'appuient sur des données NBA réelles (calendrier, scores, classements, infirmerie), mises à jour en continu. Le taux de réussite affiché est calculé sur les vrais matchs terminés." },
   ];
 
@@ -157,14 +162,20 @@ export default async function Home() {
         </section>
       )}
 
-      {/* ================= CE QUE BASKETLOG ANALYSE ================= */}
-      <section className="voices">
+      {/* ================= AVIS DES UTILISATEURS ================= */}
+      <section className="voices" id="avis">
         <div className="avatars reveal">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          {["13", "2", "9", "25", "18"].map((id) => <img key={id} src={teamById(id).logo} alt="" />)}
+          {reviews.list.length
+            ? reviews.list.slice(0, 5).map((r) => <span key={r.id} className="initial" style={{ background: avatarColor(r.prenom) }}>{r.prenom.charAt(0).toUpperCase()}</span>)
+            : /* eslint-disable-next-line @next/next/no-img-element */
+              ["13", "2", "9", "25", "18"].map((id) => <img key={id} src={teamById(id).logo} alt="" />)}
         </div>
-        <h2 className="t-80 reveal">Ce que Basketlog prévoit cette semaine</h2>
-        <p className="lead reveal" style={{ "--d": "120ms" }}>Chaque match de la semaine est déjà analysé par le modèle. Voici ses verdicts.</p>
+        <h2 className="t-80 reveal">Ce que pensent les utilisateurs de Basketlog</h2>
+        <p className="lead reveal" style={{ "--d": "120ms" }}>
+          {reviews.count
+            ? <>{reviews.count} avis · note moyenne {reviews.avg.toFixed(1).replace(".", ",")}/5. Tous publiés tels quels, après simple relecture.</>
+            : <>Les avis de nos utilisateurs, publiés tels quels après relecture. Les premiers arrivent : à toi de jouer.</>}
+        </p>
 
         <div className="arc reveal" style={{ "--d": "150ms" }} aria-hidden>
           <div className="arc-ring">
@@ -193,27 +204,7 @@ export default async function Home() {
 
         <div className="reveal"><BallButton href="/app/matchs">Analyse prête</BallButton></div>
 
-        <div className="cards-wrap">
-          <div className="cards">
-            {cards.slice(0, 9).map((g, i) => {
-              const fav = g.pHome >= 0.5 ? g.home : g.away;
-              const first = ruleNarrative(g.a).text.split(/(?<=\.)\s/)[0];
-              const txt = `${first} Victoire ${fav.short} à ${pct(Math.max(g.pHome, 1 - g.pHome))} %, score projeté ${Math.round(g.awayPts)}-${Math.round(g.homePts)}.`;
-              return (
-                <Link key={g.id} href={`/app/match/${g.id}?d=${g.d}`} className="vcard reveal" style={{ "--d": `${(i % 3) * 120}ms` }}>
-                  <p>{txt}</p>
-                  <div className="who">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <span className="duo"><img src={g.away.logo} alt="" /><img src={g.home.logo} alt="" /></span>
-                    <span><small>{g.away.short} @ {g.home.short}</small><b>{shortDay(g.date)}</b></span>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-          <div className="cards-mask" />
-          <Link href="/app/matchs" className="btn-white cards-more">Voir tous</Link>
-        </div>
+        <ReviewCards reviews={reviews.list} />
       </section>
 
       {/* ================= ANALYSES + CLASSEMENT ================= */}
