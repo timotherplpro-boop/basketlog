@@ -77,7 +77,7 @@ export default async function Home() {
     { q: "3. Est-ce que Basketlog permet de parier ?", a: "Non. Basketlog est un outil d'analyse pour mieux comprendre les matchs. Aucune prise de pari ne se fait ici et aucune probabilité n'est une garantie." },
     { q: "4. Quelles compétitions sont couvertes ?", a: "La NBA (les 30 franchises, avec stats de tirs, joueurs clés, forme récente et confrontations) et l'EuroLeague (les 20 clubs, avec probabilités, forme et classement). D'autres championnats arriveront ensuite." },
     { q: "5. Les avis affichés sont-ils réels ?", a: "Oui. Chaque avis est déposé par un utilisateur via le bouton « Donner mon avis », puis publié tel quel après une simple relecture anti-spam. Nous n'en écrivons aucun nous-mêmes." },
-    { q: "Les données sont-elles fiables ?", a: "Oui. Les analyses s'appuient sur des données NBA réelles (calendrier, scores, classements, infirmerie), mises à jour en continu. Le taux de réussite affiché est calculé sur les vrais matchs terminés." },
+    { q: "6. Quel est le taux de réussite de Basketlog ?", a: "Tout est public sur la page Bilan (/app/bilan) : chaque pronostic est comparé au score final, match par match, avec le détail par niveau de confiance. Le modèle y est recalculé uniquement avec les résultats connus avant chaque match, sans tricher avec le futur. Les données viennent des flux officiels NBA et EuroLeague, mis à jour en continu." },
   ];
 
   return (
@@ -108,7 +108,7 @@ export default async function Home() {
           <div className="rise" style={{ "--d": "800ms", width: "100%", display: "flex", justifyContent: "center" }}><TeamSearch games={up.map(({ a, ...r }) => r)} /></div>
           <p className="proof rise" style={{ "--d": "950ms" }}>
             {acc.n >= 5
-              ? <><b>{accPct}%</b> de bons pronostics sur les <b>{acc.n}</b> matchs terminés la semaine dernière</>
+              ? <Link href="/app/bilan"><b>{accPct}%</b> de bons pronostics sur les <b>{acc.n}</b> matchs terminés la semaine dernière</Link>
               : <><b>{up.length}</b> matchs NBA à analyser cette semaine</>}
           </p>
         </div>

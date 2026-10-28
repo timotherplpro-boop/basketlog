@@ -3,13 +3,17 @@ import Link from "next/link";
 import Nav from "../components/Nav";
 
 export const metadata = {
+  metadataBase: new URL("https://basketlog-zeta.vercel.app"),
   title: "Basketlog – Comprends les matchs NBA avant qu'ils commencent",
+  twitter: { card: "summary_large_image" },
   description:
-    "Analyse les matchs NBA : probabilités de victoire, score projeté, absences, back-to-back et scénarios pour chaque rencontre.",
+    "Analyse les matchs NBA et EuroLeague : probabilités de victoire, score projeté, stats comparées, absences et scénarios pour chaque rencontre. Taux de réussite public.",
   openGraph: {
     title: "Basketlog – Comprends les matchs NBA avant qu'ils commencent",
-    description: "Probabilités, score projeté et scénarios pour chaque match NBA.",
+    description: "Probabilités, score projeté et scénarios pour chaque match NBA et EuroLeague.",
     type: "website",
+    locale: "fr_FR",
+    siteName: "Basketlog",
   },
 };
 

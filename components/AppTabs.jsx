@@ -6,6 +6,7 @@ export default function AppTabs({ active }) {
     ["matchs", "/app/matchs", "Matchs du jour"],
     ["classement", "/app/classement", "Classement NBA"],
     ["euroleague", "/app/euroleague", "EuroLeague"],
+    ["bilan", "/app/bilan", "Bilan"],
   ];
   return (
     <div className="app-tabs">

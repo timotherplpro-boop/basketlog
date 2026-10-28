@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { elContext, elAnalyze } from "../../../../../lib/euroleague";
+import { elContext, elAnalyze, elTable } from "../../../../../lib/euroleague";
 import MatchView from "../../../../../components/MatchView";
 import ELExtras from "../../../../../components/ELExtras";
 
@@ -17,7 +17,9 @@ export default async function ELMatchPage({ params }) {
   const ctx = await elContext();
   const g = ctx.games.find((x) => x.id === String(code));
   if (!g) notFound();
-  const a = elAnalyze(g, ctx.cur, ctx.prev);
+  // Match terminé : pronostic recalculé avec les seuls matchs joués avant lui.
+  const before = g.played ? elTable(ctx.games.filter((x) => x.played && new Date(x.date) < new Date(g.date))) : ctx.cur;
+  const a = elAnalyze(g, before, ctx.prev);
   return (
     <MatchView
       a={a}
