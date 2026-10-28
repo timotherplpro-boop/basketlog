@@ -69,7 +69,7 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
         <div className="card kpi"><span>Confiance</span><strong>{a.confidence}</strong></div>
       </div>
 
-      <Gate matchId={g.id}>
+      <Gate matchId={g.id} league={league}>
         <div className="card block">
           <h2>L&apos;analyse {narrative.source === "ai" ? <span className="tag hot">IA</span> : <span className="tag">Modèle</span>}</h2>
           <p className="narr">{narrative.text}</p>

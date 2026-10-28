@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { track } from "../lib/analytics";
 
 // Bouton "Donner mon avis" + fenêtre de dépôt. Les avis sont publiés après validation.
 export default function ReviewForm({ label = "Donner mon avis", className = "btn-white" }) {
@@ -27,7 +28,7 @@ export default function ReviewForm({ label = "Donner mon avis", className = "btn
         body: JSON.stringify({ prenom: f.get("prenom"), profil: f.get("profil"), texte: f.get("texte"), site: f.get("site"), note }),
       });
       const j = await res.json();
-      if (j.ok) setState({ status: "done", error: "" });
+      if (j.ok) { setState({ status: "done", error: "" }); track("Avis envoyé", { note }); }
       else setState({ status: "idle", error: j.error || "Une erreur est survenue." });
     } catch {
       setState({ status: "idle", error: "Connexion impossible, réessaie." });

@@ -1,6 +1,7 @@
 import "./globals.css";
 import Link from "next/link";
 import Nav from "../components/Nav";
+import Analytics from "../components/Analytics";
 import { SITE } from "../lib/site";
 
 export const metadata = {
@@ -34,6 +35,7 @@ export default function RootLayout({ children }) {
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
       </head>
       <body>
+        <Analytics />
         <Nav />
         {children}
         <footer>

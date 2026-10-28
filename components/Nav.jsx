@@ -26,6 +26,7 @@ export default function Nav() {
               <Link href="/app/classement">Classement</Link>
               <Link href="/app/euroleague">EuroLeague</Link>
               <Link href="/app/bilan">Bilan</Link>
+              <Link href="/pro" className="nav-pro">Pro</Link>
             </div>
             <button className={`burger ${open ? "open" : ""}`} onClick={() => setOpen(!open)} aria-label={open ? "Fermer le menu" : "Ouvrir le menu"} aria-expanded={open}>
               <i /><i />
@@ -40,6 +41,7 @@ export default function Nav() {
         <Link href="/app/classement">Classement NBA</Link>
         <Link href="/app/euroleague">EuroLeague</Link>
         <Link href="/app/bilan">Bilan du modèle</Link>
+        <Link href="/pro">Basketlog Pro</Link>
         <Link href="/avis">Avis</Link>
         <Link href="/#faq">FAQ</Link>
       </div>

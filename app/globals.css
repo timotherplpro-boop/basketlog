@@ -690,3 +690,38 @@ a.team:hover .team-name { color: var(--peach); }
   .bl-bar, .bl-cal { grid-template-columns: 70px 1fr 78px; gap: 8px; font-size: 13px; }
 }
 @media (max-width: 520px) { .bl-tabs { gap: 6px; } .bl-tabs a { padding: 8px 11px; font-size: 13px; } .bl-legend .sw.pred { margin-left: 0; } }
+
+/* ===== Basketlog Pro ===== */
+.nav-box a.nav-pro { background: var(--orange); color: #fff; }
+.nav-box a.nav-pro:hover { background: var(--orange-2); }
+.counter a { color: var(--orange-2); font-weight: 700; }
+.pro-page { max-width: 1120px; margin: 0 auto; padding: 140px 20px 80px; }
+.pro-hero { text-align: center; animation: riseIn .7s var(--ease) both; }
+.pill-tag { display: inline-block; padding: 6px 14px; border-radius: 999px; border: 1px solid rgba(255,122,26,.45); background: rgba(255,122,26,.1); color: var(--orange-2); font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.pro-hero h1 { margin: 18px 0 0; }
+.pro-hero .lead { margin: 18px auto 0; max-width: 560px; }
+.pro-notice { max-width: 760px; margin: 28px auto 0; padding: 14px 18px; border-radius: 14px; font-size: 15px; text-align: center; }
+.pro-notice.good { background: rgba(74,222,128,.1); border: 1px solid rgba(74,222,128,.4); color: #bbf7d0; }
+.pro-notice.warn { background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.4); color: #fde68a; }
+.plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 44px; align-items: stretch; }
+.plan { position: relative; display: flex; flex-direction: column; background: #0d1322; border: 1px solid rgba(255,255,255,.08); border-radius: 24px; padding: 28px 24px 24px; }
+.plan.best { border-color: rgba(255,122,26,.6); background: linear-gradient(170deg, rgba(255,122,26,.16), #0d1322 55%); box-shadow: 0 30px 80px -40px rgba(255,122,26,.55); }
+.plan-badge { position: absolute; top: 18px; right: 18px; padding: 4px 10px; border-radius: 999px; background: var(--orange); color: #1a0b00; font-weight: 800; font-size: 12px; }
+.plan h3 { margin: 0; font-size: 15px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.plan-price { margin-top: 14px; display: flex; align-items: baseline; gap: 6px; }
+.plan-price b { font-family: var(--title); font-weight: 400; font-size: 44px; color: var(--peach); line-height: 1; }
+.plan-price span { color: var(--muted); font-size: 15px; }
+.plan-sub { margin-top: 6px; font-size: 14px; color: var(--orange-2); min-height: 20px; }
+.plan ul { list-style: none; padding: 0; margin: 22px 0 24px; display: grid; gap: 10px; flex: 1; }
+.plan li { position: relative; padding-left: 26px; font-size: 15px; color: rgba(255,255,255,.88); }
+.plan li::before { content: ""; position: absolute; left: 0; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: rgba(255,122,26,.18) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5' stroke='%23ffa24d' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/12px no-repeat; }
+.plan-cta { width: 100%; text-align: center; justify-content: center; }
+.plan-current, .plan-soon { display: inline-flex; align-items: center; height: 46px; border-radius: 12px; border: 1px dashed rgba(255,255,255,.25); color: var(--muted); font-weight: 600; font-size: 15px; }
+.pro-account { margin-top: 28px; text-align: center; color: var(--muted); font-size: 15px; }
+.pro-account a { color: var(--orange-2); }
+.pro-account .pro-login { font-weight: 700; }
+.pro-secure { font-size: 13px; color: var(--dim); margin-top: 8px; }
+.pro-faq { max-width: 820px; margin: 80px auto 0; text-align: center; }
+.pro-faq .faq-list { text-align: left; margin-top: 28px; }
+.reveal-in { animation: riseIn .7s var(--ease) both; }
+@media (max-width: 900px) { .plans { grid-template-columns: 1fr; max-width: 460px; margin-left: auto; margin-right: auto; } .plan.best { order: -1; } }
