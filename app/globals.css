@@ -705,13 +705,28 @@ a.team:hover .team-name { color: var(--peach); }
 .pro-notice.warn { background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.4); color: #fde68a; }
 .plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 44px; align-items: stretch; }
 .plan { position: relative; display: flex; flex-direction: column; background: #0d1322; border: 1px solid rgba(255,255,255,.08); border-radius: 24px; padding: 28px 24px 24px; }
-.plan.best { border-color: rgba(255,122,26,.6); background: linear-gradient(170deg, rgba(255,122,26,.16), #0d1322 55%); box-shadow: 0 30px 80px -40px rgba(255,122,26,.55); }
-.plan-badge { position: absolute; top: 18px; right: 18px; padding: 4px 10px; border-radius: 999px; background: var(--orange); color: #1a0b00; font-weight: 800; font-size: 12px; }
-.plan h3 { margin: 0; font-size: 15px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.plan-pro { border-color: rgba(255,122,26,.65); background: linear-gradient(170deg, rgba(255,122,26,.15), #0d1322 55%); box-shadow: 0 30px 80px -40px rgba(255,122,26,.6); }
+.plan-lifetime { border-color: rgba(255,194,77,.55); background: linear-gradient(170deg, rgba(255,194,77,.12), #0d1322 55%); }
+.plan-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 4px 12px; border-radius: 999px; background: var(--orange); color: #1a0b00; font-weight: 800; font-size: 12px; white-space: nowrap; }
+.plan-lifetime .plan-badge { background: var(--amber); }
+.plan h3 { margin: 0; display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 800; color: #fff; }
+.plan-ic { display: inline-grid; width: 24px; height: 24px; color: var(--orange-2); }
+.plan-lifetime .plan-ic { color: var(--amber); }
+.plan-ic svg { width: 24px; height: 24px; }
+.plan-lifetime .plan-price b { color: var(--amber); }
+.plan-lifetime .plan-sub { color: var(--green); }
+.plan-buy { display: inline-flex; align-items: center; height: 48px; border-radius: 12px; font-weight: 800; font-size: 15px; color: #fff; background: linear-gradient(90deg, #d4560c, var(--orange) 60%, var(--orange-2)); transition: filter .2s, transform .2s; }
+.plan-buy:hover { filter: brightness(1.1); }
+.plan-buy:active { transform: scale(.98); }
+.plan-lifetime .plan-buy { color: #1a0b00; background: linear-gradient(90deg, var(--amber), #ffa24d); }
+.pro-free { text-align: center; margin: 26px auto 0; color: var(--muted); font-size: 15px; }
+.pro-free a { color: var(--orange-2); }
 .plan-price { margin-top: 14px; display: flex; align-items: baseline; gap: 6px; }
 .plan-price b { font-family: var(--title); font-weight: 400; font-size: 44px; color: var(--peach); line-height: 1; }
 .plan-price span { color: var(--muted); font-size: 15px; }
-.plan-sub { margin-top: 6px; font-size: 14px; color: var(--orange-2); min-height: 20px; }
+.plans { margin-top: 56px; }
+.plan-sub { margin-top: 6px; font-size: 14px; color: var(--muted); min-height: 20px; }
+.plan-pro .plan-sub { color: var(--orange-2); }
 .plan ul { list-style: none; padding: 0; margin: 22px 0 24px; display: grid; gap: 10px; flex: 1; }
 .plan li { position: relative; padding-left: 26px; font-size: 15px; color: rgba(255,255,255,.88); }
 .plan li::before { content: ""; position: absolute; left: 0; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: rgba(255,122,26,.18) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5' stroke='%23ffa24d' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/12px no-repeat; }
@@ -724,4 +739,5 @@ a.team:hover .team-name { color: var(--peach); }
 .pro-faq { max-width: 820px; margin: 80px auto 0; text-align: center; }
 .pro-faq .faq-list { text-align: left; margin-top: 28px; }
 .reveal-in { animation: riseIn .7s var(--ease) both; }
-@media (max-width: 900px) { .plans { grid-template-columns: 1fr; max-width: 460px; margin-left: auto; margin-right: auto; } .plan.best { order: -1; } }
+@media (max-width: 900px) { .plans { grid-template-columns: 1fr; max-width: 460px; margin-left: auto; margin-right: auto; gap: 26px; } .plan-pro { order: -1; } }
+.gate-login { display: block; margin-top: 12px; font-size: 14px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }

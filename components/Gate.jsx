@@ -8,7 +8,8 @@ function todayKey() {
   return "hs_views_" + new Date().toISOString().slice(0, 10);
 }
 
-// Analyses complètes par jour : 3 en gratuit, 10 en Mensuel, illimitées en Annuel.
+// Analyse complète : réservée aux abonnés. Starter = 1 par jour, Pro et Lifetime = illimitées.
+// Sans abonnement, seules les probabilités et les chiffres clés en haut de la fiche sont visibles.
 export default function Gate({ matchId, league = "NBA", children }) {
   const pro = useProStatus();
   const [state, setState] = useState({ locked: false, used: 0, ready: false });
@@ -26,7 +27,7 @@ export default function Gate({ matchId, league = "NBA", children }) {
     if (!views.includes(matchId)) {
       if (views.length >= limit) {
         setState({ locked: true, used: views.length, limit, ready: true });
-        track("Limite d'analyses atteinte", { formule: pro.tier, limite: limit, ligue: league });
+        track(limit === 0 ? "Analyse bloquée" : "Limite d'analyses atteinte", { formule: pro.tier, limite: limit, ligue: league });
         return;
       }
       views.push(matchId);
@@ -36,13 +37,12 @@ export default function Gate({ matchId, league = "NBA", children }) {
     track("Analyse consultée", { match_id: String(matchId), ligue: league, formule: pro.tier });
   }, [matchId, pro, league]);
 
-  const isPaid = pro && pro.tier !== "gratuit";
+  const free = !pro || pro.tier === "gratuit";
   return (
     <>
-      {state.ready && !state.unlimited && !state.locked && (
+      {state.ready && !state.unlimited && !state.locked && state.limit > 0 && (
         <div className="counter">
-          {isPaid ? "Analyses Pro" : "Analyse gratuite"} <b>{state.used}/{state.limit}</b> aujourd&apos;hui
-          {!isPaid && <> · <Link href="/pro" onClick={() => track("Clic Passer Pro", { source: "compteur" })}>Passer Pro</Link></>}
+          Analyse Starter <b>{state.used}/{state.limit}</b> aujourd&apos;hui · <Link href="/pro" onClick={() => track("Clic Passer Pro", { source: "compteur" })}>Passer Pro</Link>
         </div>
       )}
       <div className={`gated ${state.locked ? "locked" : ""}`}>
@@ -50,15 +50,21 @@ export default function Gate({ matchId, league = "NBA", children }) {
         {state.locked && (
           <div className="gate-overlay">
             <div className="gate-box">
-              <h3>Tes {state.limit} analyses du jour sont utilisées</h3>
-              {isPaid ? (
-                <p>La formule Mensuel inclut 10 analyses complètes par jour. Passe à l&apos;Annuel pour des analyses illimitées, ou reviens demain.</p>
+              {free ? (
+                <>
+                  <h3>Débloque l&apos;analyse complète</h3>
+                  <p>Score projeté détaillé, facteurs, scénarios, stats comparées, joueurs à suivre et forme récente : tout est réservé aux abonnés. Les probabilités de victoire restent gratuites.</p>
+                </>
               ) : (
-                <p>Reviens demain pour 3 nouvelles analyses complètes, ou passe Pro pour en débloquer plus. Les probabilités de tous les matchs restent gratuites.</p>
+                <>
+                  <h3>Ton analyse Starter du jour est utilisée</h3>
+                  <p>La formule Starter inclut 1 analyse complète par jour. Passe à Pro pour des analyses illimitées, ou reviens demain.</p>
+                </>
               )}
-              <Link href="/pro" className="btn-solid" onClick={() => track("Clic Passer Pro", { source: "limite" })}>
-                {isPaid ? "Passer à l'Annuel" : "Voir les formules Pro"}
+              <Link href="/pro" className="btn-solid" onClick={() => track("Clic Passer Pro", { source: free ? "analyse_bloquee" : "limite" })}>
+                {free ? "Débloquer dès 10 €/mois" : "Passer à Pro"}
               </Link>
+              {free && <a href="/api/whop/login" className="gate-login">Déjà abonné ? Se connecter</a>}
             </div>
           </div>
         )}

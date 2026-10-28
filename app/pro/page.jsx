@@ -2,30 +2,32 @@ import ProPlans from "../../components/ProPlans";
 import Faq from "../../components/Faq";
 
 export const metadata = {
-  title: "Basketlog Pro : analyses illimitées NBA et EuroLeague",
-  description: "Passe à Basketlog Pro : jusqu'à 10 analyses par jour avec le Mensuel, illimitées avec l'Annuel. Paiement sécurisé par Whop, sans engagement.",
+  title: "Choisis ton plan – Basketlog",
+  description: "Starter 10 €/mois, Pro 19 €/mois ou Lifetime 99 € une seule fois : débloque les analyses complètes des matchs NBA et EuroLeague. Paiement sécurisé par Whop.",
 };
 
 export default async function ProPage({ searchParams }) {
   const sp = await searchParams;
   const checkout = {
-    mensuel: process.env.NEXT_PUBLIC_WHOP_CHECKOUT_MONTHLY || "",
-    annuel: process.env.NEXT_PUBLIC_WHOP_CHECKOUT_ANNUAL || "",
+    starter: process.env.NEXT_PUBLIC_WHOP_CHECKOUT_STARTER || "",
+    pro: process.env.NEXT_PUBLIC_WHOP_CHECKOUT_PRO || "",
+    lifetime: process.env.NEXT_PUBLIC_WHOP_CHECKOUT_LIFETIME || "",
   };
   const loginReady = !!process.env.WHOP_CLIENT_ID;
   const faq = [
     { q: "Comment se passe le paiement ?", a: "Le paiement est géré par Whop, une plateforme de paiement sécurisée utilisée par des milliers de créateurs. Basketlog ne voit jamais ta carte bancaire." },
-    { q: "Comment activer mon abonnement sur Basketlog ?", a: "Après le paiement, reviens sur cette page et clique sur « J'ai déjà un abonnement ». Tu te connectes avec le même compte Whop, et Basketlog débloque ta formule automatiquement." },
-    { q: "Puis-je annuler quand je veux ?", a: "Oui. L'abonnement se gère depuis ton compte Whop (whop.com, rubrique Commandes). Tu gardes l'accès jusqu'à la fin de la période déjà payée." },
-    { q: "Qu'est-ce qu'une analyse complète ?", a: "La fiche détaillée d'un match : score projeté, facteurs, scénarios, stats comparées, joueurs à suivre, forme récente, confrontations et deuxième avis. Les probabilités de victoire de tous les matchs restent gratuites pour tout le monde." },
+    { q: "Comment activer mon abonnement sur Basketlog ?", a: "Après le paiement, reviens sur cette page et clique sur « Me connecter avec Whop ». Tu te connectes avec le même compte Whop, et Basketlog débloque ta formule automatiquement." },
+    { q: "Puis-je annuler quand je veux ?", a: "Oui. Les abonnements Starter et Pro se gèrent depuis ton compte Whop (whop.com, rubrique Commandes). Tu gardes l'accès jusqu'à la fin de la période déjà payée. Lifetime se paie une seule fois : rien à annuler." },
+    { q: "Quelle différence entre Starter, Pro et Lifetime ?", a: "Starter donne 1 analyse complète par jour. Pro rend les analyses illimitées. Lifetime offre la même chose que Pro, à vie, pour un paiement unique de 99 €." },
+    { q: "Qu'est-ce qu'une analyse complète ?", a: "La fiche détaillée d'un match : score projeté, facteurs, scénarios, stats comparées, joueurs à suivre, forme récente, confrontations et deuxième avis. Sans abonnement, tu vois gratuitement les probabilités de victoire et les chiffres clés de chaque match." },
     { q: "Basketlog est-il un site de paris ?", a: "Non. Basketlog est un outil d'analyse statistique pour comprendre les matchs. Aucune prise de pari n'est possible et aucune probabilité n'est une garantie." },
   ];
   return (
     <main className="pro-page">
       <section className="pro-hero">
         <div className="pill-tag">Basketlog Pro</div>
-        <h1 className="t-80">Analyse <span className="accent">tous</span> les matchs.</h1>
-        <p className="lead">NBA et EuroLeague, chaque soir. Choisis ta formule, sans engagement.</p>
+        <h1 className="t-80">Choisis ton plan</h1>
+        <p className="lead">Accède à des analyses complètes et des pronostics détaillés, NBA et EuroLeague.</p>
       </section>
       <ProPlans checkout={checkout} loginReady={loginReady} notice={sp?.ok ? "ok" : sp?.erreur || ""} />
       <section className="pro-faq">

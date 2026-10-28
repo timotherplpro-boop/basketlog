@@ -72,7 +72,7 @@ export default async function Home() {
   const nTeams = 30 + elCrests.length;
 
   const faq = [
-    { q: "1. Basketlog est-il gratuit ?", a: "Oui. Les probabilités de tous les matchs sont gratuites et tu as 3 analyses complètes offertes chaque jour. Pour aller plus loin, la formule Mensuel (22,90 €/mois) donne 10 analyses par jour et l'Annuel (118,99 €/an) les rend illimitées : tout est sur la page Pro (/pro)." },
+    { q: "1. Basketlog est-il gratuit ?", a: "Les probabilités de victoire de tous les matchs sont gratuites. Les analyses complètes (scénarios, stats comparées, joueurs, forme) sont réservées aux abonnés : Starter à 10 €/mois (1 analyse par jour), Pro à 19 €/mois (illimité) ou Lifetime à 99 € une seule fois. Tout est sur la page Pro (/pro)." },
     { q: "2. Comment fonctionnent les analyses ?", a: "Le modèle part du niveau réel de chaque équipe (écart de points, attaque, défense, saison passée), puis ajoute l'avantage du terrain, la fatigue des back-to-back et les absences. La marge attendue est convertie en probabilité de victoire et en scénarios." },
     { q: "3. Est-ce que Basketlog permet de parier ?", a: "Non. Basketlog est un outil d'analyse pour mieux comprendre les matchs. Aucune prise de pari ne se fait ici et aucune probabilité n'est une garantie." },
     { q: "4. Quelles compétitions sont couvertes ?", a: "La NBA (les 30 franchises, avec stats de tirs, joueurs clés, forme récente et confrontations) et l'EuroLeague (les 20 clubs, avec probabilités, forme et classement). D'autres championnats arriveront ensuite." },
@@ -162,7 +162,7 @@ export default async function Home() {
               <div className="stat reveal" style={{ "--d": "450ms" }}><strong><SlotNumber value={pct(1 - big.pHome)} suffix="%" /></strong><span>Victoire {big.away.short}</span></div>
             </div>
             <div className="reveal" style={{ "--d": "500ms" }}><BallButton href={`/app/match/${big.id}?d=${big.d}`}>Analyse prête</BallButton></div>
-            <p className="demo-note reveal" style={{ "--d": "600ms" }}>3 analyses complètes offertes chaque jour, sans inscription</p>
+            <p className="demo-note reveal" style={{ "--d": "600ms" }}>Probabilités gratuites pour tous les matchs · analyses complètes dès 10 €/mois</p>
           </div>
         </section>
       )}
