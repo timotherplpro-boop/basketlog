@@ -1,9 +1,14 @@
 import Link from "next/link";
 import { conferenceStandings } from "../../../lib/data";
 import AppTabs from "../../../components/AppTabs";
+import { pageMeta } from "../../../lib/seo";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Classement NBA – Basketlog" };
+export const metadata = pageMeta({
+  title: "Classement NBA : conférences Est et Ouest – Basketlog",
+  description: "Classement NBA à jour des conférences Est et Ouest : bilan, pourcentage de victoires, écart de points, série en cours et forme de chaque équipe.",
+  path: "/app/classement",
+});
 
 function Table({ title, rows }) {
   return (
@@ -42,7 +47,7 @@ export default async function ClassementPage() {
     <main className="app-page wide">
       <AppTabs active="classement" />
       <div className="app-head">
-        <h1>Classement</h1>
+        <h1>Classement NBA</h1>
         <p>Découvre les conférences en cours</p>
         <p className="note">Clique sur une équipe pour voir sa fiche : stats, joueurs, calendrier.</p>
       </div>

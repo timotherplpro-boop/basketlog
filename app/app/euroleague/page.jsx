@@ -2,9 +2,14 @@ import Link from "next/link";
 import { elUpcoming, elStandings } from "../../../lib/euroleague";
 import UpcomingList from "../../../components/UpcomingList";
 import AppTabs from "../../../components/AppTabs";
+import { pageMeta } from "../../../lib/seo";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "EuroLeague : matchs, analyses et classement – Basketlog" };
+export const metadata = pageMeta({
+  title: "Pronostics EuroLeague : matchs, analyses et classement – Basketlog",
+  description: "Pronostics EuroLeague pour chaque journée : probabilités de victoire, score projeté et forme des 20 clubs, avec le classement à jour.",
+  path: "/app/euroleague",
+});
 
 export default async function EuroLeaguePage() {
   const { list, cur, season } = await elUpcoming(10);

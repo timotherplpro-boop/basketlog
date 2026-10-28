@@ -1,10 +1,12 @@
 import ProPlans from "../../components/ProPlans";
 import Faq from "../../components/Faq";
+import { pageMeta } from "../../lib/seo";
 
-export const metadata = {
-  title: "Choisis ton plan – Basketlog",
+export const metadata = pageMeta({
+  title: "Basketlog Pro : analyses NBA complètes dès 10 €/mois",
   description: "Starter 10 €/mois, Pro 19 €/mois ou Lifetime 99 € une seule fois : débloque les analyses complètes des matchs NBA et EuroLeague. Paiement sécurisé par Whop.",
-};
+  path: "/pro",
+});
 
 export default async function ProPage({ searchParams }) {
   const sp = await searchParams;

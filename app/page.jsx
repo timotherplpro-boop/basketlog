@@ -11,11 +11,18 @@ import RevealObserver from "../components/RevealObserver";
 import Faq from "../components/Faq";
 import ReviewCards from "../components/ReviewCards";
 import { getReviews } from "../lib/reviews";
+import JsonLd from "../components/JsonLd";
+import { pageMeta } from "../lib/seo";
 
 const AV = ["#ff7a1a", "#7c5cff", "#22c55e", "#0ea5e9", "#e11d48", "#eab308"];
 const avatarColor = (s) => AV[[...s].reduce((a, c) => a + c.charCodeAt(0), 0) % AV.length];
 
 export const dynamic = "force-dynamic";
+export const metadata = pageMeta({
+  title: "Basketlog : pronostics NBA et EuroLeague analysés par IA",
+  description: "Pronostics NBA et EuroLeague pour chaque match : probabilités de victoire gratuites, score projeté, absences, forme et scénarios. Taux de réussite public.",
+  path: "/",
+});
 
 const pct = (p) => Math.round(p * 100);
 function shortDay(iso) {
@@ -82,6 +89,11 @@ export default async function Home() {
 
   return (
     <main>
+      <JsonLd data={{
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q.replace(/^\d+\.\s*/, ""), acceptedAnswer: { "@type": "Answer", text: f.a } })),
+      }} />
       <RevealObserver />
 
       {/* ================= HERO ================= */}
@@ -101,10 +113,10 @@ export default async function Home() {
           </div>
           <h1 className="t-hero">
             <span className="ln"><span style={{ "--d": "200ms" }}>Prédis chaque</span></span>
-            <span className="ln"><span style={{ "--d": "320ms" }}>match avant qu&apos;il</span></span>
-            <span className="ln"><span style={{ "--d": "440ms" }}>ne <span className="accent">commence.</span></span></span>
+            <span className="ln"><span style={{ "--d": "320ms" }}>match NBA avant</span></span>
+            <span className="ln"><span style={{ "--d": "440ms" }}>qu&apos;il ne <span className="accent">commence.</span></span></span>
           </h1>
-          <p className="lead rise" style={{ "--d": "650ms" }}>Probabilités, statistiques avancées et scénarios de match pour anticiper les résultats et mieux comprendre le jeu.</p>
+          <p className="lead rise" style={{ "--d": "650ms" }}>Pronostics NBA et EuroLeague : probabilités, statistiques avancées et scénarios de match pour anticiper les résultats et mieux comprendre le jeu.</p>
           <div className="rise" style={{ "--d": "800ms", width: "100%", display: "flex", justifyContent: "center" }}><TeamSearch games={up.map(({ a, ...r }) => r)} /></div>
           <p className="proof rise" style={{ "--d": "950ms" }}>
             {acc.n >= 5

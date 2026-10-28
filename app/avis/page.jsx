@@ -1,9 +1,14 @@
 import { getReviews } from "../../lib/reviews";
 import ReviewCards from "../../components/ReviewCards";
 import RevealObserver from "../../components/RevealObserver";
+import { pageMeta } from "../../lib/seo";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Avis des utilisateurs – Basketlog" };
+export const metadata = pageMeta({
+  title: "Avis sur Basketlog : ce qu'en pensent les utilisateurs",
+  description: "Les avis des utilisateurs de Basketlog, l'outil d'analyse et de pronostics NBA et EuroLeague. Chaque avis est déposé par un utilisateur et publié tel quel.",
+  path: "/avis",
+});
 
 export default async function AvisPage() {
   const { list, count, avg } = await getReviews(200);

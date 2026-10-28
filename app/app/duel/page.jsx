@@ -8,7 +8,8 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata({ searchParams }) {
   const sp = (await searchParams) || {};
   const h = teamById(sp.home), a = teamById(sp.away);
-  return { title: h && a ? `${a.short} @ ${h.short} : analyse – Basketlog` : "Analyse de match – Basketlog" };
+  // Combinaisons d'équipes infinies : pages utiles aux visiteurs, mais pas à indexer.
+  return { title: h && a ? `${a.short} – ${h.short} : analyse – Basketlog` : "Analyse de match – Basketlog", robots: { index: false, follow: true } };
 }
 
 export default async function DuelPage({ searchParams }) {

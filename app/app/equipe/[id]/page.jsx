@@ -4,13 +4,19 @@ import { teamById } from "../../../../lib/teams";
 import { conferenceStandings, upcomingAnalyses } from "../../../../lib/data";
 import { getTeamStats, getTeamSchedule, getRoster, getSummary, nbaDateOf } from "../../../../lib/espn";
 import AppTabs from "../../../../components/AppTabs";
+import { pageMeta } from "../../../../lib/seo";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const t = teamById(id);
-  return { title: t ? `${t.name} : stats, calendrier et analyses – Basketlog` : "Équipe – Basketlog" };
+  if (!t) return { title: "Équipe – Basketlog", robots: { index: false } };
+  return pageMeta({
+    title: `${t.name} : stats, calendrier et pronostics – Basketlog`,
+    description: `${t.name} : bilan, stats de la saison NBA, joueurs clés, calendrier et pronostic Basketlog pour chaque prochain match.`,
+    path: `/app/equipe/${t.id}`,
+  });
 }
 
 const dfmt = (iso, o) => { try { return new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", ...o }).format(new Date(iso)); } catch { return ""; } };

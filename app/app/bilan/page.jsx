@@ -3,12 +3,14 @@ import { nbaPicks, elPicks, summarize, lastDays } from "../../../lib/history";
 import { nbaToday, seasonForDate } from "../../../lib/espn";
 import { currentSeasonCode } from "../../../lib/euroleague";
 import AppTabs from "../../../components/AppTabs";
+import { pageMeta } from "../../../lib/seo";
 
 export const dynamic = "force-dynamic";
-export const metadata = {
-  title: "Bilan du modèle : taux de réussite réel – Basketlog",
+export const metadata = pageMeta({
+  title: "Bilan des pronostics NBA : taux de réussite réel – Basketlog",
   description: "Chaque pronostic Basketlog comparé au score final, match par match. Taux de réussite NBA et EuroLeague, calibration et niveau de confiance.",
-};
+  path: "/app/bilan",
+});
 
 const pct = (x) => (x == null ? "–" : `${Math.round(x * 100)} %`);
 // Jour du match à l'heure locale du match (date NBA pour la NBA), pas de décalage d'une nuit.

@@ -5,12 +5,15 @@ import { TeamLogo, ProbBar, StatusTag } from "./ui";
 import Gate from "./Gate";
 import AppTabs from "./AppTabs";
 import MatchExtras from "./MatchExtras";
+import JsonLd from "./JsonLd";
+import { SITE } from "../lib/site";
+import { dayLong } from "../lib/seo";
 
 function Signed({ v }) {
   return <span className={v > 0.05 ? "pos" : v < -0.05 ? "neg" : ""}>{fmt(v)}</span>;
 }
 
-export default async function MatchView({ a, backHref = "/app", league = "NBA", extras = null }) {
+export default async function MatchView({ a, backHref = "/app", league = "NBA", extras = null, path = null }) {
   const isNBA = league === "NBA";
   const teamHref = (t) => (isNBA ? `/app/equipe/${t.id}` : `/app/euroleague/equipe/${t.id}`);
   const g = a.game;
@@ -30,10 +33,46 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
     ...(g.hypothetical || league !== "NBA" ? [] : [["A joué hier", aw.b2b ? "Oui" : "Non", h.b2b ? "Oui" : "Non"]]),
   ];
 
+  // Données structurées : le match (événement sportif) et la page, dont l'analyse détaillée est réservée aux abonnés.
+  const url = path ? `${SITE}${path}` : null;
+  const team = (t) => ({ "@type": "SportsTeam", name: t.name, ...(t.logo ? { logo: t.logo } : {}) });
+  const ld = g.hypothetical || !url ? null : [
+    {
+      "@context": "https://schema.org",
+      "@type": "SportsEvent",
+      name: `${g.away.name} – ${g.home.name}`,
+      description: `Match ${isNBA ? "NBA" : "d'EuroLeague"} entre ${g.away.name} et ${g.home.name}. Probabilités Basketlog : ${Math.round(a.pAway * 100)} % / ${Math.round(a.pHome * 100)} %.`,
+      sport: "Basketball",
+      startDate: g.date,
+      eventStatus: "https://schema.org/EventScheduled",
+      eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+      ...(g.venue ? { location: { "@type": "Place", name: g.venue, address: g.city || g.venue } } : {}),
+      homeTeam: team(g.home),
+      awayTeam: team(g.away),
+      competitor: [team(g.away), team(g.home)],
+      url,
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: `Pronostic ${g.away.name} – ${g.home.name}`,
+      url,
+      inLanguage: "fr-FR",
+      isAccessibleForFree: false,
+      hasPart: { "@type": "WebPageElement", isAccessibleForFree: false, cssSelector: ".gate-content" },
+      isPartOf: { "@id": `${SITE}/#site` },
+    },
+  ];
+
   return (
     <main className="app-page">
+      <JsonLd data={ld} />
       <AppTabs active={isNBA ? "analyse" : "euroleague"} />
       <Link href={backHref} className="back">← Retour</Link>
+      <h1 className="match-title">
+        {g.hypothetical ? "Analyse" : "Pronostic"} {g.away.short} – {g.home.short}{" "}
+        <span>{g.hypothetical ? "Match hypothétique" : `${isNBA ? "NBA" : "EuroLeague"} · ${dayLong(g.date)}`}</span>
+      </h1>
 
       <div className="card match-hero">
         <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>

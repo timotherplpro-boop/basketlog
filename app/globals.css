@@ -348,6 +348,8 @@ footer { border-top: 1px solid var(--line); padding: 34px 16px 40px; color: var(
 .app-tabs a:hover { color: #fff; }
 .app-tabs a.on { background: var(--orange); border-color: var(--orange); color: #1a0b02; }
 .app-head { text-align: center; animation: riseIn .7s var(--ease) both; }
+.match-title { font-family: var(--head); font-weight: 800; font-size: clamp(22px, 3vw, 30px); letter-spacing: -0.02em; text-align: center; margin: 4px 0 18px; }
+.match-title span { display: block; margin-top: 4px; font-family: var(--body); font-size: 13px; font-weight: 600; letter-spacing: 0; color: var(--dim); }
 .app-head h1 { font-family: var(--head); font-weight: 800; font-size: clamp(30px, 4vw, 42px); letter-spacing: -0.03em; margin: 0; }
 .app-head p { margin: 6px 0 0; color: rgba(255,255,255,.85); }
 .app-head .note { color: var(--orange-2); font-size: 14px; margin-top: 8px; }

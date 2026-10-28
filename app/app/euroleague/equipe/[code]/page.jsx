@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { elContext, elAnalyze, elStandings } from "../../../../../lib/euroleague";
 import AppTabs from "../../../../../components/AppTabs";
+import { pageMeta } from "../../../../../lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,12 @@ export async function generateMetadata({ params }) {
   const { code } = await params;
   const { cur } = await elContext();
   const t = cur[code];
-  return { title: t ? `${t.name} : EuroLeague – Basketlog` : "Club EuroLeague – Basketlog" };
+  if (!t) return { title: "Club EuroLeague – Basketlog", robots: { index: false } };
+  return pageMeta({
+    title: `${t.name} : EuroLeague, stats et pronostics – Basketlog`,
+    description: `${t.name} en EuroLeague : bilan, classement, forme récente, calendrier et pronostic Basketlog pour chaque prochain match.`,
+    path: `/app/euroleague/equipe/${code}`,
+  });
 }
 
 export default async function ELTeamPage({ params }) {
