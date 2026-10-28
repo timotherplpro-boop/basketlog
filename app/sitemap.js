@@ -1,5 +1,5 @@
 import { TEAMS } from "../lib/teams";
-const SITE = "https://basketlog-zeta.vercel.app";
+import { SITE } from "../lib/site";
 
 export default function sitemap() {
   const now = new Date();

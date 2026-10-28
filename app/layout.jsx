@@ -1,9 +1,10 @@
 import "./globals.css";
 import Link from "next/link";
 import Nav from "../components/Nav";
+import { SITE } from "../lib/site";
 
 export const metadata = {
-  metadataBase: new URL("https://basketlog-zeta.vercel.app"),
+  metadataBase: new URL(SITE),
   title: "Basketlog – Comprends les matchs NBA avant qu'ils commencent",
   twitter: { card: "summary_large_image" },
   description:
