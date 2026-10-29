@@ -52,7 +52,7 @@ export default function ReviewForm({ label = "Donner mon avis", className = "btn
             ) : (
               <form onSubmit={submit}>
                 <h3 id="avis-title">Ton avis sur Basketlog</h3>
-                <p className="modal-sub">Il sera publié avec ton prénom après relecture.</p>
+                <p className="modal-sub">Il sera publié avec ton prénom après relecture. <a href="/confidentialite" target="_blank" rel="noopener">Tes données</a></p>
                 <div className="stars" role="radiogroup" aria-label="Note" onMouseLeave={() => setHover(0)}>
                   {[1, 2, 3, 4, 5].map((n) => (
                     <button type="button" key={n} role="radio" aria-checked={note === n} aria-label={`${n} étoile${n > 1 ? "s" : ""}`}

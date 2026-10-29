@@ -1,0 +1,56 @@
+import Link from "next/link";
+import LegalDoc, { Sec } from "../../components/LegalDoc";
+import CookieSettingsButton from "../../components/CookieSettingsButton";
+import { pageMeta } from "../../lib/seo";
+
+export const metadata = pageMeta({
+  title: "Politique de cookies – Basketlog",
+  description: "Les cookies et traceurs utilisés par Basketlog, leur rôle, leur durée et comment accepter ou refuser la mesure d'audience.",
+  path: "/cookies",
+});
+
+const TRACEURS = [
+  ["bl_consent", "Stockage local", "Mémoriser ton choix sur les cookies", "Nécessaire", "6 mois"],
+  ["hs_views_…", "Stockage local", "Compter les analyses complètes consultées dans la journée (formule Starter)", "Nécessaire", "La journée"],
+  ["bl_pro", "Cookie", "Garder ta session d'abonné connectée (cookie signé, inaccessible aux scripts)", "Nécessaire", "60 jours"],
+  ["whop_state, whop_pkce", "Cookie", "Sécuriser la connexion avec Whop", "Nécessaire", "10 minutes"],
+  ["AMP_…, AMP_MKTG_…", "Cookie", "Mesure d'audience Amplitude : identifiant aléatoire de visiteur et de session, source de la visite", "Consentement", "12 mois"],
+  ["AMP_unsent_…, AMP_remote_config_…", "Stockage local", "Mesure d'audience Amplitude : file d'attente des événements et réglages", "Consentement", "Jusqu'au refus ou à l'effacement"],
+];
+
+export default function Cookies() {
+  return (
+    <LegalDoc
+      title="Politique de cookies"
+      path="/cookies"
+      intro="Un cookie est un petit fichier déposé dans ton navigateur. Basketlog en utilise très peu : ceux qui font fonctionner le site, et, seulement si tu l'acceptes, ceux de la mesure d'audience. Aucun cookie publicitaire."
+    >
+      <Sec n={1} title="Les traceurs utilisés">
+        <div className="legal-table-wrap">
+          <table className="legal-table">
+            <thead><tr><th>Nom</th><th>Type</th><th>Rôle</th><th>Accord</th><th>Durée</th></tr></thead>
+            <tbody>{TRACEURS.map((t) => <tr key={t[0]}>{t.map((c, i) => <td key={i}>{i === 0 ? <code>{c}</code> : c}</td>)}</tr>)}</tbody>
+          </table>
+        </div>
+      </Sec>
+
+      <Sec n={2} title="Cookies nécessaires">
+        <p>Ils servent uniquement au fonctionnement du site (connexion des abonnés, limite d&apos;analyses, mémorisation de ton choix). La loi les dispense de consentement. Les bloquer dans ton navigateur peut empêcher la connexion des abonnés.</p>
+      </Sec>
+
+      <Sec n={3} title="Mesure d'audience (Amplitude)">
+        <p>Avec ton accord, Basketlog utilise Amplitude (données hébergées dans l&apos;Union européenne) pour savoir quelles pages et fonctionnalités sont utilisées, et améliorer le site. Ces statistiques ne servent jamais à la publicité et ne sont pas revendues. Sans ton accord, aucun de ces traceurs n&apos;est déposé.</p>
+      </Sec>
+
+      <Sec n={4} title="Services tiers">
+        <p>La page de paiement est hébergée par Whop (whop.com), qui dépose ses propres cookies selon sa politique. Les logos des équipes et certaines photos sont chargés depuis d&apos;autres serveurs (ESPN, EuroLeague, Unsplash), sans cookie de notre part.</p>
+      </Sec>
+
+      <Sec n={5} title="Accepter, refuser, changer d'avis">
+        <p>À ta première visite, une bannière te permet d&apos;accepter ou de refuser la mesure d&apos;audience, aussi simplement l&apos;un que l&apos;autre. Ton choix est gardé 6 mois, puis la question t&apos;est reposée. Tu peux changer d&apos;avis à tout moment :</p>
+        <p><CookieSettingsButton className="btn-white" /></p>
+        <p>Tu peux aussi supprimer les cookies dans les réglages de ton navigateur. Plus d&apos;informations dans la <Link href="/confidentialite">politique de confidentialité</Link> et sur le site de la CNIL : <a href="https://www.cnil.fr/fr/cookies-et-autres-traceurs" rel="noopener" target="_blank">cnil.fr</a>.</p>
+      </Sec>
+    </LegalDoc>
+  );
+}

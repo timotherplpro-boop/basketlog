@@ -1,7 +1,19 @@
+// Polices hébergées sur Basketlog (aucun appel à Google Fonts : rien n'est transmis à Google)
+import "@fontsource/inter/latin-400.css";
+import "@fontsource/inter/latin-500.css";
+import "@fontsource/inter/latin-600.css";
+import "@fontsource/inter/latin-700.css";
+import "@fontsource/inter/latin-800.css";
+import "@fontsource/jetbrains-mono/latin-500.css";
+import "@fontsource/jetbrains-mono/latin-700.css";
+import "@fontsource/tilt-warp/latin-400.css";
 import "./globals.css";
 import Link from "next/link";
 import Nav from "../components/Nav";
 import Analytics from "../components/Analytics";
+import CookieBanner from "../components/CookieBanner";
+import CookieSettingsButton from "../components/CookieSettingsButton";
+import { LEGAL, LEGAL_PAGES } from "../lib/legal";
 import JsonLd from "../components/JsonLd";
 import { SITE, GOOGLE_SITE_VERIFICATION, BING_SITE_VERIFICATION } from "../lib/site";
 
@@ -52,12 +64,6 @@ export default function RootLayout({ children }) {
         {/* Validations Search Console et Bing : écrites en dur pour être toujours dans le <head>, quel que soit le visiteur */}
         <meta name="google-site-verification" content={GOOGLE_SITE_VERIFICATION} />
         <meta name="msvalidate.01" content={BING_SITE_VERIFICATION} />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Tilt+Warp&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
-          rel="stylesheet"
-        />
         <link rel="preconnect" href="https://images.unsplash.com" />
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
       </head>
@@ -78,10 +84,16 @@ export default function RootLayout({ children }) {
               <Link href="/pro">Basketlog Pro</Link>
               <Link href="/avis">Avis</Link>
             </nav>
-            <div>Analyses statistiques, pas un service de paris. Les probabilités sont des estimations, jamais des certitudes.</div>
+            <nav className="foot-links foot-legal" aria-label="Informations légales">
+              {LEGAL_PAGES.map(([href, label]) => <Link key={href} href={href}>{label}</Link>)}
+              <CookieSettingsButton />
+            </nav>
+            <div>Analyses statistiques, pas un service de paris. Les probabilités sont des estimations, jamais des certitudes. Réservé aux 18 ans et plus.</div>
+            <div>Les jeux d&apos;argent comportent des risques : endettement, dépendance… Appelle le {LEGAL.jeu.tel} ({LEGAL.jeu.nom}, appel non surtaxé).</div>
             <div>Données : flux publics NBA et EuroLeague · Photos : Unsplash · © {new Date().getFullYear()} Basketlog</div>
           </div>
         </footer>
+        <CookieBanner />
       </body>
     </html>
   );

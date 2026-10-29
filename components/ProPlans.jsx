@@ -68,6 +68,10 @@ export default function ProPlans({ checkout, loginReady, notice }) {
           );
         })}
       </div>
+      <p className="pro-legal">
+        En t&apos;abonnant, tu acceptes les <Link href="/cgv">conditions générales de vente</Link> et les <Link href="/cgu">conditions d&apos;utilisation</Link>.
+        Starter et Pro sont sans engagement et résiliables à tout moment. Tu peux te rétracter pendant 14 jours et être remboursé intégralement. Réservé aux 18 ans et plus.
+      </p>
       <p className="pro-free">Sans abonnement, les probabilités de victoire de tous les matchs restent gratuites. <Link href="/app/matchs">Voir les matchs du jour</Link></p>
       <div className="pro-account">
         {pro?.connected ? (
