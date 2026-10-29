@@ -4,24 +4,48 @@ import Link from "next/link";
 import { useProStatus } from "../lib/useProStatus";
 import { track } from "../lib/analytics";
 import { useL, useInitialPath } from "./LangProvider";
-import LangSwitch from "./LangSwitch";
-import { InstallButton } from "./InstallApp";
+import LangSelect from "./LangSelect";
+import { InstallSquare } from "./InstallApp";
 
+const Chevrons = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M4 5l7 7-7 7M12 5l7 7-7 7" /></svg>
+);
+const MenuIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+);
+
+// En-tête façon Visifoot : logo à gauche ; à droite la langue, « » CONNEXION » et la boîte blanche (appli + menu).
+// Sur mobile : logo et menu burger, qui ouvre un panneau avec ces mêmes éléments et les liens du site.
 export default function Nav() {
   const L = useL();
   const [open, setOpen] = useState(false);
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [open]);
   const pro = useProStatus();
   const initialPath = useInitialPath();
   const [here, setHere] = useState(initialPath);
   useEffect(() => { setHere(location.pathname + location.search); }, [open]);
+  useEffect(() => {
+    if (!open) return;
+    const esc = (e) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("keydown", esc);
+    return () => document.removeEventListener("keydown", esc);
+  }, [open]);
+
   const connected = !!pro?.connected;
   const account = connected
-    ? { href: L.href("/pro"), label: L.t("Mon compte", "My account") }
-    : { href: `/api/whop/login?next=${encodeURIComponent(here)}`, label: L.t("Connexion", "Log in") };
+    ? { href: L.href("/pro"), label: L.t("Mon compte", "My account", "Mi cuenta") }
+    : { href: `/api/whop/login?next=${encodeURIComponent(here)}`, label: L.t("Connexion", "Login", "Iniciar sesión") };
+  const onAccount = () => !connected && track("Connexion Whop", { etape: "clic", source: "menu" });
+  const menuLabel = open ? L.t("Fermer le menu", "Close menu", "Cerrar el menú") : L.t("Ouvrir le menu", "Open menu", "Abrir el menú");
+
+  const links = [
+    ["/app", L.t("Analyser un match", "Analyze a game", "Analizar un partido")],
+    ["/app/matchs", L.t("Matchs du jour", "Today's games", "Partidos de hoy")],
+    ["/app/classement", L.t("Classement NBA", "NBA standings", "Clasificación NBA")],
+    ["/app/euroleague", L.t("EuroLeague", "EuroLeague", "Euroliga")],
+    ["/app/bilan", L.t("Bilan du modèle", "Model track record", "Balance del modelo")],
+    ["/pro", "Basketlog Pro"],
+    ["/avis", L.t("Avis", "Reviews", "Opiniones")],
+  ];
 
   return (
     <>
@@ -31,41 +55,41 @@ export default function Nav() {
             <span className="ball" aria-hidden /> Basketlog
           </Link>
           <div className="nav-right">
-            <LangSwitch className="nav-lang" />
-            <a href={account.href} className="nav-login" aria-label={account.label} onClick={() => !connected && track("Connexion Whop", { etape: "clic", source: "menu" })}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><circle cx="12" cy="8" r="4" /><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" /></svg>
-              <span>{account.label}</span>
+            <LangSelect className="nav-only" />
+            <a href={account.href} className="nav-cta nav-only" onClick={onAccount}>
+              <Chevrons />
+              {account.label}
             </a>
-            <Link href={L.href("/app")} className="nav-cta">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M4 5l7 7-7 7M12 5l7 7-7 7" /></svg>
-              {L.t("ANALYSER", "ANALYZE")}
-            </Link>
-            <div className="nav-box">
-              <Link href={L.href("/app/matchs")}>{L.t("Matchs du jour", "Today's games")}</Link>
-              <Link href={L.href("/app/classement")}>{L.t("Classement", "Standings")}</Link>
-              <Link href={L.href("/app/euroleague")}>EuroLeague</Link>
-              <Link href={L.href("/app/bilan")}>{L.t("Bilan", "Record")}</Link>
-              <Link href={L.href("/pro")} className="nav-pro">Pro</Link>
+            <div className="nav-box nav-only">
+              <InstallSquare />
+              <button type="button" className={`nav-sq ${open ? "on" : ""}`} onClick={() => setOpen(!open)} aria-label={menuLabel} aria-expanded={open}>
+                <MenuIcon />
+              </button>
             </div>
-            <button className={`burger ${open ? "open" : ""}`} onClick={() => setOpen(!open)} aria-label={open ? L.t("Fermer le menu", "Close menu") : L.t("Ouvrir le menu", "Open menu")} aria-expanded={open}>
+            <button type="button" className={`burger ${open ? "open" : ""}`} onClick={() => setOpen(!open)} aria-label={menuLabel} aria-expanded={open}>
               <i /><i />
             </button>
           </div>
         </div>
       </nav>
-      <div className={`mmenu ${open ? "open" : ""}`} onClick={() => setOpen(false)}>
-        <button className="mclose" aria-label={L.t("Fermer le menu", "Close menu")}>×</button>
-        <a href={account.href}>{account.label}</a>
-        <Link href={L.href("/app")}>{L.t("Analyser un match", "Analyze a game")}</Link>
-        <Link href={L.href("/app/matchs")}>{L.t("Matchs du jour", "Today's games")}</Link>
-        <Link href={L.href("/app/classement")}>{L.t("Classement NBA", "NBA standings")}</Link>
-        <Link href={L.href("/app/euroleague")}>EuroLeague</Link>
-        <Link href={L.href("/app/bilan")}>{L.t("Bilan du modèle", "Model track record")}</Link>
-        <Link href={L.href("/pro")}>Basketlog Pro</Link>
-        <Link href={L.href("/avis")}>{L.t("Avis", "Reviews")}</Link>
-        <Link href={`${L.href("/")}#faq`}>FAQ</Link>
-        <InstallButton className="mmenu-install" source="menu" icon />
-        <LangSwitch className="mmenu-lang" />
+      <div className={`mmenu ${open ? "open" : ""}`} onClick={(e) => e.target === e.currentTarget && setOpen(false)}>
+        <div className="mm-panel" onClick={(e) => e.target.closest("a") && setOpen(false)}>
+          <div className="mm-top">
+            <Link href={L.href("/")} className="logo"><span className="ball" aria-hidden /> Basketlog</Link>
+            <button type="button" className="mm-x" onClick={() => setOpen(false)} aria-label={L.t("Fermer le menu", "Close menu", "Cerrar el menú")}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M5 5l14 14M19 5L5 19" /></svg>
+            </button>
+          </div>
+          <div className="mm-visi">
+            <LangSelect />
+            <a href={account.href} className="nav-cta" onClick={onAccount}><Chevrons />{account.label}</a>
+            <div className="nav-box"><InstallSquare source="menu" /></div>
+          </div>
+          <nav className="mm-links" aria-label={L.t("Pages du site", "Site pages", "Páginas del sitio")}>
+            {links.map(([href, label]) => <Link key={href} href={L.href(href)}>{label}</Link>)}
+            <Link href={`${L.href("/")}#faq`}>{L.t("Questions fréquentes", "FAQ", "Preguntas frecuentes")}</Link>
+          </nav>
+        </div>
       </div>
     </>
   );

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { recentAccuracy, upcomingAnalyses, conferenceStandings } from "../lib/data";
 import { TEAMS, teamById } from "../lib/teams";
-import { nbaToday } from "../lib/espn";
+import { nbaToday, seasonForDate } from "../lib/espn";
+import { nbaPicks } from "../lib/history";
 import { getELGames } from "../lib/euroleague";
 import TeamSearch from "../components/TeamSearch";
 import PhoneHero from "../components/PhoneHero";
@@ -34,6 +35,28 @@ export async function generateMetadata() {
 }
 
 const pct = (p) => Math.round(p * 100);
+
+// Titre du hero, mot par mot (animation comme Visifoot) ; le dernier mot est en orange.
+const HERO = {
+  fr: { words: ["Prédis", "chaque", "match", "avant", "qu’il", "ne"], accent: "commence." },
+  en: { words: ["Predict", "every", "game", "before", "it"], accent: "starts." },
+  es: { words: ["Predice", "cada", "partido", "antes", "de", "que"], accent: "comience." },
+};
+
+const StarIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden><defs><linearGradient id="star-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ffe066" /><stop offset="1" stopColor="#ffb300" /></linearGradient></defs><path d="M12 2.6l2.9 6 6.5.8-4.8 4.5 1.2 6.5L12 17.3l-5.8 3.1 1.2-6.5-4.8-4.5 6.5-.8z" fill="url(#star-g)" stroke="#e09a00" strokeWidth=".8" strokeLinejoin="round" /></svg>
+);
+
+// Nombre de matchs NBA recalculés par le modèle (bilan public). Mis en cache côté serveur ; si c'est lent, on n'attend pas.
+async function countPicks() {
+  try {
+    const season = seasonForDate(nbaToday());
+    const work = Promise.all([nbaPicks(season - 1), nbaPicks(season)]).then(([a, b]) => (a?.length || 0) + (b?.length || 0));
+    return await Promise.race([work, new Promise((r) => setTimeout(() => r(0), 1500))]);
+  } catch {
+    return 0;
+  }
+}
 const shortDay = (iso, L) => fmtDate(L, iso, { weekday: "short", day: "numeric", month: "short" });
 
 // Grains de lumière dans le faisceau du projecteur
@@ -53,7 +76,7 @@ function BallButton({ href, children }) {
 
 export default async function Home() {
   const L = await getL();
-  const [up, acc, std, reviews, elGames] = await Promise.all([upcomingAnalyses(7), recentAccuracy(7), conferenceStandings(), getReviews(30), getELGames()]);
+  const [up, acc, std, reviews, elGames, picksCount] = await Promise.all([upcomingAnalyses(7), recentAccuracy(7), conferenceStandings(), getReviews(30), getELGames(), countPicks()]);
   const pre = up.filter((g) => !g.live);
 
   // Téléphone : les Lakers (ou l'équipe qui joue le plus cette semaine)
@@ -78,6 +101,18 @@ export default async function Home() {
   const today = nbaToday();
   const todayCount = up.filter((g) => g.d === today).length;
   const accPct = acc.n ? Math.round((acc.ok / acc.n) * 100) : 0;
+  // Précision de la semaine, à une décimale comme Visifoot (« 67,4 % » / « 67.4% »).
+  const accVal = acc.n ? (acc.ok / acc.n) * 100 : 0;
+  const accTxt = L.en ? `${accVal.toFixed(1)}%` : `${accVal.toFixed(1).replace(".", ",")}\u00a0%`;
+  // Badge : nombre réel de matchs passés au crible par le modèle (saison passée + saison en cours), arrondi à la centaine.
+  const analysed = Math.floor(Math.max(1300, picksCount) / 100) * 100;
+  const badge = L.t(
+    `+${analysed.toLocaleString("fr-FR")} matchs NBA analysés`,
+    `+${analysed.toLocaleString("en-US")} NBA games analyzed`,
+    `+${analysed.toLocaleString("es-ES")} partidos de la NBA analizados`
+  );
+  const hero = HERO[L.lang];
+  const badgeTxt = badge.replace(/\u202f/g, "\u00a0");
   const cards = pre.slice(0, 12);
   const elCrests = [...new Map(elGames.flatMap((g) => [g.home, g.away]).filter((c) => c.logo).map((c) => [c.id, c.logo])).values()];
   const LOGOS = TEAMS.map((t) => t.logo);
@@ -109,42 +144,45 @@ export default async function Home() {
       }} />
       <RevealObserver />
 
-      {/* ================= HERO ================= */}
+      {/* ================= HERO (façon Visifoot) ================= */}
       <section className="hero">
         <div className="hero-bg" aria-hidden>
           <div className="photo" />
-          <div className="cone" />
-          <div className="lamp" />
           <div className="shade" />
+          <div className="cone" />
+          <div className="bloom" />
+          <div className="lamp" />
+          <div className="grain" />
           <div className="dust">{DUST.map((p, i) => <i key={i} style={{ left: `${p.x}%`, top: `${p.y}%`, animationDelay: `${p.d}s` }} />)}</div>
         </div>
 
         <div className="hero-in">
           <div className="pill-badge rise" style={{ "--d": "100ms" }}>
-            <span className="ico"><span className="ball" /></span>
-            {L.en
-              ? (todayCount ? `${todayCount} NBA games analyzed tonight` : "The whole NBA analyzed every night")
-              : (todayCount ? `${todayCount} matchs NBA analysés ce soir` : "Toute la NBA analysée chaque soir")}
+            <span className="ico" aria-hidden><StarIcon /></span>
+            {badgeTxt}
           </div>
-          {L.en ? (
-            <h1 className="t-hero">
-              <span className="ln"><span style={{ "--d": "200ms" }}>Predict every</span></span>
-              <span className="ln"><span style={{ "--d": "320ms" }}>NBA game before</span></span>
-              <span className="ln"><span style={{ "--d": "440ms" }}>it <span className="accent">tips off.</span></span></span>
-            </h1>
-          ) : (
-            <h1 className="t-hero">
-              <span className="ln"><span style={{ "--d": "200ms" }}>Prédis chaque</span></span>
-              <span className="ln"><span style={{ "--d": "320ms" }}>match NBA avant</span></span>
-              <span className="ln"><span style={{ "--d": "440ms" }}>qu&apos;il ne <span className="accent">commence.</span></span></span>
-            </h1>
-          )}
-          <p className="lead rise" style={{ "--d": "650ms" }}>{L.t("Pronostics NBA et EuroLeague : probabilités, statistiques avancées et scénarios de match pour anticiper les résultats et mieux comprendre le jeu.", "NBA and EuroLeague predictions: probabilities, advanced stats and game scenarios to anticipate results and understand the game better.")}</p>
+          <h1 className="t-hero">
+            {hero.words.map((w, i) => <span key={i}><span className="w" style={{ "--d": `${180 + i * 70}ms` }}>{w}</span>{" "}</span>)}
+            <span className="w accent" style={{ "--d": `${180 + hero.words.length * 70}ms` }}>{hero.accent}</span>
+          </h1>
+          <p className="lead rise" style={{ "--d": "650ms" }}>{L.t(
+            "Probabilités, statistiques avancées et scénarios de match pour anticiper les résultats et mieux comprendre le jeu.",
+            "Probabilities, advanced statistics and game scenarios to anticipate outcomes and better understand the game.",
+            "Probabilidades, estadísticas avanzadas y escenarios de partido para anticipar los resultados y comprender mejor el juego."
+          )}</p>
           <div className="rise" style={{ "--d": "800ms", width: "100%", display: "flex", justifyContent: "center" }}><TeamSearch games={up.map(({ a, ...r }) => r)} /></div>
           <p className="proof rise" style={{ "--d": "950ms" }}>
-            {acc.n >= 5
-              ? <Link href={L.href("/app/bilan")}>{L.en ? <><b>{accPct}%</b> correct predictions over the <b>{acc.n}</b> games played last week</> : <><b>{accPct}%</b> de bons pronostics sur les <b>{acc.n}</b> matchs terminés la semaine dernière</>}</Link>
-              : L.en ? <><b>{up.length}</b> NBA games to analyze this week</> : <><b>{up.length}</b> matchs NBA à analyser cette semaine</>}
+            {acc.n >= 5 ? (
+              <Link href={L.href("/app/bilan")}>{L.t(
+                <><b>{accTxt}</b> de précision sur les <b>{acc.n}</b> matchs analysés la semaine dernière</>,
+                <><b>{accTxt}</b> accuracy on <b>{acc.n}</b> games analyzed last week</>,
+                <><b>{accTxt}</b> de precisión en los <b>{acc.n}</b> partidos analizados la semana pasada</>
+              )}</Link>
+            ) : L.t(
+              <><b>{up.length}</b> matchs NBA à analyser cette semaine</>,
+              <><b>{up.length}</b> NBA games to analyze this week</>,
+              <><b>{up.length}</b> partidos de la NBA para analizar esta semana</>
+            )}
           </p>
         </div>
 

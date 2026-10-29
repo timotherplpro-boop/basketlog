@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useL } from "./LangProvider";
-import { subscribe, installMode, promptInstall } from "../lib/pwa";
+import { subscribe, installMode, promptInstall, isStandalone } from "../lib/pwa";
 import { getConsent } from "../lib/consent";
 import { track } from "../lib/analytics";
 
@@ -19,39 +19,64 @@ function useInstallMode() {
   return mode;
 }
 
+// Invitation native (Chrome, Edge, Android), mode d'emploi iPhone, sinon fenêtre « sur ton téléphone » (QR code).
 async function install(mode, source) {
-  track("Clic installer appli", { source, mode });
+  track("Clic installer appli", { source, mode: mode || "aide" });
   if (mode === "prompt") {
     const outcome = await promptInstall();
     track("Installation appli", { source, resultat: outcome || "indisponible" });
   } else if (mode === "ios") {
     window.dispatchEvent(new Event("bl-install-ios"));
+  } else {
+    window.dispatchEvent(new Event("bl-install-help"));
   }
 }
 
-const PhoneIcon = () => (
+export const PhoneIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><rect x="6" y="2" width="12" height="20" rx="3" /><path d="M12 7v7M9 11l3 3 3-3" /></svg>
 );
 
-// Bouton « Installer l'appli » (menu, pied de page) : visible seulement quand l'installation est possible.
+// Bouton « Installer l'appli » (menu, pied de page) : visible seulement quand l'installation directe est possible.
 export function InstallButton({ className = "linklike", source = "bouton", icon = false }) {
   const L = useL();
   const mode = useInstallMode();
   if (!mode) return null;
   return (
     <button type="button" className={className} onClick={() => install(mode, source)}>
-      {icon && <PhoneIcon />}{L.t("Installer l'appli", "Install the app")}
+      {icon && <PhoneIcon />}{L.t("Installer l'appli", "Install the app", "Instalar la app")}
     </button>
   );
 }
 
-// Enregistre le service worker, propose l'installation sur mobile et affiche le mode d'emploi iPhone.
+// Carré « appli » de l'en-tête (comme les boutons App Store de Visifoot) : toujours là, sauf dans l'appli installée.
+export function InstallSquare({ source = "en_tete" }) {
+  const L = useL();
+  const mode = useInstallMode();
+  const [inApp, setInApp] = useState(false);
+  useEffect(() => { setInApp(isStandalone()); }, []);
+  if (inApp) return null;
+  const label = L.t("Installer l'appli Basketlog", "Install the Basketlog app", "Instalar la app de Basketlog");
+  return (
+    <button type="button" className="nav-sq" aria-label={label} title={label} onClick={() => install(mode, source)}>
+      <PhoneIcon />
+    </button>
+  );
+}
+
+function ShareIcon() {
+  return (
+    <svg className="ios-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 3v12M8 7l4-4 4 4" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" /></svg>
+  );
+}
+
+// Enregistre le service worker, propose l'installation sur mobile et affiche les modes d'emploi.
 export default function InstallApp() {
   const L = useL();
   const mode = useInstallMode();
   const path = usePathname();
   const [banner, setBanner] = useState(false);
-  const [ios, setIos] = useState(false);
+  const [sheet, setSheet] = useState(null); // "ios" | "help" | null
+  const [mobile, setMobile] = useState(false);
 
   useEffect(() => {
     if (process.env.NODE_ENV !== "production" || !("serviceWorker" in navigator)) return;
@@ -64,9 +89,11 @@ export default function InstallApp() {
   }, []);
 
   useEffect(() => {
-    const open = () => setIos(true);
-    window.addEventListener("bl-install-ios", open);
-    return () => window.removeEventListener("bl-install-ios", open);
+    const ios = () => setSheet("ios");
+    const help = () => { setMobile(window.matchMedia?.("(pointer: coarse)").matches && window.innerWidth < 900); setSheet("help"); };
+    window.addEventListener("bl-install-ios", ios);
+    window.addEventListener("bl-install-help", help);
+    return () => { window.removeEventListener("bl-install-ios", ios); window.removeEventListener("bl-install-help", help); };
   }, []);
 
   // Bannière : mobile, après le choix sur les cookies, à partir de la 2e page vue, pas si refermée récemment.
@@ -85,42 +112,82 @@ export default function InstallApp() {
     try { localStorage.setItem(DISMISS, String(Date.now())); } catch {}
   };
 
+  const steps = {
+    ios: L.t(
+      <>
+        <li>Touche le bouton <b>Partager</b> <ShareIcon /> dans la barre de Safari.</li>
+        <li>Descends et choisis <b>Sur l&apos;écran d&apos;accueil</b>.</li>
+        <li>Touche <b>Ajouter</b> : Basketlog apparaît à côté de tes applis.</li>
+      </>,
+      <>
+        <li>Tap the <b>Share</b> button <ShareIcon /> in Safari&apos;s toolbar.</li>
+        <li>Scroll down and choose <b>Add to Home Screen</b>.</li>
+        <li>Tap <b>Add</b>: Basketlog appears next to your apps.</li>
+      </>,
+      <>
+        <li>Toca el botón <b>Compartir</b> <ShareIcon /> en la barra de Safari.</li>
+        <li>Desliza y elige <b>Añadir a pantalla de inicio</b>.</li>
+        <li>Toca <b>Añadir</b>: Basketlog aparece junto a tus apps.</li>
+      </>
+    ),
+    android: L.t(
+      <><b>Android</b> : ouvre le menu <b>⋮</b> de Chrome, puis <b>Installer l&apos;application</b> (ou <b>Ajouter à l&apos;écran d&apos;accueil</b>).</>,
+      <><b>Android</b>: open Chrome&apos;s <b>⋮</b> menu, then <b>Install app</b> (or <b>Add to Home screen</b>).</>,
+      <><b>Android</b>: abre el menú <b>⋮</b> de Chrome y elige <b>Instalar aplicación</b> (o <b>Añadir a pantalla de inicio</b>).</>
+    ),
+    iphone: L.t(
+      <><b>iPhone</b> : dans Safari, touche <b>Partager</b> <ShareIcon /> puis <b>Sur l&apos;écran d&apos;accueil</b>.</>,
+      <><b>iPhone</b>: in Safari, tap <b>Share</b> <ShareIcon /> then <b>Add to Home Screen</b>.</>,
+      <><b>iPhone</b>: en Safari, toca <b>Compartir</b> <ShareIcon /> y luego <b>Añadir a pantalla de inicio</b>.</>
+    ),
+  };
+
   return (
     <>
       {banner && mode && (
-        <div className="install-banner" role="dialog" aria-label={L.t("Installer l'appli Basketlog", "Install the Basketlog app")}>
+        <div className="install-banner" role="dialog" aria-label={L.t("Installer l'appli Basketlog", "Install the Basketlog app", "Instalar la app de Basketlog")}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/icons/icon-192.png" alt="" width={44} height={44} />
           <div className="ib-text">
-            <b>{L.t("Basketlog sur ton écran d'accueil", "Basketlog on your home screen")}</b>
-            <span>{L.t("Les pronostics du soir en un geste, comme une vraie appli. Gratuit.", "Tonight's predictions in one tap, like a real app. Free.")}</span>
+            <b>{L.t("Basketlog sur ton écran d'accueil", "Basketlog on your home screen", "Basketlog en tu pantalla de inicio")}</b>
+            <span>{L.t("Les pronostics du soir en un geste, comme une vraie appli. Gratuit.", "Tonight's predictions in one tap, like a real app. Free.", "Los pronósticos de la noche en un toque, como una app de verdad. Gratis.")}</span>
           </div>
-          <button type="button" className="ib-go" onClick={() => { setBanner(false); install(mode, "banniere"); }}>{L.t("Installer", "Install")}</button>
-          <button type="button" className="ib-x" onClick={close} aria-label={L.t("Fermer", "Close")}>×</button>
+          <button type="button" className="ib-go" onClick={() => { setBanner(false); install(mode, "banniere"); }}>{L.t("Installer", "Install", "Instalar")}</button>
+          <button type="button" className="ib-x" onClick={close} aria-label={L.t("Fermer", "Close", "Cerrar")}>×</button>
         </div>
       )}
-      {ios && (
-        <div className="modal" role="dialog" aria-modal="true" aria-labelledby="ios-title" onClick={(e) => e.target === e.currentTarget && setIos(false)}>
+      {sheet && (
+        <div className="modal" role="dialog" aria-modal="true" aria-labelledby="install-title" onClick={(e) => e.target === e.currentTarget && setSheet(null)}>
           <div className="modal-box ios-sheet">
-            <button className="modal-x" onClick={() => setIos(false)} aria-label={L.t("Fermer", "Close")}>×</button>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/icons/icon-192.png" alt="" width={64} height={64} className="ios-icon" />
-            <h3 id="ios-title">{L.t("Installer Basketlog sur ton iPhone", "Install Basketlog on your iPhone")}</h3>
-            <ol>
-              <li>{L.en ? <>Tap the <b>Share</b> button <ShareIcon /> in Safari&apos;s toolbar.</> : <>Touche le bouton <b>Partager</b> <ShareIcon /> dans la barre de Safari.</>}</li>
-              <li>{L.en ? <>Scroll down and choose <b>Add to Home Screen</b>.</> : <>Descends et choisis <b>Sur l&apos;écran d&apos;accueil</b>.</>}</li>
-              <li>{L.en ? <>Tap <b>Add</b>: Basketlog appears next to your apps.</> : <>Touche <b>Ajouter</b> : Basketlog apparaît à côté de tes applis.</>}</li>
-            </ol>
-            <button className="btn-solid" onClick={() => setIos(false)}>{L.t("J'ai compris", "Got it")}</button>
+            <button className="modal-x" onClick={() => setSheet(null)} aria-label={L.t("Fermer", "Close", "Cerrar")}>×</button>
+            {sheet === "ios" ? (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/icons/icon-192.png" alt="" width={64} height={64} className="ios-icon" />
+                <h3 id="install-title">{L.t("Installer Basketlog sur ton iPhone", "Install Basketlog on your iPhone", "Instala Basketlog en tu iPhone")}</h3>
+                <ol>{steps.ios}</ol>
+              </>
+            ) : (
+              <>
+                {mobile
+                  ? /* eslint-disable-next-line @next/next/no-img-element */ <img src="/icons/icon-192.png" alt="" width={64} height={64} className="ios-icon" />
+                  : /* eslint-disable-next-line @next/next/no-img-element */ <img src={`/qr/${L.lang}.svg`} alt={L.t("QR code vers Basketlog", "QR code to Basketlog", "Código QR de Basketlog")} width={168} height={168} className="qr" />}
+                <h3 id="install-title">{L.t("Basketlog sur ton téléphone", "Basketlog on your phone", "Basketlog en tu móvil")}</h3>
+                <p className="modal-sub">
+                  {mobile
+                    ? L.t("L'appli s'installe directement depuis le navigateur, gratuitement, sans passer par un store.", "The app installs straight from your browser, for free, without any app store.", "La app se instala directamente desde el navegador, gratis, sin pasar por ninguna tienda.")
+                    : L.t("Scanne ce code avec ton téléphone, puis installe l'appli depuis le navigateur : c'est gratuit et sans store.", "Scan this code with your phone, then install the app from the browser: it's free and needs no app store.", "Escanea este código con tu móvil y luego instala la app desde el navegador: es gratis y sin tiendas.")}
+                </p>
+                <ul className="install-steps">
+                  <li>{steps.iphone}</li>
+                  <li>{steps.android}</li>
+                </ul>
+              </>
+            )}
+            <button className="btn-solid" onClick={() => setSheet(null)}>{L.t("J'ai compris", "Got it", "Entendido")}</button>
           </div>
         </div>
       )}
     </>
-  );
-}
-
-function ShareIcon() {
-  return (
-    <svg className="ios-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M12 3v12M8 7l4-4 4 4" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7" /></svg>
   );
 }

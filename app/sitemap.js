@@ -8,12 +8,14 @@ export const revalidate = 3600; // régénéré chaque heure, avec les matchs à
 
 const u = (path, priority, changeFrequency, lastModified = new Date()) => ({ path, lastModified, changeFrequency, priority });
 
-// Chaque page existe en français (adresse actuelle) et en anglais (même adresse sous /en), liées par hreflang.
+// Chaque page existe en français (adresse actuelle), en anglais (/en) et en espagnol (/es), liées par hreflang.
 const both = ({ path, ...rest }) => {
   const fr = `${SITE}${path}`;
   const en = `${SITE}/en${path}`;
-  const alternates = { languages: { fr, en, "x-default": fr } };
-  return [{ url: fr, ...rest, alternates }, { url: en, ...rest, priority: Math.round(rest.priority * 0.9 * 100) / 100, alternates }];
+  const es = `${SITE}/es${path}`;
+  const alternates = { languages: { fr, en, es, "x-default": fr } };
+  const p2 = Math.round(rest.priority * 0.9 * 100) / 100;
+  return [{ url: fr, ...rest, alternates }, { url: en, ...rest, priority: p2, alternates }, { url: es, ...rest, priority: p2, alternates }];
 };
 
 export default async function sitemap() {

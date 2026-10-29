@@ -24,10 +24,11 @@ import InstallApp, { InstallButton } from "../components/InstallApp";
 
 export async function generateMetadata() {
   const L = await getL();
-  const title = L.t("Basketlog : pronostics NBA et EuroLeague analysés par IA", "Basketlog: AI-powered NBA and EuroLeague predictions");
+  const title = L.t("Basketlog : pronostics NBA et EuroLeague analysés par IA", "Basketlog: AI-powered NBA and EuroLeague predictions", "Basketlog: pronósticos NBA y Euroliga analizados con IA");
   const description = L.t(
     "Pronostics NBA et EuroLeague pour chaque match : probabilités de victoire gratuites, score projeté, absences, forme et scénarios. Taux de réussite public.",
-    "NBA and EuroLeague predictions for every game: free win probabilities, projected score, injuries, form and scenarios. Public track record."
+    "NBA and EuroLeague predictions for every game: free win probabilities, projected score, injuries, form and scenarios. Public track record.",
+    "Pronósticos de la NBA y la Euroliga para cada partido: probabilidades de victoria gratis, marcador proyectado, bajas, forma y escenarios. Balance público."
   );
   return {
     metadataBase: new URL(SITE),
@@ -36,7 +37,7 @@ export async function generateMetadata() {
     formatDetection: { telephone: false },
     twitter: { card: "summary_large_image" },
     description,
-    openGraph: { title, description, type: "website", locale: L.en ? "en_US" : "fr_FR", siteName: "Basketlog" },
+    openGraph: { title, description, type: "website", locale: L.og, siteName: "Basketlog" },
   };
 }
 
@@ -68,6 +69,7 @@ export default async function RootLayout({ children }) {
   const L = await getL();
   const path = await getPath();
   const LEGAL_EN = { "/mentions-legales": "Legal notice", "/cgu": "Terms of use", "/cgv": "Terms of sale", "/confidentialite": "Privacy", "/cookies": "Cookies" };
+  const LEGAL_ES = { "/mentions-legales": "Aviso legal", "/cgu": "Condiciones de uso", "/cgv": "Condiciones de venta", "/confidentialite": "Privacidad", "/cookies": "Cookies" };
   return (
     <html lang={L.lang}>
       <head>
@@ -76,7 +78,7 @@ export default async function RootLayout({ children }) {
         <meta name="msvalidate.01" content={BING_SITE_VERIFICATION} />
         <link rel="preconnect" href="https://images.unsplash.com" />
         {/* Appli installable : manifeste et icônes dans le <head> dès le premier octet (requis par Chrome et Safari) */}
-        <link rel="manifest" href={L.en ? "/manifest-en.webmanifest" : "/manifest.webmanifest"} />
+        <link rel="manifest" href={L.t("/manifest.webmanifest", "/manifest-en.webmanifest", "/manifest-es.webmanifest")} />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -103,13 +105,17 @@ export default async function RootLayout({ children }) {
                 <Link href={L.href("/avis")}>{L.t("Avis", "Reviews")}</Link>
               </nav>
               <nav className="foot-links foot-legal" aria-label={L.t("Informations légales", "Legal information")}>
-                {LEGAL_PAGES.map(([href, label]) => <Link key={href} href={L.href(href)}>{L.en ? LEGAL_EN[href] : label}</Link>)}
+                {LEGAL_PAGES.map(([href, label]) => <Link key={href} href={L.href(href)}>{L.t(label, LEGAL_EN[href], LEGAL_ES[href])}</Link>)}
                 <CookieSettingsButton />
                 <InstallButton source="pied_de_page" />
                 <LangSwitch />
               </nav>
               <div>{L.t("Analyses statistiques, pas un service de paris. Les probabilités sont des estimations, jamais des certitudes. Réservé aux 18 ans et plus.", "Statistical analysis, not a betting service. Probabilities are estimates, never certainties. For adults 18 and over.")}</div>
-              <div>{L.en ? <>Gambling involves risks such as debt and addiction. If you need help in France, call {LEGAL.jeu.tel} ({LEGAL.jeu.nom}).</> : <>Les jeux d&apos;argent comportent des risques : endettement, dépendance… Appelle le {LEGAL.jeu.tel} ({LEGAL.jeu.nom}, appel non surtaxé).</>}</div>
+              <div>{L.t(
+                <>Les jeux d&apos;argent comportent des risques : endettement, dépendance… Appelle le {LEGAL.jeu.tel} ({LEGAL.jeu.nom}, appel non surtaxé).</>,
+                <>Gambling involves risks such as debt and addiction. If you need help in France, call {LEGAL.jeu.tel} ({LEGAL.jeu.nom}).</>,
+                <>El juego conlleva riesgos como el endeudamiento o la adicción. En España puedes pedir ayuda en jugarbien.es; en Francia, en el {LEGAL.jeu.tel} ({LEGAL.jeu.nom}).</>
+              )}</div>
               <div>{L.t("Données : flux publics NBA et EuroLeague · Photos : Unsplash", "Data: public NBA and EuroLeague feeds · Photos: Unsplash")} · © {new Date().getFullYear()} Basketlog</div>
             </div>
           </footer>
