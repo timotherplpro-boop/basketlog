@@ -26,12 +26,18 @@
   <button id="b" type="button" onclick="location.reload()">Réessayer</button>
 </main>
 <script>
-  // Page de secours de l'appli installée : en anglais pour les adresses /en.
-  if (location.pathname === "/en" || location.pathname.indexOf("/en/") === 0) {
+  // Page de secours de l'appli installée : en anglais pour /en, en espagnol pour /es.
+  var p = location.pathname;
+  if (p === "/en" || p.indexOf("/en/") === 0) {
     document.documentElement.lang = "en";
     document.getElementById("t").innerHTML = "No <span>signal.</span>";
     document.getElementById("m").textContent = "You're offline right now. Predictions will be back as soon as you reconnect.";
     document.getElementById("b").textContent = "Try again";
+  } else if (p === "/es" || p.indexOf("/es/") === 0) {
+    document.documentElement.lang = "es";
+    document.getElementById("t").innerHTML = "Sin <span>conexión.</span>";
+    document.getElementById("m").textContent = "Ahora mismo no tienes conexión. Los pronósticos volverán en cuanto recuperes la red.";
+    document.getElementById("b").textContent = "Reintentar";
   }
   window.addEventListener("online", function () { location.reload(); });
 </script>

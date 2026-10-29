@@ -17,16 +17,18 @@ export default function CookieBanner() {
   if (!open) return null;
   const choose = (v) => { setConsent(v); setOpen(false); };
   return (
-    <div className="cookie-banner" role="dialog" aria-live="polite" aria-label={L.t("Choix des cookies", "Cookie choice")}>
+    <div className="cookie-banner" role="dialog" aria-live="polite" aria-label={L.t("Choix des cookies", "Cookie choice", "Elección de cookies")}>
       <p>
-        {L.en
-          ? <><b>Cookies</b> — With your consent, Basketlog measures traffic (Amplitude) to improve the site. No ads, no data resale. Necessary cookies (subscriber login) don&apos;t require consent. </>
-          : <><b>Cookies</b> — Avec ton accord, Basketlog mesure l&apos;audience (Amplitude) pour améliorer le site. Aucune publicité, aucune revente. Les cookies nécessaires (connexion abonné) ne demandent pas d&apos;accord. </>}
-        <Link href={L.href("/cookies")}>{L.t("En savoir plus", "Learn more")}</Link>
+        {L.t(
+          <><b>Cookies</b> — Avec ton accord, Basketlog mesure l&apos;audience (Amplitude) pour améliorer le site. Aucune publicité, aucune revente. Les cookies nécessaires (connexion abonné) ne demandent pas d&apos;accord. </>,
+          <><b>Cookies</b> — With your consent, Basketlog measures traffic (Amplitude) to improve the site. No ads, no data resale. Necessary cookies (subscriber login) don&apos;t require consent. </>,
+          <><b>Cookies</b> — Con tu consentimiento, Basketlog mide la audiencia (Amplitude) para mejorar el sitio. Sin publicidad y sin venta de datos. Las cookies necesarias (inicio de sesión) no requieren consentimiento. </>
+        )}
+        <Link href={L.href("/cookies")}>{L.t("En savoir plus", "Learn more", "Más información")}</Link>
       </p>
       <div className="cookie-actions">
-        <button type="button" className="cookie-btn" onClick={() => choose(false)}>{L.t("Refuser", "Decline")}</button>
-        <button type="button" className="cookie-btn" onClick={() => choose(true)}>{L.t("Accepter", "Accept")}</button>
+        <button type="button" className="cookie-btn" onClick={() => choose(false)}>{L.t("Refuser", "Decline", "Rechazar")}</button>
+        <button type="button" className="cookie-btn" onClick={() => choose(true)}>{L.t("Accepter", "Accept", "Aceptar")}</button>
       </div>
     </div>
   );

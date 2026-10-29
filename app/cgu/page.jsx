@@ -6,6 +6,7 @@ import { getL } from "../../lib/lang-server";
 
 export async function generateMetadata() {
   const L = await getL();
+  if (L.es) return pageMeta({ title: "Condiciones de uso – Basketlog", description: "Condiciones de uso de Basketlog: descripción del servicio, edad mínima, advertencia sobre los pronósticos, normas de uso y responsabilidad.", path: "/cgu", L });
   return L.en
     ? pageMeta({ title: "Terms of use – Basketlog", description: "Basketlog terms of use: description of the service, minimum age, disclaimer about predictions, rules of use and liability.", path: "/cgu", L })
     : pageMeta({ title: "Conditions générales d'utilisation (CGU) – Basketlog", description: "Conditions générales d'utilisation de Basketlog : description du service, âge minimum, avertissement sur les pronostics, règles d'usage et responsabilité.", path: "/cgu" });
@@ -154,7 +155,79 @@ function CGUEn({ L }) {
   );
 }
 
+function CGUEs({ L }) {
+  const e = LEGAL.editeur;
+  return (
+    <LegalDoc
+      title="Condiciones de uso"
+      path="/cgu"
+      L={L}
+      intro={`Estas condiciones de uso (las «Condiciones») regulan el acceso y el uso del sitio Basketlog, editado por ${e.nom} («nosotros»). Al usar el sitio, aceptas las Condiciones y la política de privacidad. Las suscripciones de pago se rigen además por las condiciones de venta. Esta versión en español es una traducción que se ofrece para tu comodidad; en caso de discrepancia, prevalece la versión francesa.`}
+    >
+      <Sec n={1} title="El servicio">
+        <p>Basketlog analiza los partidos de la NBA y de la Euroliga. El sitio reúne datos estadísticos públicos (resultados, clasificaciones, marcadores, bajas, calendario) y los pasa por un modelo de cálculo que genera, para cada partido, probabilidades de victoria, un marcador proyectado, escenarios y un análisis redactado automáticamente.</p>
+        <p>Una parte del servicio es gratuita: las probabilidades de victoria y las cifras clave de cada partido, la clasificación, las fichas de los equipos y el balance del modelo. Con una cuenta gratis, desbloqueas 1 análisis completo al día. Más allá, los análisis completos están reservados a los suscriptores Starter (5 al día), Pro y Lifetime (ilimitados), en las condiciones previstas en las <Link href={L.href("/cgv")}>condiciones de venta</Link>.</p>
+      </Sec>
+
+      <Sec n={2} title="Edad mínima">
+        <p>El servicio está reservado a personas de al menos 18 años con capacidad para contratar. Al suscribirte, declaras cumplir estas condiciones. Si sabemos que un suscriptor es menor de edad, podemos poner fin a su acceso.</p>
+      </Sec>
+
+      <Sec n={3} title="Advertencia sobre los pronósticos">
+        <p>Las probabilidades, los marcadores proyectados y los análisis son estimaciones estadísticas que se ofrecen a título informativo y de entretenimiento. Pueden ser erróneos, incompletos o basarse en datos desactualizados (por ejemplo, una baja anunciada a última hora). No constituyen ni una garantía de resultado, ni un consejo de apuestas, ni un consejo financiero.</p>
+        <p>Basketlog no es un operador de juego: en el sitio no se puede apostar. Si usas nuestros contenidos para apostar en otro lugar, lo haces bajo tu exclusiva responsabilidad y respetando las leyes de tu país. El juego conlleva riesgos: en España, <a href="https://www.jugarbien.es" rel="noopener" target="_blank">jugarbien.es</a>; en Francia, {LEGAL.jeu.nom}, {LEGAL.jeu.tel}.</p>
+        <p>El porcentaje de acierto del modelo se publica con total transparencia en la página <Link href={L.href("/app/bilan")}>Balance</Link>. Los resultados pasados no garantizan los resultados futuros.</p>
+      </Sec>
+
+      <Sec n={4} title="Cuenta gratis y cuenta de suscriptor">
+        <p>El sitio se puede usar sin registrarse. La cuenta gratis, creada con una cuenta de Whop (por correo electrónico, Google o Apple), da además 1 análisis completo al día. Los suscriptores inician sesión con la cuenta de Whop que usaron para pagar. Nunca recibimos tu contraseña: solo tu identificador de Whop, tu nombre de usuario y el plan al que tienes acceso. Puedes eliminar tu cuenta gratis en cualquier momento escribiéndonos.</p>
+        <p>Tu acceso es personal. Está prohibido compartirlo, revenderlo o prestarlo. Eres responsable de la seguridad de tu cuenta de Whop.</p>
+      </Sec>
+
+      <Sec n={5} title="Opiniones de los usuarios">
+        <p>Puedes publicar una opinión sobre Basketlog (nombre, descripción opcional, nota y texto). Cada opinión se revisa antes de publicarse y puede rechazarse si es injuriosa, ajena al tema, publicitaria o ilícita. Al publicar una opinión, nos autorizas a mostrarla en el sitio, sin contraprestación. Puedes pedir que se elimine en cualquier momento.</p>
+      </Sec>
+
+      <Sec n={6} title="Lo que está prohibido">
+        <ul>
+          <li>Usar el sitio con fines ilegales, fraudulentos o engañosos.</li>
+          <li>Eludir los límites técnicos, en particular el acceso reservado a suscriptores o el número de análisis al día.</li>
+          <li>Copiar de forma automática (scraping) todo o parte del sitio, de las probabilidades o de los análisis.</li>
+          <li>Revender, republicar o explotar comercialmente los análisis, incluso en un grupo o canal de pago.</li>
+          <li>Perturbar el funcionamiento del sitio o intentar acceder a nuestros sistemas sin autorización.</li>
+        </ul>
+      </Sec>
+
+      <Sec n={7} title="Propiedad intelectual">
+        <p>El sitio, sus textos, su diseño, su código, su modelo y sus análisis están protegidos. Te concedemos un derecho de uso personal, no exclusivo e intransferible, para tu uso privado. Compartir una captura o un enlace citando a Basketlog es bienvenido; reproducir los análisis de forma masiva, no.</p>
+        <p>Los nombres y logotipos de los equipos y de las competiciones pertenecen a sus titulares. Basketlog no está afiliado ni a la NBA ni a la Euroliga.</p>
+      </Sec>
+
+      <Sec n={8} title="Disponibilidad y responsabilidad">
+        <p>Hacemos todo lo posible para que el sitio esté disponible y los datos actualizados, sin poder garantizarlo en todo momento: nuestras fuentes pueden interrumpirse o retrasarse. Podemos modificar, suspender o suprimir una función gratuita en cualquier momento.</p>
+        <p>En la medida permitida por la ley, no somos responsables de las decisiones tomadas a partir de los análisis ni de las pérdidas que pudieran derivarse, en particular en caso de apuesta. Nada de lo dispuesto en estas Condiciones limita los derechos que la ley reconoce a los consumidores.</p>
+      </Sec>
+
+      <Sec n={9} title="Datos personales">
+        <p>El tratamiento de tus datos se describe en la <Link href={L.href("/confidentialite")}>política de privacidad</Link> y en la <Link href={L.href("/cookies")}>política de cookies</Link>, que forman parte de estas Condiciones.</p>
+      </Sec>
+
+      <Sec n={10} title="Suspensión">
+        <p>Podemos suspender o suprimir el acceso de un usuario que no respete las Condiciones (cuenta compartida, scraping, fraude…), tras avisarle cuando sea posible.</p>
+      </Sec>
+
+      <Sec n={11} title="Modificación de las Condiciones">
+        <p>Podemos modificar las Condiciones para adaptarlas a la evolución del servicio o de la ley. La fecha de actualización figura en la parte superior de la página. Los suscriptores reciben aviso de los cambios importantes antes de su entrada en vigor.</p>
+      </Sec>
+
+      <Sec n={12} title="Ley aplicable y litigios">
+        <p>Las Condiciones se rigen por el derecho francés. En caso de litigio, escríbenos primero a <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>: siempre buscamos una solución amistosa. Si eres consumidor, también puedes acudir gratuitamente al mediador de consumo indicado en el <Link href={L.href("/mentions-legales")}>aviso legal</Link>. A falta de acuerdo, serán competentes los tribunales que designe la ley.</p>
+      </Sec>
+    </LegalDoc>
+  );
+}
+
 export default async function CGUPage() {
   const L = await getL();
-  return L.en ? <CGUEn L={L} /> : <CGUFr />;
+  return L.es ? <CGUEs L={L} /> : L.en ? <CGUEn L={L} /> : <CGUFr />;
 }

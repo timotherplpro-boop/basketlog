@@ -10,10 +10,10 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata() {
   const L = await getL();
   return pageMeta({
-    title: L.t("Comment sont calculés les pronostics NBA de Basketlog – Méthode", "How Basketlog's NBA predictions are calculated – Methodology"),
+    title: L.t("Comment sont calculés les pronostics NBA de Basketlog – Méthode", "How Basketlog's NBA predictions are calculated – Methodology", "Cómo se calculan los pronósticos NBA de Basketlog – Metodología"),
     description: L.t(
       "La méthode du modèle Basketlog : niveau des équipes, avantage du terrain, fatigue, absences, puis conversion en probabilité de victoire. Résultats vérifiés en public.",
-      "The Basketlog model's methodology: team strength, home-court advantage, fatigue, injuries, then conversion into a win probability. Results verified in public."
+      "The Basketlog model's methodology: team strength, home-court advantage, fatigue, injuries, then conversion into a win probability. Results verified in public.", "La metodología del modelo de Basketlog: nivel de los equipos, ventaja de jugar en casa, cansancio, bajas y conversión en probabilidad de victoria. Resultados verificados en público."
     ),
     path: "/methode",
     L,
@@ -35,14 +35,78 @@ export default async function MethodePage() {
   const ld = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline: L.t("Comment Basketlog calcule ses pronostics NBA", "How Basketlog calculates its NBA predictions"),
-    description: L.t("Méthode du modèle statistique Basketlog et résultats vérifiés match par match.", "The Basketlog statistical model's methodology and results verified game by game."),
-    inLanguage: L.en ? "en-US" : "fr-FR",
+    headline: L.t("Comment Basketlog calcule ses pronostics NBA", "How Basketlog calculates its NBA predictions", "Cómo calcula Basketlog sus pronósticos NBA"),
+    description: L.t("Méthode du modèle statistique Basketlog et résultats vérifiés match par match.", "The Basketlog statistical model's methodology and results verified game by game.", "Metodología del modelo estadístico de Basketlog y resultados verificados partido a partido."),
+    inLanguage: L.hreflang,
     url: `${SITE}${L.href("/methode")}`,
     author: { "@id": `${SITE}/#organisation` },
     publisher: { "@id": `${SITE}/#organisation` },
     isPartOf: { "@id": `${SITE}/#site` },
   };
+
+  if (L.es) return (
+    <main className="app-page prose-page">
+      <JsonLd data={ld} />
+      <div className="app-head">
+        <h1>Cómo calcula Basketlog sus pronósticos NBA</h1>
+        <p>Un modelo estadístico sencillo, transparente y verificado en público, partido tras partido.</p>
+      </div>
+
+      <div className="card block">
+        <h2>En resumen</h2>
+        <p className="narr">
+          Para cada partido, Basketlog estima la diferencia de puntos esperada entre los dos equipos y luego la convierte en probabilidad de victoria.
+          La diferencia parte del nivel real de cada equipo, al que se suman la ventaja de jugar en casa, el cansancio y las bajas.
+          {p.n > 0 && <> Probado en la temporada {label(season - 1)} ({p.n} partidos), el modelo acertó el ganador en el <b>{pct(p.pct)}</b> de los casos{strong.n > 0 ? <>, y en el <b>{pct(strong.ok / strong.n)}</b> de los casos cuando daba al menos un 70&nbsp;% al favorito</> : null}.</>}
+          {s.n > 0 && <> Esta temporada ({label(season)}), va por el <b>{pct(s.pct)}</b> en {s.n} partidos terminados.</>}
+        </p>
+      </div>
+
+      <div className="card block">
+        <h2>1. El nivel de cada equipo</h2>
+        <p className="narr">
+          La base es la diferencia media de puntos por partido: los puntos anotados menos los encajados. Es uno de los indicadores más fiables del nivel real de un equipo de la NBA, más revelador que su balance de victorias y derrotas.
+          A principio de temporada, unos pocos partidos no bastan: el modelo mezcla la temporada en curso con la anterior, que cuenta como 12 partidos adicionales. Cuanto más avanza la temporada, más pesa la temporada actual.
+          Por último, esa diferencia se acerca un 15 % a la media, porque los arranques muy buenos y muy malos tienden a moderarse.
+        </p>
+      </div>
+
+      <div className="card block">
+        <h2>2. La ventaja de jugar en casa</h2>
+        <p className="narr">Jugar en casa vale unos 2,3 puntos en la NBA actual (y 3,2 puntos en la Euroliga, donde los pabellones pesan más). Ese valor se suma al equipo local.</p>
+      </div>
+
+      <div className="card block">
+        <h2>3. El cansancio de los back-to-back</h2>
+        <p className="narr">Un equipo que jugó la noche anterior pierde de media alrededor de 1,6 puntos. Cada noche, el modelo comprueba qué equipos juegan dos partidos en dos días.</p>
+      </div>
+
+      <div className="card block">
+        <h2>4. Las bajas</h2>
+        <p className="narr">El parte médico se revisa antes de cada partido. Un jugador descartado resta unos 0,9 puntos a su equipo y uno en duda unos 0,35 puntos, con un tope de 4,5 puntos para no sobrerreaccionar. Las bajas solo se tienen en cuenta para los próximos partidos.</p>
+      </div>
+
+      <div className="card block">
+        <h2>5. De la diferencia a la probabilidad</h2>
+        <p className="narr">
+          La diferencia esperada nunca se cumple exactamente: en la NBA, el resultado final se aleja de ella una docena de puntos de media. Por eso el modelo usa una distribución normal centrada en la diferencia esperada, con una desviación típica de 12,5 puntos.
+          De ahí obtiene la probabilidad de victoria de cada equipo, las opciones de un partido igualado (5 puntos o menos) y las de una victoria amplia (10 puntos o más).
+          El marcador proyectado combina el ataque de cada equipo con la defensa de su rival.
+        </p>
+      </div>
+
+      <div className="card block">
+        <h2>6. Resultados verificados, sin hacer trampa con el futuro</h2>
+        <p className="narr">
+          Cada pronóstico se compara con el resultado final en la página <Link href={L.href("/app/bilan")}>Balance del modelo</Link>. Para los partidos pasados, el modelo se recalcula solo con los resultados conocidos antes del partido: nunca ve el futuro.
+          Las probabilidades siguen siendo estimaciones: un favorito al 70&nbsp;% pierde unas tres veces de cada diez. Basketlog es una herramienta de análisis, no un servicio de apuestas.
+        </p>
+        <p className="narr" style={{ marginTop: 12 }}>
+          <Link href={L.href("/app/matchs")}>Ver los pronósticos NBA de hoy</Link> · <Link href={L.href("/app/euroleague")}>Pronósticos Euroliga</Link> · <Link href={L.href("/app/bilan")}>Porcentaje de acierto</Link>
+        </p>
+      </div>
+    </main>
+  );
 
   if (L.en) return (
     <main className="app-page prose-page">

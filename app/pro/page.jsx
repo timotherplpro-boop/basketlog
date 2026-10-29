@@ -6,10 +6,10 @@ import { getL } from "../../lib/lang-server";
 export async function generateMetadata() {
   const L = await getL();
   return pageMeta({
-    title: L.t("Basketlog Pro : analyses NBA complètes dès 10 €/mois", "Basketlog Pro: full NBA analyses from €10/month"),
+    title: L.t("Basketlog Pro : analyses NBA complètes dès 10 €/mois", "Basketlog Pro: full NBA analyses from €10/month", "Basketlog Pro: análisis NBA completos desde 10 €/mes"),
     description: L.t(
       "Starter 10 €/mois, Pro 19 €/mois ou Lifetime 99 € une seule fois : débloque les analyses complètes des matchs NBA et EuroLeague. Paiement sécurisé par Whop.",
-      "Starter €10/month, Pro €19/month or Lifetime €99 one-time: unlock full NBA and EuroLeague game analyses. Secure payment by Whop."
+      "Starter €10/month, Pro €19/month or Lifetime €99 one-time: unlock full NBA and EuroLeague game analyses. Secure payment by Whop.", "Starter 10 €/mes, Pro 19 €/mes o Lifetime 99 € en un solo pago: desbloquea los análisis completos de los partidos de la NBA y la Euroliga. Pago seguro con Whop."
     ),
     path: "/pro",
     L,
@@ -25,7 +25,16 @@ export default async function ProPage({ searchParams }) {
     lifetime: process.env.NEXT_PUBLIC_WHOP_CHECKOUT_LIFETIME || "",
   };
   const loginReady = !!process.env.WHOP_CLIENT_ID;
-  const faq = L.en
+  const faqEs = [
+    { q: "¿Cómo funciona el pago?", a: "El pago lo gestiona Whop, una plataforma de pago segura que usan miles de creadores. Basketlog nunca ve tu tarjeta." },
+    { q: "¿Cómo activo mi suscripción en Basketlog?", a: "Después de pagar, vuelve a esta página y haz clic en «Iniciar sesión». Entra con la misma cuenta de Whop y Basketlog desbloquea tu plan automáticamente." },
+    { q: "¿Puedo cancelar cuando quiera?", a: "Sí. Starter y Pro se gestionan desde tu cuenta de Whop (whop.com, apartado Pedidos). Mantienes el acceso hasta el final del periodo ya pagado. Lifetime es un pago único: no hay nada que cancelar." },
+    { q: "¿Puedo pedir un reembolso?", a: "Un periodo empezado no se reembolsa: al suscribirte, pides acceso inmediato a tus análisis y renuncias al derecho de desistimiento de 14 días, como permite la ley para los contenidos digitales. Eso sí, puedes cancelar tu suscripción en cualquier momento y sin coste para que no se te vuelva a cobrar. Si hay un problema técnico, escríbenos y lo solucionaremos. Los detalles están en las Condiciones de venta (/es/cgv)." },
+    { q: "¿Qué diferencia hay entre Starter, Pro y Lifetime?", a: "La cuenta gratis da 1 análisis completo al día. Starter da 5 al día. Pro hace los análisis ilimitados. Lifetime ofrece lo mismo que Pro, de por vida, con un único pago de 99 €." },
+    { q: "¿Qué es un análisis completo?", a: "La ficha detallada de un partido: marcador proyectado, factores, escenarios, estadísticas comparadas, jugadores a seguir, forma reciente, enfrentamientos y segunda opinión. Sin suscripción, ves gratis las probabilidades de victoria y las cifras clave de cada partido." },
+    { q: "¿Basketlog es una web de apuestas?", a: "No. Basketlog es una herramienta de análisis estadístico para entender los partidos. No se puede apostar y ninguna probabilidad es una garantía." },
+  ];
+  const faq = L.es ? faqEs : L.en
     ? [
         { q: "How does payment work?", a: "Payment is handled by Whop, a secure payment platform used by thousands of creators. Basketlog never sees your card." },
         { q: "How do I activate my subscription on Basketlog?", a: "After paying, come back to this page and click “Log in”. Sign in with the same Whop account and Basketlog unlocks your plan automatically." },
@@ -48,12 +57,12 @@ export default async function ProPage({ searchParams }) {
     <main className="pro-page">
       <section className="pro-hero">
         <div className="pill-tag">Basketlog Pro</div>
-        <h1 className="t-80">{L.t("Choisis ton plan", "Choose your plan")}</h1>
-        <p className="lead">{L.t("Accède à des analyses complètes et des pronostics détaillés, NBA et EuroLeague.", "Get full analyses and detailed predictions for the NBA and EuroLeague.")}</p>
+        <h1 className="t-80">{L.t("Choisis ton plan", "Choose your plan", "Elige tu plan")}</h1>
+        <p className="lead">{L.t("Accède à des analyses complètes et des pronostics détaillés, NBA et EuroLeague.", "Get full analyses and detailed predictions for the NBA and EuroLeague.", "Accede a análisis completos y pronósticos detallados de la NBA y la Euroliga.")}</p>
       </section>
       <ProPlans checkout={checkout} loginReady={loginReady} notice={sp?.ok || sp?.bienvenue === "abonne" ? "ok" : sp?.bienvenue ? "compte" : sp?.erreur || ""} />
       <section className="pro-faq">
-        <h2 className="t-80" style={{ fontSize: "clamp(28px,4vw,40px)" }}>{L.t("Questions fréquentes", "FAQ")}</h2>
+        <h2 className="t-80" style={{ fontSize: "clamp(28px,4vw,40px)" }}>{L.t("Questions fréquentes", "FAQ", "Preguntas frecuentes")}</h2>
         <Faq items={faq} />
       </section>
     </main>

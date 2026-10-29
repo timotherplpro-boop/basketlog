@@ -36,7 +36,7 @@ export default function PhoneHero({ team, rivals, rows }) {
   }, [ri, rival]);
 
   return (
-    <Link href={L.href("/app")} className="phone" aria-label={L.t("Ouvrir l'analyse de match", "Open the game analysis")}>
+    <Link href={L.href("/app")} className="phone" aria-label={L.t("Ouvrir l'analyse de match", "Open the game analysis", "Abrir el análisis del partido")}>
       <div className="screen">
         <div className="notch" />
         <div className="app-top" style={{ paddingTop: 54 }}>
@@ -44,11 +44,11 @@ export default function PhoneHero({ team, rivals, rows }) {
           <span className="app-burger" aria-hidden><i /><i /><i /></span>
         </div>
         <div className="screen-body">
-          <div className="sc-title">{L.t("Analyse de match", "Game analysis")}</div>
-          <div className="sc-sub">{L.t("Entre les équipes que tu veux analyser", "Between the teams you want to analyze")}</div>
-          <div className="sc-note">{L.t("Notre modèle croise niveau, forme, absences et fatigue pour chaque pronostic.", "Our model combines strength, form, injuries and fatigue for every prediction.")}</div>
+          <div className="sc-title">{L.t("Analyse de match", "Game analysis", "Análisis de partido")}</div>
+          <div className="sc-sub">{L.t("Entre les équipes que tu veux analyser", "Between the teams you want to analyze", "Entre los equipos que quieres analizar")}</div>
+          <div className="sc-note">{L.t("Notre modèle croise niveau, forme, absences et fatigue pour chaque pronostic.", "Our model combines strength, form, injuries and fatigue for every prediction.", "Nuestro modelo combina nivel, forma, bajas y cansancio en cada pronóstico.")}</div>
           <div className="sc-card">
-            <div className="sc-label">{L.t("MATCH À ANALYSER", "GAME TO ANALYZE")}</div>
+            <div className="sc-label">{L.t("MATCH À ANALYSER", "GAME TO ANALYZE", "PARTIDO A ANALIZAR")}</div>
             <div className="sc-logo">
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -64,13 +64,13 @@ export default function PhoneHero({ team, rivals, rows }) {
             <div className="sc-vs">vs</div>
             <div className={`sc-input ${typed ? "" : "empty"}`}>
               {done && rival && (/* eslint-disable-next-line @next/next/no-img-element */ <img src={rival.logo} alt="" />)}
-              {typed || L.t("Cherche une équipe (ex : Celtics, Knicks…)", "Search a team (e.g. Celtics, Knicks…)")}
+              {typed || L.t("Cherche une équipe (ex : Celtics, Knicks…)", "Search a team (e.g. Celtics, Knicks…)", "Busca un equipo (p. ej., Celtics, Knicks…)")}
               {!done && <span className="caret" />}
             </div>
-            <div className={`sc-btn ${press ? "go" : ""}`}>{L.t("Analyser le match", "Analyze the game")}</div>
+            <div className={`sc-btn ${press ? "go" : ""}`}>{L.t("Analyser le match", "Analyze the game", "Analizar el partido")}</div>
           </div>
           <div className="sc-list">
-            <h5>{L.t("Prochains matchs", "Upcoming games")}</h5>
+            <h5>{L.t("Prochains matchs", "Upcoming games", "Próximos partidos")}</h5>
             {rows.slice(0, 4).map((g) => {
               const [d, h] = when(g.date, L);
               return (

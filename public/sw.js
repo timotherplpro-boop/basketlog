@@ -1,6 +1,6 @@
 // Service worker de l'appli Basketlog : démarrage rapide et page hors ligne.
 // Rien n'est mis en cache pour /api (connexion, abonnements, avis) : ces requêtes passent toujours par le réseau.
-const VERSION = "bl-v3";
+const VERSION = "bl-v4";
 const STATIC = `${VERSION}-static`;
 const ASSETS = `${VERSION}-assets`; // fichiers JS/CSS vus en navigation, limités en nombre
 const MAX_ASSETS = 150;

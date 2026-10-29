@@ -6,6 +6,7 @@ import { getL } from "../../lib/lang-server";
 
 export async function generateMetadata() {
   const L = await getL();
+  if (L.es) return pageMeta({ title: "Condiciones de venta – Basketlog", description: "Condiciones de venta de Basketlog Starter, Pro y Lifetime: precios, pago, renovación, cancelación, desistimiento y reembolsos.", path: "/cgv", L });
   return L.en
     ? pageMeta({ title: "Terms of sale – Basketlog", description: "Terms of sale for Basketlog Starter, Pro and Lifetime: prices, payment, renewal, cancellation, withdrawal and refunds.", path: "/cgv", L })
     : pageMeta({ title: "Conditions générales de vente (CGV) – Basketlog", description: "Conditions générales de vente des abonnements Basketlog Starter, Pro et Lifetime : prix, paiement, renouvellement, résiliation, rétractation et remboursement.", path: "/cgv" });
@@ -188,7 +189,96 @@ function CGVEn({ L }) {
   );
 }
 
+const OFFERS_ES = [
+  ["Starter", "10 € al mes", "5 análisis completos al día", "Suscripción mensual, renovada automáticamente cada mes"],
+  ["Pro", "19 € al mes", "Análisis completos ilimitados", "Suscripción mensual, renovada automáticamente cada mes"],
+  ["Lifetime", "99 € en un solo pago", "Análisis completos ilimitados, como Pro", "Pago único, sin renovación, mientras se preste el servicio"],
+];
+
+function CGVEs({ L }) {
+  const e = LEGAL.editeur;
+  return (
+    <LegalDoc
+      title="Condiciones de venta"
+      path="/cgv"
+      L={L}
+      intro="Estas condiciones de venta se aplican a cualquier compra de un plan de pago de Basketlog. Completan las condiciones de uso. Están disponibles antes de cada compra y se aplican en cuanto se confirma el pago. Esta versión en español es una traducción que se ofrece para tu comodidad; en caso de discrepancia, prevalece la versión francesa."
+    >
+      <Sec n={1} title="Vendedor">
+        <p>{e.nom}, empresario individual (micro-entreprise francesa), {e.adresse}. SIREN {e.siren} — SIRET {e.siret}, inscrito en el Registro nacional de empresas francés (RNE). IVA no aplicable, artículo 293 B del Código General de Impuestos francés. Contacto: <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>.</p>
+      </Sec>
+
+      <Sec n={2} title="Planes y precios">
+        <div className="legal-table-wrap">
+          <table className="legal-table">
+            <thead><tr><th>Plan</th><th>Precio</th><th>Contenido</th><th>Duración</th></tr></thead>
+            <tbody>{OFFERS_ES.map((o) => <tr key={o[0]}>{o.map((c, i) => <td key={i}>{i === 0 ? <b>{c}</b> : c}</td>)}</tr>)}</tbody>
+          </table>
+        </div>
+        <p>Un análisis completo es la ficha detallada de un partido: marcador proyectado, factores, escenarios, estadísticas comparadas, jugadores a seguir, forma reciente, enfrentamientos y bajas. Las probabilidades de victoria y las cifras clave siguen siendo gratis para todos.</p>
+        <p>Los precios están en euros, sin gastos adicionales por nuestra parte (IVA no aplicable). El precio total se muestra en la página de pago antes de confirmar. Los precios pueden cambiar; un cambio de precio nunca se aplica a un periodo ya pagado, y los suscriptores reciben aviso antes de cualquier subida.</p>
+      </Sec>
+
+      <Sec n={3} title="Pedido y pago">
+        <p>El pedido se hace desde la página <Link href={L.href("/pro")}>Basketlog Pro</Link> y luego en la página de pago segura de nuestro proveedor {LEGAL.paiement.nom} («Whop»). El pago se carga al confirmar el pedido y, después, en cada renovación de las suscripciones mensuales. Nunca vemos ni guardamos tus datos bancarios.</p>
+        <p>Whop te envía por correo electrónico la confirmación del pedido y tu recibo. La compra implica la aceptación de estas condiciones de venta.</p>
+      </Sec>
+
+      <Sec n={4} title="Acceso al servicio">
+        <p>El acceso se abre en cuanto se confirma el pago: vuelve a la página Pro e inicia sesión con la misma cuenta de Whop con la que pagaste. Tu plan se activa entonces automáticamente en Basketlog, en todos tus dispositivos.</p>
+      </Sec>
+
+      <Sec n={5} title="Renovación y cancelación">
+        <p>Las suscripciones Starter y Pro no tienen permanencia. Se renuevan automáticamente cada mes, en la fecha de aniversario de la compra, hasta que se cancelan.</p>
+        <p>Puedes cancelar en cualquier momento, en unos clics, desde tu cuenta de Whop (<a href={LEGAL.paiement.commandes} rel="noopener" target="_blank">whop.com, apartado Pedidos</a>), o escribiéndonos a <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. Acuérdate de cancelar al menos 24 horas antes de la fecha de renovación. La cancelación surte efecto al final del periodo ya pagado: mantienes el acceso hasta esa fecha y no se cobra ningún pago nuevo. Un periodo empezado no se reembolsa, ni total ni proporcionalmente.</p>
+        <p>El plan Lifetime es un pago único: no hay nada que cancelar.</p>
+      </Sec>
+
+      <Sec n={6} title="Derecho de desistimiento y reembolsos">
+        <p>Los análisis de Basketlog son un contenido digital que se suministra de inmediato, sin soporte material. Antes de pagar, marcas en la página Pro la casilla con la que pides el acceso inmediato a tus análisis y reconoces que pierdes así tu derecho de desistimiento de 14 días, de acuerdo con el artículo L221-28 13° del Código de Consumo francés. Tu acceso se abre en cuanto se confirma el pago.</p>
+        <p>En consecuencia, una compra no es reembolsable una vez abierto el acceso, como en la mayoría de los servicios de análisis por suscripción. Esta regla no limita las garantías legales (artículo 7): si un problema técnico te impide acceder al servicio, escríbenos y encontraremos una solución (restablecimiento, ampliación o reembolso).</p>
+        <p>Si, por cualquier motivo, el pago se realizó sin que se marcara esa casilla, conservas tu derecho de desistimiento de 14 días: basta con enviarnos una declaración clara a <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a> o usar el formulario modelo de abajo.</p>
+      </Sec>
+
+      <Sec n={7} title="Garantías legales">
+        <p>Disfrutas de la garantía legal de conformidad aplicable a los contenidos y servicios digitales (artículos L224-25-12 y siguientes del Código de Consumo francés) durante todo el tiempo en que se presta el servicio. Si hay un defecto, escríbenos: restablecemos el servicio o, en su defecto, te concedemos una rebaja del precio o un reembolso, como prevé la ley. Nada de lo dispuesto en estas condiciones de venta limita esas garantías.</p>
+        <p>Los pronósticos son estimaciones: un pronóstico que no se cumple no es un defecto del servicio (consulta el artículo 3 de las <Link href={L.href("/cgu")}>condiciones de uso</Link>).</p>
+      </Sec>
+
+      <Sec n={8} title="Atención al cliente">
+        <p>Para cualquier pregunta, reclamación o solicitud de reembolso: <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. Respondemos en un plazo máximo de 7 días hábiles.</p>
+      </Sec>
+
+      <Sec n={9} title="Mediación de consumo">
+        <p>De acuerdo con los artículos L611-1 y siguientes del Código de Consumo francés, si tu reclamación por escrito no se ha resuelto, puedes acudir gratuitamente al mediador de consumo: <b>{LEGAL.mediateur.nom}</b>, {LEGAL.mediateur.adresse}, Francia, <a href={LEGAL.mediateur.site} rel="noopener" target="_blank">cm2c.net</a>, en el plazo de un año desde tu reclamación.</p>
+      </Sec>
+
+      <Sec n={10} title="Datos personales">
+        <p>Los datos relacionados con tu pedido se tratan según lo indicado en la <Link href={L.href("/confidentialite")}>política de privacidad</Link>.</p>
+      </Sec>
+
+      <Sec n={11} title="Ley aplicable">
+        <p>Estas condiciones de venta se rigen por el derecho francés. Si resides en otro país de la Unión Europea, conservas la protección de las normas imperativas de tu país. A falta de acuerdo amistoso, serán competentes los tribunales que designe la ley.</p>
+      </Sec>
+
+      <Sec title="Anexo — Formulario modelo de desistimiento">
+        <p className="legal-form">
+          A la atención de {e.nom} (Basketlog), {e.adresse}, {LEGAL.email}:<br /><br />
+          Por la presente le comunico que desisto de mi contrato de prestación del siguiente servicio:<br />
+          — Plan contratado: …………<br />
+          — Pedido el: …………<br />
+          — Nombre del consumidor: …………<br />
+          — Correo de la cuenta de Whop: …………<br />
+          — Dirección del consumidor: …………<br />
+          — Fecha: …………<br />
+          — Firma (solo si se envía en papel): …………
+        </p>
+      </Sec>
+    </LegalDoc>
+  );
+}
+
 export default async function CGVPage() {
   const L = await getL();
-  return L.en ? <CGVEn L={L} /> : <CGVFr />;
+  return L.es ? <CGVEs L={L} /> : L.en ? <CGVEn L={L} /> : <CGVFr />;
 }

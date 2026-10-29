@@ -10,8 +10,8 @@ export async function GET(req) {
   const verifier = req.cookies.get("whop_pkce")?.value;
   const expected = req.cookies.get("whop_state")?.value;
   const fail = (why) => {
-    const en = (safeNext(req.cookies.get(NEXT_COOKIE)?.value) || "").startsWith("/en");
-    const r = NextResponse.redirect(`${SITE}${en ? "/en" : ""}/pro?erreur=${why}`);
+    const m = (safeNext(req.cookies.get(NEXT_COOKIE)?.value) || "").match(/^\/(en|es)(?=\/|$|\?)/);
+    const r = NextResponse.redirect(`${SITE}${m ? `/${m[1]}` : ""}/pro?erreur=${why}`);
     r.cookies.delete({ name: "whop_pkce", path: "/api/whop" });
     r.cookies.delete({ name: "whop_state", path: "/api/whop" });
     return r;

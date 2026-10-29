@@ -2,9 +2,9 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useL, useInitialPath } from "./LangProvider";
-import { switchPath } from "../lib/i18n";
+import { LANGS, switchPath } from "../lib/i18n";
 
-// FR | EN : la même page dans l'autre langue.
+// FR · EN · ES (pied de page) : la même page dans les autres langues, en liens simples lisibles par les moteurs.
 export default function LangSwitch({ className = "lang-switch" }) {
   const L = useL();
   const initial = useInitialPath();
@@ -14,9 +14,12 @@ export default function LangSwitch({ className = "lang-switch" }) {
   useEffect(() => { setPath(location.pathname + location.search); }, [nav]);
   return (
     <span className={className}>
-      <a href={switchPath(path, "fr")} hrefLang="fr" aria-current={!L.en ? "true" : undefined} className={!L.en ? "on" : ""}>FR</a>
-      <span aria-hidden>·</span>
-      <a href={switchPath(path, "en")} hrefLang="en" aria-current={L.en ? "true" : undefined} className={L.en ? "on" : ""}>EN</a>
+      {LANGS.map((l, i) => (
+        <span key={l} className="ls-item">
+          {i > 0 && <span aria-hidden>·</span>}
+          <a href={switchPath(path, l)} hrefLang={l} aria-current={L.lang === l ? "true" : undefined} className={L.lang === l ? "on" : ""}>{l.toUpperCase()}</a>
+        </span>
+      ))}
     </span>
   );
 }

@@ -6,8 +6,8 @@ const parts = (iso, L) => [fmtDate(L, iso, { day: "2-digit", month: "2-digit" })
 
 // Liste des matchs façon "Prochains matchs", regroupés par jour (heure de Paris).
 export default function UpcomingList({ games, title, grouped = true, href = (g) => `/app/match/${g.id}?d=${g.d}`, L = mk("fr") }) {
-  if (title === undefined) title = L.t("Prochains matchs", "Upcoming games");
-  if (!games.length) return <div className="empty">{L.t("Aucun match au programme.", "No games scheduled.")}</div>;
+  if (title === undefined) title = L.t("Prochains matchs", "Upcoming games", "Próximos partidos");
+  if (!games.length) return <div className="empty">{L.t("Aucun match au programme.", "No games scheduled.", "No hay partidos programados.")}</div>;
   const groups = [];
   for (const g of games) {
     const k = grouped ? day(g.date, L) : "";
@@ -28,7 +28,7 @@ export default function UpcomingList({ games, title, grouped = true, href = (g) 
             const done = g.state === "post" && g.home.score != null;
             return (
               <Link key={g.id} href={L.href(href(g))} className="up-row" style={{ animationDelay: `${Math.min(n++, 12) * 50}ms` }}>
-                <div className="when">{d}<b>{g.live ? <span className="live">LIVE</span> : done ? L.t("FIN", "FINAL") : h}</b></div>
+                <div className="when">{d}<b>{g.live ? <span className="live">LIVE</span> : done ? L.t("FIN", "FINAL", "FINAL") : h}</b></div>
                 <div className="m">
                   <span className="t">
                     <span className={!favHome ? "fav" : ""}>{g.away.short}</span>

@@ -26,9 +26,9 @@ export function parisDay(iso, L = mk("fr")) {
 }
 
 export function StatusTag({ game, L = mk("fr") }) {
-  if (game.hypothetical) return <span className="tag hot">{L.t("Match hypothétique", "Hypothetical game")}</span>;
-  if (game.state === "in") return <span className="tag live">● {L.t("En direct", "Live")}</span>;
-  if (game.state === "post") return <span className="tag">{L.t("Terminé", "Final")}</span>;
+  if (game.hypothetical) return <span className="tag hot">{L.t("Match hypothétique", "Hypothetical game", "Partido hipotético")}</span>;
+  if (game.state === "in") return <span className="tag live">● {L.t("En direct", "Live", "En directo")}</span>;
+  if (game.state === "post") return <span className="tag">{L.t("Terminé", "Final", "Finalizado")}</span>;
   return <span className="tag">{parisDay(game.date, L)} · {parisTime(game.date, L)}{L.en ? " ET" : ""}</span>;
 }
 
@@ -40,7 +40,7 @@ export function GameCard({ a, date, L = mk("fr") }) {
     <Link href={L.href(`/app/match/${g.id}?d=${date}`)} className="card game">
       <div className="game-top">
         <StatusTag game={g} L={L} />
-        {Math.max(a.pHome, a.pAway) > 0.72 ? <span className="tag hot">{L.t("Favori net", "Clear favorite")}</span> : Math.abs(a.pHome - 0.5) < 0.06 ? <span className="tag hot">{L.t("Indécis", "Toss-up")}</span> : <span>{L.en ? `${confText(a.confidence, L)} confidence` : `Confiance ${a.confidence.toLowerCase()}`}</span>}
+        {Math.max(a.pHome, a.pAway) > 0.72 ? <span className="tag hot">{L.t("Favori net", "Clear favorite", "Favorito claro")}</span> : Math.abs(a.pHome - 0.5) < 0.06 ? <span className="tag hot">{L.t("Indécis", "Toss-up", "Igualado")}</span> : <span>{L.t(`Confiance ${a.confidence.toLowerCase()}`, `${confText(a.confidence, L)} confidence`, `Confianza ${confText(a.confidence, L).toLowerCase()}`)}</span>}
       </div>
       {[g.away, g.home].map((t, i) => {
         const p = i === 0 ? a.pAway : a.pHome;
@@ -60,8 +60,8 @@ export function GameCard({ a, date, L = mk("fr") }) {
       })}
       <ProbBar pAway={a.pAway} pHome={a.pHome} away={g.away} home={g.home} />
       <div className="game-foot">
-        <span>{L.t("Projeté :", "Projected:")} <span className="mono">{Math.round(a.awayPts)}–{Math.round(a.homePts)}</span></span>
-        <span>{L.t("Analyse →", "Analysis →")}</span>
+        <span>{L.t("Projeté :", "Projected:", "Proyectado:")} <span className="mono">{Math.round(a.awayPts)}–{Math.round(a.homePts)}</span></span>
+        <span>{L.t("Analyse →", "Analysis →", "Análisis →")}</span>
       </div>
     </Link>
   );
