@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#040817">
+<title>Basketlog</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; background: radial-gradient(120% 80% at 50% 0%, #121a3a 0%, #040817 60%); color: #fff; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; text-align: center; }
+  main { max-width: 440px; }
+  img { width: 72px; height: 72px; border-radius: 18px; }
+  h1 { margin: 22px 0 10px; font-size: clamp(34px, 9vw, 52px); line-height: 1; letter-spacing: -.02em; text-transform: uppercase; font-weight: 800; }
+  h1 span { color: #ff7a1a; }
+  p { margin: 0 0 26px; color: rgba(255,255,255,.7); font-size: 16px; line-height: 1.55; }
+  button { height: 50px; padding: 0 28px; border-radius: 999px; border: 0; background: #ff7a1a; color: #fff; font: 700 16px inherit; font-family: inherit; cursor: pointer; }
+</style>
+</head>
+<body>
+<main>
+  <img src="/icons/icon-192.png" alt="">
+  <h1 id="t">Hors <span>ligne.</span></h1>
+  <p id="m">Pas de connexion pour le moment. Les pronostics reviennent dès que le réseau est de retour.</p>
+  <button id="b" type="button" onclick="location.reload()">Réessayer</button>
+</main>
+<script>
+  // Page de secours de l'appli installée : en anglais pour les adresses /en.
+  if (location.pathname === "/en" || location.pathname.indexOf("/en/") === 0) {
+    document.documentElement.lang = "en";
+    document.getElementById("t").innerHTML = "No <span>signal.</span>";
+    document.getElementById("m").textContent = "You're offline right now. Predictions will be back as soon as you reconnect.";
+    document.getElementById("b").textContent = "Try again";
+  }
+  window.addEventListener("online", function () { location.reload(); });
+</script>
+</body>
+</html>

@@ -5,6 +5,7 @@ import { useProStatus } from "../lib/useProStatus";
 import { track } from "../lib/analytics";
 import { useL, useInitialPath } from "./LangProvider";
 import LangSwitch from "./LangSwitch";
+import { InstallButton } from "./InstallApp";
 
 export default function Nav() {
   const L = useL();
@@ -63,6 +64,7 @@ export default function Nav() {
         <Link href={L.href("/pro")}>Basketlog Pro</Link>
         <Link href={L.href("/avis")}>{L.t("Avis", "Reviews")}</Link>
         <Link href={`${L.href("/")}#faq`}>FAQ</Link>
+        <InstallButton className="mmenu-install" source="menu" icon />
         <LangSwitch className="mmenu-lang" />
       </div>
     </>

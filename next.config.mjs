@@ -5,6 +5,10 @@ const nextConfig = {
   // sans streaming. Les visiteurs gardent le rendu en streaming, plus rapide.
   htmlLimitedBots: /bot|crawl|spider|slurp|Google|Bing|yandex|baidu|Lighthouse|facebookexternalhit|facebookcatalog|WhatsApp|Twitter|LinkedIn|Slack|Discord|SkypeUriPreview|vkShare|quora|tumblr|ia_archiver|Yeti|Perplexity|ChatGPT|Claude|Applebot/i,
   // L'ancienne adresse Vercel renvoie définitivement vers le nom de domaine.
+  // Service worker de l'appli installable : toujours la dernière version.
+  async headers() {
+    return [{ source: "/sw.js", headers: [{ key: "Cache-Control", value: "no-cache, no-store, must-revalidate" }, { key: "Service-Worker-Allowed", value: "/" }] }];
+  },
   async redirects() {
     return [
       {

@@ -20,6 +20,7 @@ import { SITE, GOOGLE_SITE_VERIFICATION, BING_SITE_VERIFICATION } from "../lib/s
 import { getL, getPath } from "../lib/lang-server";
 import LangProvider from "../components/LangProvider";
 import LangSwitch from "../components/LangSwitch";
+import InstallApp, { InstallButton } from "../components/InstallApp";
 
 export async function generateMetadata() {
   const L = await getL();
@@ -32,6 +33,7 @@ export async function generateMetadata() {
     metadataBase: new URL(SITE),
     title,
     applicationName: "Basketlog",
+    formatDetection: { telephone: false },
     twitter: { card: "summary_large_image" },
     description,
     openGraph: { title, description, type: "website", locale: L.en ? "en_US" : "fr_FR", siteName: "Basketlog" },
@@ -73,6 +75,13 @@ export default async function RootLayout({ children }) {
         <meta name="google-site-verification" content={GOOGLE_SITE_VERIFICATION} />
         <meta name="msvalidate.01" content={BING_SITE_VERIFICATION} />
         <link rel="preconnect" href="https://images.unsplash.com" />
+        {/* Appli installable : manifeste et icônes dans le <head> dès le premier octet (requis par Chrome et Safari) */}
+        <link rel="manifest" href={L.en ? "/manifest-en.webmanifest" : "/manifest.webmanifest"} />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-title" content="Basketlog" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
       </head>
       <body>
@@ -96,6 +105,7 @@ export default async function RootLayout({ children }) {
               <nav className="foot-links foot-legal" aria-label={L.t("Informations légales", "Legal information")}>
                 {LEGAL_PAGES.map(([href, label]) => <Link key={href} href={L.href(href)}>{L.en ? LEGAL_EN[href] : label}</Link>)}
                 <CookieSettingsButton />
+                <InstallButton source="pied_de_page" />
                 <LangSwitch />
               </nav>
               <div>{L.t("Analyses statistiques, pas un service de paris. Les probabilités sont des estimations, jamais des certitudes. Réservé aux 18 ans et plus.", "Statistical analysis, not a betting service. Probabilities are estimates, never certainties. For adults 18 and over.")}</div>
@@ -105,6 +115,7 @@ export default async function RootLayout({ children }) {
           </footer>
           <WelcomeToast />
           <CookieBanner />
+          <InstallApp />
         </LangProvider>
       </body>
     </html>

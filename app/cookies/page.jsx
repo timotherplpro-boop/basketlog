@@ -16,6 +16,9 @@ const TRACEURS = [
   ["hs_views_…", "Stockage local", "Compter les analyses complètes consultées dans la journée (formule Starter)", "Nécessaire", "La journée"],
   ["bl_pro", "Cookie", "Garder ta session d'abonné connectée (cookie signé, inaccessible aux scripts)", "Nécessaire", "60 jours"],
   ["whop_state, whop_pkce", "Cookie", "Sécuriser la connexion avec Whop", "Nécessaire", "10 minutes"],
+  ["bl_install_dismiss", "Stockage local", "Ne plus te proposer d'installer l'appli si tu as refermé la proposition", "Nécessaire", "30 jours"],
+  ["bl_views", "Stockage de session", "Compter les pages vues pendant la visite, pour proposer l'appli au bon moment", "Nécessaire", "La visite"],
+  ["bl-v…-static, bl-v…-assets", "Cache de l'appli", "Fichiers du site (code, icônes) pour un démarrage rapide et une page hors ligne ; aucune donnée personnelle", "Nécessaire", "Jusqu'à la mise à jour suivante"],
   ["AMP_…, AMP_MKTG_…", "Cookie", "Mesure d'audience Amplitude : identifiant aléatoire de visiteur et de session, source de la visite", "Consentement", "12 mois"],
   ["AMP_unsent_…, AMP_remote_config_…", "Stockage local", "Mesure d'audience Amplitude : file d'attente des événements et réglages", "Consentement", "Jusqu'au refus ou à l'effacement"],
 ];
@@ -62,6 +65,9 @@ const TRACKERS_EN = [
   ["hs_views_…", "Local storage", "Count the full analyses viewed during the day (daily limit)", "Necessary", "The day"],
   ["bl_pro", "Cookie", "Keep your account session logged in (signed cookie, not accessible to scripts)", "Necessary", "60 days"],
   ["whop_state, whop_pkce", "Cookie", "Secure the login with Whop", "Necessary", "10 minutes"],
+  ["bl_install_dismiss", "Local storage", "Stop offering to install the app once you have closed the offer", "Necessary", "30 days"],
+  ["bl_views", "Session storage", "Count pages viewed during the visit, to offer the app at the right time", "Necessary", "The visit"],
+  ["bl-v…-static, bl-v…-assets", "App cache", "Website files (code, icons) for a fast start and an offline page; no personal data", "Necessary", "Until the next update"],
   ["AMP_…, AMP_MKTG_…", "Cookie", "Amplitude audience measurement: random visitor and session ID, visit source", "Consent", "12 months"],
   ["AMP_unsent_…, AMP_remote_config_…", "Local storage", "Amplitude audience measurement: event queue and settings", "Consent", "Until you refuse or clear it"],
 ];

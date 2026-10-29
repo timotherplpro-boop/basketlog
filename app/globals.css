@@ -823,3 +823,23 @@ a.team:hover .team-name { color: var(--peach); }
 .mmenu-lang { display: flex; gap: 10px; justify-content: center; font-size: 18px; color: var(--dim); margin-top: 10px; }
 .mmenu-lang a { color: var(--muted); font-size: 18px; }
 .mmenu-lang a.on { color: #fff; }
+
+/* ===== Appli installable (PWA) ===== */
+.install-banner { position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 70; display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 14px; border-radius: 18px; background: rgba(13, 19, 34, .97); border: 1px solid var(--line-2); box-shadow: 0 20px 60px rgba(0, 0, 0, .55); backdrop-filter: blur(10px); animation: riseIn .5s var(--ease) both; }
+.install-banner img { border-radius: 11px; flex: none; }
+.ib-text { display: grid; gap: 2px; min-width: 0; }
+.ib-text b { font-size: 14px; color: var(--text); }
+.ib-text span { font-size: 12.5px; line-height: 1.4; color: var(--muted); }
+.ib-go { flex: none; height: 38px; padding: 0 16px; border-radius: 999px; border: 0; background: var(--orange); color: #fff; font: 700 14px var(--body); cursor: pointer; }
+.ib-x { flex: none; width: 30px; height: 30px; border-radius: 50%; border: 0; background: rgba(255,255,255,.06); color: var(--muted); font-size: 20px; line-height: 1; cursor: pointer; }
+.mmenu-install { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--line-2); background: rgba(255,255,255,.05); color: #fff; font: 600 15px var(--body); cursor: pointer; }
+.mmenu-install svg { width: 18px; height: 18px; }
+.ios-sheet { text-align: center; }
+.ios-sheet .ios-icon { border-radius: 15px; margin: 4px auto 14px; display: block; }
+.ios-sheet ol { text-align: left; margin: 18px 0 0; padding-left: 22px; display: grid; gap: 12px; color: var(--muted); font-size: 15px; line-height: 1.5; }
+.ios-sheet ol b { color: var(--text); }
+.ios-share { width: 18px; height: 18px; vertical-align: -3px; color: #3b82f6; }
+@media (display-mode: standalone) { .install-banner, .mmenu-install { display: none; } }
+body:has(.mmenu.open) .install-banner { display: none; }
+.mmenu { overflow-y: auto; }
+@media (max-height: 860px) { .mmenu { gap: 18px; } .mmenu a { font-size: 26px; } }
