@@ -49,13 +49,14 @@ export default function CGV() {
 
       <Sec n={5} title="Renouvellement et résiliation">
         <p>Les abonnements Starter et Pro sont sans engagement. Ils se renouvellent automatiquement chaque mois, à la date anniversaire de l&apos;achat, jusqu&apos;à leur résiliation.</p>
-        <p>Tu peux résilier à tout moment, en quelques clics, depuis ton compte Whop (<a href={LEGAL.paiement.commandes} rel="noopener" target="_blank">whop.com, rubrique Commandes</a>), ou en nous écrivant à <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. La résiliation prend effet à la fin de la période déjà payée : tu gardes l&apos;accès jusqu&apos;à cette date et aucun nouveau paiement n&apos;est prélevé. Hors droit de rétractation (article 6), une période commencée n&apos;est pas remboursée au prorata.</p>
+        <p>Tu peux résilier à tout moment, en quelques clics, depuis ton compte Whop (<a href={LEGAL.paiement.commandes} rel="noopener" target="_blank">whop.com, rubrique Commandes</a>), ou en nous écrivant à <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. Pense à résilier au moins 24 heures avant la date de renouvellement. La résiliation prend effet à la fin de la période déjà payée : tu gardes l&apos;accès jusqu&apos;à cette date et aucun nouveau paiement n&apos;est prélevé. Une période commencée n&apos;est pas remboursée, ni en totalité ni au prorata.</p>
         <p>La formule Lifetime est un paiement unique : il n&apos;y a rien à résilier.</p>
       </Sec>
 
       <Sec n={6} title="Droit de rétractation et remboursement">
-        <p>Tu disposes d&apos;un délai de <b>14 jours</b> à compter de ton achat pour te rétracter, sans avoir à te justifier, y compris si tu as déjà commencé à utiliser le service. Nous te remboursons alors <b>intégralement</b>, sans déduction, au plus tard 14 jours après ta demande, avec le moyen de paiement utilisé pour l&apos;achat. Ton accès payant prend fin au remboursement.</p>
-        <p>Pour te rétracter, envoie-nous une déclaration claire à <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a> (en indiquant l&apos;e-mail de ton compte Whop), ou utilise le formulaire type ci-dessous. Ce droit s&apos;applique au premier achat de chaque formule ; les renouvellements mensuels suivants n&apos;ouvrent pas de nouveau délai.</p>
+        <p>Les analyses Basketlog sont un contenu numérique fourni immédiatement, sans support matériel. Avant de payer, tu coches sur la page Pro la case par laquelle tu demandes l&apos;accès immédiat à tes analyses et tu reconnais perdre ainsi ton droit de rétractation de 14 jours, conformément à l&apos;article L221-28 13° du Code de la consommation. Ton accès est ouvert dès la confirmation du paiement.</p>
+        <p>En conséquence, un achat n&apos;est pas remboursable une fois l&apos;accès ouvert, comme chez la plupart des services d&apos;analyse par abonnement. Cette règle ne limite pas les garanties légales (article 7) : en cas de problème technique qui t&apos;empêche d&apos;accéder au service, écris-nous et nous trouverons une solution (rétablissement, prolongation ou remboursement).</p>
+        <p>Si, pour une raison quelconque, le paiement a été effectué sans que cette case ait été cochée, tu gardes ton droit de rétractation de 14 jours : il suffit de nous envoyer une déclaration claire à <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a> ou d&apos;utiliser le formulaire type ci-dessous.</p>
       </Sec>
 
       <Sec n={7} title="Garanties légales">

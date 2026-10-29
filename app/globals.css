@@ -790,3 +790,12 @@ a.team:hover .team-name { color: var(--peach); }
 /* Mention CGV sous les formules */
 .pro-legal { text-align: center; color: var(--dim); font-size: 13px; line-height: 1.6; max-width: 720px; margin: 14px auto 0; }
 .pro-legal a { color: var(--muted); }
+
+/* Case CGV + accès immédiat (page Pro) */
+.pro-agree { display: flex; gap: 10px; align-items: flex-start; max-width: 720px; margin: 22px auto 22px; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--card); color: var(--muted); font-size: 13.5px; line-height: 1.5; cursor: pointer; transition: border-color .2s, box-shadow .2s; }
+.pro-agree input { width: 18px; height: 18px; margin-top: 1px; accent-color: var(--orange); flex-shrink: 0; cursor: pointer; }
+.pro-agree a { color: var(--orange-2); }
+.pro-agree.nudge { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(255, 122, 26, .25); animation: agreeShake .4s; }
+.pro-agree-hint { text-align: center; color: var(--orange-2); font-size: 13px; margin: -12px 0 18px; }
+.plan-buy.plan-wait { filter: saturate(.55) brightness(.85); }
+@keyframes agreeShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }

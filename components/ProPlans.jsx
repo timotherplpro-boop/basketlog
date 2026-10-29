@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useProStatus } from "../lib/useProStatus";
 import { track } from "../lib/analytics";
@@ -35,6 +35,13 @@ const NOTICES = {
 
 export default function ProPlans({ checkout, loginReady, notice }) {
   const pro = useProStatus();
+  const [agree, setAgree] = useState(false);
+  const [nudge, setNudge] = useState(false);
+  // Avant le paiement : acceptation des CGV et demande d'accès immédiat (renonciation à la rétractation, art. L221-28 13°).
+  const buy = (id) => (e) => {
+    if (!agree) { e.preventDefault(); setNudge(true); document.getElementById("pro-agree")?.focus(); return; }
+    track("Clic abonnement", { formule: id });
+  };
   useEffect(() => {
     if (!pro) return;
     track("Page Pro vue", { formule: pro.tier });
@@ -47,6 +54,11 @@ export default function ProPlans({ checkout, loginReady, notice }) {
   return (
     <>
       {n && <div className={`pro-notice ${n[0]}`} role="status">{n[1]}</div>}
+      <label className={`pro-agree ${nudge && !agree ? "nudge" : ""}`}>
+        <input id="pro-agree" type="checkbox" checked={agree} onChange={(e) => { setAgree(e.target.checked); setNudge(false); }} />
+        <span>J&apos;accepte les <Link href="/cgv" target="_blank">CGV</Link> et les <Link href="/cgu" target="_blank">CGU</Link>, et je demande l&apos;accès immédiat à mes analyses : je reconnais perdre mon droit de rétractation de 14 jours.</span>
+      </label>
+      {nudge && !agree && <p className="pro-agree-hint" role="alert">Coche la case ci-dessus pour continuer vers le paiement.</p>}
       <div className="plans">
         {PLANS.map((p, i) => {
           const url = checkout[p.id];
@@ -60,7 +72,7 @@ export default function ProPlans({ checkout, loginReady, notice }) {
               {pro?.connected && current === p.id ? (
                 <span className="plan-cta plan-current">Ta formule actuelle</span>
               ) : url ? (
-                <a href={url} className="plan-cta plan-buy" onClick={() => track("Clic abonnement", { formule: p.id })}>{p.cta}</a>
+                <a href={url} className={`plan-cta plan-buy ${agree ? "" : "plan-wait"}`} aria-disabled={!agree} onClick={buy(p.id)}>{p.cta}</a>
               ) : (
                 <span className="plan-cta plan-soon">Bientôt disponible</span>
               )}
@@ -69,8 +81,7 @@ export default function ProPlans({ checkout, loginReady, notice }) {
         })}
       </div>
       <p className="pro-legal">
-        En t&apos;abonnant, tu acceptes les <Link href="/cgv">conditions générales de vente</Link> et les <Link href="/cgu">conditions d&apos;utilisation</Link>.
-        Starter et Pro sont sans engagement et résiliables à tout moment. Tu peux te rétracter pendant 14 jours et être remboursé intégralement. Réservé aux 18 ans et plus.
+        Starter et Pro sont sans engagement : tu arrêtes quand tu veux depuis ton compte Whop, et tu gardes l&apos;accès jusqu&apos;à la fin du mois payé. Une période commencée n&apos;est pas remboursée. Réservé aux 18 ans et plus. <Link href="/cgv">Conditions générales de vente</Link>
       </p>
       <p className="pro-free">Sans abonnement, les probabilités de victoire de tous les matchs restent gratuites. <Link href="/app/matchs">Voir les matchs du jour</Link></p>
       <div className="pro-account">
