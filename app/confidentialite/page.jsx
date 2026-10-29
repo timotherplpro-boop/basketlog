@@ -12,7 +12,7 @@ export const metadata = pageMeta({
 const DONNEES = [
   ["Navigation", "Adresse IP, navigateur, pages demandées, date et heure (journaux techniques de l'hébergeur)", "Faire fonctionner et sécuriser le site", "Intérêt légitime", "Quelques semaines, selon la durée de rétention de Vercel"],
   ["Mesure d'audience (si tu l'acceptes)", "Pages vues, clics, durée et nombre de visites, type d'appareil, pays et ville approximatifs, identifiant aléatoire stocké dans un cookie", "Comprendre l'usage du site et l'améliorer", "Consentement", "Cookies : 12 mois maximum ; statistiques : 25 mois maximum"],
-  ["Abonnés", "Identifiant et nom d'utilisateur Whop, formule active, date de vérification", "Activer ta formule et vérifier ton abonnement", "Exécution du contrat", "Tant que ton abonnement est actif, puis 3 ans"],
+  ["Compte gratuit et abonnés", "Identifiant et nom d'utilisateur Whop, formule active, date de vérification ; l'e-mail d'inscription reste chez Whop", "Ouvrir ton compte, activer ta formule et vérifier ton abonnement", "Exécution du contrat", "Tant que ton compte existe, puis 3 ans"],
   ["Paiement", "Données de paiement et de facturation (traitées directement par Whop, jamais par Basketlog)", "Encaisser les paiements, établir les reçus", "Exécution du contrat, obligation légale", "10 ans pour les pièces comptables"],
   ["Avis", "Prénom, description facultative, note, texte de l'avis", "Publier les avis après relecture", "Consentement", "Jusqu'à ta demande de suppression"],
   ["Contact", "Adresse e-mail et contenu de tes messages", "Répondre à tes demandes", "Intérêt légitime", "3 ans après le dernier échange"],

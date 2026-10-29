@@ -12,6 +12,7 @@ import Link from "next/link";
 import Nav from "../components/Nav";
 import Analytics from "../components/Analytics";
 import CookieBanner from "../components/CookieBanner";
+import WelcomeToast from "../components/WelcomeToast";
 import CookieSettingsButton from "../components/CookieSettingsButton";
 import { LEGAL, LEGAL_PAGES } from "../lib/legal";
 import JsonLd from "../components/JsonLd";
@@ -93,6 +94,7 @@ export default function RootLayout({ children }) {
             <div>Données : flux publics NBA et EuroLeague · Photos : Unsplash · © {new Date().getFullYear()} Basketlog</div>
           </div>
         </footer>
+        <WelcomeToast />
         <CookieBanner />
       </body>
     </html>

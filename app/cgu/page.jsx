@@ -19,7 +19,7 @@ export default function CGU() {
     >
       <Sec n={1} title="Le service">
         <p>Basketlog analyse les matchs de NBA et d&apos;EuroLeague. Le site rassemble des données statistiques publiques (résultats, classements, scores, absences, calendrier) et les passe dans un modèle de calcul qui produit, pour chaque match, des probabilités de victoire, un score projeté, des scénarios et une analyse rédigée automatiquement.</p>
-        <p>Une partie du service est gratuite : les probabilités de victoire et les chiffres clés de chaque match, le classement, les fiches équipes et le bilan du modèle. Les analyses complètes sont réservées aux abonnés Starter, Pro et Lifetime, dans les conditions prévues par les <Link href="/cgv">CGV</Link>.</p>
+        <p>Une partie du service est gratuite : les probabilités de victoire et les chiffres clés de chaque match, le classement, les fiches équipes et le bilan du modèle. Avec un compte gratuit, tu débloques 1 analyse complète par jour. Au-delà, les analyses complètes sont réservées aux abonnés Starter (5 par jour), Pro et Lifetime (illimitées), dans les conditions prévues par les <Link href="/cgv">CGV</Link>.</p>
       </Sec>
 
       <Sec n={2} title="Âge minimum">
@@ -32,8 +32,8 @@ export default function CGU() {
         <p>Le taux de réussite du modèle est publié en toute transparence sur la page <Link href="/app/bilan">Bilan</Link>. Les résultats passés ne préjugent pas des résultats futurs.</p>
       </Sec>
 
-      <Sec n={4} title="Accès et compte abonné">
-        <p>Le site est accessible sans inscription. Pour les abonnés, la connexion se fait avec le compte Whop utilisé lors du paiement (« Me connecter avec Whop »). Nous ne recevons jamais ton mot de passe Whop : seulement ton identifiant Whop, ton nom d&apos;utilisateur et la formule à laquelle tu as accès.</p>
+      <Sec n={4} title="Compte gratuit et compte abonné">
+        <p>Le site est accessible sans inscription. Le compte gratuit, créé avec un compte Whop (par e-mail, Google ou Apple), donne en plus 1 analyse complète par jour. Les abonnés se connectent avec le compte Whop utilisé lors du paiement. Nous ne recevons jamais ton mot de passe : seulement ton identifiant Whop, ton nom d&apos;utilisateur et la formule à laquelle tu as accès. Tu peux supprimer ton compte gratuit à tout moment en nous écrivant.</p>
         <p>Ton accès est personnel. Il est interdit de le partager, de le revendre ou de le prêter. Tu es responsable de la sécurité de ton compte Whop.</p>
       </Sec>
 

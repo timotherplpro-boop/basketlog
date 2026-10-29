@@ -10,7 +10,7 @@ export const metadata = pageMeta({
 });
 
 const OFFRES = [
-  ["Starter", "10 € par mois", "1 analyse complète par jour", "Abonnement mensuel, renouvelé automatiquement chaque mois"],
+  ["Starter", "10 € par mois", "5 analyses complètes par jour", "Abonnement mensuel, renouvelé automatiquement chaque mois"],
   ["Pro", "19 € par mois", "Analyses complètes illimitées", "Abonnement mensuel, renouvelé automatiquement chaque mois"],
   ["Lifetime", "99 € une seule fois", "Analyses complètes illimitées, comme Pro", "Paiement unique, sans renouvellement, pour toute la durée d'exploitation du service"],
 ];

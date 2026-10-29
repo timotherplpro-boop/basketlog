@@ -14,7 +14,7 @@ const Icon = ({ name }) => {
 const PLANS = [
   {
     id: "starter", name: "Starter", icon: "bolt", price: "10 €", per: "/mois", sub: "Pour découvrir Basketlog", cta: "Débloquer - 10 €/mois",
-    perks: ["1 analyse complète par jour", "Score projeté et scénarios", "Stats clés des deux équipes", "NBA et EuroLeague"],
+    perks: ["5 analyses complètes par jour", "Score projeté et scénarios", "Stats clés des deux équipes", "NBA et EuroLeague"],
   },
   {
     id: "pro", name: "Pro", icon: "crown", price: "19 €", per: "/mois", sub: "Pour les passionnés de basket", badge: "Populaire", cta: "Débloquer - 19 €/mois",
@@ -28,6 +28,7 @@ const PLANS = [
 
 const NOTICES = {
   ok: ["good", "Ton abonnement est actif. Bonnes analyses !"],
+  compte: ["good", "Ton compte gratuit est actif : 1 analyse complète offerte chaque jour. Pour en avoir plus, choisis une formule ci-dessous."],
   abonnement: ["warn", "Connexion réussie, mais aucun abonnement Basketlog actif n'a été trouvé sur ce compte Whop. Utilise le même compte que pour ton paiement."],
   connexion: ["warn", "La connexion avec Whop n'a pas abouti. Réessaie dans un instant."],
   config: ["warn", "Le paiement n'est pas encore activé sur Basketlog. Reviens très bientôt."],
@@ -49,6 +50,7 @@ export default function ProPlans({ checkout, loginReady, notice }) {
     else if (notice) track("Connexion Whop", { etape: "erreur", raison: notice });
   }, [pro, notice]);
   const current = pro?.tier || "gratuit";
+  const TIER_LABEL = { gratuit: "Gratuit", compte: "Compte gratuit", starter: "Starter", pro: "Pro", lifetime: "Lifetime" };
   const n = NOTICES[notice];
 
   return (
@@ -87,12 +89,15 @@ export default function ProPlans({ checkout, loginReady, notice }) {
       <div className="pro-account">
         {pro?.connected ? (
           <p>
-            Connecté avec Whop{pro.name ? <> en tant que <b>{pro.name}</b></> : ""} · formule <b>{current}</b>
+            Connecté avec Whop{pro.name ? <> en tant que <b>{pro.name}</b></> : ""} · formule <b>{TIER_LABEL[current] || current}</b>
             {" · "}<a href="https://whop.com/@me/settings/orders/" target="_blank" rel="noopener">Gérer mon abonnement</a>
             {" · "}<a href="/api/pro/logout">Se déconnecter</a>
           </p>
         ) : loginReady ? (
-          <p>Déjà abonné ? <a href="/api/whop/login" className="pro-login" onClick={() => track("Connexion Whop", { etape: "clic" })}>Me connecter avec Whop</a></p>
+          <p>
+            Pas encore de compte ? <a href="/api/whop/signup?next=/app/matchs" className="pro-login" onClick={() => track("Clic créer un compte", { source: "page_pro" })}>Créer mon compte gratuit</a> (1 analyse offerte par jour)
+            {" · "}Déjà inscrit ? <a href="/api/whop/login" className="pro-login" onClick={() => track("Connexion Whop", { etape: "clic", source: "page_pro" })}>Me connecter</a>
+          </p>
         ) : null}
         <p className="pro-secure">Tu peux arrêter ton abonnement à tout moment. Paiement sécurisé par Whop. Toutes nos analyses sont fournies à titre informatif.</p>
       </div>

@@ -8,11 +8,14 @@ function todayKey() {
   return "hs_views_" + new Date().toISOString().slice(0, 10);
 }
 
-// Analyse complète : réservée aux abonnés. Starter = 1 par jour, Pro et Lifetime = illimitées.
-// Sans abonnement, seules les probabilités et les chiffres clés en haut de la fiche sont visibles.
+// Analyse complète : comme Visifoot, il faut un compte gratuit pour la débloquer.
+// Compte gratuit = 1 analyse par jour, Starter = 5, Pro et Lifetime = illimitées.
+// Sans compte, seules les probabilités et les chiffres clés en haut de la fiche sont visibles.
 export default function Gate({ matchId, league = "NBA", children }) {
   const pro = useProStatus();
   const [state, setState] = useState({ locked: false, used: 0, ready: false });
+  const [here, setHere] = useState("");
+  useEffect(() => { setHere(encodeURIComponent(location.pathname + location.search)); }, []);
 
   useEffect(() => {
     if (!pro) return;
@@ -37,12 +40,15 @@ export default function Gate({ matchId, league = "NBA", children }) {
     track("Analyse consultée", { match_id: String(matchId), ligue: league, formule: pro.tier });
   }, [matchId, pro, league]);
 
-  const free = !pro || pro.tier === "gratuit";
+  const visitor = !pro || !pro.connected; // pas encore de compte
+  const tier = pro?.tier;
+  const label = tier === "starter" ? "Starter" : "gratuite";
+
   return (
     <>
       {state.ready && !state.unlimited && !state.locked && state.limit > 0 && (
         <div className="counter">
-          Analyse Starter <b>{state.used}/{state.limit}</b> aujourd&apos;hui · <Link href="/pro" onClick={() => track("Clic Passer Pro", { source: "compteur" })}>Passer Pro</Link>
+          Analyse {label} <b>{state.used}/{state.limit}</b> aujourd&apos;hui · <Link href="/pro" onClick={() => track("Clic Passer Pro", { source: "compteur" })}>{tier === "starter" ? "Passer Pro" : "Débloquer plus d'analyses"}</Link>
         </div>
       )}
       <div className={`gated ${state.locked ? "locked" : ""}`}>
@@ -50,21 +56,26 @@ export default function Gate({ matchId, league = "NBA", children }) {
         {state.locked && (
           <div className="gate-overlay">
             <div className="gate-box">
-              {free ? (
+              {visitor ? (
                 <>
-                  <h3>Débloque l&apos;analyse complète</h3>
-                  <p>Score projeté détaillé, facteurs, scénarios, stats comparées, joueurs à suivre et forme récente : tout est réservé aux abonnés. Les probabilités de victoire restent gratuites.</p>
+                  <h3>Crée ton compte gratuit pour débloquer l&apos;analyse complète</h3>
+                  <p>Score projeté détaillé, facteurs, scénarios, stats comparées, joueurs à suivre et forme récente. Avec un compte gratuit, tu as 1 analyse complète offerte chaque jour.</p>
+                  <a href={`/api/whop/signup?next=${here}`} className="btn-solid" onClick={() => track("Clic créer un compte", { source: "analyse_bloquee", ligue: league })}>Créer mon compte gratuit</a>
+                  <a href={`/api/whop/login?next=${here}`} className="gate-login" onClick={() => track("Connexion Whop", { etape: "clic", source: "analyse_bloquee" })}>Déjà un compte ? Se connecter</a>
+                </>
+              ) : tier === "starter" ? (
+                <>
+                  <h3>Tes 5 analyses Starter du jour sont utilisées</h3>
+                  <p>Passe à Pro pour des analyses illimitées, ou reviens demain.</p>
+                  <Link href="/pro" className="btn-solid" onClick={() => track("Clic Passer Pro", { source: "limite" })}>Passer à Pro</Link>
                 </>
               ) : (
                 <>
-                  <h3>Ton analyse Starter du jour est utilisée</h3>
-                  <p>La formule Starter inclut 1 analyse complète par jour. Passe à Pro pour des analyses illimitées, ou reviens demain.</p>
+                  <h3>Ton analyse gratuite du jour est utilisée</h3>
+                  <p>Starter t&apos;offre 5 analyses complètes par jour, Pro les rend illimitées. Sinon, reviens demain pour ta prochaine analyse offerte.</p>
+                  <Link href="/pro" className="btn-solid" onClick={() => track("Clic Passer Pro", { source: "limite_compte" })}>Voir les formules dès 10 €/mois</Link>
                 </>
               )}
-              <Link href="/pro" className="btn-solid" onClick={() => track("Clic Passer Pro", { source: free ? "analyse_bloquee" : "limite" })}>
-                {free ? "Débloquer dès 10 €/mois" : "Passer à Pro"}
-              </Link>
-              {free && <a href="/api/whop/login" className="gate-login">Déjà abonné ? Se connecter</a>}
             </div>
           </div>
         )}

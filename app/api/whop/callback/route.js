@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { SITE } from "../../../../lib/site";
-import { COOKIE, cookieOptions, encodeSession, whopTier } from "../../../../lib/pro";
+import { COOKIE, cookieOptions, encodeSession, whopTier, safeNext, NEXT_COOKIE } from "../../../../lib/pro";
 
 // Retour de Whop : échange du code, identité de l'utilisateur, vérification de l'abonnement.
 export async function GET(req) {
@@ -44,8 +44,15 @@ export async function GET(req) {
     const tier = await whopTier(uid);
     const value = encodeSession({ uid, name: info.preferred_username || info.name || "", tier, checked: Date.now() });
     if (!value) return fail("config");
-    const r = NextResponse.redirect(`${SITE}/pro?${tier === "gratuit" ? "erreur=abonnement" : "ok=1"}`);
+    // Retour sur la page d'origine (ex. la fiche match), sinon page Pro (abonné) ou matchs du jour (compte gratuit).
+    const next = safeNext(req.cookies.get(NEXT_COOKIE)?.value);
+    const flow = req.cookies.get("bl_flow")?.value === "signup" ? "inscription" : "connexion";
+    const dest = new URL(next || (tier === "compte" ? "/app/matchs" : "/pro"), SITE);
+    dest.searchParams.set("bienvenue", tier === "compte" ? flow : "abonne");
+    const r = NextResponse.redirect(dest.toString());
     r.cookies.set(COOKIE, value, cookieOptions);
+    r.cookies.delete({ name: NEXT_COOKIE, path: "/api/whop" });
+    r.cookies.delete({ name: "bl_flow", path: "/api/whop" });
     r.cookies.delete({ name: "whop_pkce", path: "/api/whop" });
     r.cookies.delete({ name: "whop_state", path: "/api/whop" });
     return r;

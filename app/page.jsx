@@ -79,7 +79,7 @@ export default async function Home() {
   const nTeams = 30 + elCrests.length;
 
   const faq = [
-    { q: "1. Basketlog est-il gratuit ?", a: "Les probabilités de victoire de tous les matchs sont gratuites. Les analyses complètes (scénarios, stats comparées, joueurs, forme) sont réservées aux abonnés : Starter à 10 €/mois (1 analyse par jour), Pro à 19 €/mois (illimité) ou Lifetime à 99 € une seule fois. Tout est sur la page Pro (/pro)." },
+    { q: "1. Basketlog est-il gratuit ?", a: "Les probabilités de victoire de tous les matchs sont gratuites, sans inscription. Avec un compte gratuit, tu débloques en plus 1 analyse complète par jour (scénarios, stats comparées, joueurs, forme). Pour aller plus loin : Starter à 10 €/mois (5 analyses par jour), Pro à 19 €/mois (illimité) ou Lifetime à 99 € une seule fois. Tout est sur la page Pro (/pro)." },
     { q: "2. Comment fonctionnent les analyses ?", a: "Le modèle part du niveau réel de chaque équipe (écart de points, attaque, défense, saison passée), puis ajoute l'avantage du terrain, la fatigue des back-to-back et les absences. La marge attendue est convertie en probabilité de victoire et en scénarios. Tout le détail est sur la page Méthode (/methode)." },
     { q: "3. Est-ce que Basketlog permet de parier ?", a: "Non. Basketlog est un outil d'analyse pour mieux comprendre les matchs. Aucune prise de pari ne se fait ici et aucune probabilité n'est une garantie." },
     { q: "4. Quelles compétitions sont couvertes ?", a: "La NBA (les 30 franchises, avec stats de tirs, joueurs clés, forme récente et confrontations) et l'EuroLeague (les 20 clubs, avec probabilités, forme et classement). D'autres championnats arriveront ensuite." },

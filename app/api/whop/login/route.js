@@ -1,9 +1,10 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { SITE } from "../../../../lib/site";
+import { safeNext, NEXT_COOKIE, flowCookieOptions } from "../../../../lib/pro";
 
 // Démarre « Se connecter avec Whop » (OAuth + PKCE).
-export async function GET() {
+export async function GET(req) {
   const clientId = process.env.WHOP_CLIENT_ID;
   if (!clientId) return NextResponse.redirect(`${SITE}/pro?erreur=config`);
   const verifier = crypto.randomBytes(32).toString("base64url");
@@ -24,5 +25,7 @@ export async function GET() {
   const opts = { httpOnly: true, secure: true, sameSite: "lax", path: "/api/whop", maxAge: 600 };
   res.cookies.set("whop_pkce", verifier, opts);
   res.cookies.set("whop_state", state, opts);
+  const next = safeNext(new URL(req.url).searchParams.get("next"));
+  if (next) res.cookies.set(NEXT_COOKIE, next, flowCookieOptions);
   return res;
 }
