@@ -85,7 +85,7 @@ button { font: inherit; color: inherit; }
   .burger { display: block; }
   .logo { font-size: 25px; }
   .mmenu { background: rgba(2, 4, 12, .55); }
-  .mm-panel { top: 0; right: 0; left: 0; width: auto; max-height: 100vh; padding: 20px 20px 26px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0 0 22px 22px; background: rgba(4, 8, 23, .98); transform: translateY(-14px); }
+  .mm-panel { top: 0; right: 0; left: 0; width: auto; max-height: 100vh; padding: 20px 20px 26px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0 0 22px 22px; background: var(--bg); transform: translateY(-14px); }
   .mm-top { display: flex; align-items: center; justify-content: space-between; height: 40px; }
   .mm-x { width: 40px; height: 40px; padding: 8px; border: 0; background: none; color: var(--peach); cursor: pointer; }
   .mm-x svg { width: 24px; height: 24px; }
@@ -874,3 +874,8 @@ a.team:hover .team-name { color: var(--peach); }
 .ios-share { width: 18px; height: 18px; vertical-align: -3px; color: #3b82f6; }
 @media (display-mode: standalone) { .install-banner { display: none; } }
 body:has(.mmenu.open) .install-banner { display: none; }
+/* Empêche les logos flottants et le téléphone animé d'élargir la page sur mobile (clip ne casse pas position: sticky) */
+.hero, .sticky-sec { overflow-x: clip; }
+.ios-sheet .qr { display: block; margin: 6px auto 16px; border-radius: 14px; background: #fff; padding: 6px; }
+.install-steps { text-align: left; margin: 16px 0 0; padding-left: 18px; display: grid; gap: 10px; color: var(--muted); font-size: 14.5px; line-height: 1.5; }
+.install-steps b { color: var(--text); }

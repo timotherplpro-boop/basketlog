@@ -80,9 +80,11 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
       <AppTabs active={isNBA ? "analyse" : "euroleague"} />
       <Link href={L.href(backHref)} className="back">← {L.t("Retour", "Back", "Volver")}</Link>
       <h1 className="match-title">
-        {L.en
-          ? `${g.away.short} vs ${g.home.short} ${g.hypothetical ? "analysis" : "prediction"}`
-          : `${g.hypothetical ? "Analyse" : "Pronostic"} ${g.away.short} – ${g.home.short}`}{" "}
+        {L.t(
+          `${g.hypothetical ? "Analyse" : "Pronostic"} ${g.away.short} – ${g.home.short}`,
+          `${g.away.short} vs ${g.home.short} ${g.hypothetical ? "analysis" : "prediction"}`,
+          `${g.hypothetical ? "Análisis" : "Pronóstico"} ${g.away.short} – ${g.home.short}`
+        )}{" "}
         <span>{g.hypothetical ? L.t("Match hypothétique", "Hypothetical game", "Partido hipotético") : `${isNBA ? "NBA" : L.t("EuroLeague", "EuroLeague", "Euroliga")} · ${dayLong(g.date, L)}`}</span>
       </h1>
 
