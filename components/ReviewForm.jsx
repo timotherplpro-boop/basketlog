@@ -31,42 +31,42 @@ export default function ReviewForm({ label, className = "btn-white" }) {
       });
       const j = await res.json();
       if (j.ok) { setState({ status: "done", error: "" }); track("Avis envoyé", { note }); }
-      else setState({ status: "idle", error: j.error || L.t("Une erreur est survenue.", "Something went wrong.") });
+      else setState({ status: "idle", error: j.error || L.t("Une erreur est survenue.", "Something went wrong.", "Se ha producido un error.") });
     } catch {
-      setState({ status: "idle", error: L.t("Connexion impossible, réessaie.", "Couldn't connect, please try again.") });
+      setState({ status: "idle", error: L.t("Connexion impossible, réessaie.", "Couldn't connect, please try again.", "No se ha podido conectar, inténtalo de nuevo.") });
     }
   }
 
   return (
     <>
-      <button type="button" className={className} onClick={() => { setOpen(true); setState({ status: "idle", error: "" }); }}>{label || L.t("Donner mon avis", "Leave a review")}</button>
+      <button type="button" className={className} onClick={() => { setOpen(true); setState({ status: "idle", error: "" }); }}>{label || L.t("Donner mon avis", "Leave a review", "Dar mi opinión")}</button>
       {open && (
         <div className="modal" role="dialog" aria-modal="true" aria-labelledby="avis-title" onClick={(e) => e.target === e.currentTarget && setOpen(false)}>
           <div className="modal-box">
-            <button className="modal-x" onClick={() => setOpen(false)} aria-label={L.t("Fermer", "Close")}>×</button>
+            <button className="modal-x" onClick={() => setOpen(false)} aria-label={L.t("Fermer", "Close", "Cerrar")}>×</button>
             {state.status === "done" ? (
               <div className="modal-done">
                 <span className="ball big-ball" aria-hidden />
-                <h3 id="avis-title">{L.t("Merci pour ton avis !", "Thanks for your review!")}</h3>
-                <p>{L.t("Il sera affiché sur Basketlog dès qu'il aura été relu.", "It will appear on Basketlog once it has been reviewed.")}</p>
-                <button className="btn-solid" onClick={() => setOpen(false)}>{L.t("Fermer", "Close")}</button>
+                <h3 id="avis-title">{L.t("Merci pour ton avis !", "Thanks for your review!", "¡Gracias por tu opinión!")}</h3>
+                <p>{L.t("Il sera affiché sur Basketlog dès qu'il aura été relu.", "It will appear on Basketlog once it has been reviewed.", "Se mostrará en Basketlog en cuanto la hayamos revisado.")}</p>
+                <button className="btn-solid" onClick={() => setOpen(false)}>{L.t("Fermer", "Close", "Cerrar")}</button>
               </div>
             ) : (
               <form onSubmit={submit}>
-                <h3 id="avis-title">{L.t("Ton avis sur Basketlog", "Your review of Basketlog")}</h3>
-                <p className="modal-sub">{L.t("Il sera publié avec ton prénom après relecture.", "It will be published with your first name after review.")} <a href={L.href("/confidentialite")} target="_blank" rel="noopener">{L.t("Tes données", "Your data")}</a></p>
-                <div className="stars" role="radiogroup" aria-label={L.t("Note", "Rating")} onMouseLeave={() => setHover(0)}>
+                <h3 id="avis-title">{L.t("Ton avis sur Basketlog", "Your review of Basketlog", "Tu opinión sobre Basketlog")}</h3>
+                <p className="modal-sub">{L.t("Il sera publié avec ton prénom après relecture.", "It will be published with your first name after review.", "Se publicará con tu nombre tras una revisión.")} <a href={L.href("/confidentialite")} target="_blank" rel="noopener">{L.t("Tes données", "Your data", "Tus datos")}</a></p>
+                <div className="stars" role="radiogroup" aria-label={L.t("Note", "Rating", "Nota")} onMouseLeave={() => setHover(0)}>
                   {[1, 2, 3, 4, 5].map((n) => (
-                    <button type="button" key={n} role="radio" aria-checked={note === n} aria-label={L.en ? `${n} star${n > 1 ? "s" : ""}` : `${n} étoile${n > 1 ? "s" : ""}`}
+                    <button type="button" key={n} role="radio" aria-checked={note === n} aria-label={L.t(`${n} étoile${n > 1 ? "s" : ""}`, `${n} star${n > 1 ? "s" : ""}`, `${n} estrella${n > 1 ? "s" : ""}`)}
                       className={(hover || note) >= n ? "on" : ""} onMouseEnter={() => setHover(n)} onClick={() => setNote(n)}>★</button>
                   ))}
                 </div>
-                <label>{L.t("Prénom", "First name")}<input name="prenom" required minLength={2} maxLength={40} placeholder={L.t("Ex : Karim", "E.g. Jordan")} autoComplete="given-name" /></label>
-                <label><span>{L.t("Qui es-tu ?", "Who are you?")} <small>{L.t("(facultatif)", "(optional)")}</small></span><input name="profil" maxLength={60} placeholder={L.t("Ex : Fan des Celtics depuis 2008", "E.g. Celtics fan since 2008")} /></label>
-                <label>{L.t("Ton avis", "Your review")}<textarea name="texte" required minLength={15} maxLength={500} rows={4} placeholder={L.t("Qu'est-ce que Basketlog t'apporte ?", "What does Basketlog do for you?")} /></label>
+                <label>{L.t("Prénom", "First name", "Nombre")}<input name="prenom" required minLength={2} maxLength={40} placeholder={L.t("Ex : Karim", "E.g. Jordan", "P. ej.: Javier")} autoComplete="given-name" /></label>
+                <label><span>{L.t("Qui es-tu ?", "Who are you?", "¿Quién eres?")} <small>{L.t("(facultatif)", "(optional)", "(opcional)")}</small></span><input name="profil" maxLength={60} placeholder={L.t("Ex : Fan des Celtics depuis 2008", "E.g. Celtics fan since 2008", "P. ej.: fan de los Celtics desde 2008")} /></label>
+                <label>{L.t("Ton avis", "Your review", "Tu opinión")}<textarea name="texte" required minLength={15} maxLength={500} rows={4} placeholder={L.t("Qu'est-ce que Basketlog t'apporte ?", "What does Basketlog do for you?", "¿Qué te aporta Basketlog?")} /></label>
                 <input name="site" tabIndex={-1} autoComplete="off" className="hp" aria-hidden="true" />
                 {state.error && <p className="modal-err">{state.error}</p>}
-                <button className="btn-solid" disabled={!note || state.status === "sending"}>{state.status === "sending" ? L.t("Envoi…", "Sending…") : note ? L.t("Envoyer mon avis", "Send my review") : L.t("Choisis une note", "Pick a rating")}</button>
+                <button className="btn-solid" disabled={!note || state.status === "sending"}>{state.status === "sending" ? L.t("Envoi…", "Sending…", "Enviando…") : note ? L.t("Envoyer mon avis", "Send my review", "Enviar mi opinión") : L.t("Choisis une note", "Pick a rating", "Elige una nota")}</button>
               </form>
             )}
           </div>

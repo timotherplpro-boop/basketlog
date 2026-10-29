@@ -40,7 +40,7 @@ export default function TeamSearch({ games }) {
         onFocus={() => { setOpen(true); setFocus(true); }}
         onBlur={() => setFocus(false)}
         placeholder={focus ? L.t("Tape le nom d'une équipe", "Type a team name", "Escribe el nombre de un equipo") : ph}
-        aria-label={L.t("Rechercher une équipe NBA", "Search an NBA team")}
+        aria-label={L.t("Rechercher une équipe NBA", "Search an NBA team", "Buscar un equipo de la NBA")}
         autoComplete="off"
       /></div>
       {open && q.trim().length >= 2 && (
@@ -57,11 +57,11 @@ export default function TeamSearch({ games }) {
                   <img src={g.home.logo} alt="" width={26} height={26} />
                   <b>{g.home.short}</b>
                 </span>
-                <span className="search-when">{g.live ? L.t("● En direct", "● Live") : when(g.date, L)}</span>
+                <span className="search-when">{g.live ? L.t("● En direct", "● Live", "● En directo") : when(g.date, L)}</span>
               </Link>
             ))
           ) : (
-            <div className="search-empty">{L.en ? <>No upcoming games this week for “{q}”.</> : <>Aucun match à venir cette semaine pour « {q} ».</>} <Link href={L.href("/app")} style={{ color: "var(--orange-2)" }}>{L.t("Analyser un duel →", "Analyze a matchup →")}</Link></div>
+            <div className="search-empty">{L.t(<>Aucun match à venir cette semaine pour « {q} ».</>, <>No upcoming games this week for “{q}”.</>, <>No hay partidos esta semana para «{q}».</>)} <Link href={L.href("/app")} style={{ color: "var(--orange-2)" }}>{L.t("Analyser un duel →", "Analyze a matchup →", "Analizar un duelo →")}</Link></div>
           )}
         </div>
       )}

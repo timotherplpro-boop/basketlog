@@ -14,29 +14,37 @@ const Icon = ({ name }) => {
 
 const PLANS = (L) => [
   {
-    id: "starter", name: "Starter", icon: "bolt", price: L.t("10 €", "€10"), per: L.t("/mois", "/month"), sub: L.t("Pour découvrir Basketlog", "To get started with Basketlog"), cta: L.t("Débloquer - 10 €/mois", "Unlock - €10/month"),
-    perks: L.en ? ["5 full analyses per day", "Projected score and scenarios", "Key stats for both teams", "NBA and EuroLeague"] : ["5 analyses complètes par jour", "Score projeté et scénarios", "Stats clés des deux équipes", "NBA et EuroLeague"],
+    id: "starter", name: "Starter", icon: "bolt", price: L.t("10 €", "€10", "10 €"), per: L.t("/mois", "/month", "/mes"), sub: L.t("Pour découvrir Basketlog", "To get started with Basketlog", "Para descubrir Basketlog"), cta: L.t("Débloquer - 10 €/mois", "Unlock - €10/month", "Desbloquear - 10 €/mes"),
+    perks: L.t(
+      ["5 analyses complètes par jour", "Score projeté et scénarios", "Stats clés des deux équipes", "NBA et EuroLeague"],
+      ["5 full analyses per day", "Projected score and scenarios", "Key stats for both teams", "NBA and EuroLeague"],
+      ["5 análisis completos al día", "Marcador proyectado y escenarios", "Estadísticas clave de los dos equipos", "NBA y Euroliga"]
+    ),
   },
   {
-    id: "pro", name: "Pro", icon: "crown", price: L.t("19 €", "€19"), per: L.t("/mois", "/month"), sub: L.t("Pour les passionnés de basket", "For basketball enthusiasts"), badge: L.t("Populaire", "Popular"), cta: L.t("Débloquer - 19 €/mois", "Unlock - €19/month"),
-    perks: L.en
-      ? ["Unlimited analyses", "Detailed full analysis", "Detailed likely scenarios", "Stat comparison, players to watch and form", "Injuries and fatigue factored in"]
-      : ["Analyses illimitées", "Analyse complète détaillée", "Scénarios probables détaillés", "Stats comparées, joueurs à suivre et forme", "Absences et fatigue prises en compte"],
+    id: "pro", name: "Pro", icon: "crown", price: L.t("19 €", "€19", "19 €"), per: L.t("/mois", "/month", "/mes"), sub: L.t("Pour les passionnés de basket", "For basketball enthusiasts", "Para los apasionados del baloncesto"), badge: L.t("Populaire", "Popular", "Popular"), cta: L.t("Débloquer - 19 €/mois", "Unlock - €19/month", "Desbloquear - 19 €/mes"),
+    perks: L.t(
+      ["Analyses illimitées", "Analyse complète détaillée", "Scénarios probables détaillés", "Stats comparées, joueurs à suivre et forme", "Absences et fatigue prises en compte"],
+      ["Unlimited analyses", "Detailed full analysis", "Detailed likely scenarios", "Stat comparison, players to watch and form", "Injuries and fatigue factored in"],
+      ["Análisis ilimitados", "Análisis completo detallado", "Escenarios probables detallados", "Estadísticas comparadas, jugadores a seguir y forma", "Bajas y cansancio incluidos"]
+    ),
   },
   {
-    id: "lifetime", name: "Lifetime", icon: "infinity", price: L.t("99 €", "€99"), per: L.t("une seule fois", "one-time"), sub: L.t("Économise +100 €/an vs mensuel", "Save €100+/year vs monthly"), badge: L.t("À vie", "Lifetime"), cta: L.t("Débloquer - 99 €", "Unlock - €99"),
-    perks: L.en
-      ? ["Unlimited analyses for life", "Everything in Pro", "No more monthly payments", "Early access to new features"]
-      : ["Analyses illimitées à vie", "Tout le contenu de Pro", "Plus jamais de paiement mensuel", "Priorité sur les nouvelles fonctionnalités"],
+    id: "lifetime", name: "Lifetime", icon: "infinity", price: L.t("99 €", "€99", "99 €"), per: L.t("une seule fois", "one-time", "pago único"), sub: L.t("Économise +100 €/an vs mensuel", "Save €100+/year vs monthly", "Ahorra +100 €/año frente al mensual"), badge: L.t("À vie", "Lifetime", "De por vida"), cta: L.t("Débloquer - 99 €", "Unlock - €99", "Desbloquear - 99 €"),
+    perks: L.t(
+      ["Analyses illimitées à vie", "Tout le contenu de Pro", "Plus jamais de paiement mensuel", "Priorité sur les nouvelles fonctionnalités"],
+      ["Unlimited analyses for life", "Everything in Pro", "No more monthly payments", "Early access to new features"],
+      ["Análisis ilimitados de por vida", "Todo el contenido de Pro", "Se acabaron los pagos mensuales", "Prioridad en las nuevas funciones"]
+    ),
   },
 ];
 
 const NOTICES = {
-  ok: ["good", "Ton abonnement est actif. Bonnes analyses !", "Your subscription is active. Enjoy the analyses!"],
-  compte: ["good", "Ton compte gratuit est actif : 1 analyse complète offerte chaque jour. Pour en avoir plus, choisis une formule ci-dessous.", "Your free account is active: 1 full analysis free every day. Want more? Pick a plan below."],
-  abonnement: ["warn", "Connexion réussie, mais aucun abonnement Basketlog actif n'a été trouvé sur ce compte Whop. Utilise le même compte que pour ton paiement.", "You're logged in, but no active Basketlog subscription was found on this Whop account. Use the same account you paid with."],
-  connexion: ["warn", "La connexion avec Whop n'a pas abouti. Réessaie dans un instant.", "Logging in with Whop didn't work. Please try again in a moment."],
-  config: ["warn", "Le paiement n'est pas encore activé sur Basketlog. Reviens très bientôt.", "Payments aren't enabled on Basketlog yet. Please come back soon."],
+  ok: ["good", "Ton abonnement est actif. Bonnes analyses !", "Your subscription is active. Enjoy the analyses!", "Tu suscripción está activa. ¡Buenos análisis!"],
+  compte: ["good", "Ton compte gratuit est actif : 1 analyse complète offerte chaque jour. Pour en avoir plus, choisis une formule ci-dessous.", "Your free account is active: 1 full analysis free every day. Want more? Pick a plan below.", "Tu cuenta gratis está activa: 1 análisis completo gratis cada día. Si quieres más, elige un plan aquí abajo."],
+  abonnement: ["warn", "Connexion réussie, mais aucun abonnement Basketlog actif n'a été trouvé sur ce compte Whop. Utilise le même compte que pour ton paiement.", "You're logged in, but no active Basketlog subscription was found on this Whop account. Use the same account you paid with.", "Has iniciado sesión, pero no hemos encontrado ninguna suscripción activa de Basketlog en esta cuenta de Whop. Usa la misma cuenta con la que pagaste."],
+  connexion: ["warn", "La connexion avec Whop n'a pas abouti. Réessaie dans un instant.", "Logging in with Whop didn't work. Please try again in a moment.", "No se ha podido iniciar sesión con Whop. Vuelve a intentarlo en un momento."],
+  config: ["warn", "Le paiement n'est pas encore activé sur Basketlog. Reviens très bientôt.", "Payments aren't enabled on Basketlog yet. Please come back soon.", "El pago todavía no está activado en Basketlog. Vuelve muy pronto."],
 };
 
 export default function ProPlans({ checkout, loginReady, notice }) {
@@ -56,21 +64,25 @@ export default function ProPlans({ checkout, loginReady, notice }) {
     else if (notice) track("Connexion Whop", { etape: "erreur", raison: notice });
   }, [pro, notice]);
   const current = pro?.tier || "gratuit";
-  const TIER_LABEL = L.en
-    ? { gratuit: "Free", compte: "Free account", starter: "Starter", pro: "Pro", lifetime: "Lifetime" }
-    : { gratuit: "Gratuit", compte: "Compte gratuit", starter: "Starter", pro: "Pro", lifetime: "Lifetime" };
+  const TIER_LABEL = L.t(
+    { gratuit: "Gratuit", compte: "Compte gratuit", starter: "Starter", pro: "Pro", lifetime: "Lifetime" },
+    { gratuit: "Free", compte: "Free account", starter: "Starter", pro: "Pro", lifetime: "Lifetime" },
+    { gratuit: "Gratis", compte: "Cuenta gratis", starter: "Starter", pro: "Pro", lifetime: "Lifetime" }
+  );
   const n = NOTICES[notice];
 
   return (
     <>
-      {n && <div className={`pro-notice ${n[0]}`} role="status">{L.en ? n[2] : n[1]}</div>}
+      {n && <div className={`pro-notice ${n[0]}`} role="status">{L.t(n[1], n[2], n[3])}</div>}
       <label className={`pro-agree ${nudge && !agree ? "nudge" : ""}`}>
         <input id="pro-agree" type="checkbox" checked={agree} onChange={(e) => { setAgree(e.target.checked); setNudge(false); }} />
-        {L.en
-          ? <span>I accept the <Link href={L.href("/cgv")} target="_blank">Terms of Sale</Link> and <Link href={L.href("/cgu")} target="_blank">Terms of Use</Link>, and I request immediate access to my analyses: I acknowledge that I lose my 14-day right of withdrawal.</span>
-          : <span>J&apos;accepte les <Link href="/cgv" target="_blank">CGV</Link> et les <Link href="/cgu" target="_blank">CGU</Link>, et je demande l&apos;accès immédiat à mes analyses : je reconnais perdre mon droit de rétractation de 14 jours.</span>}
+        {L.t(
+          <span>J&apos;accepte les <Link href="/cgv" target="_blank">CGV</Link> et les <Link href="/cgu" target="_blank">CGU</Link>, et je demande l&apos;accès immédiat à mes analyses : je reconnais perdre mon droit de rétractation de 14 jours.</span>,
+          <span>I accept the <Link href={L.href("/cgv")} target="_blank">Terms of Sale</Link> and <Link href={L.href("/cgu")} target="_blank">Terms of Use</Link>, and I request immediate access to my analyses: I acknowledge that I lose my 14-day right of withdrawal.</span>,
+          <span>Acepto las <Link href={L.href("/cgv")} target="_blank">Condiciones de venta</Link> y las <Link href={L.href("/cgu")} target="_blank">Condiciones de uso</Link>, y pido el acceso inmediato a mis análisis: reconozco que pierdo mi derecho de desistimiento de 14 días.</span>
+        )}
       </label>
-      {nudge && !agree && <p className="pro-agree-hint" role="alert">{L.t("Coche la case ci-dessus pour continuer vers le paiement.", "Tick the box above to continue to checkout.")}</p>}
+      {nudge && !agree && <p className="pro-agree-hint" role="alert">{L.t("Coche la case ci-dessus pour continuer vers le paiement.", "Tick the box above to continue to checkout.", "Marca la casilla de arriba para continuar con el pago.")}</p>}
       <div className="plans">
         {PLANS(L).map((p, i) => {
           const url = checkout[p.id];
@@ -82,37 +94,39 @@ export default function ProPlans({ checkout, loginReady, notice }) {
               <div className="plan-sub">{p.sub}</div>
               <ul>{p.perks.map((k) => <li key={k}>{k}</li>)}</ul>
               {pro?.connected && current === p.id ? (
-                <span className="plan-cta plan-current">{L.t("Ta formule actuelle", "Your current plan")}</span>
+                <span className="plan-cta plan-current">{L.t("Ta formule actuelle", "Your current plan", "Tu plan actual")}</span>
               ) : url ? (
                 <a href={url} className={`plan-cta plan-buy ${agree ? "" : "plan-wait"}`} aria-disabled={!agree} onClick={buy(p.id)}>{p.cta}</a>
               ) : (
-                <span className="plan-cta plan-soon">{L.t("Bientôt disponible", "Coming soon")}</span>
+                <span className="plan-cta plan-soon">{L.t("Bientôt disponible", "Coming soon", "Próximamente")}</span>
               )}
             </article>
           );
         })}
       </div>
       <p className="pro-legal">
-        {L.en
-          ? <>Starter and Pro have no commitment: cancel anytime from your Whop account and keep access until the end of the paid month. A started period is not refunded. For adults 18 and over. </>
-          : <>Starter et Pro sont sans engagement : tu arrêtes quand tu veux depuis ton compte Whop, et tu gardes l&apos;accès jusqu&apos;à la fin du mois payé. Une période commencée n&apos;est pas remboursée. Réservé aux 18 ans et plus. </>}
-        <Link href={L.href("/cgv")}>{L.t("Conditions générales de vente", "Terms of Sale")}</Link>
+        {L.t(
+          <>Starter et Pro sont sans engagement : tu arrêtes quand tu veux depuis ton compte Whop, et tu gardes l&apos;accès jusqu&apos;à la fin du mois payé. Une période commencée n&apos;est pas remboursée. Réservé aux 18 ans et plus. </>,
+          <>Starter and Pro have no commitment: cancel anytime from your Whop account and keep access until the end of the paid month. A started period is not refunded. For adults 18 and over. </>,
+          <>Starter y Pro no tienen permanencia: cancelas cuando quieras desde tu cuenta de Whop y mantienes el acceso hasta el final del mes pagado. Un periodo empezado no se reembolsa. Solo para mayores de 18 años. </>
+        )}
+        <Link href={L.href("/cgv")}>{L.t("Conditions générales de vente", "Terms of Sale", "Condiciones generales de venta")}</Link>
       </p>
-      <p className="pro-free">{L.t("Sans abonnement, les probabilités de victoire de tous les matchs restent gratuites.", "Without a subscription, win probabilities for every game stay free.")} <Link href={L.href("/app/matchs")}>{L.t("Voir les matchs du jour", "See today's games")}</Link></p>
+      <p className="pro-free">{L.t("Sans abonnement, les probabilités de victoire de tous les matchs restent gratuites.", "Without a subscription, win probabilities for every game stay free.", "Sin suscripción, las probabilidades de victoria de todos los partidos siguen siendo gratis.")} <Link href={L.href("/app/matchs")}>{L.t("Voir les matchs du jour", "See today's games", "Ver los partidos de hoy")}</Link></p>
       <div className="pro-account">
         {pro?.connected ? (
           <p>
-            {L.t("Connecté avec Whop", "Logged in with Whop")}{pro.name ? <> {L.t("en tant que", "as")} <b>{pro.name}</b></> : ""} · {L.t("formule", "plan")} <b>{TIER_LABEL[current] || current}</b>
-            {" · "}<a href="https://whop.com/@me/settings/orders/" target="_blank" rel="noopener">{L.t("Gérer mon abonnement", "Manage my subscription")}</a>
-            {" · "}<a href="/api/pro/logout">{L.t("Se déconnecter", "Log out")}</a>
+            {L.t("Connecté avec Whop", "Logged in with Whop", "Conectado con Whop")}{pro.name ? <> {L.t("en tant que", "as", "como")} <b>{pro.name}</b></> : ""} · {L.t("formule", "plan", "plan")} <b>{TIER_LABEL[current] || current}</b>
+            {" · "}<a href="https://whop.com/@me/settings/orders/" target="_blank" rel="noopener">{L.t("Gérer mon abonnement", "Manage my subscription", "Gestionar mi suscripción")}</a>
+            {" · "}<a href="/api/pro/logout">{L.t("Se déconnecter", "Log out", "Cerrar sesión")}</a>
           </p>
         ) : loginReady ? (
           <p>
-            {L.t("Pas encore de compte ?", "No account yet?")} <a href={`/api/whop/signup?next=${encodeURIComponent(L.href("/app/matchs"))}`} className="pro-login" onClick={() => track("Clic créer un compte", { source: "page_pro" })}>{L.t("Créer mon compte gratuit", "Create my free account")}</a> {L.t("(1 analyse offerte par jour)", "(1 free analysis per day)")}
-            {" · "}{L.t("Déjà inscrit ?", "Already signed up?")} <a href={`/api/whop/login?next=${encodeURIComponent(L.href("/pro"))}`} className="pro-login" onClick={() => track("Connexion Whop", { etape: "clic", source: "page_pro" })}>{L.t("Me connecter", "Log in")}</a>
+            {L.t("Pas encore de compte ?", "No account yet?", "¿Todavía no tienes cuenta?")} <a href={`/api/whop/signup?next=${encodeURIComponent(L.href("/app/matchs"))}`} className="pro-login" onClick={() => track("Clic créer un compte", { source: "page_pro" })}>{L.t("Créer mon compte gratuit", "Create my free account", "Crear mi cuenta gratis")}</a> {L.t("(1 analyse offerte par jour)", "(1 free analysis per day)", "(1 análisis gratis al día)")}
+            {" · "}{L.t("Déjà inscrit ?", "Already signed up?", "¿Ya estás registrado?")} <a href={`/api/whop/login?next=${encodeURIComponent(L.href("/pro"))}`} className="pro-login" onClick={() => track("Connexion Whop", { etape: "clic", source: "page_pro" })}>{L.t("Me connecter", "Log in", "Iniciar sesión")}</a>
           </p>
         ) : null}
-        <p className="pro-secure">{L.t("Tu peux arrêter ton abonnement à tout moment. Paiement sécurisé par Whop. Toutes nos analyses sont fournies à titre informatif.", "You can cancel anytime. Secure payment by Whop. All analyses are provided for information only.")}</p>
+        <p className="pro-secure">{L.t("Tu peux arrêter ton abonnement à tout moment. Paiement sécurisé par Whop. Toutes nos analyses sont fournies à titre informatif.", "You can cancel anytime. Secure payment by Whop. All analyses are provided for information only.", "Puedes cancelar tu suscripción en cualquier momento. Pago seguro con Whop. Todos nuestros análisis se ofrecen a título informativo.")}</p>
       </div>
     </>
   );

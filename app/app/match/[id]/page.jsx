@@ -23,11 +23,19 @@ export async function generateMetadata({ params, searchParams }) {
   const sp = (await searchParams) || {};
   const L = await getL();
   const found = await findAnalysis(id, sp.d);
-  if (!found) return { title: L.t("Match introuvable – Basketlog", "Game not found – Basketlog"), robots: { index: false } };
+  if (!found) return { title: L.t("Match introuvable – Basketlog", "Game not found – Basketlog", "Partido no encontrado – Basketlog"), robots: { index: false } };
   const { a, date } = found;
   const g = a.game;
   const pFav = Math.max(a.pHome, a.pAway);
   const done = g.state === "post" && g.home.score != null;
+  if (L.es) return pageMeta({
+    title: `Pronóstico ${g.away.short} – ${g.home.short} (${dayShort(g.date, L)}): análisis NBA – Basketlog`,
+    description: done
+      ? `${g.away.name} – ${g.home.name}, ${dayLong(g.date, L)}: resultado final ${g.away.score}-${g.home.score}. El pronóstico de Basketlog antes del partido, sus probabilidades y su análisis.`
+      : `${g.away.name} – ${g.home.name}, ${dayLong(g.date, L)}: ${a.fav.team.name}, favorito al ${pctTxt(pFav, L)}. Marcador proyectado ${Math.round(a.awayPts)}-${Math.round(a.homePts)}, bajas, forma y escenarios del partido.`,
+    path: `/app/match/${id}?d=${date}`,
+    L,
+  });
   if (L.en) return pageMeta({
     title: `${g.away.short} vs ${g.home.short} prediction (${dayShort(g.date, L)}): NBA analysis – Basketlog`,
     description: done

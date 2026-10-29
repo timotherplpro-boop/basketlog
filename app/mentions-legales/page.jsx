@@ -6,6 +6,7 @@ import { getL } from "../../lib/lang-server";
 
 export async function generateMetadata() {
   const L = await getL();
+  if (L.es) return pageMeta({ title: "Aviso legal – Basketlog", description: "Aviso legal de Basketlog: editor, director de la publicación, alojamiento, propiedad intelectual y mediación de consumo.", path: "/mentions-legales", L });
   return L.en
     ? pageMeta({ title: "Legal notice – Basketlog", description: "Basketlog legal notice: publisher, publication director, host, intellectual property and consumer mediation.", path: "/mentions-legales", L })
     : pageMeta({ title: "Mentions légales – Basketlog", description: "Mentions légales du site Basketlog : éditeur, directeur de la publication, hébergeur, propriété intellectuelle et médiation de la consommation.", path: "/mentions-legales" });
@@ -97,7 +98,51 @@ function MentionsLegalesEn({ L }) {
   );
 }
 
+const NOTE_ES = "Esta versión en español es una traducción que se ofrece para tu comodidad. En caso de discrepancia, prevalece la versión francesa.";
+
+function MentionsLegalesEs({ L }) {
+  const e = LEGAL.editeur;
+  return (
+    <LegalDoc title="Aviso legal" path="/mentions-legales" intro={NOTE_ES} L={L}>
+      <Sec n={1} title="Editor del sitio">
+        <p>El sitio {LEGAL.url.replace("https://", "")} («Basketlog») lo edita <b>{e.nom}</b>, empresario individual (micro-entreprise francesa), {e.adresse}.</p>
+        <ul>
+          <li>SIREN {e.siren} — SIRET {e.siret}, inscrito en el Registro nacional de empresas francés (RNE)</li>
+          <li>IVA no aplicable, artículo 293 B del Código General de Impuestos francés</li>
+          <li>Contacto: <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a></li>
+        </ul>
+        <p>Director de la publicación: {LEGAL.directeur}.</p>
+      </Sec>
+
+      <Sec n={2} title="Alojamiento">
+        <p>El sitio está alojado por <b>{LEGAL.hebergeur.nom}</b>, 440 North Barranca Avenue, Suite 4133, Covina, CA 91723, Estados Unidos, teléfono {LEGAL.hebergeur.tel}, <a href={LEGAL.hebergeur.site} rel="noopener" target="_blank">vercel.com</a>.</p>
+        <p>La base de datos de opiniones está alojada por {LEGAL.base.nom} (<a href={LEGAL.base.site} rel="noopener" target="_blank">supabase.com</a>), con los datos almacenados en la región AWS de París (eu-west-3).</p>
+        <p>Los pagos y las cuentas de suscriptores los gestiona {LEGAL.paiement.nom}, 300 Kent Avenue #401, Brooklyn, NY 11249, Estados Unidos (<a href={LEGAL.paiement.site} rel="noopener" target="_blank">whop.com</a>).</p>
+      </Sec>
+
+      <Sec n={3} title="Propiedad intelectual">
+        <p>El nombre Basketlog, el sitio, sus textos, su diseño, su código y su modelo de análisis pertenecen a {e.nom}. Queda prohibida cualquier reproducción o reutilización, total o parcial, sin autorización por escrito.</p>
+        <p>Los nombres, logotipos y marcas de los equipos, de la NBA y de la Euroliga pertenecen a sus titulares. Se citan solo a título informativo: Basketlog no está afiliado a la NBA, a la Euroliga ni a ningún club. Las estadísticas proceden de fuentes públicas (ESPN, EuroLeague). Las fotos ilustrativas proceden de Unsplash y se usan conforme a la licencia de Unsplash.</p>
+      </Sec>
+
+      <Sec n={4} title="Pronósticos y juego responsable">
+        <p>Basketlog es una herramienta de análisis estadístico. No es un operador de juego ni un servicio de consejos de apuestas: en el sitio no se puede apostar y ninguna probabilidad es una garantía. El servicio está reservado a mayores de edad (18 años o más).</p>
+        <p>El juego conlleva riesgos como el endeudamiento o la adicción. Si necesitas ayuda en España, consulta <a href="https://www.jugarbien.es" rel="noopener" target="_blank">jugarbien.es</a>; en Francia: {LEGAL.jeu.nom}, {LEGAL.jeu.tel} (llamada sin recargo), <a href={LEGAL.jeu.site} rel="noopener" target="_blank">joueurs-info-service.fr</a>.</p>
+      </Sec>
+
+      <Sec n={5} title="Avisos, reclamaciones y mediación">
+        <p>Para señalar un contenido ilícito o presentar una reclamación: <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>.</p>
+        <p>De acuerdo con los artículos L611-1 y siguientes del Código de Consumo francés, si un litigio no se resuelve tras una reclamación por escrito a esta dirección, puedes acudir gratuitamente al mediador de consumo: <b>{LEGAL.mediateur.nom}</b>, {LEGAL.mediateur.adresse}, Francia, <a href={LEGAL.mediateur.site} rel="noopener" target="_blank">cm2c.net</a>. La solicitud debe presentarse en el plazo de un año desde tu reclamación por escrito.</p>
+      </Sec>
+
+      <Sec n={6} title="Datos personales y cookies">
+        <p>La recogida y el uso de tus datos se describen en la <Link href={L.href("/confidentialite")}>política de privacidad</Link> y en la <Link href={L.href("/cookies")}>política de cookies</Link>.</p>
+      </Sec>
+    </LegalDoc>
+  );
+}
+
 export default async function MentionsLegalesPage() {
   const L = await getL();
-  return L.en ? <MentionsLegalesEn L={L} /> : <MentionsLegalesFr />;
+  return L.es ? <MentionsLegalesEs L={L} /> : L.en ? <MentionsLegalesEn L={L} /> : <MentionsLegalesFr />;
 }

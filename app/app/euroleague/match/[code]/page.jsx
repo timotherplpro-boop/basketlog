@@ -12,10 +12,18 @@ export async function generateMetadata({ params }) {
   const L = await getL();
   const ctx = await elContext();
   const g = ctx.games.find((x) => x.id === String(code));
-  if (!g) return { title: L.t("Match EuroLeague – Basketlog", "EuroLeague game – Basketlog"), robots: { index: false } };
+  if (!g) return { title: L.t("Match EuroLeague – Basketlog", "EuroLeague game – Basketlog", "Partido de la Euroliga – Basketlog"), robots: { index: false } };
   const before = g.played ? elTable(ctx.games.filter((x) => x.played && new Date(x.date) < new Date(g.date))) : ctx.cur;
   const a = elAnalyze(g, before, ctx.prev);
   const done = g.played && g.home.score != null;
+  if (L.es) return pageMeta({
+    title: `Pronóstico ${g.away.short} – ${g.home.short} (${dayShort(g.date, L)}): análisis Euroliga – Basketlog`,
+    description: done
+      ? `${g.away.name} – ${g.home.name}, ${dayLong(g.date, L)}: resultado final ${g.away.score}-${g.home.score}. El pronóstico de Basketlog antes del partido y su análisis de la Euroliga.`
+      : `${g.away.name} – ${g.home.name}, ${dayLong(g.date, L)}: ${a.fav.team.name}, favorito al ${pctTxt(Math.max(a.pHome, a.pAway), L)}. Marcador proyectado, forma y escenarios de este partido de la Euroliga.`,
+    path: `/app/euroleague/match/${code}`,
+    L,
+  });
   if (L.en) return pageMeta({
     title: `${g.away.short} vs ${g.home.short} prediction (${dayShort(g.date, L)}): EuroLeague analysis – Basketlog`,
     description: done

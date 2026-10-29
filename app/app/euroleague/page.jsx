@@ -9,10 +9,10 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata() {
   const L = await getL();
   return pageMeta({
-    title: L.t("Pronostics EuroLeague : matchs, analyses et classement – Basketlog", "EuroLeague predictions: games, analysis and standings – Basketlog"),
+    title: L.t("Pronostics EuroLeague : matchs, analyses et classement – Basketlog", "EuroLeague predictions: games, analysis and standings – Basketlog", "Pronósticos Euroliga: partidos, análisis y clasificación – Basketlog"),
     description: L.t(
       "Pronostics EuroLeague pour chaque journée : probabilités de victoire, score projeté et forme des 20 clubs, avec le classement à jour.",
-      "EuroLeague predictions for every round: win probabilities, projected score and form for all 20 clubs, with up-to-date standings."
+      "EuroLeague predictions for every round: win probabilities, projected score and form for all 20 clubs, with up-to-date standings.", "Pronósticos de la Euroliga para cada jornada: probabilidades de victoria, marcador proyectado y forma de los 20 clubes, con la clasificación actualizada."
     ),
     path: "/app/euroleague",
     L,
@@ -32,16 +32,16 @@ export default async function EuroLeaguePage() {
     <main className="app-page wide">
       <AppTabs active="euroleague" />
       <div className="app-head">
-        <h1>EuroLeague {year}-{String(year + 1).slice(2)}</h1>
-        <p>{L.t("Les 20 meilleurs clubs d'Europe, analysés comme la NBA", "Europe's top 20 clubs, analyzed like the NBA")}</p>
-        <p className="note">{L.t("Probabilités, score projeté et forme : clique sur un match pour l'analyse complète.", "Probabilities, projected score and form: click a game for the full analysis.")}</p>
+        <h1>{L.t("EuroLeague", "EuroLeague", "Euroliga")} {year}-{String(year + 1).slice(2)}</h1>
+        <p>{L.t("Les 20 meilleurs clubs d'Europe, analysés comme la NBA", "Europe's top 20 clubs, analyzed like the NBA", "Los 20 mejores clubes de Europa, analizados como la NBA")}</p>
+        <p className="note">{L.t("Probabilités, score projeté et forme : clique sur un match pour l'analyse complète.", "Probabilities, projected score and form: click a game for the full analysis.", "Probabilidades, marcador proyectado y forma: haz clic en un partido para ver el análisis completo.")}</p>
       </div>
       <div className="el-grid">
         <UpcomingList games={games} L={L} href={(g) => `/app/euroleague/match/${g.id}`} />
         <div className="panel">
-          <div className="panel-label" style={{ marginBottom: 8 }}>{L.t("CLASSEMENT", "STANDINGS")}</div>
+          <div className="panel-label" style={{ marginBottom: 8 }}>{L.t("CLASSEMENT", "STANDINGS", "CLASIFICACIÓN")}</div>
           <table className="std-table">
-            <thead><tr><th>#</th><th>Club</th><th>{L.t("V-D", "W-L")}</th><th>{L.t("Écart", "Diff")}</th><th>{L.t("Série", "Streak")}</th></tr></thead>
+            <thead><tr><th>#</th><th>Club</th><th>{L.t("V-D", "W-L", "V-D")}</th><th>{L.t("Écart", "Diff", "Dif.")}</th><th>{L.t("Série", "Streak", "Racha")}</th></tr></thead>
             <tbody>
               {table.map((t, i) => (
                 <tr key={t.id} className={i === 6 || i === 10 ? "cut" : ""} style={{ animationDelay: `${i * 30}ms` }}>
@@ -59,7 +59,7 @@ export default async function EuroLeaguePage() {
               ))}
             </tbody>
           </table>
-          <p className="disclaimer" style={{ marginTop: 12 }}>{L.t("Tirets : 1-6 qualifiés pour les playoffs, 7-10 play-in.", "Dividers: 1-6 qualify for the playoffs, 7-10 go to the play-in.")}</p>
+          <p className="disclaimer" style={{ marginTop: 12 }}>{L.t("Tirets : 1-6 qualifiés pour les playoffs, 7-10 play-in.", "Dividers: 1-6 qualify for the playoffs, 7-10 go to the play-in.", "Separadores: del 1 al 6 se clasifican para los playoffs, del 7 al 10 van al play-in.")}</p>
         </div>
       </div>
     </main>

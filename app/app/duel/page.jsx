@@ -11,7 +11,7 @@ export async function generateMetadata({ searchParams }) {
   const L = await getL();
   const h = teamById(sp.home), a = teamById(sp.away);
   // Combinaisons d'équipes infinies : pages utiles aux visiteurs, mais pas à indexer.
-  return { title: h && a ? `${a.short} – ${h.short} : ${L.t("analyse", "analysis")} – Basketlog` : L.t("Analyse de match – Basketlog", "Game analysis – Basketlog"), robots: { index: false, follow: true } };
+  return { title: h && a ? `${a.short} – ${h.short} : ${L.t("analyse", "analysis", "análisis")} – Basketlog` : L.t("Analyse de match – Basketlog", "Game analysis – Basketlog", "Análisis de partido – Basketlog"), robots: { index: false, follow: true } };
 }
 
 export default async function DuelPage({ searchParams }) {

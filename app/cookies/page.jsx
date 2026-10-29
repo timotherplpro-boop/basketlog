@@ -6,6 +6,7 @@ import { getL } from "../../lib/lang-server";
 
 export async function generateMetadata() {
   const L = await getL();
+  if (L.es) return pageMeta({ title: "Política de cookies – Basketlog", description: "Las cookies y rastreadores que usa Basketlog, su función, su duración y cómo aceptar o rechazar la medición de audiencia.", path: "/cookies", L });
   return L.en
     ? pageMeta({ title: "Cookie policy – Basketlog", description: "The cookies and trackers Basketlog uses, their purpose, their duration and how to accept or refuse audience measurement.", path: "/cookies", L })
     : pageMeta({ title: "Politique de cookies – Basketlog", description: "Les cookies et traceurs utilisés par Basketlog, leur rôle, leur durée et comment accepter ou refuser la mesure d'audience.", path: "/cookies" });
@@ -110,7 +111,57 @@ function CookiesEn({ L }) {
   );
 }
 
+const TRACKERS_ES = [
+  ["bl_consent", "Almacenamiento local", "Recordar tu elección sobre las cookies", "Necesaria", "6 meses"],
+  ["hs_views_…", "Almacenamiento local", "Contar los análisis completos consultados en el día (límite diario)", "Necesaria", "El día"],
+  ["bl_pro", "Cookie", "Mantener abierta la sesión de tu cuenta (cookie firmada, inaccesible para los scripts)", "Necesaria", "60 días"],
+  ["whop_state, whop_pkce", "Cookie", "Proteger el inicio de sesión con Whop", "Necesaria", "10 minutos"],
+  ["bl_install_dismiss", "Almacenamiento local", "No volver a proponerte instalar la app si has cerrado la propuesta", "Necesaria", "30 días"],
+  ["bl_views", "Almacenamiento de sesión", "Contar las páginas vistas durante la visita, para proponerte la app en el momento oportuno", "Necesaria", "La visita"],
+  ["bl-v…-static, bl-v…-assets", "Caché de la app", "Archivos del sitio (código, iconos) para un arranque rápido y una página sin conexión; ningún dato personal", "Necesaria", "Hasta la siguiente actualización"],
+  ["AMP_…, AMP_MKTG_…", "Cookie", "Medición de audiencia de Amplitude: identificador aleatorio de visitante y de sesión, origen de la visita", "Consentimiento", "12 meses"],
+  ["AMP_unsent_…, AMP_remote_config_…", "Almacenamiento local", "Medición de audiencia de Amplitude: cola de eventos y ajustes", "Consentimiento", "Hasta que la rechaces o la borres"],
+];
+
+function CookiesEs({ L }) {
+  return (
+    <LegalDoc
+      title="Política de cookies"
+      path="/cookies"
+      L={L}
+      intro="Una cookie es un pequeño archivo que se guarda en tu navegador. Basketlog usa muy pocas: las que hacen funcionar el sitio y, solo si las aceptas, las de medición de audiencia. Ninguna cookie publicitaria. Esta versión en español es una traducción que se ofrece para tu comodidad; en caso de discrepancia, prevalece la versión francesa."
+    >
+      <Sec n={1} title="Los rastreadores que usamos">
+        <div className="legal-table-wrap">
+          <table className="legal-table">
+            <thead><tr><th>Nombre</th><th>Tipo</th><th>Función</th><th>Consentimiento</th><th>Duración</th></tr></thead>
+            <tbody>{TRACKERS_ES.map((t) => <tr key={t[0]}>{t.map((c, i) => <td key={i}>{i === 0 ? <code>{c}</code> : c}</td>)}</tr>)}</tbody>
+          </table>
+        </div>
+      </Sec>
+
+      <Sec n={2} title="Cookies necesarias">
+        <p>Solo sirven para el funcionamiento del sitio (inicio de sesión, límite de análisis, recordar tu elección). La ley las exime de consentimiento. Bloquearlas en tu navegador puede impedirte iniciar sesión.</p>
+      </Sec>
+
+      <Sec n={3} title="Medición de audiencia (Amplitude)">
+        <p>Con tu consentimiento, Basketlog usa Amplitude (datos alojados en la Unión Europea) para saber qué páginas y funciones se usan y mejorar el sitio. Estas estadísticas nunca se usan para publicidad ni se venden. Sin tu consentimiento, no se instala ninguno de estos rastreadores.</p>
+      </Sec>
+
+      <Sec n={4} title="Servicios de terceros">
+        <p>La página de pago está alojada por Whop (whop.com), que instala sus propias cookies según su política. Los logotipos de los equipos y algunas fotos se cargan desde otros servidores (ESPN, EuroLeague, Unsplash), sin ninguna cookie por nuestra parte.</p>
+      </Sec>
+
+      <Sec n={5} title="Aceptar, rechazar, cambiar de opinión">
+        <p>En tu primera visita, un banner te permite aceptar o rechazar la medición de audiencia, tan fácilmente una opción como la otra. Tu elección se guarda 6 meses y después se te vuelve a preguntar. Puedes cambiar de opinión en cualquier momento:</p>
+        <p><CookieSettingsButton className="btn-white" /></p>
+        <p>También puedes borrar las cookies en los ajustes de tu navegador. Más información en la <Link href={L.href("/confidentialite")}>política de privacidad</Link> y en el sitio de la CNIL: <a href="https://www.cnil.fr/fr/cookies-et-autres-traceurs" rel="noopener" target="_blank">cnil.fr</a>.</p>
+      </Sec>
+    </LegalDoc>
+  );
+}
+
 export default async function CookiesPage() {
   const L = await getL();
-  return L.en ? <CookiesEn L={L} /> : <CookiesFr />;
+  return L.es ? <CookiesEs L={L} /> : L.en ? <CookiesEn L={L} /> : <CookiesFr />;
 }

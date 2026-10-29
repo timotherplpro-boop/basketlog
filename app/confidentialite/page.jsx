@@ -6,6 +6,7 @@ import { getL } from "../../lib/lang-server";
 
 export async function generateMetadata() {
   const L = await getL();
+  if (L.es) return pageMeta({ title: "Política de privacidad – Basketlog", description: "Qué datos recoge Basketlog, por qué, con qué proveedores, cuánto tiempo se conservan y cómo ejercer tus derechos (RGPD).", path: "/confidentialite", L });
   return L.en
     ? pageMeta({ title: "Privacy policy – Basketlog", description: "What data Basketlog collects, why, with which providers, how long it is kept and how to exercise your rights (GDPR).", path: "/confidentialite", L })
     : pageMeta({ title: "Politique de confidentialité – Basketlog", description: "Quelles données Basketlog collecte, pourquoi, avec quels prestataires, combien de temps elles sont conservées et comment exercer tes droits (RGPD).", path: "/confidentialite" });
@@ -184,7 +185,94 @@ function ConfidentialiteEn({ L }) {
   );
 }
 
+const DATA_ES = [
+  ["Navegación", "Dirección IP, navegador, páginas solicitadas, fecha y hora (registros técnicos del proveedor de alojamiento)", "Hacer funcionar y proteger el sitio", "Interés legítimo", "Unas semanas, según el periodo de conservación de Vercel"],
+  ["Medición de audiencia (si la aceptas)", "Páginas vistas, clics, duración y número de visitas, tipo de dispositivo, país y ciudad aproximados, identificador aleatorio guardado en una cookie", "Entender el uso del sitio y mejorarlo", "Consentimiento", "Cookies: 12 meses como máximo; estadísticas: 25 meses como máximo"],
+  ["Cuenta gratis y suscriptores", "Identificador y nombre de usuario de Whop, plan activo, fecha de verificación; el correo de registro se queda en Whop", "Abrir tu cuenta, activar tu plan y verificar tu suscripción", "Ejecución del contrato", "Mientras exista tu cuenta y, después, 3 años"],
+  ["Pago", "Datos de pago y de facturación (tratados directamente por Whop, nunca por Basketlog)", "Cobrar los pagos y emitir los recibos", "Ejecución del contrato, obligación legal", "10 años para los documentos contables"],
+  ["Opiniones", "Nombre, descripción opcional, nota y texto de la opinión", "Publicar las opiniones tras revisarlas", "Consentimiento", "Hasta que pidas su eliminación"],
+  ["Contacto", "Dirección de correo electrónico y contenido de tus mensajes", "Responder a tus solicitudes", "Interés legítimo", "3 años después del último intercambio"],
+];
+
+const PROVIDERS_ES = [
+  ["Vercel Inc. (Estados Unidos)", "Alojamiento del sitio y de los servidores"],
+  ["Supabase (región de París, UE)", "Base de datos de opiniones"],
+  ["Whop, Inc. (Estados Unidos)", "Pago, gestión de suscripciones, inicio de sesión de los suscriptores"],
+  ["Amplitude, Inc. (datos en la UE)", "Medición de audiencia, solo con tu consentimiento"],
+  ["Zoho Corporation (datos en la UE)", "Correo de la dirección de contacto"],
+];
+
+function ConfidentialiteEs({ L }) {
+  const e = LEGAL.editeur;
+  return (
+    <LegalDoc
+      title="Política de privacidad"
+      path="/confidentialite"
+      L={L}
+      intro="Esta política explica qué datos personales recoge Basketlog, por qué, con quién se comparten, cuánto tiempo se conservan y cómo ejercer tus derechos. Basketlog no vende ningún dato ni hace publicidad personalizada. Esta versión en español es una traducción que se ofrece para tu comodidad; en caso de discrepancia, prevalece la versión francesa."
+    >
+      <Sec n={1} title="Responsable del tratamiento">
+        <p>{e.nom}, empresario individual (micro-entreprise francesa), {e.adresse} (SIRET {e.siret}). Contacto para cualquier pregunta sobre tus datos: <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>.</p>
+      </Sec>
+
+      <Sec n={2} title="Qué datos recogemos y por qué">
+        <p>Puedes consultar Basketlog sin crear una cuenta. Solo recogemos lo necesario:</p>
+        <div className="legal-table-wrap">
+          <table className="legal-table">
+            <thead><tr><th>Cuándo</th><th>Datos</th><th>Para qué</th><th>Base legal</th><th>Conservación</th></tr></thead>
+            <tbody>{DATA_ES.map((d) => <tr key={d[0]}>{d.map((c, i) => <td key={i}>{i === 0 ? <b>{c}</b> : c}</td>)}</tr>)}</tbody>
+          </table>
+        </div>
+        <p>El número de análisis consultados cada día se cuenta en tu navegador (almacenamiento local) y no se envía a nuestros servidores. Si eres suscriptor y aceptas la medición de audiencia, tu identificador de Whop y tu plan se asocian a tus estadísticas de uso, para saber qué funciones se usan más.</p>
+      </Sec>
+
+      <Sec n={3} title="Pago y cuentas de suscriptor">
+        <p>El pago se realiza en la página segura de Whop. Basketlog nunca recibe el número de tu tarjeta. Cuando inicias sesión con Whop, solo recibimos tu identificador, tu nombre de usuario y el plan al que tienes acceso. Whop trata tus datos según su propia <a href={LEGAL.paiement.confidentialite} rel="noopener" target="_blank">política de privacidad</a>.</p>
+      </Sec>
+
+      <Sec n={4} title="Proveedores">
+        <p>Solo compartimos datos con los proveedores necesarios para el servicio, que actúan por cuenta nuestra:</p>
+        <ul>{PROVIDERS_ES.map(([n, r]) => <li key={n}><b>{n}</b>: {r}</li>)}</ul>
+        <p>Para las estadísticas deportivas (ESPN, EuroLeague) y la redacción automática de los análisis, solo enviamos datos de partidos, nunca tus datos personales. Los logotipos de los equipos y algunas fotos (Unsplash) se cargan desde los servidores de esos servicios, que reciben por tanto tu dirección IP, como en cualquier sitio web. Las tipografías están alojadas por Basketlog.</p>
+      </Sec>
+
+      <Sec n={5} title="Transferencias fuera de la Unión Europea">
+        <p>Vercel y Whop están establecidos en Estados Unidos. Las transferencias a estos proveedores se basan en las garantías previstas por el RGPD: la decisión de adecuación de la Comisión Europea para las empresas certificadas en el Marco de Privacidad de Datos UE–EE. UU., o las cláusulas contractuales tipo de la Comisión Europea.</p>
+      </Sec>
+
+      <Sec n={6} title="Seguridad">
+        <p>Las comunicaciones con el sitio están cifradas (HTTPS). La sesión de los suscriptores se guarda en una cookie firmada, inaccesible para los scripts de la página, y se verifica de nuevo con Whop con regularidad. El acceso a los datos está limitado al editor. Ningún sistema es infalible, pero corregimos lo antes posible cualquier problema que se nos comunique.</p>
+      </Sec>
+
+      <Sec n={7} title="Tus derechos">
+        <p>De acuerdo con el RGPD y la ley francesa de protección de datos, puedes en cualquier momento:</p>
+        <ul>
+          <li>acceder a tus datos y obtener una copia;</li>
+          <li>rectificarlos o suprimirlos;</li>
+          <li>oponerte a su tratamiento o pedir su limitación;</li>
+          <li>recuperar los datos que nos facilitaste en un formato legible (portabilidad);</li>
+          <li>retirar tu consentimiento a la medición de audiencia en cualquier momento, con el enlace «Gestionar cookies» al pie de cada página;</li>
+          <li>dar instrucciones sobre el destino de tus datos después de tu fallecimiento.</li>
+        </ul>
+        <p>Escríbenos a <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. Respondemos en el plazo máximo de un mes. También puedes presentar una reclamación ante la autoridad francesa de protección de datos (CNIL): <a href="https://www.cnil.fr" rel="noopener" target="_blank">cnil.fr</a>, o ante la de tu país (en España, la AEPD: <a href="https://www.aepd.es" rel="noopener" target="_blank">aepd.es</a>).</p>
+      </Sec>
+
+      <Sec n={8} title="Menores">
+        <p>Basketlog está reservado a personas de 18 años o más. No recogemos a sabiendas datos de menores. Si crees que un menor nos ha enviado datos, escríbenos y los eliminaremos.</p>
+      </Sec>
+
+      <Sec n={9} title="Cookies">
+        <p>Las cookies y otros rastreadores que se usan, y la forma de gestionarlos, se detallan en la <Link href={L.href("/cookies")}>política de cookies</Link>.</p>
+      </Sec>
+
+      <Sec n={10} title="Cambios">
+        <p>Esta política puede cambiar con el servicio o con la ley. La fecha de actualización figura en la parte superior de la página. Si hay un cambio importante, te avisaremos en el sitio.</p>
+      </Sec>
+    </LegalDoc>
+  );
+}
+
 export default async function ConfidentialitePage() {
   const L = await getL();
-  return L.en ? <ConfidentialiteEn L={L} /> : <ConfidentialiteFr />;
+  return L.es ? <ConfidentialiteEs L={L} /> : L.en ? <ConfidentialiteEn L={L} /> : <ConfidentialiteFr />;
 }
