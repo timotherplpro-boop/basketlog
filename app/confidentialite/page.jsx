@@ -23,6 +23,7 @@ const PRESTATAIRES = [
   ["Supabase (région de Paris, UE)", "Base de données des avis"],
   ["Whop, Inc. (États-Unis)", "Paiement, gestion des abonnements, connexion des abonnés"],
   ["Amplitude, Inc. (données dans l'UE)", "Mesure d'audience, uniquement avec ton accord"],
+  ["Zoho Corporation (données dans l'UE)", "Messagerie de l'adresse de contact"],
 ];
 
 export default function Confidentialite() {
