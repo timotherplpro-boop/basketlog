@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useProStatus } from "../lib/useProStatus";
 import { track } from "../lib/analytics";
+import { useL } from "./LangProvider";
 
 function todayKey() {
   return "hs_views_" + new Date().toISOString().slice(0, 10);
@@ -12,6 +13,7 @@ function todayKey() {
 // Compte gratuit = 1 analyse par jour, Starter = 5, Pro et Lifetime = illimitées.
 // Sans compte, seules les probabilités et les chiffres clés en haut de la fiche sont visibles.
 export default function Gate({ matchId, league = "NBA", children }) {
+  const L = useL();
   const pro = useProStatus();
   const [state, setState] = useState({ locked: false, used: 0, ready: false });
   const [here, setHere] = useState("");
@@ -42,13 +44,13 @@ export default function Gate({ matchId, league = "NBA", children }) {
 
   const visitor = !pro || !pro.connected; // pas encore de compte
   const tier = pro?.tier;
-  const label = tier === "starter" ? "Starter" : "gratuite";
+  const label = tier === "starter" ? "Starter" : L.t("gratuite", "free");
 
   return (
     <>
       {state.ready && !state.unlimited && !state.locked && state.limit > 0 && (
         <div className="counter">
-          Analyse {label} <b>{state.used}/{state.limit}</b> aujourd&apos;hui · <Link href="/pro" onClick={() => track("Clic Passer Pro", { source: "compteur" })}>{tier === "starter" ? "Passer Pro" : "Débloquer plus d'analyses"}</Link>
+          {L.en ? <>{tier === "starter" ? "Starter" : "Free"} analysis <b>{state.used}/{state.limit}</b> today</> : <>Analyse {label} <b>{state.used}/{state.limit}</b> aujourd&apos;hui</>} · <Link href={L.href("/pro")} onClick={() => track("Clic Passer Pro", { source: "compteur" })}>{tier === "starter" ? L.t("Passer Pro", "Go Pro") : L.t("Débloquer plus d'analyses", "Unlock more analyses")}</Link>
         </div>
       )}
       <div className={`gated ${state.locked ? "locked" : ""}`}>
@@ -58,22 +60,22 @@ export default function Gate({ matchId, league = "NBA", children }) {
             <div className="gate-box">
               {visitor ? (
                 <>
-                  <h3>Crée ton compte gratuit pour débloquer l&apos;analyse complète</h3>
-                  <p>Score projeté détaillé, facteurs, scénarios, stats comparées, joueurs à suivre et forme récente. Avec un compte gratuit, tu as 1 analyse complète offerte chaque jour.</p>
-                  <a href={`/api/whop/signup?next=${here}`} className="btn-solid" onClick={() => track("Clic créer un compte", { source: "analyse_bloquee", ligue: league })}>Créer mon compte gratuit</a>
-                  <a href={`/api/whop/login?next=${here}`} className="gate-login" onClick={() => track("Connexion Whop", { etape: "clic", source: "analyse_bloquee" })}>Déjà un compte ? Se connecter</a>
+                  <h3>{L.t("Crée ton compte gratuit pour débloquer l'analyse complète", "Create your free account to unlock the full analysis")}</h3>
+                  <p>{L.t("Score projeté détaillé, facteurs, scénarios, stats comparées, joueurs à suivre et forme récente. Avec un compte gratuit, tu as 1 analyse complète offerte chaque jour.", "Detailed projected score, key factors, scenarios, stat comparison, players to watch and recent form. A free account gives you 1 full analysis every day.")}</p>
+                  <a href={`/api/whop/signup?next=${here}`} className="btn-solid" onClick={() => track("Clic créer un compte", { source: "analyse_bloquee", ligue: league })}>{L.t("Créer mon compte gratuit", "Create my free account")}</a>
+                  <a href={`/api/whop/login?next=${here}`} className="gate-login" onClick={() => track("Connexion Whop", { etape: "clic", source: "analyse_bloquee" })}>{L.t("Déjà un compte ? Se connecter", "Already have an account? Log in")}</a>
                 </>
               ) : tier === "starter" ? (
                 <>
-                  <h3>Tes 5 analyses Starter du jour sont utilisées</h3>
-                  <p>Passe à Pro pour des analyses illimitées, ou reviens demain.</p>
-                  <Link href="/pro" className="btn-solid" onClick={() => track("Clic Passer Pro", { source: "limite" })}>Passer à Pro</Link>
+                  <h3>{L.t("Tes 5 analyses Starter du jour sont utilisées", "You've used today's 5 Starter analyses")}</h3>
+                  <p>{L.t("Passe à Pro pour des analyses illimitées, ou reviens demain.", "Upgrade to Pro for unlimited analyses, or come back tomorrow.")}</p>
+                  <Link href={L.href("/pro")} className="btn-solid" onClick={() => track("Clic Passer Pro", { source: "limite" })}>{L.t("Passer à Pro", "Upgrade to Pro")}</Link>
                 </>
               ) : (
                 <>
-                  <h3>Ton analyse gratuite du jour est utilisée</h3>
-                  <p>Starter t&apos;offre 5 analyses complètes par jour, Pro les rend illimitées. Sinon, reviens demain pour ta prochaine analyse offerte.</p>
-                  <Link href="/pro" className="btn-solid" onClick={() => track("Clic Passer Pro", { source: "limite_compte" })}>Voir les formules dès 10 €/mois</Link>
+                  <h3>{L.t("Ton analyse gratuite du jour est utilisée", "You've used today's free analysis")}</h3>
+                  <p>{L.t("Starter t'offre 5 analyses complètes par jour, Pro les rend illimitées. Sinon, reviens demain pour ta prochaine analyse offerte.", "Starter gives you 5 full analyses a day, Pro makes them unlimited. Or come back tomorrow for your next free analysis.")}</p>
+                  <Link href={L.href("/pro")} className="btn-solid" onClick={() => track("Clic Passer Pro", { source: "limite_compte" })}>{L.t("Voir les formules dès 10 €/mois", "See plans from €10/month")}</Link>
                 </>
               )}
             </div>

@@ -1,10 +1,11 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useL } from "./LangProvider";
 
 const norm = (s) => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
-function Combo({ teams, value, onChange, placeholder, exclude }) {
+function Combo({ teams, value, onChange, placeholder, exclude, L }) {
   const [q, setQ] = useState(value ? value.name : "");
   const [open, setOpen] = useState(false);
   const [hi, setHi] = useState(0);
@@ -51,7 +52,7 @@ function Combo({ teams, value, onChange, placeholder, exclude }) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={t.logo} alt="" />
               {t.name}
-              <small>{t.conf === "E" ? "Est" : "Ouest"}</small>
+              <small>{t.conf === "E" ? L.t("Est", "East") : L.t("Ouest", "West")}</small>
             </button>
           ))}
         </div>
@@ -61,6 +62,7 @@ function Combo({ teams, value, onChange, placeholder, exclude }) {
 }
 
 export default function DuelForm({ teams, initialHome }) {
+  const L = useL();
   const router = useRouter();
   const [home, setHome] = useState(initialHome || null);
   const [away, setAway] = useState(null);
@@ -70,12 +72,12 @@ export default function DuelForm({ teams, initialHome }) {
     e.preventDefault();
     if (!home || !away) return;
     setBusy(true);
-    router.push(`/app/duel?home=${home.id}&away=${away.id}`);
+    router.push(L.href(`/app/duel?home=${home.id}&away=${away.id}`));
   };
 
   return (
     <form className="panel" onSubmit={go}>
-      <div className="panel-label">MATCH À ANALYSER</div>
+      <div className="panel-label">{L.t("MATCH À ANALYSER", "GAME TO ANALYZE")}</div>
       <div className="pick-logo">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {home ? <img key={home.id} src={home.logo} alt={home.name} /> : <span className="ph" />}
@@ -83,11 +85,11 @@ export default function DuelForm({ teams, initialHome }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {away ? <img key={away.id} src={away.logo} alt={away.name} /> : <span className="ph" />}
       </div>
-      <Combo teams={teams} value={home} onChange={setHome} exclude={away?.id} placeholder="Cherche une équipe (ex : Lakers, Celtics)" />
+      <Combo teams={teams} value={home} onChange={setHome} exclude={away?.id} L={L} placeholder={L.t("Cherche une équipe (ex : Lakers, Celtics)", "Search a team (e.g. Lakers, Celtics)")} />
       <div className="vs-sep">vs</div>
-      <Combo teams={teams} value={away} onChange={setAway} exclude={home?.id} placeholder="Cherche une équipe (ex : Knicks, Warriors)" />
-      <p className="home-hint">S&apos;ils se jouent dans les 3 prochaines semaines, tu tombes sur le vrai match. Sinon, la 1re équipe reçoit.</p>
-      <button className="btn-solid" disabled={!home || !away || busy}>{busy ? "Analyse en cours…" : "Analyser le match"}</button>
+      <Combo teams={teams} value={away} onChange={setAway} exclude={home?.id} L={L} placeholder={L.t("Cherche une équipe (ex : Knicks, Warriors)", "Search a team (e.g. Knicks, Warriors)")} />
+      <p className="home-hint">{L.t("S'ils se jouent dans les 3 prochaines semaines, tu tombes sur le vrai match. Sinon, la 1re équipe reçoit.", "If they meet in the next 3 weeks, you land on the real game. Otherwise, the first team plays at home.")}</p>
+      <button className="btn-solid" disabled={!home || !away || busy}>{busy ? L.t("Analyse en cours…", "Analyzing…") : L.t("Analyser le match", "Analyze the game")}</button>
     </form>
   );
 }

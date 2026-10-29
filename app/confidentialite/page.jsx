@@ -2,12 +2,14 @@ import Link from "next/link";
 import LegalDoc, { Sec } from "../../components/LegalDoc";
 import { LEGAL } from "../../lib/legal";
 import { pageMeta } from "../../lib/seo";
+import { getL } from "../../lib/lang-server";
 
-export const metadata = pageMeta({
-  title: "Politique de confidentialité – Basketlog",
-  description: "Quelles données Basketlog collecte, pourquoi, avec quels prestataires, combien de temps elles sont conservées et comment exercer tes droits (RGPD).",
-  path: "/confidentialite",
-});
+export async function generateMetadata() {
+  const L = await getL();
+  return L.en
+    ? pageMeta({ title: "Privacy policy – Basketlog", description: "What data Basketlog collects, why, with which providers, how long it is kept and how to exercise your rights (GDPR).", path: "/confidentialite", L })
+    : pageMeta({ title: "Politique de confidentialité – Basketlog", description: "Quelles données Basketlog collecte, pourquoi, avec quels prestataires, combien de temps elles sont conservées et comment exercer tes droits (RGPD).", path: "/confidentialite" });
+}
 
 const DONNEES = [
   ["Navigation", "Adresse IP, navigateur, pages demandées, date et heure (journaux techniques de l'hébergeur)", "Faire fonctionner et sécuriser le site", "Intérêt légitime", "Quelques semaines, selon la durée de rétention de Vercel"],
@@ -26,7 +28,7 @@ const PRESTATAIRES = [
   ["Zoho Corporation (données dans l'UE)", "Messagerie de l'adresse de contact"],
 ];
 
-export default function Confidentialite() {
+function ConfidentialiteFr() {
   const e = LEGAL.editeur;
   return (
     <LegalDoc
@@ -93,4 +95,96 @@ export default function Confidentialite() {
       </Sec>
     </LegalDoc>
   );
+}
+
+const DATA_EN = [
+  ["Browsing", "IP address, browser, pages requested, date and time (host's technical logs)", "Run and secure the website", "Legitimate interest", "A few weeks, depending on Vercel's retention period"],
+  ["Audience measurement (if you accept it)", "Page views, clicks, visit length and count, device type, approximate country and city, random ID stored in a cookie", "Understand how the website is used and improve it", "Consent", "Cookies: 12 months maximum; statistics: 25 months maximum"],
+  ["Free account and subscribers", "Whop ID and username, active plan, verification date; the sign-up email stays with Whop", "Open your account, activate your plan and check your subscription", "Performance of the contract", "As long as your account exists, then 3 years"],
+  ["Payment", "Payment and billing data (processed directly by Whop, never by Basketlog)", "Collect payments, issue receipts", "Performance of the contract, legal obligation", "10 years for accounting records"],
+  ["Reviews", "First name, optional description, rating, review text", "Publish reviews after they are checked", "Consent", "Until you ask for removal"],
+  ["Contact", "Email address and content of your messages", "Reply to your requests", "Legitimate interest", "3 years after the last exchange"],
+];
+
+const PROVIDERS_EN = [
+  ["Vercel Inc. (United States)", "Website and server hosting"],
+  ["Supabase (Paris region, EU)", "Reviews database"],
+  ["Whop, Inc. (United States)", "Payment, subscription management, subscriber login"],
+  ["Amplitude, Inc. (data in the EU)", "Audience measurement, only with your consent"],
+  ["Zoho Corporation (data in the EU)", "Email for the contact address"],
+];
+
+function ConfidentialiteEn({ L }) {
+  const e = LEGAL.editeur;
+  return (
+    <LegalDoc
+      title="Privacy policy"
+      path="/confidentialite"
+      L={L}
+      intro="This policy explains what personal data Basketlog collects, why, who it is shared with, how long it is kept and how to exercise your rights. Basketlog sells no data and runs no targeted advertising. This English version is a translation provided for convenience; in case of any discrepancy, the French version prevails."
+    >
+      <Sec n={1} title="Data controller">
+        <p>{e.nom}, sole proprietor (French micro-entreprise), {e.adresse} (SIRET {e.siret}). Contact for any question about your data: <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>.</p>
+      </Sec>
+
+      <Sec n={2} title="What data we collect and why">
+        <p>You can browse Basketlog without creating an account. We only collect what is necessary:</p>
+        <div className="legal-table-wrap">
+          <table className="legal-table">
+            <thead><tr><th>When</th><th>Data</th><th>Why</th><th>Legal basis</th><th>Retention</th></tr></thead>
+            <tbody>{DATA_EN.map((d) => <tr key={d[0]}>{d.map((c, i) => <td key={i}>{i === 0 ? <b>{c}</b> : c}</td>)}</tr>)}</tbody>
+          </table>
+        </div>
+        <p>The number of analyses viewed each day is counted in your browser (local storage) and is not sent to our servers. If you are a subscriber and accept audience measurement, your Whop ID and plan are linked to your usage statistics, so we know which features are used most.</p>
+      </Sec>
+
+      <Sec n={3} title="Payment and subscriber accounts">
+        <p>Payment is made on Whop&apos;s secure page. Basketlog never receives your card number. When you log in with Whop, we only receive your ID, your username and the plan you have access to. Whop processes your data under its own <a href={LEGAL.paiement.confidentialite} rel="noopener" target="_blank">privacy policy</a>.</p>
+      </Sec>
+
+      <Sec n={4} title="Service providers">
+        <p>We only share data with the providers needed to run the service, who act on our behalf:</p>
+        <ul>{PROVIDERS_EN.map(([n, r]) => <li key={n}><b>{n}</b>: {r}</li>)}</ul>
+        <p>For sports statistics (ESPN, EuroLeague) and the automatic writing of analyses, we only send game data, never your personal data. Team logos and some photos (Unsplash) are loaded from these services&apos; servers, which therefore receive your IP address as with any website. Fonts are hosted by Basketlog.</p>
+      </Sec>
+
+      <Sec n={5} title="Transfers outside the European Union">
+        <p>Vercel and Whop are based in the United States. Transfers to these providers rely on the safeguards provided by the GDPR: the European Commission&apos;s adequacy decision for companies certified under the EU–US Data Privacy Framework, or the European Commission&apos;s standard contractual clauses.</p>
+      </Sec>
+
+      <Sec n={6} title="Security">
+        <p>Communication with the website is encrypted (HTTPS). The subscriber session is stored in a signed cookie that page scripts cannot access, and is regularly rechecked with Whop. Access to data is limited to the publisher. No system is foolproof, but we fix any reported issue as quickly as possible.</p>
+      </Sec>
+
+      <Sec n={7} title="Your rights">
+        <p>Under the GDPR and the French Data Protection Act, you can at any time:</p>
+        <ul>
+          <li>access your data and get a copy of it;</li>
+          <li>have it corrected or erased;</li>
+          <li>object to its processing or ask for it to be restricted;</li>
+          <li>get the data you provided to us in a readable format (portability);</li>
+          <li>withdraw your consent to audience measurement at any time, with the “Manage cookies” link at the bottom of every page;</li>
+          <li>set instructions for what happens to your data after your death.</li>
+        </ul>
+        <p>Email us at <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. We reply within one month at most. You can also lodge a complaint with the French data protection authority (CNIL): <a href="https://www.cnil.fr" rel="noopener" target="_blank">cnil.fr</a>, or with the authority of your country.</p>
+      </Sec>
+
+      <Sec n={8} title="Minors">
+        <p>Basketlog is reserved for people aged 18 and over. We do not knowingly collect data from minors. If you think a minor has sent us data, email us: we will delete it.</p>
+      </Sec>
+
+      <Sec n={9} title="Cookies">
+        <p>The cookies and other trackers used, and how to manage them, are detailed in the <Link href={L.href("/cookies")}>cookie policy</Link>.</p>
+      </Sec>
+
+      <Sec n={10} title="Changes">
+        <p>This policy may change with the service or the law. The update date is shown at the top of the page. If there is a significant change, we will let you know on the website.</p>
+      </Sec>
+    </LegalDoc>
+  );
+}
+
+export default async function ConfidentialitePage() {
+  const L = await getL();
+  return L.en ? <ConfidentialiteEn L={L} /> : <ConfidentialiteFr />;
 }

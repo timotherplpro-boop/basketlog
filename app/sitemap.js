@@ -6,7 +6,15 @@ import { elContext } from "../lib/euroleague";
 
 export const revalidate = 3600; // régénéré chaque heure, avec les matchs à venir
 
-const u = (path, priority, changeFrequency, lastModified = new Date()) => ({ url: `${SITE}${path}`, lastModified, changeFrequency, priority });
+const u = (path, priority, changeFrequency, lastModified = new Date()) => ({ path, lastModified, changeFrequency, priority });
+
+// Chaque page existe en français (adresse actuelle) et en anglais (même adresse sous /en), liées par hreflang.
+const both = ({ path, ...rest }) => {
+  const fr = `${SITE}${path}`;
+  const en = `${SITE}/en${path}`;
+  const alternates = { languages: { fr, en, "x-default": fr } };
+  return [{ url: fr, ...rest, alternates }, { url: en, ...rest, priority: Math.round(rest.priority * 0.9 * 100) / 100, alternates }];
+};
 
 export default async function sitemap() {
   const pages = [
@@ -40,5 +48,5 @@ export default async function sitemap() {
     ];
   } catch {}
 
-  return [...pages, ...teams, ...nba, ...el];
+  return [...pages, ...teams, ...nba, ...el].flatMap(both);
 }

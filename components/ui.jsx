@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { pct } from "../lib/model";
+import { mk, fmtDate, fmtTime } from "../lib/i18n";
+import { confText } from "../lib/matchtext";
 
 export function TeamLogo({ team, size = 30 }) {
   if (!team.logo) return <div style={{ width: size, height: size, borderRadius: 8, background: team.color }} />;
@@ -16,37 +18,29 @@ export function ProbBar({ pAway, pHome, away, home }) {
   );
 }
 
-export function parisTime(iso) {
-  try {
-    return new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
-  } catch {
-    return "";
-  }
+export function parisTime(iso, L = mk("fr")) {
+  return fmtTime(L, iso);
 }
-export function parisDay(iso) {
-  try {
-    return new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", weekday: "short", day: "numeric", month: "short" }).format(new Date(iso));
-  } catch {
-    return "";
-  }
+export function parisDay(iso, L = mk("fr")) {
+  return fmtDate(L, iso, { weekday: "short", day: "numeric", month: "short" });
 }
 
-export function StatusTag({ game }) {
-  if (game.hypothetical) return <span className="tag hot">Match hypothétique</span>;
-  if (game.state === "in") return <span className="tag live">● En direct</span>;
-  if (game.state === "post") return <span className="tag">Terminé</span>;
-  return <span className="tag">{parisDay(game.date)} · {parisTime(game.date)}</span>;
+export function StatusTag({ game, L = mk("fr") }) {
+  if (game.hypothetical) return <span className="tag hot">{L.t("Match hypothétique", "Hypothetical game")}</span>;
+  if (game.state === "in") return <span className="tag live">● {L.t("En direct", "Live")}</span>;
+  if (game.state === "post") return <span className="tag">{L.t("Terminé", "Final")}</span>;
+  return <span className="tag">{parisDay(game.date, L)} · {parisTime(game.date, L)}{L.en ? " ET" : ""}</span>;
 }
 
-export function GameCard({ a, date }) {
+export function GameCard({ a, date, L = mk("fr") }) {
   const g = a.game;
   const favHome = a.pHome >= 0.5;
   const showScore = g.state !== "pre" && g.home.score != null;
   return (
-    <Link href={`/app/match/${g.id}?d=${date}`} className="card game">
+    <Link href={L.href(`/app/match/${g.id}?d=${date}`)} className="card game">
       <div className="game-top">
-        <StatusTag game={g} />
-        {Math.max(a.pHome, a.pAway) > 0.72 ? <span className="tag hot">Favori net</span> : Math.abs(a.pHome - 0.5) < 0.06 ? <span className="tag hot">Indécis</span> : <span>Confiance {a.confidence.toLowerCase()}</span>}
+        <StatusTag game={g} L={L} />
+        {Math.max(a.pHome, a.pAway) > 0.72 ? <span className="tag hot">{L.t("Favori net", "Clear favorite")}</span> : Math.abs(a.pHome - 0.5) < 0.06 ? <span className="tag hot">{L.t("Indécis", "Toss-up")}</span> : <span>{L.en ? `${confText(a.confidence, L)} confidence` : `Confiance ${a.confidence.toLowerCase()}`}</span>}
       </div>
       {[g.away, g.home].map((t, i) => {
         const p = i === 0 ? a.pAway : a.pHome;
@@ -66,8 +60,8 @@ export function GameCard({ a, date }) {
       })}
       <ProbBar pAway={a.pAway} pHome={a.pHome} away={g.away} home={g.home} />
       <div className="game-foot">
-        <span>Projeté : <span className="mono">{Math.round(a.awayPts)}–{Math.round(a.homePts)}</span></span>
-        <span>Analyse →</span>
+        <span>{L.t("Projeté :", "Projected:")} <span className="mono">{Math.round(a.awayPts)}–{Math.round(a.homePts)}</span></span>
+        <span>{L.t("Analyse →", "Analysis →")}</span>
       </div>
     </Link>
   );

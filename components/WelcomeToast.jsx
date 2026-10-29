@@ -1,21 +1,23 @@
 "use client";
 import { useEffect, useState } from "react";
 import { track } from "../lib/analytics";
+import { useL } from "./LangProvider";
 
 const MSG = {
-  inscription: "Bienvenue sur Basketlog ! Ton compte gratuit est créé : 1 analyse complète offerte chaque jour.",
-  connexion: "Te revoilà ! Tu es connecté : ton analyse complète gratuite du jour t'attend.",
-  abonne: "Ton abonnement est actif. Bonnes analyses !",
+  inscription: ["Bienvenue sur Basketlog ! Ton compte gratuit est créé : 1 analyse complète offerte chaque jour.", "Welcome to Basketlog! Your free account is ready: 1 full analysis free every day."],
+  connexion: ["Te revoilà ! Tu es connecté : ton analyse complète gratuite du jour t'attend.", "Welcome back! You're signed in: today's free full analysis is waiting."],
+  abonne: ["Ton abonnement est actif. Bonnes analyses !", "Your subscription is active. Enjoy the analyses!"],
 };
 
 // Message de bienvenue après l'inscription ou la connexion (paramètre ?bienvenue=…), puis l'adresse est nettoyée.
 export default function WelcomeToast() {
+  const L = useL();
   const [msg, setMsg] = useState(null);
   useEffect(() => {
     const u = new URL(location.href);
     const k = u.searchParams.get("bienvenue");
     if (!k || !MSG[k]) return;
-    setMsg(MSG[k]);
+    setMsg(MSG[k][L.en ? 1 : 0]);
     track(k === "inscription" ? "Compte créé" : "Connexion Whop", { etape: "réussie", type: k });
     u.searchParams.delete("bienvenue");
     history.replaceState(null, "", u.pathname + (u.search || "") + u.hash);

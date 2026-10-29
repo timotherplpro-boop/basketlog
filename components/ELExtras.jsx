@@ -1,10 +1,11 @@
 import Link from "next/link";
 import StatCompare from "./StatCompare";
+import { mk } from "../lib/i18n";
 
-const day = (iso) => { try { return new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", day: "numeric", month: "short", year: "2-digit" }).format(new Date(iso)); } catch { return ""; } };
+const day = (iso, L) => { try { return new Intl.DateTimeFormat(L.locale, { timeZone: L.tz, day: "numeric", month: "short", year: "2-digit" }).format(new Date(iso)); } catch { return ""; } };
 const pct0 = (v) => `${Math.round(v)} %`;
 
-function Form({ team, results }) {
+function Form({ team, results, L }) {
   return (
     <div className="form-row">
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -12,29 +13,29 @@ function Form({ team, results }) {
       <div className="form-chips">
         {results.length ? results.map((r) => (
           <span key={r.id} className={`chip ${r.res === "W" ? "w" : "l"}`} title={`${r.ha} ${r.opp.name} · ${r.score}`}>
-            <em>{r.res === "W" ? "V" : "D"}</em>
+            <em>{r.res === "W" ? L.t("V", "W") : L.t("D", "L")}</em>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             {r.opp.logo && <img src={r.opp.logo} alt={r.opp.name} />}
             <small>{r.score}</small>
           </span>
-        )) : <span className="team-rec">Pas encore de match joué.</span>}
+        )) : <span className="team-rec">{L.t("Pas encore de match joué.", "No games played yet.")}</span>}
       </div>
     </div>
   );
 }
 
 // Sections enrichies de la fiche match EuroLeague.
-export default function ELExtras({ a, games, prevGames }) {
+export default function ELExtras({ a, games, prevGames, L = mk("fr") }) {
   const h = a.home, aw = a.away;
   const hc = h.cur, ac = aw.cur;
   const rows = [
-    { label: "Points marqués / match", a: aw.ppg, h: h.ppg },
-    { label: "Points encaissés / match", a: aw.oppg, h: h.oppg, low: true },
-    { label: "Écart ajusté / match", a: aw.diff, h: h.diff },
+    { label: L.t("Points marqués / match", "Points scored / game"), a: aw.ppg, h: h.ppg },
+    { label: L.t("Points encaissés / match", "Points allowed / game"), a: aw.oppg, h: h.oppg, low: true },
+    { label: L.t("Écart ajusté / match", "Adjusted margin / game"), a: aw.diff, h: h.diff },
     ...(hc && ac ? [
-      { label: "% de victoires", a: (ac.wins / ac.gp) * 100, h: (hc.wins / hc.gp) * 100, fmt: pct0 },
-      { label: "Victoires à domicile", a: ac.hw, h: hc.hw, fmt: (v) => String(v) },
-      { label: "Victoires à l'extérieur", a: ac.rw, h: hc.rw, fmt: (v) => String(v) },
+      { label: L.t("% de victoires", "Win %"), a: (ac.wins / ac.gp) * 100, h: (hc.wins / hc.gp) * 100, fmt: pct0 },
+      { label: L.t("Victoires à domicile", "Home wins"), a: ac.hw, h: hc.hw, fmt: (v) => String(v) },
+      { label: L.t("Victoires à l'extérieur", "Road wins"), a: ac.rw, h: hc.rw, fmt: (v) => String(v) },
     ] : []),
   ];
   const ids = [h.team.id, aw.team.id];
@@ -45,33 +46,33 @@ export default function ELExtras({ a, games, prevGames }) {
   return (
     <>
       <div className="card block">
-        <h2>Stats comparées <span className="tag">EuroLeague</span></h2>
+        <h2>{L.t("Stats comparées", "Stat comparison")} <span className="tag">EuroLeague</span></h2>
         <StatCompare away={aw.team} home={h.team} rows={rows} />
-        {(!hc || !ac) && <p className="team-rec" style={{ marginTop: 10 }}>Début de saison : les chiffres s&apos;appuient aussi sur la saison passée.</p>}
+        {(!hc || !ac) && <p className="team-rec" style={{ marginTop: 10 }}>{L.t("Début de saison : les chiffres s'appuient aussi sur la saison passée.", "Early season: the numbers also lean on last season.")}</p>}
       </div>
       <div className="grid2">
         <div className="card block">
-          <h2>Forme récente</h2>
-          <div className="team-rec" style={{ marginBottom: 8 }}>5 derniers matchs d&apos;EuroLeague</div>
-          <Form team={aw.team} results={ac?.form || []} />
-          <Form team={h.team} results={hc?.form || []} />
+          <h2>{L.t("Forme récente", "Recent form")}</h2>
+          <div className="team-rec" style={{ marginBottom: 8 }}>{L.t("5 derniers matchs d'EuroLeague", "Last 5 EuroLeague games")}</div>
+          <Form team={aw.team} results={ac?.form || []} L={L} />
+          <Form team={h.team} results={hc?.form || []} L={L} />
         </div>
         <div className="card block">
-          <h2>Confrontations</h2>
+          <h2>{L.t("Confrontations", "Head-to-head")}</h2>
           {meets.length ? (
             <div className="h2h">
               {meets.map((x) => (
-                <Link key={x.season + x.id} href={x.season === a.game.season ? `/app/euroleague/match/${x.id}` : "#"} className={`h2h-row ${`el-${x.id}` === a.game.id && x.season === a.game.season ? "cur" : ""}`}>
-                  <span className="d">{day(x.date)}</span>
+                <Link key={x.season + x.id} href={x.season === a.game.season ? L.href(`/app/euroleague/match/${x.id}`) : "#"} className={`h2h-row ${`el-${x.id}` === a.game.id && x.season === a.game.season ? "cur" : ""}`}>
+                  <span className="d">{day(x.date, L)}</span>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <span className="t">{x.away.logo && <img src={x.away.logo} alt="" />}{x.away.abbr}</span>
-                  <span className="s">{x.played ? `${x.away.score} - ${x.home.score}` : `el-${x.id}` === a.game.id ? "ce match" : "à venir"}</span>
+                  <span className="s">{x.played ? `${x.away.score} - ${x.home.score}` : `el-${x.id}` === a.game.id ? L.t("ce match", "this game") : L.t("à venir", "upcoming")}</span>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <span className="t">{x.home.abbr}{x.home.logo && <img src={x.home.logo} alt="" />}</span>
                 </Link>
               ))}
             </div>
-          ) : <p className="team-rec">Aucune confrontation récente.</p>}
+          ) : <p className="team-rec">{L.t("Aucune confrontation récente.", "No recent meetings.")}</p>}
         </div>
       </div>
     </>

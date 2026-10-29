@@ -2,14 +2,16 @@ import Link from "next/link";
 import LegalDoc, { Sec } from "../../components/LegalDoc";
 import { LEGAL } from "../../lib/legal";
 import { pageMeta } from "../../lib/seo";
+import { getL } from "../../lib/lang-server";
 
-export const metadata = pageMeta({
-  title: "Conditions générales d'utilisation (CGU) – Basketlog",
-  description: "Conditions générales d'utilisation de Basketlog : description du service, âge minimum, avertissement sur les pronostics, règles d'usage et responsabilité.",
-  path: "/cgu",
-});
+export async function generateMetadata() {
+  const L = await getL();
+  return L.en
+    ? pageMeta({ title: "Terms of use – Basketlog", description: "Basketlog terms of use: description of the service, minimum age, disclaimer about predictions, rules of use and liability.", path: "/cgu", L })
+    : pageMeta({ title: "Conditions générales d'utilisation (CGU) – Basketlog", description: "Conditions générales d'utilisation de Basketlog : description du service, âge minimum, avertissement sur les pronostics, règles d'usage et responsabilité.", path: "/cgu" });
+}
 
-export default function CGU() {
+function CGUFr() {
   const e = LEGAL.editeur;
   return (
     <LegalDoc
@@ -78,4 +80,81 @@ export default function CGU() {
       </Sec>
     </LegalDoc>
   );
+}
+
+function CGUEn({ L }) {
+  const e = LEGAL.editeur;
+  return (
+    <LegalDoc
+      title="Terms of use"
+      path="/cgu"
+      L={L}
+      intro={`These terms of use (the “Terms”) govern access to and use of the Basketlog website, published by ${e.nom} (“we”). By using the website, you accept the Terms and the privacy policy. Paid subscriptions are also governed by the terms of sale. This English version is a translation provided for convenience; in case of any discrepancy, the French version prevails.`}
+    >
+      <Sec n={1} title="The service">
+        <p>Basketlog analyzes NBA and EuroLeague games. The website gathers public statistical data (results, standings, scores, injuries, schedule) and runs it through a model that produces, for each game, win probabilities, a projected score, scenarios and an automatically written analysis.</p>
+        <p>Part of the service is free: win probabilities and key figures for every game, the standings, team pages and the model&apos;s track record. With a free account, you unlock 1 full analysis per day. Beyond that, full analyses are reserved for Starter (5 per day), Pro and Lifetime (unlimited) subscribers, under the conditions set out in the <Link href={L.href("/cgv")}>terms of sale</Link>.</p>
+      </Sec>
+
+      <Sec n={2} title="Minimum age">
+        <p>The service is reserved for people aged at least 18 who have the legal capacity to enter into a contract. By subscribing, you declare that you meet these conditions. If we learn that a subscriber is a minor, we may end their access.</p>
+      </Sec>
+
+      <Sec n={3} title="Disclaimer about predictions">
+        <p>Probabilities, projected scores and analyses are statistical estimates provided for information and entertainment. They may be wrong, incomplete or based on outdated data (for example an injury announced late). They are neither a guarantee of results, nor betting advice, nor financial advice.</p>
+        <p>Basketlog is not a gambling operator: no bets can be placed on the website. If you use our content to bet elsewhere, you do so at your own risk and in compliance with the laws of your country. Gambling involves risks: in France, {LEGAL.jeu.nom}, {LEGAL.jeu.tel} (standard rate).</p>
+        <p>The model&apos;s accuracy is published transparently on the <Link href={L.href("/app/bilan")}>Track record</Link> page. Past results do not guarantee future results.</p>
+      </Sec>
+
+      <Sec n={4} title="Free account and subscriber account">
+        <p>The website can be used without signing up. The free account, created with a Whop account (by email, Google or Apple), also gives you 1 full analysis per day. Subscribers log in with the Whop account used for payment. We never receive your password: only your Whop ID, your username and the plan you have access to. You can delete your free account at any time by emailing us.</p>
+        <p>Your access is personal. Sharing, reselling or lending it is prohibited. You are responsible for the security of your Whop account.</p>
+      </Sec>
+
+      <Sec n={5} title="User reviews">
+        <p>You can post a review of Basketlog (first name, optional description, rating and text). Every review is checked before publication and may be rejected if it is abusive, off-topic, promotional or illegal. By posting a review, you allow us to display it on the website, free of charge. You can ask for it to be removed at any time.</p>
+      </Sec>
+
+      <Sec n={6} title="What is prohibited">
+        <ul>
+          <li>Using the website for illegal, fraudulent or misleading purposes.</li>
+          <li>Circumventing technical limits, in particular subscriber-only access or the number of analyses per day.</li>
+          <li>Automatically copying (scraping) all or part of the website, probabilities or analyses.</li>
+          <li>Reselling, republishing or commercially exploiting the analyses, including in a paid group or channel.</li>
+          <li>Disrupting the website or attempting to access our systems without authorization.</li>
+        </ul>
+      </Sec>
+
+      <Sec n={7} title="Intellectual property">
+        <p>The website, its texts, design, code, model and analyses are protected. We grant you a personal, non-exclusive and non-transferable right of use for your private use. Sharing a screenshot or a link that credits Basketlog is welcome; reproducing analyses in bulk is not.</p>
+        <p>Team and competition names and logos belong to their owners. Basketlog is not affiliated with the NBA or the EuroLeague.</p>
+      </Sec>
+
+      <Sec n={8} title="Availability and liability">
+        <p>We do our best to keep the website available and the data up to date, but cannot guarantee it at all times: our sources may be interrupted or delayed. We may change, suspend or discontinue a free feature at any time.</p>
+        <p>To the extent permitted by law, we are not liable for decisions made on the basis of the analyses, or for any resulting losses, in particular from betting. Nothing in these Terms limits the rights that the law grants to consumers.</p>
+      </Sec>
+
+      <Sec n={9} title="Personal data">
+        <p>How your data is processed is described in the <Link href={L.href("/confidentialite")}>privacy policy</Link> and the <Link href={L.href("/cookies")}>cookie policy</Link>, which form part of these Terms.</p>
+      </Sec>
+
+      <Sec n={10} title="Suspension">
+        <p>We may suspend or delete the access of a user who breaches the Terms (account sharing, scraping, fraud…), after notifying them where possible.</p>
+      </Sec>
+
+      <Sec n={11} title="Changes to the Terms">
+        <p>We may change the Terms to reflect changes to the service or the law. The update date is shown at the top of the page. Subscribers are informed of significant changes before they take effect.</p>
+      </Sec>
+
+      <Sec n={12} title="Governing law and disputes">
+        <p>The Terms are governed by French law. In the event of a dispute, please email us first at <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>: we always look for an amicable solution. If you are a consumer, you can also refer the matter free of charge to the consumer mediator listed in the <Link href={L.href("/mentions-legales")}>legal notice</Link>. Failing agreement, the competent courts are those designated by law.</p>
+      </Sec>
+    </LegalDoc>
+  );
+}
+
+export default async function CGUPage() {
+  const L = await getL();
+  return L.en ? <CGUEn L={L} /> : <CGUFr />;
 }

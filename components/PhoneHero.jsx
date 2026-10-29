@@ -1,20 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useL } from "./LangProvider";
+import { fmtDate, fmtTime } from "../lib/i18n";
 
-function when(iso) {
-  try {
-    const d = new Date(iso);
-    const day = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", day: "2-digit", month: "2-digit" }).format(d);
-    const hm = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit" }).format(d);
-    return [day, hm];
-  } catch {
-    return ["", ""];
-  }
-}
+const when = (iso, L) => [fmtDate(L, iso, { day: "2-digit", month: "2-digit" }), fmtTime(L, iso)];
 
 // Écran "Analyse de match" animé : la 2e équipe s'écrit toute seule, puis le bouton s'active.
 export default function PhoneHero({ team, rivals, rows }) {
+  const L = useL();
   const [ri, setRi] = useState(0);
   const [typed, setTyped] = useState("");
   const [done, setDone] = useState(false);
@@ -42,7 +36,7 @@ export default function PhoneHero({ team, rivals, rows }) {
   }, [ri, rival]);
 
   return (
-    <Link href="/app" className="phone" aria-label="Ouvrir l'analyse de match">
+    <Link href={L.href("/app")} className="phone" aria-label={L.t("Ouvrir l'analyse de match", "Open the game analysis")}>
       <div className="screen">
         <div className="notch" />
         <div className="app-top" style={{ paddingTop: 54 }}>
@@ -50,11 +44,11 @@ export default function PhoneHero({ team, rivals, rows }) {
           <span className="app-burger" aria-hidden><i /><i /><i /></span>
         </div>
         <div className="screen-body">
-          <div className="sc-title">Analyse de match</div>
-          <div className="sc-sub">Entre les équipes que tu veux analyser</div>
-          <div className="sc-note">Notre modèle croise niveau, forme, absences et fatigue pour chaque pronostic.</div>
+          <div className="sc-title">{L.t("Analyse de match", "Game analysis")}</div>
+          <div className="sc-sub">{L.t("Entre les équipes que tu veux analyser", "Between the teams you want to analyze")}</div>
+          <div className="sc-note">{L.t("Notre modèle croise niveau, forme, absences et fatigue pour chaque pronostic.", "Our model combines strength, form, injuries and fatigue for every prediction.")}</div>
           <div className="sc-card">
-            <div className="sc-label">MATCH À ANALYSER</div>
+            <div className="sc-label">{L.t("MATCH À ANALYSER", "GAME TO ANALYZE")}</div>
             <div className="sc-logo">
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -70,15 +64,15 @@ export default function PhoneHero({ team, rivals, rows }) {
             <div className="sc-vs">vs</div>
             <div className={`sc-input ${typed ? "" : "empty"}`}>
               {done && rival && (/* eslint-disable-next-line @next/next/no-img-element */ <img src={rival.logo} alt="" />)}
-              {typed || "Cherche une équipe (ex : Celtics, Knicks…)"}
+              {typed || L.t("Cherche une équipe (ex : Celtics, Knicks…)", "Search a team (e.g. Celtics, Knicks…)")}
               {!done && <span className="caret" />}
             </div>
-            <div className={`sc-btn ${press ? "go" : ""}`}>Analyser le match</div>
+            <div className={`sc-btn ${press ? "go" : ""}`}>{L.t("Analyser le match", "Analyze the game")}</div>
           </div>
           <div className="sc-list">
-            <h5>Prochains matchs</h5>
+            <h5>{L.t("Prochains matchs", "Upcoming games")}</h5>
             {rows.slice(0, 4).map((g) => {
-              const [d, h] = when(g.date);
+              const [d, h] = when(g.date, L);
               return (
                 <div className="sc-row" key={g.id}>
                   <div className="when">{d}<br />{h}</div>

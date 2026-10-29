@@ -2,14 +2,16 @@ import Link from "next/link";
 import LegalDoc, { Sec } from "../../components/LegalDoc";
 import { LEGAL } from "../../lib/legal";
 import { pageMeta } from "../../lib/seo";
+import { getL } from "../../lib/lang-server";
 
-export const metadata = pageMeta({
-  title: "Mentions légales – Basketlog",
-  description: "Mentions légales du site Basketlog : éditeur, directeur de la publication, hébergeur, propriété intellectuelle et médiation de la consommation.",
-  path: "/mentions-legales",
-});
+export async function generateMetadata() {
+  const L = await getL();
+  return L.en
+    ? pageMeta({ title: "Legal notice – Basketlog", description: "Basketlog legal notice: publisher, publication director, host, intellectual property and consumer mediation.", path: "/mentions-legales", L })
+    : pageMeta({ title: "Mentions légales – Basketlog", description: "Mentions légales du site Basketlog : éditeur, directeur de la publication, hébergeur, propriété intellectuelle et médiation de la consommation.", path: "/mentions-legales" });
+}
 
-export default function MentionsLegales() {
+function MentionsLegalesFr() {
   const e = LEGAL.editeur;
   return (
     <LegalDoc title="Mentions légales" path="/mentions-legales">
@@ -49,4 +51,53 @@ export default function MentionsLegales() {
       </Sec>
     </LegalDoc>
   );
+}
+
+const NOTE_EN = "This English version is a translation provided for convenience. In case of any discrepancy, the French version prevails.";
+
+function MentionsLegalesEn({ L }) {
+  const e = LEGAL.editeur;
+  return (
+    <LegalDoc title="Legal notice" path="/mentions-legales" intro={NOTE_EN} L={L}>
+      <Sec n={1} title="Publisher">
+        <p>The website {LEGAL.url.replace("https://", "")} (“Basketlog”) is published by <b>{e.nom}</b>, sole proprietor (French micro-entreprise), {e.adresse}.</p>
+        <ul>
+          <li>SIREN {e.siren} — SIRET {e.siret}, registered with the French national business register (RNE)</li>
+          <li>VAT not applicable, article 293 B of the French General Tax Code</li>
+          <li>Contact: <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a></li>
+        </ul>
+        <p>Publication director: {LEGAL.directeur}.</p>
+      </Sec>
+
+      <Sec n={2} title="Hosting">
+        <p>The website is hosted by <b>{LEGAL.hebergeur.nom}</b>, 440 North Barranca Avenue, Suite 4133, Covina, CA 91723, United States, phone {LEGAL.hebergeur.tel}, <a href={LEGAL.hebergeur.site} rel="noopener" target="_blank">vercel.com</a>.</p>
+        <p>The reviews database is hosted by {LEGAL.base.nom} (<a href={LEGAL.base.site} rel="noopener" target="_blank">supabase.com</a>), with data stored in the AWS Paris region (eu-west-3).</p>
+        <p>Payments and subscriber accounts are handled by {LEGAL.paiement.nom}, 300 Kent Avenue #401, Brooklyn, NY 11249, United States (<a href={LEGAL.paiement.site} rel="noopener" target="_blank">whop.com</a>).</p>
+      </Sec>
+
+      <Sec n={3} title="Intellectual property">
+        <p>The Basketlog name, the website, its texts, design, code and analysis model belong to {e.nom}. Any full or partial reproduction or reuse without written permission is prohibited.</p>
+        <p>Team, NBA and EuroLeague names, logos and trademarks belong to their respective owners. They are mentioned for information only: Basketlog is not affiliated with the NBA, the EuroLeague or any club. Statistics come from public feeds (ESPN, EuroLeague). Illustration photos come from Unsplash and are used under the Unsplash license.</p>
+      </Sec>
+
+      <Sec n={4} title="Predictions and responsible gambling">
+        <p>Basketlog is a statistical analysis tool. It is neither a gambling operator nor a betting advice service: no bets can be placed on the website and no probability is a guarantee. The service is reserved for adults (18 and over).</p>
+        <p>Gambling involves risks such as debt and addiction. If you need help in France: {LEGAL.jeu.nom}, {LEGAL.jeu.tel} (standard rate), <a href={LEGAL.jeu.site} rel="noopener" target="_blank">joueurs-info-service.fr</a>. Elsewhere, contact your local gambling helpline.</p>
+      </Sec>
+
+      <Sec n={5} title="Reporting, complaints and mediation">
+        <p>To report illegal content or make a complaint: <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>.</p>
+        <p>In accordance with articles L611-1 et seq. of the French Consumer Code, if a dispute is not resolved after a written complaint to this address, you can refer it free of charge to the consumer mediator: <b>{LEGAL.mediateur.nom}</b>, {LEGAL.mediateur.adresse}, France, <a href={LEGAL.mediateur.site} rel="noopener" target="_blank">cm2c.net</a>. The request must be made within one year of your written complaint.</p>
+      </Sec>
+
+      <Sec n={6} title="Personal data and cookies">
+        <p>How your data is collected and used is described in the <Link href={L.href("/confidentialite")}>privacy policy</Link> and the <Link href={L.href("/cookies")}>cookie policy</Link>.</p>
+      </Sec>
+    </LegalDoc>
+  );
+}
+
+export default async function MentionsLegalesPage() {
+  const L = await getL();
+  return L.en ? <MentionsLegalesEn L={L} /> : <MentionsLegalesFr />;
 }

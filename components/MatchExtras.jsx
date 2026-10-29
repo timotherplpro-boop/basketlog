@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { getSummary, getTeamStats, nbaDateOf } from "../lib/espn";
 import StatCompare from "./StatCompare";
+import { mk } from "../lib/i18n";
 
 const pct1 = (v) => `${v.toFixed(1)} %`;
-const day = (iso) => {
-  try { return new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", day: "numeric", month: "short" }).format(new Date(iso)); } catch { return ""; }
+const day = (iso, L) => {
+  try { return new Intl.DateTimeFormat(L.locale, { timeZone: L.tz, day: "numeric", month: "short" }).format(new Date(iso)); } catch { return ""; }
 };
 
-function Players({ team, list, title }) {
+function Players({ team, list, title, L }) {
   return (
     <div className="pl-col">
       <div className="pl-team">
@@ -19,16 +20,18 @@ function Players({ team, list, title }) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           {p.head ? <img className="pl-head" src={p.head} alt="" loading="lazy" /> : <span className="pl-head ph" />}
           <span className="pl-id"><b>{p.name}</b><small>{p.pos}{p.jersey ? ` · #${p.jersey}` : ""}</small></span>
-          <span className="pl-val"><strong>{p.value}</strong><small>{catFr(p.cat)}</small></span>
+          <span className="pl-val"><strong>{p.value}</strong><small>{catLabel(p.cat, L)}</small></span>
         </div>
-      )) : <div className="team-rec">{title === "game" ? "Pas encore de données." : "Pas encore de match joué cette saison."}</div>}
+      )) : <div className="team-rec">{title === "game" ? L.t("Pas encore de données.", "No data yet.") : L.t("Pas encore de match joué cette saison.", "No games played yet this season.")}</div>}
     </div>
   );
 }
 
-const catFr = (c) => ({ Points: "pts / match", Rebounds: "rebonds", Assists: "passes", "Points Per Game": "pts / match", "Rebounds Per Game": "rebonds", "Assists Per Game": "passes" }[c] || c);
+const catLabel = (c, L) => (L.en
+  ? { Points: "pts / game", Rebounds: "rebounds", Assists: "assists", "Points Per Game": "pts / game", "Rebounds Per Game": "rebounds", "Assists Per Game": "assists" }
+  : { Points: "pts / match", Rebounds: "rebonds", Assists: "passes", "Points Per Game": "pts / match", "Rebounds Per Game": "rebonds", "Assists Per Game": "passes" })[c] || c;
 
-function Form({ team, games }) {
+function Form({ team, games, L }) {
   return (
     <div className="form-row">
       <span className="form-team">
@@ -38,19 +41,19 @@ function Form({ team, games }) {
       <div className="form-chips">
         {games.length ? games.map((g, i) => (
           <span key={i} className={`chip ${g.res === "W" ? "w" : g.res === "L" ? "l" : ""}`} title={`${g.ha} ${g.opp} · ${g.score}`}>
-            <em>{g.res === "W" ? "V" : g.res === "L" ? "D" : "–"}</em>
+            <em>{g.res === "W" ? L.t("V", "W") : g.res === "L" ? L.t("D", "L") : "–"}</em>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             {g.oppLogo && <img src={g.oppLogo} alt={g.opp} />}
             <small>{g.score}</small>
           </span>
-        )) : <span className="team-rec">Pas encore de match joué.</span>}
+        )) : <span className="team-rec">{L.t("Pas encore de match joué.", "No games played yet.")}</span>}
       </div>
     </div>
   );
 }
 
 // Sections enrichies de la fiche match (stats comparées, joueurs, forme, confrontations, 2e avis).
-export default async function MatchExtras({ a }) {
+export default async function MatchExtras({ a, L = mk("fr") }) {
   const g = a.game;
   const [sum, hs, as] = await Promise.all([
     g.hypothetical ? null : getSummary(g.id),
@@ -61,18 +64,18 @@ export default async function MatchExtras({ a }) {
   const post = g.state === "post";
 
   const rows = [
-    { label: "Points marqués / match", a: aw.ppg, h: h.ppg },
-    { label: "Points encaissés / match", a: aw.oppg, h: h.oppg, low: true },
+    { label: L.t("Points marqués / match", "Points scored / game"), a: aw.ppg, h: h.ppg },
+    { label: L.t("Points encaissés / match", "Points allowed / game"), a: aw.oppg, h: h.oppg, low: true },
     ...(hs && as ? [
-      { label: "Adresse aux tirs", a: as.fgPct, h: hs.fgPct, fmt: pct1 },
-      { label: "Adresse à 3 points", a: as.threePct, h: hs.threePct, fmt: pct1 },
-      { label: "Tirs à 3 pts tentés / match", a: as.threeAtt, h: hs.threeAtt },
-      { label: "Lancers francs", a: as.ftPct, h: hs.ftPct, fmt: pct1 },
-      { label: "Rebonds / match", a: as.reb, h: hs.reb },
-      { label: "Passes décisives / match", a: as.ast, h: hs.ast },
-      { label: "Interceptions / match", a: as.stl, h: hs.stl },
-      { label: "Contres / match", a: as.blk, h: hs.blk },
-      { label: "Balles perdues / match", a: as.tov, h: hs.tov, low: true },
+      { label: L.t("Adresse aux tirs", "Field goal %"), a: as.fgPct, h: hs.fgPct, fmt: pct1 },
+      { label: L.t("Adresse à 3 points", "3-point %"), a: as.threePct, h: hs.threePct, fmt: pct1 },
+      { label: L.t("Tirs à 3 pts tentés / match", "3-pointers attempted / game"), a: as.threeAtt, h: hs.threeAtt },
+      { label: L.t("Lancers francs", "Free throw %"), a: as.ftPct, h: hs.ftPct, fmt: pct1 },
+      { label: L.t("Rebonds / match", "Rebounds / game"), a: as.reb, h: hs.reb },
+      { label: L.t("Passes décisives / match", "Assists / game"), a: as.ast, h: hs.ast },
+      { label: L.t("Interceptions / match", "Steals / game"), a: as.stl, h: hs.stl },
+      { label: L.t("Contres / match", "Blocks / game"), a: as.blk, h: hs.blk },
+      { label: L.t("Balles perdues / match", "Turnovers / game"), a: as.tov, h: hs.tov, low: true },
     ] : []),
   ];
 
@@ -84,23 +87,25 @@ export default async function MatchExtras({ a }) {
     done.forEach((x) => { const w = x.home.winner ? x.home : x.away; wins[w.abbr] = (wins[w.abbr] || 0) + 1; });
     const [t1, t2] = [aw.team.abbr, h.team.abbr];
     const w1 = wins[t1] || 0, w2 = wins[t2] || 0;
-    serText = !done.length ? `${ser.total || ser.games.length} confrontations prévues cette saison.` : w1 === w2 ? `Égalité ${w1}-${w2} cette saison.` : `${w1 > w2 ? t1 : t2} mène ${Math.max(w1, w2)}-${Math.min(w1, w2)} cette saison.`;
+    serText = L.en
+      ? (!done.length ? `${ser.total || ser.games.length} meetings scheduled this season.` : w1 === w2 ? `Tied ${w1}-${w2} this season.` : `${w1 > w2 ? t1 : t2} lead ${Math.max(w1, w2)}-${Math.min(w1, w2)} this season.`)
+      : (!done.length ? `${ser.total || ser.games.length} confrontations prévues cette saison.` : w1 === w2 ? `Égalité ${w1}-${w2} cette saison.` : `${w1 > w2 ? t1 : t2} mène ${Math.max(w1, w2)}-${Math.min(w1, w2)} cette saison.`);
   }
 
   return (
     <>
       <div className="card block">
-        <h2>Stats comparées <span className="tag">Saison en cours</span></h2>
+        <h2>{L.t("Stats comparées", "Stat comparison")} <span className="tag">{L.t("Saison en cours", "Current season")}</span></h2>
         <StatCompare away={aw.team} home={h.team} rows={rows} />
-        {(!hs || !as) && <p className="team-rec" style={{ marginTop: 10 }}>Stats de tirs indisponibles pour le moment.</p>}
+        {(!hs || !as) && <p className="team-rec" style={{ marginTop: 10 }}>{L.t("Stats de tirs indisponibles pour le moment.", "Shooting stats unavailable for now.")}</p>}
       </div>
 
       {sum && (
         <div className="card block">
-          <h2>{post ? "Meilleurs joueurs du match" : "Joueurs à suivre"}</h2>
+          <h2>{post ? L.t("Meilleurs joueurs du match", "Top performers") : L.t("Joueurs à suivre", "Players to watch")}</h2>
           <div className="grid2 pl-grid">
-            <Players team={aw.team} list={sum.leaders[aw.team.id] || []} title={post ? "game" : "season"} />
-            <Players team={h.team} list={sum.leaders[h.team.id] || []} title={post ? "game" : "season"} />
+            <Players team={aw.team} list={sum.leaders[aw.team.id] || []} title={post ? "game" : "season"} L={L} />
+            <Players team={h.team} list={sum.leaders[h.team.id] || []} title={post ? "game" : "season"} L={L} />
           </div>
         </div>
       )}
@@ -108,38 +113,38 @@ export default async function MatchExtras({ a }) {
       {sum && (
         <div className="grid2">
           <div className="card block">
-            <h2>Forme récente</h2>
-            <div className="team-rec" style={{ marginBottom: 8 }}>5 derniers matchs (présaison comprise en début de saison)</div>
-            <Form team={aw.team} games={sum.form[aw.team.id] || []} />
-            <Form team={h.team} games={sum.form[h.team.id] || []} />
+            <h2>{L.t("Forme récente", "Recent form")}</h2>
+            <div className="team-rec" style={{ marginBottom: 8 }}>{L.t("5 derniers matchs (présaison comprise en début de saison)", "Last 5 games (including preseason early in the season)")}</div>
+            <Form team={aw.team} games={sum.form[aw.team.id] || []} L={L} />
+            <Form team={h.team} games={sum.form[h.team.id] || []} L={L} />
           </div>
           <div className="card block">
-            <h2>Confrontations</h2>
+            <h2>{L.t("Confrontations", "Head-to-head")}</h2>
             {ser ? (
               <>
                 <p className="team-rec" style={{ marginTop: 0 }}>{serText}</p>
                 <div className="h2h">
                   {ser.games.map((x) => (
-                    <Link key={x.id} href={`/app/match/${x.id}?d=${nbaDateOf(x.date)}`} className={`h2h-row ${x.id === g.id ? "cur" : ""}`}>
-                      <span className="d">{day(x.date)}</span>
+                    <Link key={x.id} href={L.href(`/app/match/${x.id}?d=${nbaDateOf(x.date)}`)} className={`h2h-row ${x.id === g.id ? "cur" : ""}`}>
+                      <span className="d">{day(x.date, L)}</span>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <span className="t">{x.away.logo && <img src={x.away.logo} alt="" />}{x.away.abbr}</span>
-                      <span className="s">{x.state === "post" && x.home.score != null ? `${x.away.score} - ${x.home.score}` : x.id === g.id ? "ce match" : "à venir"}</span>
+                      <span className="s">{x.state === "post" && x.home.score != null ? `${x.away.score} - ${x.home.score}` : x.id === g.id ? L.t("ce match", "this game") : L.t("à venir", "upcoming")}</span>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <span className="t">{x.home.abbr}{x.home.logo && <img src={x.home.logo} alt="" />}</span>
                     </Link>
                   ))}
                 </div>
               </>
-            ) : <p className="team-rec">Pas de confrontation programmée cette saison.</p>}
+            ) : <p className="team-rec">{L.t("Pas de confrontation programmée cette saison.", "No meetings scheduled this season.")}</p>}
           </div>
         </div>
       )}
 
       {sum?.predictor && !post && (
         <div className="card block">
-          <h2>Deuxième avis</h2>
-          <p className="team-rec" style={{ marginTop: 0 }}>Notre modèle comparé au modèle public d&apos;ESPN (BPI). Quand ils sont d&apos;accord, le pronostic est plus solide.</p>
+          <h2>{L.t("Deuxième avis", "Second opinion")}</h2>
+          <p className="team-rec" style={{ marginTop: 0 }}>{L.t("Notre modèle comparé au modèle public d'ESPN (BPI). Quand ils sont d'accord, le pronostic est plus solide.", "Our model compared with ESPN's public model (BPI). When they agree, the prediction is more solid.")}</p>
           {[["Basketlog", a.pHome], ["ESPN BPI", sum.predictor.home]].map(([n, p]) => (
             <div className="second" key={n}>
               <span className="n">{n}</span>
@@ -148,7 +153,7 @@ export default async function MatchExtras({ a }) {
             </div>
           ))}
           <p className="team-rec" style={{ marginBottom: 0 }}>
-            {(a.pHome >= 0.5) === (sum.predictor.home >= 0.5) ? "✓ Les deux modèles désignent le même favori." : "⚠ Les deux modèles ne sont pas d'accord : match à prendre avec prudence."}
+            {(a.pHome >= 0.5) === (sum.predictor.home >= 0.5) ? L.t("✓ Les deux modèles désignent le même favori.", "✓ Both models pick the same favorite.") : L.t("⚠ Les deux modèles ne sont pas d'accord : match à prendre avec prudence.", "⚠ The two models disagree: handle this game with caution.")}
           </p>
         </div>
       )}

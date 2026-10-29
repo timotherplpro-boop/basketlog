@@ -1,22 +1,16 @@
 import Link from "next/link";
+import { mk, fmtDate, fmtTime } from "../lib/i18n";
 
-function day(iso) {
-  return new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", weekday: "long", day: "numeric", month: "long" }).format(new Date(iso));
-}
-function parts(iso) {
-  const d = new Date(iso);
-  return [
-    new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", day: "2-digit", month: "2-digit" }).format(d),
-    new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit" }).format(d),
-  ];
-}
+const day = (iso, L) => fmtDate(L, iso, { weekday: "long", day: "numeric", month: "long" });
+const parts = (iso, L) => [fmtDate(L, iso, { day: "2-digit", month: "2-digit" }), fmtTime(L, iso)];
 
 // Liste des matchs façon "Prochains matchs", regroupés par jour (heure de Paris).
-export default function UpcomingList({ games, title = "Prochains matchs", grouped = true, href = (g) => `/app/match/${g.id}?d=${g.d}` }) {
-  if (!games.length) return <div className="empty">Aucun match au programme.</div>;
+export default function UpcomingList({ games, title, grouped = true, href = (g) => `/app/match/${g.id}?d=${g.d}`, L = mk("fr") }) {
+  if (title === undefined) title = L.t("Prochains matchs", "Upcoming games");
+  if (!games.length) return <div className="empty">{L.t("Aucun match au programme.", "No games scheduled.")}</div>;
   const groups = [];
   for (const g of games) {
-    const k = grouped ? day(g.date) : "";
+    const k = grouped ? day(g.date, L) : "";
     const last = groups[groups.length - 1];
     if (last && last.k === k) last.items.push(g);
     else groups.push({ k, items: [g] });
@@ -29,12 +23,12 @@ export default function UpcomingList({ games, title = "Prochains matchs", groupe
         <div key={gr.k || "all"}>
           {gr.k && <div className="up-day">{gr.k}</div>}
           {gr.items.map((g) => {
-            const [d, h] = parts(g.date);
+            const [d, h] = parts(g.date, L);
             const favHome = g.pHome >= 0.5;
             const done = g.state === "post" && g.home.score != null;
             return (
-              <Link key={g.id} href={href(g)} className="up-row" style={{ animationDelay: `${Math.min(n++, 12) * 50}ms` }}>
-                <div className="when">{d}<b>{g.live ? <span className="live">LIVE</span> : done ? "FIN" : h}</b></div>
+              <Link key={g.id} href={L.href(href(g))} className="up-row" style={{ animationDelay: `${Math.min(n++, 12) * 50}ms` }}>
+                <div className="when">{d}<b>{g.live ? <span className="live">LIVE</span> : done ? L.t("FIN", "FINAL") : h}</b></div>
                 <div className="m">
                   <span className="t">
                     <span className={!favHome ? "fav" : ""}>{g.away.short}</span>

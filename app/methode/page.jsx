@@ -4,18 +4,27 @@ import { nbaToday, seasonForDate } from "../../lib/espn";
 import { pageMeta } from "../../lib/seo";
 import { SITE } from "../../lib/site";
 import JsonLd from "../../components/JsonLd";
+import { getL } from "../../lib/lang-server";
 
 export const dynamic = "force-dynamic";
-export const metadata = pageMeta({
-  title: "Comment sont calculés les pronostics NBA de Basketlog – Méthode",
-  description: "La méthode du modèle Basketlog : niveau des équipes, avantage du terrain, fatigue, absences, puis conversion en probabilité de victoire. Résultats vérifiés en public.",
-  path: "/methode",
-});
+export async function generateMetadata() {
+  const L = await getL();
+  return pageMeta({
+    title: L.t("Comment sont calculés les pronostics NBA de Basketlog – Méthode", "How Basketlog's NBA predictions are calculated – Methodology"),
+    description: L.t(
+      "La méthode du modèle Basketlog : niveau des équipes, avantage du terrain, fatigue, absences, puis conversion en probabilité de victoire. Résultats vérifiés en public.",
+      "The Basketlog model's methodology: team strength, home-court advantage, fatigue, injuries, then conversion into a win probability. Results verified in public."
+    ),
+    path: "/methode",
+    L,
+  });
+}
 
-const pct = (x) => (x == null ? "–" : `${Math.round(x * 100)}\u00a0%`);
 const label = (y) => `${y - 1}-${String(y).slice(2)}`;
 
 export default async function MethodePage() {
+  const L = await getL();
+  const pct = (x) => (x == null ? "–" : L.en ? `${Math.round(x * 100)}%` : `${Math.round(x * 100)}\u00a0%`);
   const season = seasonForDate(nbaToday());
   const [cur, past] = await Promise.all([nbaPicks(season).catch(() => []), nbaPicks(season - 1).catch(() => [])]);
   const s = summarize(cur || []);
@@ -26,14 +35,78 @@ export default async function MethodePage() {
   const ld = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline: "Comment Basketlog calcule ses pronostics NBA",
-    description: "Méthode du modèle statistique Basketlog et résultats vérifiés match par match.",
-    inLanguage: "fr-FR",
-    url: `${SITE}/methode`,
+    headline: L.t("Comment Basketlog calcule ses pronostics NBA", "How Basketlog calculates its NBA predictions"),
+    description: L.t("Méthode du modèle statistique Basketlog et résultats vérifiés match par match.", "The Basketlog statistical model's methodology and results verified game by game."),
+    inLanguage: L.en ? "en-US" : "fr-FR",
+    url: `${SITE}${L.href("/methode")}`,
     author: { "@id": `${SITE}/#organisation` },
     publisher: { "@id": `${SITE}/#organisation` },
     isPartOf: { "@id": `${SITE}/#site` },
   };
+
+  if (L.en) return (
+    <main className="app-page prose-page">
+      <JsonLd data={ld} />
+      <div className="app-head">
+        <h1>How Basketlog calculates its NBA predictions</h1>
+        <p>A simple, transparent statistical model, verified in public, game after game.</p>
+      </div>
+
+      <div className="card block">
+        <h2>In short</h2>
+        <p className="narr">
+          For every game, Basketlog estimates the expected point margin between the two teams, then turns it into a win probability.
+          The margin starts from each team&apos;s real strength, then adds home-court advantage, fatigue and injuries.
+          {p.n > 0 && <> Backtested on the {label(season - 1)} season ({p.n} games), the model picked the right winner in <b>{pct(p.pct)}</b> of cases{strong.n > 0 ? <>, and in <b>{pct(strong.ok / strong.n)}</b> of cases when it gave the favorite at least 70%</> : null}.</>}
+          {s.n > 0 && <> This season ({label(season)}), it stands at <b>{pct(s.pct)}</b> over {s.n} completed games.</>}
+        </p>
+      </div>
+
+      <div className="card block">
+        <h2>1. Each team&apos;s strength</h2>
+        <p className="narr">
+          The foundation is the average point differential per game: points scored minus points allowed. It is one of the most reliable indicators of an NBA team&apos;s real strength, more telling than its win-loss record.
+          Early in the season, a handful of games isn&apos;t enough, so the model blends the current season with the previous one, which counts as 12 extra games. The further the season goes, the more the current season weighs.
+          Finally, this differential is pulled 15% toward the average, because very good and very bad starts tend to even out.
+        </p>
+      </div>
+
+      <div className="card block">
+        <h2>2. Home-court advantage</h2>
+        <p className="narr">Playing at home is worth about 2.3 points in today&apos;s NBA (and 3.2 points in the EuroLeague, where arenas matter more). This value is added to the home team.</p>
+      </div>
+
+      <div className="card block">
+        <h2>3. Back-to-back fatigue</h2>
+        <p className="narr">A team that played the night before loses around 1.6 points on average. Every night, the model checks which teams are playing two games in two days.</p>
+      </div>
+
+      <div className="card block">
+        <h2>4. Injuries</h2>
+        <p className="narr">The injury report is checked before every game. A player ruled out takes about 0.9 points away from his team and a questionable player about 0.35 points, capped at 4.5 points to avoid overreacting. Injuries are only factored in for upcoming games.</p>
+      </div>
+
+      <div className="card block">
+        <h2>5. From margin to probability</h2>
+        <p className="narr">
+          The expected margin is never spot on: in the NBA, the final score misses it by about a dozen points on average. So the model uses a normal distribution centered on the expected margin, with a standard deviation of 12.5 points.
+          From it, the model derives each team&apos;s win probability, the chances of a close game (a margin of 5 points or fewer) and of a blowout (10 points or more).
+          The projected score combines each team&apos;s offense with its opponent&apos;s defense.
+        </p>
+      </div>
+
+      <div className="card block">
+        <h2>6. Verified results, no peeking at the future</h2>
+        <p className="narr">
+          Every prediction is compared with the final score on the <Link href={L.href("/app/bilan")}>Model track record</Link> page. For past games, the model is recalculated using only the results known before the game: it never sees the future.
+          Probabilities remain estimates: a 70% favorite loses about three times out of ten. Basketlog is an analysis tool, not a betting service.
+        </p>
+        <p className="narr" style={{ marginTop: 12 }}>
+          <Link href={L.href("/app/matchs")}>See today&apos;s NBA predictions</Link> · <Link href={L.href("/app/euroleague")}>EuroLeague predictions</Link> · <Link href={L.href("/app/bilan")}>Track record</Link>
+        </p>
+      </div>
+    </main>
+  );
 
   return (
     <main className="app-page prose-page">
