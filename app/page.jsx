@@ -205,9 +205,9 @@ export default async function Home() {
           <p className="proof rise" style={{ "--d": "950ms" }}>
             {strong ? (
               <Link href={L.href("/app/bilan")} title={strongTitle}>{L.t(
-                <><b>{strong.txt}</b> de précision sur nos <b>{num(strong.n)}</b> favoris à&nbsp;70&nbsp;%&nbsp;et&nbsp;plus</>,
-                <><b>{strong.txt}</b> accuracy on our <b>{num(strong.n)}</b> favorites at&nbsp;70%+</>,
-                <><b>{strong.txt}</b> de precisión en nuestros <b>{num(strong.n)}</b> favoritos al&nbsp;70&nbsp;%&nbsp;o&nbsp;más</>
+                <><b>{strong.txt}</b> de précision sur nos <b>{num(strong.n)}</b>&nbsp;favoris à&nbsp;70&nbsp;%&nbsp;et&nbsp;plus</>,
+                <><b>{strong.txt}</b> accuracy on our <b>{num(strong.n)}</b>&nbsp;favorites at&nbsp;70%+</>,
+                <><b>{strong.txt}</b> de precisión en nuestros <b>{num(strong.n)}</b>&nbsp;favoritos al&nbsp;70&nbsp;%&nbsp;o&nbsp;más</>
               )}</Link>
             ) : acc.n >= 5 ? (
               <Link href={L.href("/app/bilan")}>{L.t(
