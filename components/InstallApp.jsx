@@ -23,14 +23,18 @@ function useInstallMode() {
 // Avec une plateforme (boutons iPhone / Android de l'en-tête) : le mode d'emploi de ce téléphone-là.
 async function install(mode, source, platform) {
   track("Clic installer appli", { source, mode: mode || "aide", ...(platform && { plateforme: platform }) });
-  if (platform === "ios") {
-    if (isIOS()) window.dispatchEvent(new Event("bl-install-ios"));
-    else window.dispatchEvent(new CustomEvent("bl-install-help", { detail: { platform } }));
-    return;
-  }
-  if (platform === "android" && !(mode === "prompt" && isAndroid())) {
-    window.dispatchEvent(new CustomEvent("bl-install-help", { detail: { platform } }));
-    return;
+  if (platform) {
+    // Sur un téléphone, on installe sur ce téléphone quel que soit le bouton touché ;
+    // sur ordinateur, QR code et étapes du téléphone choisi.
+    const device = isIOS() ? "ios" : isAndroid() ? "android" : null;
+    if (device === "ios") {
+      window.dispatchEvent(new Event("bl-install-ios"));
+      return;
+    }
+    if (!(device === "android" && mode === "prompt")) {
+      window.dispatchEvent(new CustomEvent("bl-install-help", { detail: { platform: device || platform } }));
+      return;
+    }
   }
   if (mode === "prompt") {
     const outcome = await promptInstall();
@@ -58,19 +62,31 @@ export function InstallButton({ className = "linklike", source = "bouton", icon 
   );
 }
 
-// Boutons « iPhone » et « Android » de l'en-tête, à la place des boutons de store de Visifoot :
-// Basketlog n'est pas sur l'App Store ni sur Google Play, ils ouvrent l'installation depuis le navigateur.
+// Boutons iPhone et Android de l'en-tête, disposés comme les boutons de store de Visifoot.
+// Icônes maison, pas les logos d'Apple ni de Google : Basketlog n'est pas sur leurs stores,
+// ces boutons installent l'appli depuis le navigateur.
+const IconIPhone = () => (
+  <svg viewBox="0 0 24 24" aria-hidden>
+    <rect x="1" y="1" width="22" height="22" rx="5.5" fill="#0b0d14" />
+    <path d="M12 5.6v8.6M8.9 8.7 12 5.6l3.1 3.1M9.2 11.4h-1a1.2 1.2 0 0 0-1.2 1.2v4.6a1.2 1.2 0 0 0 1.2 1.2h7.6a1.2 1.2 0 0 0 1.2-1.2v-4.6a1.2 1.2 0 0 0-1.2-1.2h-1" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+const IconAndroid = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M12 3.6v10.6M7.5 9.7l4.5 4.5 4.5-4.5M4.6 15.6v2.6a2 2 0 0 0 2 2h10.8a2 2 0 0 0 2-2v-2.6" />
+  </svg>
+);
 export function InstallPlatforms({ source = "en_tete", box = false }) {
   const L = useL();
   const mode = useInstallMode();
   const [inApp, setInApp] = useState(false);
   useEffect(() => { setInApp(isStandalone()); }, []);
   if (inApp) return null;
-  const buttons = [["ios", "iPhone"], ["android", "Android"]].map(([platform, name]) => {
+  const buttons = [["ios", "iPhone", IconIPhone], ["android", "Android", IconAndroid]].map(([platform, name, Icon]) => {
     const label = L.t(`Installer l'appli Basketlog sur ${name}`, `Install the Basketlog app on ${name}`, `Instalar la app de Basketlog en ${name}`);
     return (
-      <button key={platform} type="button" className="nav-sq nav-plat" aria-label={label} title={label} onClick={() => install(mode, source, platform)}>
-        {name}
+      <button key={platform} type="button" className="nav-sq nav-store" aria-label={label} title={label} onClick={() => install(mode, source, platform)}>
+        <Icon />
       </button>
     );
   });
