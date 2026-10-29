@@ -67,6 +67,15 @@ export default function RootLayout({ children }) {
         <footer>
           <div className="foot">
             <Link href="/" className="logo"><span className="ball" aria-hidden /> Basketlog</Link>
+            <nav className="foot-links" aria-label="Liens du site">
+              <Link href="/app/matchs">Pronostics NBA du jour</Link>
+              <Link href="/app/classement">Classement NBA</Link>
+              <Link href="/app/euroleague">Pronostics EuroLeague</Link>
+              <Link href="/app/bilan">Taux de réussite</Link>
+              <Link href="/methode">Méthode</Link>
+              <Link href="/pro">Basketlog Pro</Link>
+              <Link href="/avis">Avis</Link>
+            </nav>
             <div>Analyses statistiques, pas un service de paris. Les probabilités sont des estimations, jamais des certitudes.</div>
             <div>Données : flux publics NBA et EuroLeague · Photos : Unsplash · © {new Date().getFullYear()} Basketlog</div>
           </div>

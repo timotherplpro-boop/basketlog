@@ -8,6 +8,7 @@ import MatchExtras from "./MatchExtras";
 import JsonLd from "./JsonLd";
 import { SITE } from "../lib/site";
 import { dayLong } from "../lib/seo";
+import { matchSummary } from "../lib/summary";
 
 function Signed({ v }) {
   return <span className={v > 0.05 ? "pos" : v < -0.05 ? "neg" : ""}>{fmt(v)}</span>;
@@ -106,6 +107,11 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
         <div className="card kpi"><span>Écart projeté</span><strong>{Math.abs(a.margin).toFixed(1)}</strong></div>
         <div className="card kpi"><span>Total projeté</span><strong>{Math.round(a.total)}</strong></div>
         <div className="card kpi"><span>Confiance</span><strong>{a.confidence}</strong></div>
+      </div>
+
+      <div className="card block">
+        <h2>En bref</h2>
+        <p className="narr">{matchSummary(a, league).join(" ")}</p>
       </div>
 
       <Gate matchId={g.id} league={league}>

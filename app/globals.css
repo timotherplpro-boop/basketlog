@@ -743,3 +743,10 @@ a.team:hover .team-name { color: var(--peach); }
 .reveal-in { animation: riseIn .7s var(--ease) both; }
 @media (max-width: 900px) { .plans { grid-template-columns: 1fr; max-width: 460px; margin-left: auto; margin-right: auto; gap: 26px; } }
 .gate-login { display: block; margin-top: 12px; font-size: 14px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+
+/* Liens du pied de page (maillage interne) */
+.foot-links { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: center; margin: 10px 0 4px; }
+.foot-links a { color: var(--muted); font-size: 13px; text-decoration: none; }
+.foot-links a:hover { color: var(--text); }
+.prose-page { max-width: 820px; }
+.prose-page .narr a { color: var(--orange-2); }

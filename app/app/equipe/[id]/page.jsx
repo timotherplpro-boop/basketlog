@@ -4,6 +4,7 @@ import { teamById } from "../../../../lib/teams";
 import { conferenceStandings, upcomingAnalyses } from "../../../../lib/data";
 import { getTeamStats, getTeamSchedule, getRoster, getSummary, nbaDateOf } from "../../../../lib/espn";
 import AppTabs from "../../../../components/AppTabs";
+import { teamSummary } from "../../../../lib/summary";
 import { pageMeta } from "../../../../lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -68,6 +69,11 @@ export default async function TeamPage({ params }) {
 
       <div className="kpis kpis8">
         {kpis.map(([l, v]) => <div className="card kpi" key={l}><span>{l}</span><strong>{v}</strong></div>)}
+      </div>
+
+      <div className="card block">
+        <h2>En bref</h2>
+        <p className="narr">{teamSummary({ team, me: { ...me, streak: me.streak ? me.streak.replace(/^W/, "V").replace(/^L/, "D") : null }, rank, conf: team.conf, next, probs, stats }).join(" ")}</p>
       </div>
 
       {leaders.length > 0 && (
