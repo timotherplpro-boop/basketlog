@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useL } from "./LangProvider";
-import { subscribe, installMode, promptInstall, isStandalone } from "../lib/pwa";
+import { subscribe, installMode, promptInstall, isStandalone, isIOS, isAndroid } from "../lib/pwa";
 import { getConsent } from "../lib/consent";
 import { track } from "../lib/analytics";
 
@@ -20,8 +20,18 @@ function useInstallMode() {
 }
 
 // Invitation native (Chrome, Edge, Android), mode d'emploi iPhone, sinon fenêtre « sur ton téléphone » (QR code).
-async function install(mode, source) {
-  track("Clic installer appli", { source, mode: mode || "aide" });
+// Avec une plateforme (boutons iPhone / Android de l'en-tête) : le mode d'emploi de ce téléphone-là.
+async function install(mode, source, platform) {
+  track("Clic installer appli", { source, mode: mode || "aide", ...(platform && { plateforme: platform }) });
+  if (platform === "ios") {
+    if (isIOS()) window.dispatchEvent(new Event("bl-install-ios"));
+    else window.dispatchEvent(new CustomEvent("bl-install-help", { detail: { platform } }));
+    return;
+  }
+  if (platform === "android" && !(mode === "prompt" && isAndroid())) {
+    window.dispatchEvent(new CustomEvent("bl-install-help", { detail: { platform } }));
+    return;
+  }
   if (mode === "prompt") {
     const outcome = await promptInstall();
     track("Installation appli", { source, resultat: outcome || "indisponible" });
@@ -48,19 +58,23 @@ export function InstallButton({ className = "linklike", source = "bouton", icon 
   );
 }
 
-// Carré « appli » de l'en-tête (comme les boutons App Store de Visifoot) : toujours là, sauf dans l'appli installée.
-export function InstallSquare({ source = "en_tete" }) {
+// Boutons « iPhone » et « Android » de l'en-tête, à la place des boutons de store de Visifoot :
+// Basketlog n'est pas sur l'App Store ni sur Google Play, ils ouvrent l'installation depuis le navigateur.
+export function InstallPlatforms({ source = "en_tete", box = false }) {
   const L = useL();
   const mode = useInstallMode();
   const [inApp, setInApp] = useState(false);
   useEffect(() => { setInApp(isStandalone()); }, []);
   if (inApp) return null;
-  const label = L.t("Installer l'appli Basketlog", "Install the Basketlog app", "Instalar la app de Basketlog");
-  return (
-    <button type="button" className="nav-sq" aria-label={label} title={label} onClick={() => install(mode, source)}>
-      <PhoneIcon />
-    </button>
-  );
+  const buttons = [["ios", "iPhone"], ["android", "Android"]].map(([platform, name]) => {
+    const label = L.t(`Installer l'appli Basketlog sur ${name}`, `Install the Basketlog app on ${name}`, `Instalar la app de Basketlog en ${name}`);
+    return (
+      <button key={platform} type="button" className="nav-sq nav-plat" aria-label={label} title={label} onClick={() => install(mode, source, platform)}>
+        {name}
+      </button>
+    );
+  });
+  return box ? <div className="nav-box">{buttons}</div> : buttons;
 }
 
 function ShareIcon() {
@@ -76,6 +90,7 @@ export default function InstallApp() {
   const path = usePathname();
   const [banner, setBanner] = useState(false);
   const [sheet, setSheet] = useState(null); // "ios" | "help" | null
+  const [plat, setPlat] = useState(null); // "ios" | "android" | null : téléphone choisi dans l'en-tête
   const [mobile, setMobile] = useState(false);
 
   useEffect(() => {
@@ -90,7 +105,7 @@ export default function InstallApp() {
 
   useEffect(() => {
     const ios = () => setSheet("ios");
-    const help = () => { setMobile(window.matchMedia?.("(pointer: coarse)").matches && window.innerWidth < 900); setSheet("help"); };
+    const help = (e) => { setPlat(e?.detail?.platform || null); setMobile(window.matchMedia?.("(pointer: coarse)").matches && window.innerWidth < 900); setSheet("help"); };
     window.addEventListener("bl-install-ios", ios);
     window.addEventListener("bl-install-help", help);
     return () => { window.removeEventListener("bl-install-ios", ios); window.removeEventListener("bl-install-help", help); };
@@ -172,15 +187,23 @@ export default function InstallApp() {
                 {mobile
                   ? /* eslint-disable-next-line @next/next/no-img-element */ <img src="/icons/icon-192.png" alt="" width={64} height={64} className="ios-icon" />
                   : /* eslint-disable-next-line @next/next/no-img-element */ <img src={`/qr/${L.lang}.svg`} alt={L.t("QR code vers Basketlog", "QR code to Basketlog", "Código QR de Basketlog")} width={168} height={168} className="qr" />}
-                <h3 id="install-title">{L.t("Basketlog sur ton téléphone", "Basketlog on your phone", "Basketlog en tu móvil")}</h3>
+                <h3 id="install-title">{plat === "ios"
+                  ? L.t("Basketlog sur ton iPhone", "Basketlog on your iPhone", "Basketlog en tu iPhone")
+                  : plat === "android"
+                    ? L.t("Basketlog sur ton téléphone Android", "Basketlog on your Android phone", "Basketlog en tu móvil Android")
+                    : L.t("Basketlog sur ton téléphone", "Basketlog on your phone", "Basketlog en tu móvil")}</h3>
                 <p className="modal-sub">
-                  {mobile
-                    ? L.t("L'appli s'installe directement depuis le navigateur, gratuitement, sans passer par un store.", "The app installs straight from your browser, for free, without any app store.", "La app se instala directamente desde el navegador, gratis, sin pasar por ninguna tienda.")
-                    : L.t("Scanne ce code avec ton téléphone, puis installe l'appli depuis le navigateur : c'est gratuit et sans store.", "Scan this code with your phone, then install the app from the browser: it's free and needs no app store.", "Escanea este código con tu móvil y luego instala la app desde el navegador: es gratis y sin tiendas.")}
+                  {plat
+                    ? (mobile
+                      ? L.t(`Pas besoin ${plat === "ios" ? "de l'App Store" : "de Google Play"} : l'appli s'installe directement depuis le navigateur, gratuitement.`, `No ${plat === "ios" ? "App Store" : "Google Play"} needed: the app installs straight from your browser, for free.`, `No hace falta ${plat === "ios" ? "el App Store" : "Google Play"}: la app se instala directamente desde el navegador, gratis.`)
+                      : L.t(`Pas besoin ${plat === "ios" ? "de l'App Store" : "de Google Play"} : scanne ce code avec ton ${plat === "ios" ? "iPhone" : "téléphone Android"}, puis installe l'appli depuis le navigateur. C'est gratuit.`, `No ${plat === "ios" ? "App Store" : "Google Play"} needed: scan this code with your ${plat === "ios" ? "iPhone" : "Android phone"}, then install the app from the browser. It's free.`, `No hace falta ${plat === "ios" ? "el App Store" : "Google Play"}: escanea este código con tu ${plat === "ios" ? "iPhone" : "móvil Android"} y luego instala la app desde el navegador. Es gratis.`))
+                    : mobile
+                      ? L.t("L'appli s'installe directement depuis le navigateur, gratuitement, sans passer par un store.", "The app installs straight from your browser, for free, without any app store.", "La app se instala directamente desde el navegador, gratis, sin pasar por ninguna tienda.")
+                      : L.t("Scanne ce code avec ton téléphone, puis installe l'appli depuis le navigateur : c'est gratuit et sans store.", "Scan this code with your phone, then install the app from the browser: it's free and needs no app store.", "Escanea este código con tu móvil y luego instala la app desde el navegador: es gratis y sin tiendas.")}
                 </p>
                 <ul className="install-steps">
-                  <li>{steps.iphone}</li>
-                  <li>{steps.android}</li>
+                  {plat !== "android" && <li>{steps.iphone}</li>}
+                  {plat !== "ios" && <li>{steps.android}</li>}
                 </ul>
               </>
             )}

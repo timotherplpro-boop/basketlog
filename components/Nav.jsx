@@ -5,7 +5,7 @@ import { useProStatus } from "../lib/useProStatus";
 import { track } from "../lib/analytics";
 import { useL, useInitialPath } from "./LangProvider";
 import LangSelect from "./LangSelect";
-import { InstallSquare } from "./InstallApp";
+import { InstallPlatforms } from "./InstallApp";
 
 const Chevrons = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M4 5l7 7-7 7M12 5l7 7-7 7" /></svg>
@@ -14,7 +14,7 @@ const MenuIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden><path d="M4 7h16M4 12h16M4 17h16" /></svg>
 );
 
-// En-tête façon Visifoot : logo à gauche ; à droite la langue, « » CONNEXION » et la boîte blanche (appli + menu).
+// En-tête façon Visifoot : logo à gauche ; à droite la langue, « » CONNEXION » et la boîte blanche (iPhone, Android, menu).
 // Sur mobile : logo et menu burger, qui ouvre un panneau avec ces mêmes éléments et les liens du site.
 export default function Nav() {
   const L = useL();
@@ -61,7 +61,7 @@ export default function Nav() {
               {account.label}
             </a>
             <div className="nav-box nav-only">
-              <InstallSquare />
+              <InstallPlatforms />
               <button type="button" className={`nav-sq ${open ? "on" : ""}`} onClick={() => setOpen(!open)} aria-label={menuLabel} aria-expanded={open}>
                 <MenuIcon />
               </button>
@@ -83,7 +83,7 @@ export default function Nav() {
           <div className="mm-visi">
             <LangSelect />
             <a href={account.href} className="nav-cta" onClick={onAccount}><Chevrons />{account.label}</a>
-            <div className="nav-box"><InstallSquare source="menu" /></div>
+            <InstallPlatforms source="menu" box />
           </div>
           <nav className="mm-links" aria-label={L.t("Pages du site", "Site pages", "Páginas del sitio")}>
             {links.map(([href, label]) => <Link key={href} href={L.href(href)}>{label}</Link>)}
