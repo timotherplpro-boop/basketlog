@@ -12,6 +12,7 @@ import RevealObserver from "../components/RevealObserver";
 import Faq from "../components/Faq";
 import ReviewCards from "../components/ReviewCards";
 import { getReviews } from "../lib/reviews";
+import { memberCount } from "../lib/members";
 import JsonLd from "../components/JsonLd";
 import { pageMeta } from "../lib/seo";
 import { getL } from "../lib/lang-server";
@@ -47,16 +48,29 @@ const StarIcon = () => (
   <svg viewBox="0 0 24 24" aria-hidden><defs><linearGradient id="star-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ffe066" /><stop offset="1" stopColor="#ffb300" /></linearGradient></defs><path d="M12 2.6l2.9 6 6.5.8-4.8 4.5 1.2 6.5L12 17.3l-5.8 3.1 1.2-6.5-4.8-4.5 6.5-.8z" fill="url(#star-g)" stroke="#e09a00" strokeWidth=".8" strokeLinejoin="round" /></svg>
 );
 
-// Nombre de matchs NBA recalculés par le modèle (bilan public). Mis en cache côté serveur ; si c'est lent, on n'attend pas.
-async function countPicks() {
+// Bilan public (saison passée testée + saison en cours) : nombre de matchs recalculés par le modèle et réussite
+// quand le favori est donné à 70 % ou plus, avec le même calcul que la carte « Favoris à 70 % et plus » du bilan.
+// Mis en cache côté serveur ; si c'est lent, on n'attend pas.
+const STRONG = 0.7;
+async function pickStats() {
   try {
     const season = seasonForDate(nbaToday());
-    const work = Promise.all([nbaPicks(season - 1), nbaPicks(season)]).then(([a, b]) => (a?.length || 0) + (b?.length || 0));
-    return await Promise.race([work, new Promise((r) => setTimeout(() => r(0), 1500))]);
+    const work = Promise.all([nbaPicks(season - 1), nbaPicks(season)]).then(([a, b]) => {
+      const all = [...(a || []), ...(b || [])];
+      const strong = all.filter((p) => Math.max(p.pHome, 1 - p.pHome) >= STRONG);
+      return { n: all.length, strongN: strong.length, strongOk: strong.filter((p) => p.ok).length };
+    });
+    return await Promise.race([work, new Promise((r) => setTimeout(() => r(null), 1500))]);
   } catch {
-    return 0;
+    return null;
   }
 }
+
+// Seuils d'affichage : sous ces valeurs, le chiffre n'est pas assez parlant (ou pas assez fiable) pour la vitrine.
+const MEMBERS_MIN = 100; // le badge passe au nombre de membres à partir de +100 inscrits
+const STRONG_MIN = 100; // taux sur les gros favoris affiché à partir de 100 matchs
+// « +N » reste toujours strictement inférieur au vrai chiffre (arrondi vers le bas).
+const plusFloor = (n, step) => Math.floor((n - 1) / step) * step;
 const shortDay = (iso, L) => fmtDate(L, iso, { weekday: "short", day: "numeric", month: "short" });
 
 // Grains de lumière dans le faisceau du projecteur
@@ -76,7 +90,7 @@ function BallButton({ href, children }) {
 
 export default async function Home() {
   const L = await getL();
-  const [up, acc, std, reviews, elGames, picksCount] = await Promise.all([upcomingAnalyses(7), recentAccuracy(7), conferenceStandings(), getReviews(30), getELGames(), countPicks()]);
+  const [up, acc, std, reviews, elGames, stats, members] = await Promise.all([upcomingAnalyses(7), recentAccuracy(7), conferenceStandings(), getReviews(30), getELGames(), pickStats(), memberCount()]);
   const pre = up.filter((g) => !g.live);
 
   // Téléphone : les Lakers (ou l'équipe qui joue le plus cette semaine)
@@ -101,18 +115,27 @@ export default async function Home() {
   const today = nbaToday();
   const todayCount = up.filter((g) => g.d === today).length;
   const accPct = acc.n ? Math.round((acc.ok / acc.n) * 100) : 0;
-  // Précision de la semaine, à une décimale comme Visifoot (« 67,4 % » / « 67.4% »).
-  const accVal = acc.n ? (acc.ok / acc.n) * 100 : 0;
-  const accTxt = L.en ? `${accVal.toFixed(1)}%` : `${accVal.toFixed(1).replace(".", ",")}\u00a0%`;
-  // Badge : nombre réel de matchs passés au crible par le modèle (saison passée + saison en cours), arrondi à la centaine.
-  const analysed = Math.floor(Math.max(1300, picksCount) / 100) * 100;
-  const badge = L.t(
-    `+${analysed.toLocaleString("fr-FR")} matchs NBA analysés`,
-    `+${analysed.toLocaleString("en-US")} NBA games analyzed`,
-    `+${analysed.toLocaleString("es-ES")} partidos NBA analizados`
+  // Pourcentages à une décimale comme Visifoot (« 67,4 % » / « 67.4% »).
+  const pctTxt = (v) => (L.en ? `${v.toFixed(1)}%` : `${v.toFixed(1).replace(".", ",")} %`);
+  const num = (n) => n.toLocaleString(L.locale).replace(/ /g, " ");
+  const accTxt = pctTxt(acc.n ? (acc.ok / acc.n) * 100 : 0);
+  // Réussite réelle sur les gros favoris (bilan public), si l'échantillon est assez grand.
+  const strong = stats && stats.strongN >= STRONG_MIN ? { n: stats.strongN, txt: pctTxt((stats.strongOk / stats.strongN) * 100) } : null;
+  const season = seasonForDate(today);
+  const seasonLabel = (y) => `${y - 1}-${String(y).slice(2)}`;
+  const strongTitle = L.t(
+    `Saison ${seasonLabel(season - 1)} testée en entier et saison ${seasonLabel(season)} en cours : chaque match est recalculé avec les seuls résultats connus avant lui.`,
+    `Full ${seasonLabel(season - 1)} season backtest plus the current ${seasonLabel(season)} season: every game is recalculated using only results known before it.`,
+    `Temporada ${seasonLabel(season - 1)} probada entera y temporada ${seasonLabel(season)} en curso: cada partido se recalcula solo con los resultados conocidos antes de él.`
   );
+  // Badge : vrai nombre de membres Whop dès qu'il est parlant, sinon vrai nombre de matchs passés au crible.
+  const memStep = members >= 10000 ? 1000 : members >= 1000 ? 100 : 10;
+  const memShown = members > 0 ? plusFloor(members, memStep) : 0;
+  const analysed = plusFloor(Math.max(1301, stats?.n || 0), 100); // la saison testée compte à elle seule plus de 1 300 matchs
+  const badgeTxt = memShown >= MEMBERS_MIN
+    ? L.t(`+${num(memShown)} membres inscrits`, `+${num(memShown)} registered members`, `+${num(memShown)} miembros registrados`)
+    : L.t(`+${num(analysed)} matchs NBA analysés`, `+${num(analysed)} NBA games analyzed`, `+${num(analysed)} partidos NBA analizados`);
   const hero = HERO[L.lang];
-  const badgeTxt = badge.replace(/\u202f/g, "\u00a0");
   const cards = pre.slice(0, 12);
   const elCrests = [...new Map(elGames.flatMap((g) => [g.home, g.away]).filter((c) => c.logo).map((c) => [c.id, c.logo])).values()];
   const LOGOS = TEAMS.map((t) => t.logo);
@@ -180,7 +203,13 @@ export default async function Home() {
           )}</p>
           <div className="rise" style={{ "--d": "800ms", width: "100%", display: "flex", justifyContent: "center" }}><TeamSearch games={up.map(({ a, ...r }) => r)} /></div>
           <p className="proof rise" style={{ "--d": "950ms" }}>
-            {acc.n >= 5 ? (
+            {strong ? (
+              <Link href={L.href("/app/bilan")} title={strongTitle}>{L.t(
+                <><b>{strong.txt}</b> de précision sur nos <b>{num(strong.n)}</b> favoris à 70&nbsp;% et plus</>,
+                <><b>{strong.txt}</b> accuracy on our <b>{num(strong.n)}</b> favorites at 70%+</>,
+                <><b>{strong.txt}</b> de precisión en nuestros <b>{num(strong.n)}</b> favoritos al 70&nbsp;% o más</>
+              )}</Link>
+            ) : acc.n >= 5 ? (
               <Link href={L.href("/app/bilan")}>{L.t(
                 <><b>{accTxt}</b> de précision sur les <b>{acc.n}</b> matchs analysés la semaine dernière</>,
                 <><b>{accTxt}</b> accuracy on <b>{acc.n}</b> games analyzed last week</>,
