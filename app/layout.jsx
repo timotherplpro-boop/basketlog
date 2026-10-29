@@ -3,7 +3,7 @@ import Link from "next/link";
 import Nav from "../components/Nav";
 import Analytics from "../components/Analytics";
 import JsonLd from "../components/JsonLd";
-import { SITE, GOOGLE_SITE_VERIFICATION } from "../lib/site";
+import { SITE, GOOGLE_SITE_VERIFICATION, BING_SITE_VERIFICATION } from "../lib/site";
 
 export const metadata = {
   metadataBase: new URL(SITE),
@@ -12,7 +12,6 @@ export const metadata = {
   twitter: { card: "summary_large_image" },
   description:
     "Pronostics NBA et EuroLeague pour chaque match : probabilités de victoire gratuites, score projeté, absences, forme et scénarios. Taux de réussite public.",
-  verification: { google: GOOGLE_SITE_VERIFICATION },
   openGraph: {
     title: "Basketlog : pronostics NBA et EuroLeague analysés par IA",
     description: "Probabilités, score projeté et scénarios pour chaque match NBA et EuroLeague.",
@@ -50,6 +49,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="fr">
       <head>
+        {/* Validations Search Console et Bing : écrites en dur pour être toujours dans le <head>, quel que soit le visiteur */}
+        <meta name="google-site-verification" content={GOOGLE_SITE_VERIFICATION} />
+        <meta name="msvalidate.01" content={BING_SITE_VERIFICATION} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
