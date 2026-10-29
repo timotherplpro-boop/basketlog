@@ -132,7 +132,7 @@ button { font: inherit; color: inherit; }
 .hero-bg { position: absolute; inset: 0 0 auto 0; height: 1080px; z-index: -1; overflow: hidden; }
 /* Salle de basket de nuit, floutée et assombrie (comme le stade de nuit de Visifoot) */
 .hero-bg .photo { position: absolute; inset: -12px; background: url("https://images.unsplash.com/photo-1765924705648-9a0731ac5202?w=1800&q=55&auto=format") center 58% / cover no-repeat; filter: brightness(.85) saturate(.85) blur(2px); transform: scale(1.04); animation: kenburns 30s ease-in-out infinite alternate; }
-.hero-bg .shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(4,8,23,.62) 0%, rgba(4,8,23,.42) 34%, rgba(4,8,23,.58) 62%, rgba(4,8,23,.9) 84%, var(--bg) 100%); }
+.hero-bg .shade { position: absolute; inset: 0; background: radial-gradient(70% 55% at 50% 30%, transparent 0%, rgba(4,8,23,.35) 100%), linear-gradient(180deg, rgba(4,8,23,.72) 0%, rgba(4,8,23,.46) 34%, rgba(4,8,23,.6) 62%, rgba(4,8,23,.9) 84%, var(--bg) 100%); }
 /* Rampe de projecteurs au-dessus du titre */
 .hero-bg .cone { position: absolute; top: 110px; left: 50%; width: 900px; height: 760px; transform: translateX(-50%); background: conic-gradient(from 160deg at 50% 10%, transparent 0deg, rgba(220,232,255,.05) 12deg, rgba(220,232,255,.11) 20deg, rgba(220,232,255,.05) 28deg, transparent 40deg); filter: blur(14px); animation: flicker 2.2s ease-out .15s both; }
 .hero-bg .bloom { position: absolute; top: 158px; left: 50%; width: 360px; height: 150px; transform: translateX(-50%); background: radial-gradient(closest-side, rgba(235,242,255,.5), rgba(235,242,255,.16) 52%, transparent 100%); filter: blur(12px); animation: flicker 2.2s ease-out both; }
