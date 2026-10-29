@@ -109,7 +109,7 @@ export default async function Home() {
   const badge = L.t(
     `+${analysed.toLocaleString("fr-FR")} matchs NBA analysés`,
     `+${analysed.toLocaleString("en-US")} NBA games analyzed`,
-    `+${analysed.toLocaleString("es-ES")} partidos de la NBA analizados`
+    `+${analysed.toLocaleString("es-ES")} partidos NBA analizados`
   );
   const hero = HERO[L.lang];
   const badgeTxt = badge.replace(/\u202f/g, "\u00a0");
