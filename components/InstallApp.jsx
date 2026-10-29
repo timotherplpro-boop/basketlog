@@ -67,16 +67,16 @@ export function InstallButton({ className = "linklike", source = "bouton", icon 
 // ces boutons installent l'appli depuis le navigateur.
 const IconIPhone = () => (
   <svg viewBox="0 0 24 24" aria-hidden>
-    <rect x="1" y="1" width="22" height="22" rx="5.5" fill="#0b0d14" />
+    <rect x="1" y="1" width="22" height="22" rx="5.5" fill="#131515" />
     <path d="M12 5.6v8.6M8.9 8.7 12 5.6l3.1 3.1M9.2 11.4h-1a1.2 1.2 0 0 0-1.2 1.2v4.6a1.2 1.2 0 0 0 1.2 1.2h7.6a1.2 1.2 0 0 0 1.2-1.2v-4.6a1.2 1.2 0 0 0-1.2-1.2h-1" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 const IconAndroid = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+  <svg viewBox="2.5 2.5 19 19" fill="none" stroke="currentColor" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
     <path d="M12 3.6v10.6M7.5 9.7l4.5 4.5 4.5-4.5M4.6 15.6v2.6a2 2 0 0 0 2 2h10.8a2 2 0 0 0 2-2v-2.6" />
   </svg>
 );
-export function InstallPlatforms({ source = "en_tete", box = false }) {
+export function InstallPlatforms({ source = "en_tete", box = false, className = "" }) {
   const L = useL();
   const mode = useInstallMode();
   const [inApp, setInApp] = useState(false);
@@ -90,7 +90,7 @@ export function InstallPlatforms({ source = "en_tete", box = false }) {
       </button>
     );
   });
-  return box ? <div className="nav-box">{buttons}</div> : buttons;
+  return box ? <div className={`nav-box ${className}`.trim()}>{buttons}</div> : buttons;
 }
 
 function ShareIcon() {

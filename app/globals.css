@@ -49,23 +49,24 @@ button { font: inherit; color: inherit; }
 .nav-in { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; margin-top: 20px; padding: 0 20px; }
 .logo { display: inline-flex; align-items: center; gap: 9px; font-family: var(--head); font-weight: 800; font-size: 27px; letter-spacing: -0.02em; color: #ff8c3a; }
 .logo .ball { width: 26px; height: 26px; }
-.nav-right { display: flex; align-items: center; gap: 20px; }
+.nav-right { display: flex; align-items: center; gap: 31px; }
 /* Langue : boîte grise et vrai <select> invisible par-dessus */
 .lang-select { position: relative; display: inline-flex; align-items: center; justify-content: space-between; gap: 10px; width: 120px; height: 41px; padding: 10px; border-radius: 10px; background: rgb(96, 98, 102); color: #fff; font: 400 14px/21px var(--body); cursor: pointer; transition: background .2s; }
 .lang-select:hover { background: rgb(112, 114, 119); }
-.lang-select svg { width: 12px; height: 12px; flex: none; opacity: .85; }
+.lang-select svg { width: 12px; height: 12px; flex: none; color: #999; }
 .lang-select select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 16px; appearance: none; }
 .lang-select:has(select:focus-visible) { outline: 2px solid var(--orange); outline-offset: 2px; }
 /* » CONNEXION */
-.nav-cta { display: inline-flex; align-items: center; gap: 10px; padding: 15px 35px; border-radius: 999px; font-family: var(--title); font-size: 24px; line-height: 1.2; letter-spacing: -0.03em; text-transform: uppercase; color: #fff; white-space: nowrap; transition: color .2s var(--ease), transform .2s var(--ease); }
-.nav-cta svg { width: 25px; height: 25px; flex: none; }
+.nav-cta { display: inline-flex; align-items: center; gap: 11px; padding: 15px 35px; border-radius: 999px; font-family: var(--title); font-size: 24px; line-height: 1.2; letter-spacing: -0.03em; text-transform: uppercase; color: #fff; white-space: nowrap; transition: color .2s var(--ease), transform .2s var(--ease); }
+.nav-cta svg { width: 25px; height: 18px; flex: none; }
 .nav-cta:hover { color: var(--peach); transform: translateX(3px); }
 /* Boîte blanche (appli + menu), comme les boutons App Store / Google Play de Visifoot */
-.nav-box { display: flex; gap: 6px; padding: 6px; border-radius: 20px; background: #fff; box-shadow: 0 8px 20px rgba(19, 21, 21, .05); }
+.nav-box { display: flex; gap: 6px; padding: 7px 6px; border-radius: 20px; background: #fff; box-shadow: 0 8px 20px rgba(19, 21, 21, .05); }
 .nav-sq { display: grid; place-items: center; width: 50px; height: 50px; padding: 0; border: 0; border-radius: 16px; background: #e8e8e8; color: #0b0d14; cursor: pointer; transition: background .2s, transform .2s var(--ease); }
 .nav-sq svg { width: 22px; height: 22px; }
 .nav-sq:hover, .nav-sq.on { background: var(--peach); }
 .nav-sq:active { transform: scale(.95); }
+.nav-store { color: #131515; }
 .burger { display: none; width: 40px; height: 40px; padding: 0; background: none; border: 0; cursor: pointer; position: relative; z-index: 60; }
 .burger i { position: absolute; left: 0; right: 0; height: 2px; border-radius: 2px; background: var(--peach); transition: transform .3s var(--ease), top .3s var(--ease); }
 .burger i:first-child { top: 15px; } .burger i:last-child { top: 23px; }

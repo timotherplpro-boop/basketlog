@@ -14,7 +14,7 @@ export default function LangSelect({ className = "" }) {
   return (
     <label className={`lang-select ${className}`}>
       <span>{LANG_NAMES[L.lang]}</span>
-      <svg viewBox="0 0 12 12" aria-hidden><path d="M3 4.6l3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      <svg viewBox="0 0 12 12" aria-hidden><path d="M1.5 3.6l4.5 4.5 4.5-4.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
       <select
         aria-label={L.t("Langue", "Language", "Idioma")}
         value={L.lang}
