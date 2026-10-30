@@ -39,7 +39,7 @@ export async function POST(req) {
 
   const a = await analysisFor(league, id, d).catch(() => null);
   if (!a) return json({ error: "match" }, 404, refreshed);
-  const answer = await askAI(a, league, question, lang);
+  const answer = await askAI(a, league, question, lang, req.headers.get("x-vercel-oidc-token"));
   if (!answer) return json({ error: "ia" }, 502, refreshed);
 
   const r = await recordQuestion(session.uid, matchKey(league, id), limit);

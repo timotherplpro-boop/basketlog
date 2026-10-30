@@ -3,7 +3,19 @@ import LegalDoc, { Sec } from "../../components/LegalDoc";
 import { LEGAL } from "../../lib/legal";
 import { pageMeta } from "../../lib/seo";
 import { getL } from "../../lib/lang-server";
-import { aiReady } from "../../lib/pro";
+import { aiReady, aiVendor } from "../../lib/pro";
+
+// Prestataire d'IA réellement branché (Anthropic en direct, ou modèle via Vercel AI Gateway).
+const AI_TXT = {
+  fr: { pays: "États-Unis", via: "via", q: "IA qui répond aux questions des abonnés", n: " et rédige l'argumentation des analyses" },
+  en: { pays: "United States", via: "via", q: "AI that answers subscribers' questions", n: " and writes the analysis reasoning" },
+  es: { pays: "Estados Unidos", via: "a través de", q: "IA que responde a las preguntas de los suscriptores", n: " y redacta la argumentación de los análisis" },
+};
+const withAi = (lang) => ([n, r, f]) => {
+  if (f !== "ia") return [n, r];
+  const v = aiVendor(), t = AI_TXT[lang];
+  return [`${v.name} (${t.pays})${v.via ? `, ${t.via} ${v.via}` : ""}`, t.q + (v.narrative ? t.n : "")];
+};
 
 export async function generateMetadata() {
   const L = await getL();
@@ -62,7 +74,7 @@ function ConfidentialiteFr() {
 
       <Sec n={4} title="Prestataires">
         <p>Nous partageons des données uniquement avec les prestataires nécessaires au service, qui agissent pour notre compte :</p>
-        <ul>{PRESTATAIRES.filter(([, , f]) => f !== "ia" || aiReady()).map(([n, r]) => <li key={n}><b>{n}</b> : {r}</li>)}</ul>
+        <ul>{PRESTATAIRES.filter(([, , f]) => f !== "ia" || aiReady()).map(withAi("fr")).map(([n, r]) => <li key={n}><b>{n}</b> : {r}</li>)}</ul>
         <p>Pour les statistiques sportives (ESPN, EuroLeague) et la rédaction automatique des analyses, nous n&apos;envoyons que des données de matchs, jamais tes données personnelles. Les logos des équipes et certaines photos (Unsplash) sont chargés depuis les serveurs de ces services, qui reçoivent donc ton adresse IP comme pour tout site web. Les polices d&apos;écriture sont hébergées par Basketlog.</p>
       </Sec>
 
@@ -152,7 +164,7 @@ function ConfidentialiteEn({ L }) {
 
       <Sec n={4} title="Service providers">
         <p>We only share data with the providers needed to run the service, who act on our behalf:</p>
-        <ul>{PROVIDERS_EN.filter(([, , f]) => f !== "ia" || aiReady()).map(([n, r]) => <li key={n}><b>{n}</b>: {r}</li>)}</ul>
+        <ul>{PROVIDERS_EN.filter(([, , f]) => f !== "ia" || aiReady()).map(withAi("en")).map(([n, r]) => <li key={n}><b>{n}</b>: {r}</li>)}</ul>
         <p>For sports statistics (ESPN, EuroLeague) and the automatic writing of analyses, we only send game data, never your personal data. Team logos and some photos (Unsplash) are loaded from these services&apos; servers, which therefore receive your IP address as with any website. Fonts are hosted by Basketlog.</p>
       </Sec>
 
@@ -242,7 +254,7 @@ function ConfidentialiteEs({ L }) {
 
       <Sec n={4} title="Proveedores">
         <p>Solo compartimos datos con los proveedores necesarios para el servicio, que actúan por cuenta nuestra:</p>
-        <ul>{PROVIDERS_ES.filter(([, , f]) => f !== "ia" || aiReady()).map(([n, r]) => <li key={n}><b>{n}</b>: {r}</li>)}</ul>
+        <ul>{PROVIDERS_ES.filter(([, , f]) => f !== "ia" || aiReady()).map(withAi("es")).map(([n, r]) => <li key={n}><b>{n}</b>: {r}</li>)}</ul>
         <p>Para las estadísticas deportivas (ESPN, EuroLeague) y la redacción automática de los análisis, solo enviamos datos de partidos, nunca tus datos personales. Los logotipos de los equipos y algunas fotos (Unsplash) se cargan desde los servidores de esos servicios, que reciben por tanto tu dirección IP, como en cualquier sitio web. Las tipografías están alojadas por Basketlog.</p>
       </Sec>
 
