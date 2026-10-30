@@ -8,26 +8,28 @@ const DURATION = 5500;
 
 export function useAnalysisRun(duration = DURATION) {
   const [p, setP] = useState(null); // null = pas lancée
-  const raf = useRef(0);
-  useEffect(() => () => cancelAnimationFrame(raf.current), []);
+  const timer = useRef(0);
+  useEffect(() => () => clearInterval(timer.current), []);
   const start = useCallback((task, onDone) => {
-    const t0 = performance.now();
+    const t0 = Date.now();
     let settled = false, result = null;
     Promise.resolve().then(task).then((r) => { result = r; }, () => { result = { error: true }; }).finally(() => { settled = true; });
+    // Minuterie plutôt que requestAnimationFrame : l'analyse avance aussi si l'onglet passe en arrière-plan.
     const tick = () => {
-      const k = Math.min(1, (performance.now() - t0) / duration);
+      const k = Math.min(1, (Date.now() - t0) / duration);
       let v = (1 - Math.pow(1 - k, 1.6)) * 100;
       if (!settled) v = Math.min(v, 96);
-      setP(v);
       if (k >= 1 && settled) {
+        clearInterval(timer.current);
         setP(100);
         setTimeout(() => onDone(result), 450);
         return;
       }
-      raf.current = requestAnimationFrame(tick);
+      setP(v);
     };
+    clearInterval(timer.current);
     setP(0);
-    raf.current = requestAnimationFrame(tick);
+    timer.current = setInterval(tick, 50);
   }, [duration]);
   return { p, running: p != null, start };
 }
