@@ -9,7 +9,11 @@ import { fmt } from "../lib/model";
 import { aiNarrative } from "../lib/narrative";
 import { matchSummary } from "../lib/summary";
 import { factorText, scenarioText, confText } from "../lib/matchtext";
-import { analysisAccess } from "../lib/usage";
+import Link from "next/link";
+import NewsSection from "./NewsSection";
+import AskAI from "./AskAI";
+import { aiReady, QUESTIONS } from "../lib/pro";
+import { analysisAccess, memberSession, questionUsage } from "../lib/usage";
 import { nbaRecentForm } from "../lib/data";
 import { unlockProof } from "../lib/proof";
 import { nbaDateOf } from "../lib/espn";
@@ -85,7 +89,16 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
   const vd = (l) => `${l.filter((x) => x.res === "W").length}-${l.filter((x) => x.res !== "W").length}`;
   const chips = (l) => l.map((x) => (x.res === "W" ? "✅" : "❌")).join("") + (g.state === "pre" ? "⏳" : "");
 
-  const narrative = open ? await aiNarrative(a, L) : null;
+  // Starter : analyse réduite (probabilités exactes et stats clés), comme Visifoot. Pro et Lifetime : analyse complète
+  // détaillée, actualités en temps réel et questions personnelles à l'IA (si l'IA est configurée).
+  const reduced = open && access.tier === "starter";
+  const full = open && !reduced;
+  const aiOn = aiReady();
+  const ask = full && aiOn && QUESTIONS[access.tier] ? { limit: access.tier === "lifetime" ? null : QUESTIONS[access.tier] } : null;
+  const [narrative, qUsed] = await Promise.all([
+    full ? aiNarrative(a, L) : null,
+    ask && ask.limit != null ? memberSession().then((m) => (m ? questionUsage(m.uid) : 0)) : 0,
+  ]);
   const conf = a.confidence;
   const confW = conf === "Élevée" ? 88 : conf === "Moyenne" ? 62 : 34;
 
@@ -106,6 +119,29 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
   ];
 
   const when = g.date ? fmtDate(L, g.date, { weekday: "long", day: "numeric", month: "long", hour: L.en ? "numeric" : "2-digit", minute: "2-digit" }) : null;
+
+  const probsBlock = (
+        <div className="ar-sec">
+          <h3>📈 {L.t("Probabilités exactes", "Exact probabilities", "Probabilidades exactas")}</h3>
+          <div className="ar-box ar-probs">
+            <div><span>{L.t("Victoire", "Win", "Victoria")} {g.away.short}</span><b>{pctL(a.pAway, L, 1)}</b></div>
+            <div><span>{L.t("Victoire", "Win", "Victoria")} {g.home.short}</span><b>{pctL(a.pHome, L, 1)}</b></div>
+            <div><span>{L.t("Score projeté", "Projected score", "Marcador proyectado")}</span><b>{g.away.abbr} {Math.round(a.awayPts)} - {Math.round(a.homePts)} {g.home.abbr}</b></div>
+            <div><span>{L.t("Écart projeté", "Projected margin", "Diferencia proyectada")}</span><b>{num(Math.abs(a.margin), L)} pts</b></div>
+            <div><span>{L.t("Total projeté", "Projected total", "Total proyectado")}</span><b>{Math.round(a.total)} pts</b></div>
+            <div><span>{L.t("Match serré (écart ≤ 5)", "Close game (margin ≤ 5)", "Partido igualado (diferencia ≤ 5)")}</span><b>{pctL(a.scenarios.find((s) => s.key === "close")?.p || 0, L)}</b></div>
+          </div>
+        </div>
+  );
+  const ficheBlock = (title) => (
+        <div className="card block">
+          <h2>📋 {title}</h2>
+          <table className="cmp">
+            <thead><tr><th>{g.away.abbr}</th><th></th><th>{g.home.abbr}</th></tr></thead>
+            <tbody>{rows.map(([l, x, y]) => <tr key={l}><td className="mono">{x}</td><td>{l}</td><td className="mono">{y}</td></tr>)}</tbody>
+          </table>
+        </div>
+  );
 
   return (
     <section className="panel ar">
@@ -171,18 +207,32 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
       </div>
 
       <Gate key={target.id} access={access} target={target} pct={visiblePct} proof={proof} match={matchInfo} mode={mode}>
-        {open && <>
-          <div className="ar-sec">
-            <h3>📈 {L.t("Probabilités exactes", "Exact probabilities", "Probabilidades exactas")}</h3>
-            <div className="ar-box ar-probs">
-              <div><span>{L.t("Victoire", "Win", "Victoria")} {g.away.short}</span><b>{pctL(a.pAway, L, 1)}</b></div>
-              <div><span>{L.t("Victoire", "Win", "Victoria")} {g.home.short}</span><b>{pctL(a.pHome, L, 1)}</b></div>
-              <div><span>{L.t("Score projeté", "Projected score", "Marcador proyectado")}</span><b>{g.away.abbr} {Math.round(a.awayPts)} - {Math.round(a.homePts)} {g.home.abbr}</b></div>
-              <div><span>{L.t("Écart projeté", "Projected margin", "Diferencia proyectada")}</span><b>{num(Math.abs(a.margin), L)} pts</b></div>
-              <div><span>{L.t("Total projeté", "Projected total", "Total proyectado")}</span><b>{Math.round(a.total)} pts</b></div>
-              <div><span>{L.t("Match serré (écart ≤ 5)", "Close game (margin ≤ 5)", "Partido igualado (diferencia ≤ 5)")}</span><b>{pctL(a.scenarios.find((s) => s.key === "close")?.p || 0, L)}</b></div>
+        {reduced && <>
+          {probsBlock}
+          {ficheBlock(L.t("Stats clés des deux équipes", "Key stats for both teams", "Estadísticas clave de los dos equipos"))}
+          <div className="gated locked ar-locked">
+            <div className="gate-content" aria-hidden>
+              <div className="card block ghost"><div className="gl w40" /><div className="gl" /><div className="gl" /><div className="gl w70" /></div>
+              <div className="grid2">
+                <div className="card block ghost"><div className="gl w60" /><div className="gl" /><div className="gl w40" /></div>
+                <div className="card block ghost"><div className="gl w50" /><div className="gl" /><div className="gl w70" /></div>
+              </div>
+            </div>
+            <div className="gate-overlay">
+              <div className="gate-box">
+                <h3>{L.t("Passe à l'analyse complète détaillée", "Get the detailed full analysis", "Pásate al análisis completo detallado")}</h3>
+                <p>{L.t(
+                  `Ton analyse Starter du jour montre les probabilités exactes et les stats clés. Avec Pro ou Lifetime : l'argumentation du modèle, tous les scénarios, les stats comparées, les joueurs à suivre, l'infirmerie, les actualités en temps réel${aiOn ? " et tes questions à l'IA" : ""}, sur tous les matchs et sans limite.`,
+                  `Your Starter analysis shows exact probabilities and key stats. With Pro or Lifetime: the model's reasoning, every scenario, the stat comparison, players to watch, the injury report, real-time news${aiOn ? " and your questions to the AI" : ""}, on every game with no limit.`,
+                  `Tu análisis Starter muestra las probabilidades exactas y las estadísticas clave. Con Pro o Lifetime: la argumentación del modelo, todos los escenarios, las estadísticas comparadas, los jugadores a seguir, el parte médico, las noticias en tiempo real${aiOn ? " y tus preguntas a la IA" : ""}, en todos los partidos y sin límite.`
+                )}</p>
+                <Link href={L.href("/pro")} className="btn-solid">🔓 {L.t("Passer Pro", "Go Pro", "Hazte Pro")}</Link>
+              </div>
             </div>
           </div>
+        </>}
+        {full && <>
+          {probsBlock}
 
           <div className="card block">
             <h2>🧠 {L.t("L'argumentation du modèle", "The model's reasoning", "La argumentación del modelo")} {narrative.source === "ai" ? <span className="tag hot">{L.t("IA", "AI", "IA")}</span> : <span className="tag">{L.t("Modèle", "Model", "Modelo")}</span>}</h2>
@@ -214,13 +264,7 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
 
           {isNBA ? <MatchExtras a={a} L={L} /> : extras}
 
-          <div className="card block">
-            <h2>📋 {L.t("Fiche des deux équipes", "Team comparison", "Ficha de los dos equipos")}</h2>
-            <table className="cmp">
-              <thead><tr><th>{g.away.abbr}</th><th></th><th>{g.home.abbr}</th></tr></thead>
-              <tbody>{rows.map(([l, x, y]) => <tr key={l}><td className="mono">{x}</td><td>{l}</td><td className="mono">{y}</td></tr>)}</tbody>
-            </table>
-          </div>
+          {ficheBlock(L.t("Fiche des deux équipes", "Team comparison", "Ficha de los dos equipos"))}
 
           {isNBA && (
             <div className="grid2">
@@ -240,6 +284,9 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
               ))}
             </div>
           )}
+
+          {isNBA && <NewsSection a={a} L={L} />}
+          {ask && <AskAI target={{ league: leagueKey, id: String(g.id), d: g.date ? nbaDateOf(g.date) : null }} tier={access.tier} limit={ask.limit} used={qUsed} />}
         </>}
       </Gate>
     </section>

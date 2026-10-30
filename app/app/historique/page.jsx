@@ -34,7 +34,7 @@ export default async function HistoriquePage() {
       {!m ? (
         <div className="panel hist-empty">
           <b>{L.t("Connecte-toi pour retrouver tes analyses", "Log in to find your analyses", "Inicia sesión para encontrar tus análisis")}</b>
-          <p>{L.t("Les analyses complètes que tu lances avec Starter, Pro ou Lifetime s'affichent ici, sur tous tes appareils.", "The full analyses you run with Starter, Pro or Lifetime show up here, on all your devices.", "Los análisis completos que lanzas con Starter, Pro o Lifetime aparecen aquí, en todos tus dispositivos.")}</p>
+          <p>{L.t("Les analyses que tu lances avec Starter, Pro ou Lifetime s'affichent ici, sur tous tes appareils.", "The analyses you run with Starter, Pro or Lifetime show up here, on all your devices.", "Los análisis que lanzas con Starter, Pro o Lifetime aparecen aquí, en todos tus dispositivos.")}</p>
           <Link href={L.href("/pro")} className="btn-solid">{L.t("Voir les formules", "See the plans", "Ver los planes")}</Link>
           <a href={`/api/whop/login?next=${next}`} className="comp-more">{L.t("Déjà abonné ? Se connecter", "Already subscribed? Log in", "¿Ya estás suscrito? Inicia sesión")} →</a>
         </div>
@@ -43,7 +43,7 @@ export default async function HistoriquePage() {
       ) : !list.length && m.tier === "compte" ? (
         <div className="panel hist-empty">
           <b>{L.t("Aucune analyse complète pour l'instant", "No full analyses yet", "Todavía no hay análisis completos")}</b>
-          <p>{L.t("Avec le compte gratuit, tu vois l'aperçu de chaque analyse. Les analyses complètes sont incluses dans Starter, Pro et Lifetime, et s'affichent ici.", "With the free account, you see a preview of every analysis. Full analyses come with Starter, Pro and Lifetime, and show up here.", "Con la cuenta gratis, ves un avance de cada análisis. Los análisis completos están incluidos en Starter, Pro y Lifetime, y aparecen aquí.")}</p>
+          <p>{L.t("Avec le compte gratuit, tu vois l'aperçu de chaque analyse. Les analyses sont incluses dans Starter (1 par jour), Pro et Lifetime (illimitées), et s'affichent ici.", "With the free account, you see a preview of every analysis. Analyses come with Starter (1 a day), Pro and Lifetime (unlimited), and show up here.", "Con la cuenta gratis, ves un avance de cada análisis. Los análisis están incluidos en Starter (1 al día), Pro y Lifetime (ilimitados), y aparecen aquí.")}</p>
           <Link href={L.href("/pro")} className="btn-solid">{L.t("Voir les formules", "See the plans", "Ver los planes")}</Link>
           <Link href={L.href("/app")} className="comp-more">{L.t("Analyser un match", "Analyze a game", "Analizar un partido")} →</Link>
         </div>

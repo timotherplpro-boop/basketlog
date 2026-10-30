@@ -3,6 +3,7 @@ import LegalDoc, { Sec } from "../../components/LegalDoc";
 import { LEGAL } from "../../lib/legal";
 import { pageMeta } from "../../lib/seo";
 import { getL } from "../../lib/lang-server";
+import { aiReady } from "../../lib/pro";
 
 export async function generateMetadata() {
   const L = await getL();
@@ -17,6 +18,7 @@ const DONNEES = [
   ["Mesure d'audience (si tu l'acceptes)", "Pages vues, clics, durée et nombre de visites, type d'appareil, pays et ville approximatifs, identifiant aléatoire stocké dans un cookie", "Comprendre l'usage du site et l'améliorer", "Consentement", "Cookies : 12 mois maximum ; statistiques : 25 mois maximum"],
   ["Compte gratuit et abonnés", "Identifiant et nom d'utilisateur Whop, formule active, date de vérification ; l'e-mail d'inscription reste chez Whop", "Ouvrir ton compte, activer ta formule et vérifier ton abonnement", "Exécution du contrat", "Tant que ton compte existe, puis 3 ans"],
   ["Analyses lancées", "Identifiant Whop, match analysé, date et heure de l'analyse", "Appliquer la limite d'analyses du jour de ta formule et afficher ton historique", "Exécution du contrat", "12 mois"],
+  ["Questions à l'IA", "Texte de ta question et données du match, transmis à l'IA pour obtenir la réponse ; nombre de questions posées par jour", "Répondre à tes questions et appliquer la limite de ta formule", "Exécution du contrat", "Texte non conservé par Basketlog ; compteur : 90 jours", "ia"],
   ["Paiement", "Données de paiement et de facturation (traitées directement par Whop, jamais par Basketlog)", "Encaisser les paiements, établir les reçus", "Exécution du contrat, obligation légale", "10 ans pour les pièces comptables"],
   ["Avis", "Prénom, description facultative, note, texte de l'avis", "Publier les avis après relecture", "Consentement", "Jusqu'à ta demande de suppression"],
   ["Contact", "Adresse e-mail et contenu de tes messages", "Répondre à tes demandes", "Intérêt légitime", "3 ans après le dernier échange"],
@@ -28,6 +30,7 @@ const PRESTATAIRES = [
   ["Whop, Inc. (États-Unis)", "Paiement, gestion des abonnements, connexion des abonnés"],
   ["Amplitude, Inc. (données dans l'UE)", "Mesure d'audience, uniquement avec ton accord"],
   ["Zoho Corporation (données dans l'UE)", "Messagerie de l'adresse de contact"],
+  ["Anthropic, PBC (États-Unis)", "IA qui répond aux questions des abonnés et rédige l'argumentation des analyses", "ia"],
 ];
 
 function ConfidentialiteFr() {
@@ -47,7 +50,7 @@ function ConfidentialiteFr() {
         <div className="legal-table-wrap">
           <table className="legal-table">
             <thead><tr><th>Quand</th><th>Données</th><th>Pourquoi</th><th>Base légale</th><th>Durée</th></tr></thead>
-            <tbody>{DONNEES.map((d) => <tr key={d[0]}>{d.map((c, i) => <td key={i}>{i === 0 ? <b>{c}</b> : c}</td>)}</tr>)}</tbody>
+            <tbody>{DONNEES.filter((d) => d[5] !== "ia" || aiReady()).map((d) => <tr key={d[0]}>{d.slice(0, 5).map((c, i) => <td key={i}>{i === 0 ? <b>{c}</b> : c}</td>)}</tr>)}</tbody>
           </table>
         </div>
         <p>Les analyses complètes que tu lances avec ton compte sont enregistrées avec ton identifiant Whop, pour appliquer la limite du jour de ta formule sur tous tes appareils et t&apos;afficher ton historique. Si tu es abonné et que tu acceptes la mesure d&apos;audience, ton identifiant Whop et ta formule sont associés à tes statistiques d&apos;usage, pour savoir quelles fonctionnalités servent le plus.</p>
@@ -59,7 +62,7 @@ function ConfidentialiteFr() {
 
       <Sec n={4} title="Prestataires">
         <p>Nous partageons des données uniquement avec les prestataires nécessaires au service, qui agissent pour notre compte :</p>
-        <ul>{PRESTATAIRES.map(([n, r]) => <li key={n}><b>{n}</b> : {r}</li>)}</ul>
+        <ul>{PRESTATAIRES.filter(([, , f]) => f !== "ia" || aiReady()).map(([n, r]) => <li key={n}><b>{n}</b> : {r}</li>)}</ul>
         <p>Pour les statistiques sportives (ESPN, EuroLeague) et la rédaction automatique des analyses, nous n&apos;envoyons que des données de matchs, jamais tes données personnelles. Les logos des équipes et certaines photos (Unsplash) sont chargés depuis les serveurs de ces services, qui reçoivent donc ton adresse IP comme pour tout site web. Les polices d&apos;écriture sont hébergées par Basketlog.</p>
       </Sec>
 
@@ -104,6 +107,7 @@ const DATA_EN = [
   ["Audience measurement (if you accept it)", "Page views, clicks, visit length and count, device type, approximate country and city, random ID stored in a cookie", "Understand how the website is used and improve it", "Consent", "Cookies: 12 months maximum; statistics: 25 months maximum"],
   ["Free account and subscribers", "Whop ID and username, active plan, verification date; the sign-up email stays with Whop", "Open your account, activate your plan and check your subscription", "Performance of the contract", "As long as your account exists, then 3 years"],
   ["Analyses run", "Whop ID, game analyzed, date and time of the analysis", "Apply your plan's daily analysis limit and show your history", "Performance of the contract", "12 months"],
+  ["Questions to the AI", "Your question and the game data, sent to the AI to get the answer; number of questions asked per day", "Answer your questions and apply your plan's limit", "Performance of the contract", "Basketlog does not keep the text; counter: 90 days", "ia"],
   ["Payment", "Payment and billing data (processed directly by Whop, never by Basketlog)", "Collect payments, issue receipts", "Performance of the contract, legal obligation", "10 years for accounting records"],
   ["Reviews", "First name, optional description, rating, review text", "Publish reviews after they are checked", "Consent", "Until you ask for removal"],
   ["Contact", "Email address and content of your messages", "Reply to your requests", "Legitimate interest", "3 years after the last exchange"],
@@ -115,6 +119,7 @@ const PROVIDERS_EN = [
   ["Whop, Inc. (United States)", "Payment, subscription management, subscriber login"],
   ["Amplitude, Inc. (data in the EU)", "Audience measurement, only with your consent"],
   ["Zoho Corporation (data in the EU)", "Email for the contact address"],
+  ["Anthropic, PBC (United States)", "AI that answers subscribers' questions and writes the analysis reasoning", "ia"],
 ];
 
 function ConfidentialiteEn({ L }) {
@@ -135,7 +140,7 @@ function ConfidentialiteEn({ L }) {
         <div className="legal-table-wrap">
           <table className="legal-table">
             <thead><tr><th>When</th><th>Data</th><th>Why</th><th>Legal basis</th><th>Retention</th></tr></thead>
-            <tbody>{DATA_EN.map((d) => <tr key={d[0]}>{d.map((c, i) => <td key={i}>{i === 0 ? <b>{c}</b> : c}</td>)}</tr>)}</tbody>
+            <tbody>{DATA_EN.filter((d) => d[5] !== "ia" || aiReady()).map((d) => <tr key={d[0]}>{d.slice(0, 5).map((c, i) => <td key={i}>{i === 0 ? <b>{c}</b> : c}</td>)}</tr>)}</tbody>
           </table>
         </div>
         <p>The full analyses you run with your account are recorded with your Whop ID, to apply your plan&apos;s daily limit across all your devices and show your history. If you are a subscriber and accept audience measurement, your Whop ID and plan are linked to your usage statistics, so we know which features are used most.</p>
@@ -147,7 +152,7 @@ function ConfidentialiteEn({ L }) {
 
       <Sec n={4} title="Service providers">
         <p>We only share data with the providers needed to run the service, who act on our behalf:</p>
-        <ul>{PROVIDERS_EN.map(([n, r]) => <li key={n}><b>{n}</b>: {r}</li>)}</ul>
+        <ul>{PROVIDERS_EN.filter(([, , f]) => f !== "ia" || aiReady()).map(([n, r]) => <li key={n}><b>{n}</b>: {r}</li>)}</ul>
         <p>For sports statistics (ESPN, EuroLeague) and the automatic writing of analyses, we only send game data, never your personal data. Team logos and some photos (Unsplash) are loaded from these services&apos; servers, which therefore receive your IP address as with any website. Fonts are hosted by Basketlog.</p>
       </Sec>
 
@@ -192,6 +197,7 @@ const DATA_ES = [
   ["Medición de audiencia (si la aceptas)", "Páginas vistas, clics, duración y número de visitas, tipo de dispositivo, país y ciudad aproximados, identificador aleatorio guardado en una cookie", "Entender el uso del sitio y mejorarlo", "Consentimiento", "Cookies: 12 meses como máximo; estadísticas: 25 meses como máximo"],
   ["Cuenta gratis y suscriptores", "Identificador y nombre de usuario de Whop, plan activo, fecha de verificación; el correo de registro se queda en Whop", "Abrir tu cuenta, activar tu plan y verificar tu suscripción", "Ejecución del contrato", "Mientras exista tu cuenta y, después, 3 años"],
   ["Análisis realizados", "Identificador de Whop, partido analizado, fecha y hora del análisis", "Aplicar el límite diario de análisis de tu plan y mostrar tu historial", "Ejecución del contrato", "12 meses"],
+  ["Preguntas a la IA", "Tu pregunta y los datos del partido, enviados a la IA para obtener la respuesta; número de preguntas al día", "Responder a tus preguntas y aplicar el límite de tu plan", "Ejecución del contrato", "Basketlog no conserva el texto; contador: 90 días", "ia"],
   ["Pago", "Datos de pago y de facturación (tratados directamente por Whop, nunca por Basketlog)", "Cobrar los pagos y emitir los recibos", "Ejecución del contrato, obligación legal", "10 años para los documentos contables"],
   ["Opiniones", "Nombre, descripción opcional, nota y texto de la opinión", "Publicar las opiniones tras revisarlas", "Consentimiento", "Hasta que pidas su eliminación"],
   ["Contacto", "Dirección de correo electrónico y contenido de tus mensajes", "Responder a tus solicitudes", "Interés legítimo", "3 años después del último intercambio"],
@@ -203,6 +209,7 @@ const PROVIDERS_ES = [
   ["Whop, Inc. (Estados Unidos)", "Pago, gestión de suscripciones, inicio de sesión de los suscriptores"],
   ["Amplitude, Inc. (datos en la UE)", "Medición de audiencia, solo con tu consentimiento"],
   ["Zoho Corporation (datos en la UE)", "Correo de la dirección de contacto"],
+  ["Anthropic, PBC (Estados Unidos)", "IA que responde a las preguntas de los suscriptores y redacta la argumentación de los análisis", "ia"],
 ];
 
 function ConfidentialiteEs({ L }) {
@@ -223,7 +230,7 @@ function ConfidentialiteEs({ L }) {
         <div className="legal-table-wrap">
           <table className="legal-table">
             <thead><tr><th>Cuándo</th><th>Datos</th><th>Para qué</th><th>Base legal</th><th>Conservación</th></tr></thead>
-            <tbody>{DATA_ES.map((d) => <tr key={d[0]}>{d.map((c, i) => <td key={i}>{i === 0 ? <b>{c}</b> : c}</td>)}</tr>)}</tbody>
+            <tbody>{DATA_ES.filter((d) => d[5] !== "ia" || aiReady()).map((d) => <tr key={d[0]}>{d.slice(0, 5).map((c, i) => <td key={i}>{i === 0 ? <b>{c}</b> : c}</td>)}</tr>)}</tbody>
           </table>
         </div>
         <p>Los análisis completos que realizas con tu cuenta se registran con tu identificador de Whop, para aplicar el límite diario de tu plan en todos tus dispositivos y mostrarte tu historial. Si eres suscriptor y aceptas la medición de audiencia, tu identificador de Whop y tu plan se asocian a tus estadísticas de uso, para saber qué funciones se usan más.</p>
@@ -235,7 +242,7 @@ function ConfidentialiteEs({ L }) {
 
       <Sec n={4} title="Proveedores">
         <p>Solo compartimos datos con los proveedores necesarios para el servicio, que actúan por cuenta nuestra:</p>
-        <ul>{PROVIDERS_ES.map(([n, r]) => <li key={n}><b>{n}</b>: {r}</li>)}</ul>
+        <ul>{PROVIDERS_ES.filter(([, , f]) => f !== "ia" || aiReady()).map(([n, r]) => <li key={n}><b>{n}</b>: {r}</li>)}</ul>
         <p>Para las estadísticas deportivas (ESPN, EuroLeague) y la redacción automática de los análisis, solo enviamos datos de partidos, nunca tus datos personales. Los logotipos de los equipos y algunas fotos (Unsplash) se cargan desde los servidores de esos servicios, que reciben por tanto tu dirección IP, como en cualquier sitio web. Las tipografías están alojadas por Basketlog.</p>
       </Sec>
 

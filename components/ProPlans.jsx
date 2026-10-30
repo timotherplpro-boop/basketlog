@@ -12,32 +12,49 @@ const Icon = ({ name }) => {
   return <svg viewBox="0 0 24 24" {...p}><path d="M18.2 8.2c2.4 0 3.8 1.7 3.8 3.8s-1.4 3.8-3.8 3.8c-3.4 0-5-7.6-8.8-7.6C7 8.2 5.6 9.9 5.6 12s1.4 3.8 3.8 3.8c3.8 0 5.4-7.6 8.8-7.6z" transform="translate(-1.8 0)" /></svg>;
 };
 
-const PLANS = (L) => [
+// Mêmes offres que Visifoot, ligne par ligne. Les questions personnelles à l'IA n'apparaissent que si l'IA est
+// configurée : on n'affiche jamais une fonction qui ne marche pas.
+const PLANS = (L, ai) => [
   {
-    id: "starter", name: "Starter", icon: "bolt", price: L.t("10 €", "€10", "10 €"), per: L.t("/mois", "/month", "/mes"), sub: L.t("Pour découvrir Basketlog", "To get started with Basketlog", "Para descubrir Basketlog"), cta: L.t("Débloquer - 10 €/mois", "Unlock - €10/month", "Desbloquear - 10 €/mes"),
-    perks: L.t(
-      ["5 analyses complètes par jour", "Score projeté et scénarios", "Stats clés des deux équipes", "NBA et EuroLeague"],
-      ["5 full analyses per day", "Projected score and scenarios", "Key stats for both teams", "NBA and EuroLeague"],
-      ["5 análisis completos al día", "Marcador proyectado y escenarios", "Estadísticas clave de los dos equipos", "NBA y Euroliga"]
-    ),
+    id: "starter", name: "Starter", icon: "bolt", price: L.t("10 €", "€10", "10 €"), per: L.t("/mois", "/month", "/mes"), sub: L.t("Pour découvrir l'IA", "To discover the AI", "Para descubrir la IA"), cta: L.t("Débloquer - 10 €/mois", "Unlock - €10/month", "Desbloquear - 10 €/mes"),
+    items: [
+      ["ok", L.t("1 analyse par jour", "1 analysis per day", "1 análisis al día")],
+      ["ok", L.t("Analyse réduite", "Reduced analysis", "Análisis reducido")],
+      ["ok", L.t("Stats clés", "Key stats", "Estadísticas clave")],
+      ["ok", L.t("Probabilités exactes 1x/jour", "Exact probabilities 1x/day", "Probabilidades exactas 1x/día")],
+      ai && ["no", L.t("Questions personnelles à l'IA", "Personal questions to the AI", "Preguntas personales a la IA")],
+    ].filter(Boolean),
   },
   {
-    id: "pro", name: "Pro", icon: "crown", price: L.t("19 €", "€19", "19 €"), per: L.t("/mois", "/month", "/mes"), sub: L.t("Pour les passionnés de basket", "For basketball enthusiasts", "Para los apasionados del baloncesto"), badge: L.t("Populaire", "Popular", "Popular"), cta: L.t("Débloquer - 19 €/mois", "Unlock - €19/month", "Desbloquear - 19 €/mes"),
-    perks: L.t(
-      ["Analyses illimitées", "Analyse complète détaillée", "Scénarios probables détaillés", "Stats comparées, joueurs à suivre et forme", "Absences et fatigue prises en compte"],
-      ["Unlimited analyses", "Detailed full analysis", "Detailed likely scenarios", "Stat comparison, players to watch and form", "Injuries and fatigue factored in"],
-      ["Análisis ilimitados", "Análisis completo detallado", "Escenarios probables detallados", "Estadísticas comparadas, jugadores a seguir y forma", "Bajas y cansancio incluidos"]
-    ),
+    id: "pro", name: "Pro", icon: "crown", price: L.t("19 €", "€19", "19 €"), per: L.t("/mois", "/month", "/mes"), sub: L.t("Pour les passionnés de basket", "For basketball fans", "Para los apasionados del baloncesto"), badge: L.t("Populaire", "Popular", "Popular"), cta: L.t("Débloquer - 19 €/mois", "Unlock - €19/month", "Desbloquear - 19 €/mes"),
+    items: [
+      ["ok", L.t("Analyses illimitées", "Unlimited analyses", "Análisis ilimitados")],
+      ["ok", L.t("Analyse complète détaillée", "Detailed full analysis", "Análisis completo detallado")],
+      ["ok", L.t("Scénarios probables détaillés", "Detailed likely scenarios", "Escenarios probables detallados")],
+      ["ok", L.t("Analyse basée sur les statistiques", "Stats-based analysis", "Análisis basado en las estadísticas")],
+      ["ok", L.t("Actualités en temps réel", "Real-time news", "Noticias en tiempo real")],
+      ai && ["ai", L.t("Questions personnelles à l'IA", "Personal questions to the AI", "Preguntas personales a la IA"), L.t("(1 question/jour)", "(1 question/day)", "(1 pregunta/día)")],
+    ].filter(Boolean),
   },
   {
     id: "lifetime", name: "Lifetime", icon: "infinity", price: L.t("99 €", "€99", "99 €"), per: L.t("une seule fois", "one-time", "pago único"), sub: L.t("Économise +100 €/an vs mensuel", "Save €100+/year vs monthly", "Ahorra +100 €/año frente al mensual"), badge: L.t("À vie", "Lifetime", "De por vida"), cta: L.t("Débloquer - 99 €", "Unlock - €99", "Desbloquear - 99 €"),
-    perks: L.t(
-      ["Analyses illimitées à vie", "Tout le contenu de Pro", "Plus jamais de paiement mensuel", "Priorité sur les nouvelles fonctionnalités"],
-      ["Unlimited analyses for life", "Everything in Pro", "No more monthly payments", "Early access to new features"],
-      ["Análisis ilimitados de por vida", "Todo el contenido de Pro", "Se acabaron los pagos mensuales", "Prioridad en las nuevas funciones"]
-    ),
+    items: [
+      ["ok", L.t("Analyses illimitées à vie", "Unlimited analyses for life", "Análisis ilimitados de por vida")],
+      ["ok", L.t("Analyse complète détaillée", "Detailed full analysis", "Análisis completo detallado")],
+      ["ok", L.t("Scénarios probables détaillés", "Detailed likely scenarios", "Escenarios probables detallados")],
+      ["ok", L.t("Plus jamais de paiement mensuel", "No more monthly payments", "Se acabaron los pagos mensuales")],
+      ["ok", L.t("Priorité nouvelles features", "Priority on new features", "Prioridad en nuevas funciones")],
+      ai && ["ai", L.t("Questions personnelles à l'IA illimitées", "Unlimited personal questions to the AI", "Preguntas personales a la IA ilimitadas")],
+    ].filter(Boolean),
   },
 ];
+
+const ItemIcon = ({ kind }) => {
+  const p = { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
+  if (kind === "no") return <svg {...p}><path d="M6 6l12 12M18 6L6 18" /></svg>;
+  if (kind === "ai") return <svg {...p} strokeWidth={2}><path d="M20 11.5a7.5 7.5 0 0 1-11.1 6.6L4 19.5l1.4-4.6A7.5 7.5 0 1 1 20 11.5z" /></svg>;
+  return <svg {...p}><path d="M4.5 12.5l5 5L19.5 7" /></svg>;
+};
 
 const NOTICES = {
   ok: ["good", "Ton abonnement est actif. Bonnes analyses !", "Your subscription is active. Enjoy the analyses!", "Tu suscripción está activa. ¡Buenos análisis!"],
@@ -47,7 +64,7 @@ const NOTICES = {
   config: ["warn", "Le paiement n'est pas encore activé sur Basketlog. Reviens très bientôt.", "Payments aren't enabled on Basketlog yet. Please come back soon.", "El pago todavía no está activado en Basketlog. Vuelve muy pronto."],
 };
 
-export default function ProPlans({ checkout, loginReady, notice }) {
+export default function ProPlans({ checkout, loginReady, notice, ai = false }) {
   const L = useL();
   const pro = useProStatus();
   const [agree, setAgree] = useState(false);
@@ -84,15 +101,20 @@ export default function ProPlans({ checkout, loginReady, notice }) {
       </label>
       {nudge && !agree && <p className="pro-agree-hint" role="alert">{L.t("Coche la case ci-dessus pour continuer vers le paiement.", "Tick the box above to continue to checkout.", "Marca la casilla de arriba para continuar con el pago.")}</p>}
       <div className="plans">
-        {PLANS(L).map((p, i) => {
+        {PLANS(L, ai).map((p, i) => {
           const url = checkout[p.id];
           return (
             <article key={p.id} className={`plan plan-${p.id} reveal-in`} style={{ animationDelay: `${i * 90}ms` }}>
-              {p.badge && <span className="plan-badge">{p.id === "pro" ? "★★ " : "∞ "}{p.badge}</span>}
+              {p.badge && <span className="plan-badge">{p.id === "pro" ? "⭐⭐ " : "∞∞ "}{p.badge}</span>}
               <h3><span className="plan-ic"><Icon name={p.icon} /></span>{p.name}</h3>
               <div className="plan-price"><b>{p.price}</b><span>{p.per}</span></div>
               <div className="plan-sub">{p.sub}</div>
-              <ul>{p.perks.map((k) => <li key={k}>{k}</li>)}</ul>
+              <ul>{p.items.map(([kind, text, extra]) => (
+                <li key={text} className={`pi pi-${kind}`}>
+                  <span className="pi-ic"><ItemIcon kind={kind} /></span>
+                  <span>{kind === "no" && <span className="vh">{L.t("Non inclus : ", "Not included: ", "No incluido: ")}</span>}{kind === "ai" ? <b>{text}</b> : text}{extra ? <> {extra}</> : null}</span>
+                </li>
+              ))}</ul>
               {pro?.connected && current === p.id ? (
                 <span className="plan-cta plan-current">{L.t("Ta formule actuelle", "Your current plan", "Tu plan actual")}</span>
               ) : url ? (
@@ -126,7 +148,8 @@ export default function ProPlans({ checkout, loginReady, notice }) {
             {" · "}{L.t("Déjà inscrit ?", "Already signed up?", "¿Ya estás registrado?")} <a href={`/api/whop/login?next=${encodeURIComponent(L.href("/pro"))}`} className="pro-login" onClick={() => track("Connexion Whop", { etape: "clic", source: "page_pro" })}>{L.t("Me connecter", "Log in", "Iniciar sesión")}</a>
           </p>
         ) : null}
-        <p className="pro-secure">{L.t("Tu peux arrêter ton abonnement à tout moment. Paiement sécurisé par Whop. Toutes nos analyses sont fournies à titre informatif.", "You can cancel anytime. Secure payment by Whop. All analyses are provided for information only.", "Puedes cancelar tu suscripción en cualquier momento. Pago seguro con Whop. Todos nuestros análisis se ofrecen a título informativo.")}</p>
+        <p className="pro-secure">{L.t("Tu peux arrêter ton abonnement à tout moment. Toutes nos analyses sont fournies à titre informatif uniquement.", "You can cancel your subscription anytime. All our analyses are provided for information only.", "Puedes cancelar tu suscripción en cualquier momento. Todos nuestros análisis se ofrecen solo a título informativo.")}</p>
+        <p className="pro-secure">{L.t("Une question sur nos offres ?", "A question about our plans?", "¿Una pregunta sobre nuestros planes?")} <a href="mailto:contact@basketlog-app.com">contact@basketlog-app.com</a></p>
       </div>
     </>
   );

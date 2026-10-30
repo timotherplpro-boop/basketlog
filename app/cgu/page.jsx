@@ -22,7 +22,7 @@ function CGUFr() {
     >
       <Sec n={1} title="Le service">
         <p>Basketlog analyse les matchs de NBA et d&apos;EuroLeague. Le site rassemble des données statistiques publiques (résultats, classements, scores, absences, calendrier) et les passe dans un modèle de calcul qui produit, pour chaque match, des probabilités de victoire, un score projeté, des scénarios et une analyse rédigée automatiquement.</p>
-        <p>Une partie du service est gratuite : les probabilités de victoire et les chiffres clés de chaque match, l&apos;aperçu de chaque analyse (forme récente, résumé rapide, scénario n° 1 et confiance du modèle), le classement, les fiches équipes et le bilan du modèle. Les analyses complètes sont réservées aux abonnés Starter (5 par jour), Pro et Lifetime (illimitées), dans les conditions prévues par les <Link href="/cgv">CGV</Link>.</p>
+        <p>Une partie du service est gratuite : les probabilités de victoire et les chiffres clés de chaque match, l&apos;aperçu de chaque analyse (forme récente, résumé rapide, scénario n° 1 et confiance du modèle), le classement, les fiches équipes et le bilan du modèle. Les analyses sont réservées aux abonnés : Starter (1 analyse réduite par jour), Pro et Lifetime (analyses complètes illimitées), dans les conditions prévues par les <Link href="/cgv">CGV</Link>.</p>
       </Sec>
 
       <Sec n={2} title="Âge minimum">
@@ -94,7 +94,7 @@ function CGUEn({ L }) {
     >
       <Sec n={1} title="The service">
         <p>Basketlog analyzes NBA and EuroLeague games. The website gathers public statistical data (results, standings, scores, injuries, schedule) and runs it through a model that produces, for each game, win probabilities, a projected score, scenarios and an automatically written analysis.</p>
-        <p>Part of the service is free: win probabilities and key figures for every game, a preview of every analysis (recent form, quick summary, #1 scenario and the model&apos;s confidence), the standings, team pages and the model&apos;s track record. Full analyses are reserved for Starter (5 per day), Pro and Lifetime (unlimited) subscribers, under the conditions set out in the <Link href={L.href("/cgv")}>terms of sale</Link>.</p>
+        <p>Part of the service is free: win probabilities and key figures for every game, a preview of every analysis (recent form, quick summary, #1 scenario and the model&apos;s confidence), the standings, team pages and the model&apos;s track record. Analyses are reserved for subscribers: Starter (1 reduced analysis per day), Pro and Lifetime (unlimited full analyses), under the conditions set out in the <Link href={L.href("/cgv")}>terms of sale</Link>.</p>
       </Sec>
 
       <Sec n={2} title="Minimum age">
@@ -166,7 +166,7 @@ function CGUEs({ L }) {
     >
       <Sec n={1} title="El servicio">
         <p>Basketlog analiza los partidos de la NBA y de la Euroliga. El sitio reúne datos estadísticos públicos (resultados, clasificaciones, marcadores, bajas, calendario) y los pasa por un modelo de cálculo que genera, para cada partido, probabilidades de victoria, un marcador proyectado, escenarios y un análisis redactado automáticamente.</p>
-        <p>Una parte del servicio es gratuita: las probabilidades de victoria y las cifras clave de cada partido, el avance de cada análisis (forma reciente, resumen rápido, escenario n.º 1 y confianza del modelo), la clasificación, las fichas de los equipos y el balance del modelo. Los análisis completos están reservados a los suscriptores Starter (5 al día), Pro y Lifetime (ilimitados), en las condiciones previstas en las <Link href={L.href("/cgv")}>condiciones de venta</Link>.</p>
+        <p>Una parte del servicio es gratuita: las probabilidades de victoria y las cifras clave de cada partido, el avance de cada análisis (forma reciente, resumen rápido, escenario n.º 1 y confianza del modelo), la clasificación, las fichas de los equipos y el balance del modelo. Los análisis están reservados a los suscriptores: Starter (1 análisis reducido al día), Pro y Lifetime (análisis completos ilimitados), en las condiciones previstas en las <Link href={L.href("/cgv")}>condiciones de venta</Link>.</p>
       </Sec>
 
       <Sec n={2} title="Edad mínima">

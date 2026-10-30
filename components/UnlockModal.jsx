@@ -1,6 +1,6 @@
 "use client";
 // Fenêtre « Tu veux voir l'analyse complète ? », comme Visifoot : elle s'ouvre dès qu'une analyse s'affiche
-// sans l'analyse complète (visiteur, compte gratuit, ou limite Starter du jour atteinte). Chiffres réels uniquement :
+// sans sa partie complète (visiteur, compte gratuit, ou analyse Starter du jour utilisée). Chiffres réels uniquement :
 // réussite du modèle tirée du bilan, membres Whop (à partir de +100) ou matchs analysés, vrai compte à rebours.
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";

@@ -55,7 +55,7 @@ export default function AppShell({ session, children }) {
   const p = stripLang(here.split("?")[0]) || "/";
   const tier = pro?.tier && pro.tier !== "gratuit" ? pro.tier : session?.tier || "compte";
   const name = pro?.name || session?.name || "";
-  const limit = pro ? pro.perDay : tier === "starter" ? 5 : tier === "compte" ? 0 : null; // null = illimité
+  const limit = pro ? pro.perDay : tier === "starter" ? 1 : tier === "compte" ? 0 : null; // null = illimité
   const unlimited = limit == null;
   const none = limit === 0; // compte gratuit : 0 / 0, comme Visifoot
   const full = !unlimited && !none && used >= limit;
@@ -110,7 +110,7 @@ export default function AppShell({ session, children }) {
           ) : unlimited ? (
             <span className="sb-q-note">{L.t(`Formule ${plan} : aucune limite`, `${plan} plan: no limit`, `Plan ${plan}: sin límite`)}</span>
           ) : (
-            <span className="sb-q-note">{L.t(`${limit - used} analyse${limit - used > 1 ? "s" : ""} complète${limit - used > 1 ? "s" : ""} restante${limit - used > 1 ? "s" : ""}`, `${limit - used} full analys${limit - used > 1 ? "es" : "is"} left`, `${limit - used} análisis completo${limit - used > 1 ? "s" : ""} restante${limit - used > 1 ? "s" : ""}`)}</span>
+            <span className="sb-q-note">{L.t(`${limit - used} analyse${limit - used > 1 ? "s" : ""} réduite${limit - used > 1 ? "s" : ""} restante${limit - used > 1 ? "s" : ""}`, `${limit - used} reduced analys${limit - used > 1 ? "es" : "is"} left`, `${limit - used} análisis reducido${limit - used > 1 ? "s" : ""} restante${limit - used > 1 ? "s" : ""}`)}</span>
           )}
         </div>
 

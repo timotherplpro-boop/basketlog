@@ -3,6 +3,7 @@ import LegalDoc, { Sec } from "../../components/LegalDoc";
 import { LEGAL } from "../../lib/legal";
 import { pageMeta } from "../../lib/seo";
 import { getL } from "../../lib/lang-server";
+import { aiReady } from "../../lib/pro";
 
 export async function generateMetadata() {
   const L = await getL();
@@ -12,10 +13,11 @@ export async function generateMetadata() {
     : pageMeta({ title: "Conditions générales de vente (CGV) – Basketlog", description: "Conditions générales de vente des abonnements Basketlog Starter, Pro et Lifetime : prix, paiement, renouvellement, résiliation, rétractation et remboursement.", path: "/cgv" });
 }
 
-const OFFRES = [
-  ["Starter", "10 € par mois", "5 analyses complètes par jour", "Abonnement mensuel, renouvelé automatiquement chaque mois"],
-  ["Pro", "19 € par mois", "Analyses complètes illimitées", "Abonnement mensuel, renouvelé automatiquement chaque mois"],
-  ["Lifetime", "99 € une seule fois", "Analyses complètes illimitées, comme Pro", "Paiement unique, sans renouvellement, pour toute la durée d'exploitation du service"],
+// Contenu des formules (comme Visifoot). Les questions à l'IA ne figurent que si l'IA est configurée.
+const OFFRES = (ai) => [
+  ["Starter", "10 € par mois", "1 analyse réduite par jour : probabilités exactes, score projeté et stats clés du match", "Abonnement mensuel, renouvelé automatiquement chaque mois"],
+  ["Pro", "19 € par mois", `Analyses complètes illimitées, actualités en temps réel${ai ? ", 1 question personnelle par jour à l'IA" : ""}`, "Abonnement mensuel, renouvelé automatiquement chaque mois"],
+  ["Lifetime", "99 € une seule fois", `Analyses complètes illimitées, comme Pro${ai ? ", questions personnelles à l'IA illimitées dans la limite d'un usage raisonnable (50 par jour)" : ""}`, "Paiement unique, sans renouvellement, pour toute la durée d'exploitation du service"],
 ];
 
 function CGVFr() {
@@ -34,10 +36,10 @@ function CGVFr() {
         <div className="legal-table-wrap">
           <table className="legal-table">
             <thead><tr><th>Formule</th><th>Prix</th><th>Contenu</th><th>Durée</th></tr></thead>
-            <tbody>{OFFRES.map((o) => <tr key={o[0]}>{o.map((c, i) => <td key={i}>{i === 0 ? <b>{c}</b> : c}</td>)}</tr>)}</tbody>
+            <tbody>{OFFRES(aiReady()).map((o) => <tr key={o[0]}>{o.map((c, i) => <td key={i}>{i === 0 ? <b>{c}</b> : c}</td>)}</tr>)}</tbody>
           </table>
         </div>
-        <p>Une analyse complète est la fiche détaillée d&apos;un match : score projeté, facteurs, scénarios, stats comparées, joueurs à suivre, forme récente, confrontations et absences. Les probabilités de victoire et les chiffres clés restent gratuits pour tous.</p>
+        <p>Une analyse réduite (Starter) comprend les probabilités exactes, le score projeté et les stats clés du match. Une analyse complète (Pro et Lifetime) est la fiche détaillée d&apos;un match : argumentation du modèle, facteurs, tous les scénarios, stats comparées, joueurs à suivre, forme récente, confrontations, absences et actualités en temps réel. Les probabilités de victoire de la liste des matchs et l&apos;aperçu de chaque analyse restent gratuits pour tous.</p>
         <p>Les prix sont en euros, sans frais supplémentaires de notre part ({e.tva.charAt(0).toLowerCase() + e.tva.slice(1)}). Le prix total est affiché sur la page de paiement avant validation. Les prix peuvent évoluer ; un changement de prix ne s&apos;applique jamais à une période déjà payée, et les abonnés sont prévenus avant toute hausse.</p>
       </Sec>
 
@@ -100,10 +102,10 @@ function CGVFr() {
   );
 }
 
-const OFFERS_EN = [
-  ["Starter", "€10 per month", "5 full analyses per day", "Monthly subscription, renewed automatically every month"],
-  ["Pro", "€19 per month", "Unlimited full analyses", "Monthly subscription, renewed automatically every month"],
-  ["Lifetime", "€99 one-time", "Unlimited full analyses, same as Pro", "One-time payment, no renewal, for as long as the service is operated"],
+const OFFERS_EN = (ai) => [
+  ["Starter", "€10 per month", "1 reduced analysis per day: exact probabilities, projected score and key stats for the game", "Monthly subscription, renewed automatically every month"],
+  ["Pro", "€19 per month", `Unlimited full analyses, real-time news${ai ? ", 1 personal question a day to the AI" : ""}`, "Monthly subscription, renewed automatically every month"],
+  ["Lifetime", "€99 one-time", `Unlimited full analyses, same as Pro${ai ? ", unlimited personal questions to the AI within fair use (50 per day)" : ""}`, "One-time payment, no renewal, for as long as the service is operated"],
 ];
 
 function CGVEn({ L }) {
@@ -123,10 +125,10 @@ function CGVEn({ L }) {
         <div className="legal-table-wrap">
           <table className="legal-table">
             <thead><tr><th>Plan</th><th>Price</th><th>Content</th><th>Term</th></tr></thead>
-            <tbody>{OFFERS_EN.map((o) => <tr key={o[0]}>{o.map((c, i) => <td key={i}>{i === 0 ? <b>{c}</b> : c}</td>)}</tr>)}</tbody>
+            <tbody>{OFFERS_EN(aiReady()).map((o) => <tr key={o[0]}>{o.map((c, i) => <td key={i}>{i === 0 ? <b>{c}</b> : c}</td>)}</tr>)}</tbody>
           </table>
         </div>
-        <p>A full analysis is the detailed page for a game: projected score, factors, scenarios, stat comparison, players to watch, recent form, head-to-head and injuries. Win probabilities and key figures remain free for everyone.</p>
+        <p>A reduced analysis (Starter) includes the exact probabilities, projected score and key stats for the game. A full analysis (Pro and Lifetime) is the detailed page for a game: the model&apos;s reasoning, factors, every scenario, stat comparison, players to watch, recent form, head-to-head, injuries and real-time news. Win probabilities in the games list and the preview of every analysis remain free for everyone.</p>
         <p>Prices are in euros, with no additional fees from us (VAT not applicable). The total price is shown on the checkout page before you confirm. Prices may change; a price change never applies to a period already paid, and subscribers are notified before any increase.</p>
       </Sec>
 
@@ -189,10 +191,10 @@ function CGVEn({ L }) {
   );
 }
 
-const OFFERS_ES = [
-  ["Starter", "10 € al mes", "5 análisis completos al día", "Suscripción mensual, renovada automáticamente cada mes"],
-  ["Pro", "19 € al mes", "Análisis completos ilimitados", "Suscripción mensual, renovada automáticamente cada mes"],
-  ["Lifetime", "99 € en un solo pago", "Análisis completos ilimitados, como Pro", "Pago único, sin renovación, mientras se preste el servicio"],
+const OFFERS_ES = (ai) => [
+  ["Starter", "10 € al mes", "1 análisis reducido al día: probabilidades exactas, marcador proyectado y estadísticas clave del partido", "Suscripción mensual, renovada automáticamente cada mes"],
+  ["Pro", "19 € al mes", `Análisis completos ilimitados, noticias en tiempo real${ai ? ", 1 pregunta personal al día a la IA" : ""}`, "Suscripción mensual, renovada automáticamente cada mes"],
+  ["Lifetime", "99 € en un solo pago", `Análisis completos ilimitados, como Pro${ai ? ", preguntas personales a la IA ilimitadas dentro de un uso razonable (50 al día)" : ""}`, "Pago único, sin renovación, mientras se preste el servicio"],
 ];
 
 function CGVEs({ L }) {
@@ -212,10 +214,10 @@ function CGVEs({ L }) {
         <div className="legal-table-wrap">
           <table className="legal-table">
             <thead><tr><th>Plan</th><th>Precio</th><th>Contenido</th><th>Duración</th></tr></thead>
-            <tbody>{OFFERS_ES.map((o) => <tr key={o[0]}>{o.map((c, i) => <td key={i}>{i === 0 ? <b>{c}</b> : c}</td>)}</tr>)}</tbody>
+            <tbody>{OFFERS_ES(aiReady()).map((o) => <tr key={o[0]}>{o.map((c, i) => <td key={i}>{i === 0 ? <b>{c}</b> : c}</td>)}</tr>)}</tbody>
           </table>
         </div>
-        <p>Un análisis completo es la ficha detallada de un partido: marcador proyectado, factores, escenarios, estadísticas comparadas, jugadores a seguir, forma reciente, enfrentamientos y bajas. Las probabilidades de victoria y las cifras clave siguen siendo gratis para todos.</p>
+        <p>Un análisis reducido (Starter) incluye las probabilidades exactas, el marcador proyectado y las estadísticas clave del partido. Un análisis completo (Pro y Lifetime) es la ficha detallada de un partido: argumentación del modelo, factores, todos los escenarios, estadísticas comparadas, jugadores a seguir, forma reciente, enfrentamientos, bajas y noticias en tiempo real. Las probabilidades de victoria de la lista de partidos y el avance de cada análisis siguen siendo gratis para todos.</p>
         <p>Los precios están en euros, sin gastos adicionales por nuestra parte (IVA no aplicable). El precio total se muestra en la página de pago antes de confirmar. Los precios pueden cambiar; un cambio de precio nunca se aplica a un periodo ya pagado, y los suscriptores reciben aviso antes de cualquier subida.</p>
       </Sec>
 
