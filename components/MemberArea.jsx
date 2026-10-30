@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { COOKIE, decodeSession } from "../lib/pro";
 import { getL } from "../lib/lang-server";
+import { getUsage } from "../lib/usage";
 import AppShell from "./AppShell";
 import SiteFooter from "./SiteFooter";
 
@@ -8,8 +9,8 @@ import SiteFooter from "./SiteFooter";
 export default async function MemberArea({ children }) {
   const s = decodeSession((await cookies()).get(COOKIE)?.value);
   if (!s?.uid) return children;
-  const L = await getL();
-  const session = { name: s.name || "", tier: s.tier === "gratuit" ? "compte" : s.tier || "compte" };
+  const [L, usage] = await Promise.all([getL(), getUsage(s.uid)]);
+  const session = { name: s.name || "", tier: s.tier === "gratuit" ? "compte" : s.tier || "compte", used: usage?.used ?? 0 };
   return (
     <AppShell session={session}>
       {children}

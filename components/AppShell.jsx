@@ -26,7 +26,6 @@ const Icon = ({ name }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>{I[name]}</svg>
 );
 
-const todayKey = () => "hs_views_" + new Date().toISOString().slice(0, 10);
 const FLAG = { fr: "🇫🇷", en: "🇺🇸", es: "🇪🇸" };
 
 export default function AppShell({ session, children }) {
@@ -36,15 +35,15 @@ export default function AppShell({ session, children }) {
   const initial = useInitialPath();
   const [here, setHere] = useState(initial);
   const [open, setOpen] = useState(false);
-  const [used, setUsed] = useState(0);
+  const [used, setUsed] = useState(session?.used ?? 0); // analyses lancées aujourd'hui (compté par le serveur)
 
   useEffect(() => { setHere(location.pathname + location.search); setOpen(false); }, [pathname]);
+  useEffect(() => { if (session?.used != null) setUsed(session.used); }, [session?.used]);
+  useEffect(() => { if (pro?.used != null) setUsed((u) => Math.max(u, pro.used)); }, [pro?.used]);
   useEffect(() => {
-    const read = () => { try { setUsed(JSON.parse(localStorage.getItem(todayKey()) || "[]").length); } catch {} };
-    read();
-    window.addEventListener("bl-views", read);
-    window.addEventListener("storage", read);
-    return () => { window.removeEventListener("bl-views", read); window.removeEventListener("storage", read); };
+    const on = (e) => { if (e.detail?.used != null) setUsed(e.detail.used); };
+    window.addEventListener("bl-views", on);
+    return () => window.removeEventListener("bl-views", on);
   }, []);
   useEffect(() => {
     if (!open) return;

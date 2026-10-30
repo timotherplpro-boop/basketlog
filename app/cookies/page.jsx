@@ -14,8 +14,6 @@ export async function generateMetadata() {
 
 const TRACEURS = [
   ["bl_consent", "Stockage local", "Mémoriser ton choix sur les cookies", "Nécessaire", "6 mois"],
-  ["hs_views_…", "Stockage local", "Compter les analyses complètes consultées dans la journée (formule Starter)", "Nécessaire", "La journée"],
-  ["bl_history", "Stockage local", "Garder l'historique de tes analyses, affiché dans ton espace (jamais envoyé à nos serveurs)", "Nécessaire", "Jusqu'à ce que tu l'effaces"],
   ["bl_pro", "Cookie", "Garder ta session d'abonné connectée (cookie signé, inaccessible aux scripts)", "Nécessaire", "60 jours"],
   ["whop_state, whop_pkce", "Cookie", "Sécuriser la connexion avec Whop", "Nécessaire", "10 minutes"],
   ["bl_install_dismiss", "Stockage local", "Ne plus te proposer d'installer l'appli si tu as refermé la proposition", "Nécessaire", "30 jours"],
@@ -64,8 +62,6 @@ function CookiesFr() {
 
 const TRACKERS_EN = [
   ["bl_consent", "Local storage", "Remember your cookie choice", "Necessary", "6 months"],
-  ["hs_views_…", "Local storage", "Count the full analyses viewed during the day (daily limit)", "Necessary", "The day"],
-  ["bl_history", "Local storage", "Keep the history of your analyses, shown in your space (never sent to our servers)", "Necessary", "Until you clear it"],
   ["bl_pro", "Cookie", "Keep your account session logged in (signed cookie, not accessible to scripts)", "Necessary", "60 days"],
   ["whop_state, whop_pkce", "Cookie", "Secure the login with Whop", "Necessary", "10 minutes"],
   ["bl_install_dismiss", "Local storage", "Stop offering to install the app once you have closed the offer", "Necessary", "30 days"],
@@ -115,8 +111,6 @@ function CookiesEn({ L }) {
 
 const TRACKERS_ES = [
   ["bl_consent", "Almacenamiento local", "Recordar tu elección sobre las cookies", "Necesaria", "6 meses"],
-  ["hs_views_…", "Almacenamiento local", "Contar los análisis completos consultados en el día (límite diario)", "Necesaria", "El día"],
-  ["bl_history", "Almacenamiento local", "Guardar el historial de tus análisis, que se muestra en tu espacio (nunca se envía a nuestros servidores)", "Necesaria", "Hasta que lo borres"],
   ["bl_pro", "Cookie", "Mantener abierta la sesión de tu cuenta (cookie firmada, inaccesible para los scripts)", "Necesaria", "60 días"],
   ["whop_state, whop_pkce", "Cookie", "Proteger el inicio de sesión con Whop", "Necesaria", "10 minutos"],
   ["bl_install_dismiss", "Almacenamiento local", "No volver a proponerte instalar la app si has cerrado la propuesta", "Necesaria", "30 días"],

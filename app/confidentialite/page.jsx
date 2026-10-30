@@ -16,6 +16,7 @@ const DONNEES = [
   ["Navigation", "Adresse IP, navigateur, pages demandées, date et heure (journaux techniques de l'hébergeur)", "Faire fonctionner et sécuriser le site", "Intérêt légitime", "Quelques semaines, selon la durée de rétention de Vercel"],
   ["Mesure d'audience (si tu l'acceptes)", "Pages vues, clics, durée et nombre de visites, type d'appareil, pays et ville approximatifs, identifiant aléatoire stocké dans un cookie", "Comprendre l'usage du site et l'améliorer", "Consentement", "Cookies : 12 mois maximum ; statistiques : 25 mois maximum"],
   ["Compte gratuit et abonnés", "Identifiant et nom d'utilisateur Whop, formule active, date de vérification ; l'e-mail d'inscription reste chez Whop", "Ouvrir ton compte, activer ta formule et vérifier ton abonnement", "Exécution du contrat", "Tant que ton compte existe, puis 3 ans"],
+  ["Analyses lancées", "Identifiant Whop, match analysé, date et heure de l'analyse", "Appliquer la limite d'analyses du jour de ta formule et afficher ton historique", "Exécution du contrat", "12 mois"],
   ["Paiement", "Données de paiement et de facturation (traitées directement par Whop, jamais par Basketlog)", "Encaisser les paiements, établir les reçus", "Exécution du contrat, obligation légale", "10 ans pour les pièces comptables"],
   ["Avis", "Prénom, description facultative, note, texte de l'avis", "Publier les avis après relecture", "Consentement", "Jusqu'à ta demande de suppression"],
   ["Contact", "Adresse e-mail et contenu de tes messages", "Répondre à tes demandes", "Intérêt légitime", "3 ans après le dernier échange"],
@@ -23,7 +24,7 @@ const DONNEES = [
 
 const PRESTATAIRES = [
   ["Vercel Inc. (États-Unis)", "Hébergement du site et des serveurs"],
-  ["Supabase (région de Paris, UE)", "Base de données des avis"],
+  ["Supabase (région de Paris, UE)", "Base de données des avis et des analyses lancées"],
   ["Whop, Inc. (États-Unis)", "Paiement, gestion des abonnements, connexion des abonnés"],
   ["Amplitude, Inc. (données dans l'UE)", "Mesure d'audience, uniquement avec ton accord"],
   ["Zoho Corporation (données dans l'UE)", "Messagerie de l'adresse de contact"],
@@ -49,7 +50,7 @@ function ConfidentialiteFr() {
             <tbody>{DONNEES.map((d) => <tr key={d[0]}>{d.map((c, i) => <td key={i}>{i === 0 ? <b>{c}</b> : c}</td>)}</tr>)}</tbody>
           </table>
         </div>
-        <p>Le nombre d&apos;analyses consultées chaque jour et l&apos;historique de tes analyses sont gardés dans ton navigateur (stockage local) et ne sont pas envoyés à nos serveurs. Si tu es abonné et que tu acceptes la mesure d&apos;audience, ton identifiant Whop et ta formule sont associés à tes statistiques d&apos;usage, pour savoir quelles fonctionnalités servent le plus.</p>
+        <p>Les analyses complètes que tu lances avec ton compte sont enregistrées avec ton identifiant Whop, pour appliquer la limite du jour de ta formule sur tous tes appareils et t&apos;afficher ton historique. Si tu es abonné et que tu acceptes la mesure d&apos;audience, ton identifiant Whop et ta formule sont associés à tes statistiques d&apos;usage, pour savoir quelles fonctionnalités servent le plus.</p>
       </Sec>
 
       <Sec n={3} title="Paiement et comptes abonnés">
@@ -102,6 +103,7 @@ const DATA_EN = [
   ["Browsing", "IP address, browser, pages requested, date and time (host's technical logs)", "Run and secure the website", "Legitimate interest", "A few weeks, depending on Vercel's retention period"],
   ["Audience measurement (if you accept it)", "Page views, clicks, visit length and count, device type, approximate country and city, random ID stored in a cookie", "Understand how the website is used and improve it", "Consent", "Cookies: 12 months maximum; statistics: 25 months maximum"],
   ["Free account and subscribers", "Whop ID and username, active plan, verification date; the sign-up email stays with Whop", "Open your account, activate your plan and check your subscription", "Performance of the contract", "As long as your account exists, then 3 years"],
+  ["Analyses run", "Whop ID, game analyzed, date and time of the analysis", "Apply your plan's daily analysis limit and show your history", "Performance of the contract", "12 months"],
   ["Payment", "Payment and billing data (processed directly by Whop, never by Basketlog)", "Collect payments, issue receipts", "Performance of the contract, legal obligation", "10 years for accounting records"],
   ["Reviews", "First name, optional description, rating, review text", "Publish reviews after they are checked", "Consent", "Until you ask for removal"],
   ["Contact", "Email address and content of your messages", "Reply to your requests", "Legitimate interest", "3 years after the last exchange"],
@@ -109,7 +111,7 @@ const DATA_EN = [
 
 const PROVIDERS_EN = [
   ["Vercel Inc. (United States)", "Website and server hosting"],
-  ["Supabase (Paris region, EU)", "Reviews database"],
+  ["Supabase (Paris region, EU)", "Database for reviews and analyses run"],
   ["Whop, Inc. (United States)", "Payment, subscription management, subscriber login"],
   ["Amplitude, Inc. (data in the EU)", "Audience measurement, only with your consent"],
   ["Zoho Corporation (data in the EU)", "Email for the contact address"],
@@ -136,7 +138,7 @@ function ConfidentialiteEn({ L }) {
             <tbody>{DATA_EN.map((d) => <tr key={d[0]}>{d.map((c, i) => <td key={i}>{i === 0 ? <b>{c}</b> : c}</td>)}</tr>)}</tbody>
           </table>
         </div>
-        <p>The number of analyses viewed each day and your analysis history are kept in your browser (local storage) and are not sent to our servers. If you are a subscriber and accept audience measurement, your Whop ID and plan are linked to your usage statistics, so we know which features are used most.</p>
+        <p>The full analyses you run with your account are recorded with your Whop ID, to apply your plan&apos;s daily limit across all your devices and show your history. If you are a subscriber and accept audience measurement, your Whop ID and plan are linked to your usage statistics, so we know which features are used most.</p>
       </Sec>
 
       <Sec n={3} title="Payment and subscriber accounts">
@@ -189,6 +191,7 @@ const DATA_ES = [
   ["Navegación", "Dirección IP, navegador, páginas solicitadas, fecha y hora (registros técnicos del proveedor de alojamiento)", "Hacer funcionar y proteger el sitio", "Interés legítimo", "Unas semanas, según el periodo de conservación de Vercel"],
   ["Medición de audiencia (si la aceptas)", "Páginas vistas, clics, duración y número de visitas, tipo de dispositivo, país y ciudad aproximados, identificador aleatorio guardado en una cookie", "Entender el uso del sitio y mejorarlo", "Consentimiento", "Cookies: 12 meses como máximo; estadísticas: 25 meses como máximo"],
   ["Cuenta gratis y suscriptores", "Identificador y nombre de usuario de Whop, plan activo, fecha de verificación; el correo de registro se queda en Whop", "Abrir tu cuenta, activar tu plan y verificar tu suscripción", "Ejecución del contrato", "Mientras exista tu cuenta y, después, 3 años"],
+  ["Análisis realizados", "Identificador de Whop, partido analizado, fecha y hora del análisis", "Aplicar el límite diario de análisis de tu plan y mostrar tu historial", "Ejecución del contrato", "12 meses"],
   ["Pago", "Datos de pago y de facturación (tratados directamente por Whop, nunca por Basketlog)", "Cobrar los pagos y emitir los recibos", "Ejecución del contrato, obligación legal", "10 años para los documentos contables"],
   ["Opiniones", "Nombre, descripción opcional, nota y texto de la opinión", "Publicar las opiniones tras revisarlas", "Consentimiento", "Hasta que pidas su eliminación"],
   ["Contacto", "Dirección de correo electrónico y contenido de tus mensajes", "Responder a tus solicitudes", "Interés legítimo", "3 años después del último intercambio"],
@@ -196,7 +199,7 @@ const DATA_ES = [
 
 const PROVIDERS_ES = [
   ["Vercel Inc. (Estados Unidos)", "Alojamiento del sitio y de los servidores"],
-  ["Supabase (región de París, UE)", "Base de datos de opiniones"],
+  ["Supabase (región de París, UE)", "Base de datos de opiniones y análisis realizados"],
   ["Whop, Inc. (Estados Unidos)", "Pago, gestión de suscripciones, inicio de sesión de los suscriptores"],
   ["Amplitude, Inc. (datos en la UE)", "Medición de audiencia, solo con tu consentimiento"],
   ["Zoho Corporation (datos en la UE)", "Correo de la dirección de contacto"],
@@ -223,7 +226,7 @@ function ConfidentialiteEs({ L }) {
             <tbody>{DATA_ES.map((d) => <tr key={d[0]}>{d.map((c, i) => <td key={i}>{i === 0 ? <b>{c}</b> : c}</td>)}</tr>)}</tbody>
           </table>
         </div>
-        <p>El número de análisis consultados cada día y el historial de tus análisis se guardan en tu navegador (almacenamiento local) y no se envían a nuestros servidores. Si eres suscriptor y aceptas la medición de audiencia, tu identificador de Whop y tu plan se asocian a tus estadísticas de uso, para saber qué funciones se usan más.</p>
+        <p>Los análisis completos que realizas con tu cuenta se registran con tu identificador de Whop, para aplicar el límite diario de tu plan en todos tus dispositivos y mostrarte tu historial. Si eres suscriptor y aceptas la medición de audiencia, tu identificador de Whop y tu plan se asocian a tus estadísticas de uso, para saber qué funciones se usan más.</p>
       </Sec>
 
       <Sec n={3} title="Pago y cuentas de suscriptor">

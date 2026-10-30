@@ -11,6 +11,8 @@ import { dayLong } from "../lib/seo";
 import { matchSummary } from "../lib/summary";
 import { getL } from "../lib/lang-server";
 import { factorText, scenarioText, confText } from "../lib/matchtext";
+import { analysisAccess } from "../lib/usage";
+import { nbaDateOf } from "../lib/espn";
 
 function Signed({ v }) {
   return <span className={v > 0.05 ? "pos" : v < -0.05 ? "neg" : ""}>{fmt(v)}</span>;
@@ -24,7 +26,17 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
   const streak = (x) => (!x ? x : L.en ? x.replace(/^V/, "W").replace(/^D/, "L") : x.replace(/^W/, "V").replace(/^L/, "D"));
   const g = a.game;
   const h = a.home, aw = a.away;
-  const narrative = await aiNarrative(a, L);
+  // Analyse complète : décidée par le serveur (compte, formule, analyses déjà lancées aujourd'hui).
+  const leagueKey = isNBA ? "NBA" : "EL";
+  const access = await analysisAccess(leagueKey, g.id);
+  const open = access.state === "open";
+  const target = {
+    league: leagueKey,
+    id: String(g.id),
+    path: path || (g.hypothetical ? `/app/duel?home=${g.home.id}&away=${g.away.id}` : isNBA ? `/app/match/${g.id}?d=${nbaDateOf(g.date)}` : `/app/euroleague/match/${g.id}`),
+    info: { date: g.date, home: { short: g.home.short, abbr: g.home.abbr, logo: g.home.logo || null }, away: { short: g.away.short, abbr: g.away.abbr, logo: g.away.logo || null } },
+  };
+  const narrative = open ? await aiNarrative(a, L) : null;
   const showScore = g.state !== "pre" && g.home.score != null;
 
   const rows = [
@@ -131,7 +143,8 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
         <p className="narr">{matchSummary(a, league, L).join(" ")}</p>
       </div>
 
-      <Gate matchId={g.id} league={league} info={{ date: g.date, home: { short: g.home.short, abbr: g.home.abbr, logo: g.home.logo || null }, away: { short: g.away.short, abbr: g.away.abbr, logo: g.away.logo || null } }}>
+      <Gate access={access} target={target}>
+        {open && <>
         <div className="card block">
           <h2>{L.t("L'analyse", "The analysis", "El análisis")} {narrative.source === "ai" ? <span className="tag hot">{L.t("IA", "AI", "IA")}</span> : <span className="tag">{L.t("Modèle", "Model", "Modelo")}</span>}</h2>
           <p className="narr">{narrative.text}</p>
@@ -188,6 +201,7 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
           ))}
         </div>
         )}
+        </>}
       </Gate>
 
       <p className="disclaimer">
