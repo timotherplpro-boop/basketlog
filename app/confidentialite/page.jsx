@@ -24,7 +24,7 @@ const DONNEES = [
 
 const PRESTATAIRES = [
   ["Vercel Inc. (États-Unis)", "Hébergement du site et des serveurs"],
-  ["Supabase (région de Paris, UE)", "Base de données des avis et des analyses lancées"],
+  ["Supabase (Irlande, UE)", "Base de données des avis et des analyses lancées"],
   ["Whop, Inc. (États-Unis)", "Paiement, gestion des abonnements, connexion des abonnés"],
   ["Amplitude, Inc. (données dans l'UE)", "Mesure d'audience, uniquement avec ton accord"],
   ["Zoho Corporation (données dans l'UE)", "Messagerie de l'adresse de contact"],
@@ -111,7 +111,7 @@ const DATA_EN = [
 
 const PROVIDERS_EN = [
   ["Vercel Inc. (United States)", "Website and server hosting"],
-  ["Supabase (Paris region, EU)", "Database for reviews and analyses run"],
+  ["Supabase (Ireland, EU)", "Database for reviews and analyses run"],
   ["Whop, Inc. (United States)", "Payment, subscription management, subscriber login"],
   ["Amplitude, Inc. (data in the EU)", "Audience measurement, only with your consent"],
   ["Zoho Corporation (data in the EU)", "Email for the contact address"],
@@ -199,7 +199,7 @@ const DATA_ES = [
 
 const PROVIDERS_ES = [
   ["Vercel Inc. (Estados Unidos)", "Alojamiento del sitio y de los servidores"],
-  ["Supabase (región de París, UE)", "Base de datos de opiniones y análisis realizados"],
+  ["Supabase (Irlanda, UE)", "Base de datos de opiniones y análisis realizados"],
   ["Whop, Inc. (Estados Unidos)", "Pago, gestión de suscripciones, inicio de sesión de los suscriptores"],
   ["Amplitude, Inc. (datos en la UE)", "Medición de audiencia, solo con tu consentimiento"],
   ["Zoho Corporation (datos en la UE)", "Correo de la dirección de contacto"],

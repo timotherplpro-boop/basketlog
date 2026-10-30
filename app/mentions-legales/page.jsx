@@ -28,7 +28,7 @@ function MentionsLegalesFr() {
 
       <Sec n={2} title="Hébergement">
         <p>Le site est hébergé par <b>{LEGAL.hebergeur.nom}</b>, {LEGAL.hebergeur.adresse}, téléphone {LEGAL.hebergeur.tel}, <a href={LEGAL.hebergeur.site} rel="noopener" target="_blank">vercel.com</a>.</p>
-        <p>La base de données des avis est hébergée par {LEGAL.base.nom} (<a href={LEGAL.base.site} rel="noopener" target="_blank">supabase.com</a>), {LEGAL.base.detail}.</p>
+        <p>La base de données des avis et des analyses lancées est hébergée par {LEGAL.base.nom} (<a href={LEGAL.base.site} rel="noopener" target="_blank">supabase.com</a>), {LEGAL.base.detail}.</p>
         <p>Les paiements et les comptes abonnés sont gérés par {LEGAL.paiement.nom}, {LEGAL.paiement.adresse} (<a href={LEGAL.paiement.site} rel="noopener" target="_blank">whop.com</a>).</p>
       </Sec>
 
@@ -72,7 +72,7 @@ function MentionsLegalesEn({ L }) {
 
       <Sec n={2} title="Hosting">
         <p>The website is hosted by <b>{LEGAL.hebergeur.nom}</b>, 440 North Barranca Avenue, Suite 4133, Covina, CA 91723, United States, phone {LEGAL.hebergeur.tel}, <a href={LEGAL.hebergeur.site} rel="noopener" target="_blank">vercel.com</a>.</p>
-        <p>The reviews database is hosted by {LEGAL.base.nom} (<a href={LEGAL.base.site} rel="noopener" target="_blank">supabase.com</a>), with data stored in the AWS Paris region (eu-west-3).</p>
+        <p>The database for reviews and analyses run is hosted by {LEGAL.base.nom} (<a href={LEGAL.base.site} rel="noopener" target="_blank">supabase.com</a>), with data stored in the AWS Ireland region (eu-west-1), in the European Union.</p>
         <p>Payments and subscriber accounts are handled by {LEGAL.paiement.nom}, 300 Kent Avenue #401, Brooklyn, NY 11249, United States (<a href={LEGAL.paiement.site} rel="noopener" target="_blank">whop.com</a>).</p>
       </Sec>
 
@@ -116,7 +116,7 @@ function MentionsLegalesEs({ L }) {
 
       <Sec n={2} title="Alojamiento">
         <p>El sitio está alojado por <b>{LEGAL.hebergeur.nom}</b>, 440 North Barranca Avenue, Suite 4133, Covina, CA 91723, Estados Unidos, teléfono {LEGAL.hebergeur.tel}, <a href={LEGAL.hebergeur.site} rel="noopener" target="_blank">vercel.com</a>.</p>
-        <p>La base de datos de opiniones está alojada por {LEGAL.base.nom} (<a href={LEGAL.base.site} rel="noopener" target="_blank">supabase.com</a>), con los datos almacenados en la región AWS de París (eu-west-3).</p>
+        <p>La base de datos de opiniones y análisis realizados está alojada por {LEGAL.base.nom} (<a href={LEGAL.base.site} rel="noopener" target="_blank">supabase.com</a>), con los datos almacenados en la región AWS de Irlanda (eu-west-1), en la Unión Europea.</p>
         <p>Los pagos y las cuentas de suscriptores los gestiona {LEGAL.paiement.nom}, 300 Kent Avenue #401, Brooklyn, NY 11249, Estados Unidos (<a href={LEGAL.paiement.site} rel="noopener" target="_blank">whop.com</a>).</p>
       </Sec>
 
