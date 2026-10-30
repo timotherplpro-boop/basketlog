@@ -11,6 +11,7 @@ import { matchSummary } from "../lib/summary";
 import { factorText, scenarioText, confText } from "../lib/matchtext";
 import { analysisAccess } from "../lib/usage";
 import { nbaRecentForm } from "../lib/data";
+import { unlockProof } from "../lib/proof";
 import { nbaDateOf } from "../lib/espn";
 import { fmtDate } from "../lib/i18n";
 
@@ -71,9 +72,14 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
   };
 
   // Forme : 5 derniers matchs (chronologiques), et bilans à domicile / à l'extérieur.
-  const form = isNBA
-    ? await nbaRecentForm([h.team.id, aw.team.id], g.hypothetical || g.state === "pre" ? null : g.date)
-    : { [h.team.id]: [...(h.cur?.form || [])].reverse(), [aw.team.id]: [...(aw.cur?.form || [])].reverse() };
+  // Sans l'analyse complète : chiffres réels de la fenêtre « Tu veux voir l'analyse complète ? ».
+  const [form, proof] = await Promise.all([
+    isNBA
+      ? nbaRecentForm([h.team.id, aw.team.id], g.hypothetical || g.state === "pre" ? null : g.date)
+      : { [h.team.id]: [...(h.cur?.form || [])].reverse(), [aw.team.id]: [...(aw.cur?.form || [])].reverse() },
+    access.state === "visitor" || access.state === "limit" ? unlockProof() : null,
+  ]);
+  const matchInfo = { home: g.home.name, away: g.away.name, date: g.date || null, state: g.state || "pre", hypothetical: !!g.hypothetical };
   const fh = form[h.team.id] || [], fa = form[aw.team.id] || [];
   const splits = { home: h.cur?.home || null, away: aw.cur?.road || null };
   const vd = (l) => `${l.filter((x) => x.res === "W").length}-${l.filter((x) => x.res !== "W").length}`;
@@ -164,7 +170,7 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
         </div>
       </div>
 
-      <Gate access={access} target={target} pct={visiblePct}>
+      <Gate key={target.id} access={access} target={target} pct={visiblePct} proof={proof} match={matchInfo} mode={mode}>
         {open && <>
           <div className="ar-sec">
             <h3>📈 {L.t("Probabilités exactes", "Exact probabilities", "Probabilidades exactas")}</h3>

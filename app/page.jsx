@@ -13,6 +13,7 @@ import Faq from "../components/Faq";
 import ReviewCards from "../components/ReviewCards";
 import { getReviews } from "../lib/reviews";
 import { memberCount } from "../lib/members";
+import { MEMBERS_MIN, plusFloor, memberStep } from "../lib/proof";
 import JsonLd from "../components/JsonLd";
 import { pageMeta } from "../lib/seo";
 import { getL } from "../lib/lang-server";
@@ -67,10 +68,9 @@ async function pickStats() {
 }
 
 // Seuils d'affichage : sous ces valeurs, le chiffre n'est pas assez parlant (ou pas assez fiable) pour la vitrine.
-const MEMBERS_MIN = 100; // le badge passe au nombre de membres à partir de +100 inscrits
+// Le badge passe au nombre de membres à partir de +100 inscrits (MEMBERS_MIN) ; « +N » reste toujours
+// strictement inférieur au vrai chiffre (plusFloor). Mêmes règles que la fenêtre « Tu veux voir l'analyse complète ? ».
 const STRONG_MIN = 100; // taux sur les gros favoris affiché à partir de 100 matchs
-// « +N » reste toujours strictement inférieur au vrai chiffre (arrondi vers le bas).
-const plusFloor = (n, step) => Math.floor((n - 1) / step) * step;
 const shortDay = (iso, L) => fmtDate(L, iso, { weekday: "short", day: "numeric", month: "short" });
 
 // Grains de lumière dans le faisceau du projecteur
@@ -129,8 +129,7 @@ export default async function Home() {
     `Temporada ${seasonLabel(season - 1)} probada entera y temporada ${seasonLabel(season)} en curso: cada partido se recalcula solo con los resultados conocidos antes de él.`
   );
   // Badge : vrai nombre de membres Whop dès qu'il est parlant, sinon vrai nombre de matchs passés au crible.
-  const memStep = members >= 10000 ? 1000 : members >= 1000 ? 100 : 10;
-  const memShown = members > 0 ? plusFloor(members, memStep) : 0;
+  const memShown = members > 0 ? plusFloor(members, memberStep(members)) : 0;
   const analysed = plusFloor(Math.max(1301, stats?.n || 0), 100); // la saison testée compte à elle seule plus de 1 300 matchs
   const badgeTxt = memShown >= MEMBERS_MIN
     ? L.t(`+${num(memShown)} membres inscrits`, `+${num(memShown)} registered members`, `+${num(memShown)} miembros registrados`)
