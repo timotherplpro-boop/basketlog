@@ -57,8 +57,7 @@ export default function AppShell({ session, children }) {
   const name = pro?.name || session?.name || "";
   const limit = pro ? pro.perDay : tier === "starter" ? 1 : tier === "compte" ? 0 : null; // null = illimité
   const unlimited = limit == null;
-  const none = limit === 0; // compte gratuit : 0 / 0, comme Visifoot
-  const full = !unlimited && !none && used >= limit;
+  const full = !unlimited && used >= limit; // compte gratuit : « 0 / 0 » et « Limite atteinte », comme Visifoot
   const plan = { compte: L.t("Gratuit", "Free", "Gratis"), starter: "Starter", pro: "Pro", lifetime: "Lifetime" }[tier] || L.t("Gratuit", "Free", "Gratis");
 
   const items = [
@@ -82,7 +81,7 @@ export default function AppShell({ session, children }) {
       <aside className="sb" aria-label={L.t("Espace membre", "Member area", "Área de miembros")}>
         <div className="sb-brand">
           <Link href={L.href("/")} className="logo"><span className="ball" aria-hidden /> Basketlog</Link>
-          <small>{L.t("Analyse de matchs de basket", "Basketball game analysis", "Análisis de baloncesto")}</small>
+          <small>{L.t("Analyse IA de matchs", "AI match analysis", "Análisis IA de partidos")}</small>
         </div>
 
         <nav className="sb-nav" aria-label={L.t("Analyse", "Analysis", "Análisis")}>
@@ -100,12 +99,10 @@ export default function AppShell({ session, children }) {
         <div className="sb-quota">
           <div className="sb-q-head"><Icon name="bars" />{L.t("Analyses du jour", "Today's analyses", "Análisis de hoy")}</div>
           <b className={full ? "full" : unlimited ? "free" : ""}>{unlimited ? L.t("Illimitées", "Unlimited", "Ilimitados") : `${Math.min(used, limit)} / ${limit}`}</b>
-          <div className={`sb-bar ${full ? "full" : ""}`}><i style={{ width: unlimited ? "100%" : none ? "0%" : `${Math.min(used / limit, 1) * 100}%` }} /></div>
-          {none ? (
-            <Link href={L.href("/pro")} className="sb-q-note warn">{L.t("Analyses complètes avec Starter ou Pro", "Full analyses with Starter or Pro", "Análisis completos con Starter o Pro")}</Link>
-          ) : full ? (
+          <div className={`sb-bar ${full ? "full" : ""}`}><i style={{ width: unlimited || full ? "100%" : `${Math.min(used / limit, 1) * 100}%` }} /></div>
+          {full ? (
             <Link href={L.href("/pro")} className="sb-q-note warn">
-              {L.t("Limite atteinte", "Limit reached", "Límite alcanzado")} • {tier === "starter" ? L.t("Illimité avec Pro", "Unlimited with Pro", "Ilimitado con Pro") : L.t("Plus d'analyses avec Starter", "More analyses with Starter", "Más análisis con Starter")}
+              {L.t("Limite atteinte", "Limit reached", "Límite alcanzado")} • {L.t("Upgrade pour plus", "Upgrade for more", "Mejora tu plan para más")}
             </Link>
           ) : unlimited ? (
             <span className="sb-q-note">{L.t(`Formule ${plan} : aucune limite`, `${plan} plan: no limit`, `Plan ${plan}: sin límite`)}</span>
