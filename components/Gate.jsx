@@ -4,15 +4,26 @@ import Link from "next/link";
 import { useProStatus } from "../lib/useProStatus";
 import { track } from "../lib/analytics";
 import { useL } from "./LangProvider";
+import { stripLang } from "../lib/i18n";
 
 function todayKey() {
   return "hs_views_" + new Date().toISOString().slice(0, 10);
 }
 
+// Historique des analyses consultées, gardé dans le navigateur (affiché dans « Historique »).
+export const HISTORY_KEY = "bl_history";
+function remember(entry) {
+  try {
+    const list = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]").filter((x) => x.id !== entry.id);
+    list.unshift(entry);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, 100)));
+  } catch {}
+}
+
 // Analyse complète : comme Visifoot, il faut un compte gratuit pour la débloquer.
 // Compte gratuit = 1 analyse par jour, Starter = 5, Pro et Lifetime = illimitées.
 // Sans compte, seules les probabilités et les chiffres clés en haut de la fiche sont visibles.
-export default function Gate({ matchId, league = "NBA", children }) {
+export default function Gate({ matchId, league = "NBA", info = null, children }) {
   const L = useL();
   const pro = useProStatus();
   const [state, setState] = useState({ locked: false, used: 0, ready: false });
@@ -22,8 +33,13 @@ export default function Gate({ matchId, league = "NBA", children }) {
   useEffect(() => {
     if (!pro) return;
     const limit = pro.perDay; // null = illimité
+    const seen = () => {
+      if (info) remember({ id: String(matchId), league, path: stripLang(location.pathname) + location.search, ...info, at: Date.now() });
+      window.dispatchEvent(new Event("bl-views"));
+    };
     if (limit == null) {
       setState({ locked: false, used: 0, ready: true, unlimited: true });
+      seen();
       track("Analyse consultée", { match_id: String(matchId), ligue: league, formule: pro.tier });
       return;
     }
@@ -39,8 +55,9 @@ export default function Gate({ matchId, league = "NBA", children }) {
       try { localStorage.setItem(todayKey(), JSON.stringify(views)); } catch {}
     }
     setState({ locked: false, used: views.length, limit, ready: true });
+    seen();
     track("Analyse consultée", { match_id: String(matchId), ligue: league, formule: pro.tier });
-  }, [matchId, pro, league]);
+  }, [matchId, pro, league, info]);
 
   const visitor = !pro || !pro.connected; // pas encore de compte
   const tier = pro?.tier;

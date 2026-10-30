@@ -45,10 +45,10 @@ export async function GET(req) {
     const tier = await whopTier(uid);
     const value = encodeSession({ uid, name: info.preferred_username || info.name || "", tier, checked: Date.now() });
     if (!value) return fail("config");
-    // Retour sur la page d'origine (ex. la fiche match), sinon page Pro (abonné) ou matchs du jour (compte gratuit).
+    // Retour sur la page d'origine (ex. la fiche match), sinon l'espace membre.
     const next = safeNext(req.cookies.get(NEXT_COOKIE)?.value);
     const flow = req.cookies.get("bl_flow")?.value === "signup" ? "inscription" : "connexion";
-    const dest = new URL(next || (tier === "compte" ? "/app/matchs" : "/pro"), SITE);
+    const dest = new URL(next || "/app", SITE);
     dest.searchParams.set("bienvenue", tier === "compte" ? flow : "abonne");
     const r = NextResponse.redirect(dest.toString());
     r.cookies.set(COOKIE, value, cookieOptions);

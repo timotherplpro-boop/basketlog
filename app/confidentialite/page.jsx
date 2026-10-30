@@ -49,7 +49,7 @@ function ConfidentialiteFr() {
             <tbody>{DONNEES.map((d) => <tr key={d[0]}>{d.map((c, i) => <td key={i}>{i === 0 ? <b>{c}</b> : c}</td>)}</tr>)}</tbody>
           </table>
         </div>
-        <p>Le nombre d&apos;analyses consultées chaque jour est compté dans ton navigateur (stockage local) et n&apos;est pas envoyé à nos serveurs. Si tu es abonné et que tu acceptes la mesure d&apos;audience, ton identifiant Whop et ta formule sont associés à tes statistiques d&apos;usage, pour savoir quelles fonctionnalités servent le plus.</p>
+        <p>Le nombre d&apos;analyses consultées chaque jour et l&apos;historique de tes analyses sont gardés dans ton navigateur (stockage local) et ne sont pas envoyés à nos serveurs. Si tu es abonné et que tu acceptes la mesure d&apos;audience, ton identifiant Whop et ta formule sont associés à tes statistiques d&apos;usage, pour savoir quelles fonctionnalités servent le plus.</p>
       </Sec>
 
       <Sec n={3} title="Paiement et comptes abonnés">
@@ -136,7 +136,7 @@ function ConfidentialiteEn({ L }) {
             <tbody>{DATA_EN.map((d) => <tr key={d[0]}>{d.map((c, i) => <td key={i}>{i === 0 ? <b>{c}</b> : c}</td>)}</tr>)}</tbody>
           </table>
         </div>
-        <p>The number of analyses viewed each day is counted in your browser (local storage) and is not sent to our servers. If you are a subscriber and accept audience measurement, your Whop ID and plan are linked to your usage statistics, so we know which features are used most.</p>
+        <p>The number of analyses viewed each day and your analysis history are kept in your browser (local storage) and are not sent to our servers. If you are a subscriber and accept audience measurement, your Whop ID and plan are linked to your usage statistics, so we know which features are used most.</p>
       </Sec>
 
       <Sec n={3} title="Payment and subscriber accounts">
@@ -223,7 +223,7 @@ function ConfidentialiteEs({ L }) {
             <tbody>{DATA_ES.map((d) => <tr key={d[0]}>{d.map((c, i) => <td key={i}>{i === 0 ? <b>{c}</b> : c}</td>)}</tr>)}</tbody>
           </table>
         </div>
-        <p>El número de análisis consultados cada día se cuenta en tu navegador (almacenamiento local) y no se envía a nuestros servidores. Si eres suscriptor y aceptas la medición de audiencia, tu identificador de Whop y tu plan se asocian a tus estadísticas de uso, para saber qué funciones se usan más.</p>
+        <p>El número de análisis consultados cada día y el historial de tus análisis se guardan en tu navegador (almacenamiento local) y no se envían a nuestros servidores. Si eres suscriptor y aceptas la medición de audiencia, tu identificador de Whop y tu plan se asocian a tus estadísticas de uso, para saber qué funciones se usan más.</p>
       </Sec>
 
       <Sec n={3} title="Pago y cuentas de suscriptor">

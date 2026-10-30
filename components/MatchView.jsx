@@ -131,7 +131,7 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
         <p className="narr">{matchSummary(a, league, L).join(" ")}</p>
       </div>
 
-      <Gate matchId={g.id} league={league}>
+      <Gate matchId={g.id} league={league} info={{ date: g.date, home: { short: g.home.short, abbr: g.home.abbr, logo: g.home.logo || null }, away: { short: g.away.short, abbr: g.away.abbr, logo: g.away.logo || null } }}>
         <div className="card block">
           <h2>{L.t("L'analyse", "The analysis", "El análisis")} {narrative.source === "ai" ? <span className="tag hot">{L.t("IA", "AI", "IA")}</span> : <span className="tag">{L.t("Modèle", "Model", "Modelo")}</span>}</h2>
           <p className="narr">{narrative.text}</p>

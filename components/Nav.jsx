@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useProStatus } from "../lib/useProStatus";
 import { track } from "../lib/analytics";
-import { useL, useInitialPath } from "./LangProvider";
+import { useL } from "./LangProvider";
 import LangSelect from "./LangSelect";
 import { InstallPlatforms } from "./InstallApp";
 
@@ -18,9 +18,6 @@ export default function Nav() {
   const L = useL();
   const [open, setOpen] = useState(false);
   const pro = useProStatus();
-  const initialPath = useInitialPath();
-  const [here, setHere] = useState(initialPath);
-  useEffect(() => { setHere(location.pathname + location.search); }, [open]);
   useEffect(() => {
     if (!open) return;
     const esc = (e) => e.key === "Escape" && setOpen(false);
@@ -28,12 +25,14 @@ export default function Nav() {
     return () => document.removeEventListener("keydown", esc);
   }, [open]);
 
-  // Toujours « » CONNEXION », comme sur Visifoot ; un membre déjà connecté arrive directement sur son compte.
+  // Toujours « » CONNEXION », comme sur Visifoot : on arrive dans l'espace membre (barre latérale),
+  // directement si on est déjà connecté, sinon après la connexion Whop.
   const connected = !!pro?.connected;
+  const space = L.href("/app");
   const account = {
-    href: connected ? L.href("/pro") : `/api/whop/login?next=${encodeURIComponent(here)}`,
+    href: connected ? space : `/api/whop/login?next=${encodeURIComponent(space)}`,
     label: L.t("Connexion", "Login", "Iniciar sesión"),
-    title: connected ? L.t("Tu es connecté : ouvrir ton compte", "You're logged in: open your account", "Has iniciado sesión: abrir tu cuenta") : undefined,
+    title: connected ? L.t("Tu es connecté : ouvrir ton espace", "You're logged in: open your space", "Has iniciado sesión: abrir tu espacio") : undefined,
   };
   const onAccount = () => !connected && track("Connexion Whop", { etape: "clic", source: "menu" });
   const menuLabel = open ? L.t("Fermer le menu", "Close menu", "Cerrar el menú") : L.t("Ouvrir le menu", "Open menu", "Abrir el menú");

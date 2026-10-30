@@ -118,7 +118,7 @@ export default function ProPlans({ checkout, loginReady, notice }) {
           <p>
             {L.t("Connecté avec Whop", "Logged in with Whop", "Conectado con Whop")}{pro.name ? <> {L.t("en tant que", "as", "como")} <b>{pro.name}</b></> : ""} · {L.t("formule", "plan", "plan")} <b>{TIER_LABEL[current] || current}</b>
             {" · "}<a href="https://whop.com/@me/settings/orders/" target="_blank" rel="noopener">{L.t("Gérer mon abonnement", "Manage my subscription", "Gestionar mi suscripción")}</a>
-            {" · "}<a href="/api/pro/logout">{L.t("Se déconnecter", "Log out", "Cerrar sesión")}</a>
+            {" · "}<a href={`/api/pro/logout?next=${encodeURIComponent(L.href("/pro"))}`}>{L.t("Se déconnecter", "Log out", "Cerrar sesión")}</a>
           </p>
         ) : loginReady ? (
           <p>
