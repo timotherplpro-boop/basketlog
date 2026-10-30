@@ -32,11 +32,11 @@ export async function POST(req) {
     } else {
       const g = res.analysis.game;
       id = g.id;
-      path = `/app/duel?home=${g.home.id}&away=${g.away.id}`;
+      path = `/app?home=${g.home.id}&away=${g.away.id}`;
       info = { date: null, home: team(g.home), away: team(g.away) };
     }
   }
-  if (!id || !path || !path.startsWith("/app/")) return NextResponse.json({ error: "match" }, { status: 400 });
+  if (!id || !path || !/^\/app(\/|\?|$)/.test(path)) return NextResponse.json({ error: "match" }, { status: 400 });
 
   const { session, refreshed } = await currentSession(req.cookies.get(COOKIE)?.value);
   if (!session) return NextResponse.json({ state: "visitor", path });

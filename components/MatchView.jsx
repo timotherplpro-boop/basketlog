@@ -1,55 +1,19 @@
 import Link from "next/link";
-import { fmt, pct } from "../lib/model";
-import { aiNarrative } from "../lib/narrative";
+import { pct } from "../lib/model";
 import { TeamLogo, ProbBar, StatusTag } from "./ui";
-import Gate from "./Gate";
 import AppTabs from "./AppTabs";
-import MatchExtras from "./MatchExtras";
 import JsonLd from "./JsonLd";
+import AnalysisResult from "./AnalysisResult";
 import { SITE } from "../lib/site";
 import { dayLong } from "../lib/seo";
-import { matchSummary } from "../lib/summary";
 import { getL } from "../lib/lang-server";
-import { factorText, scenarioText, confText } from "../lib/matchtext";
-import { analysisAccess } from "../lib/usage";
-import { nbaDateOf } from "../lib/espn";
-
-function Signed({ v }) {
-  return <span className={v > 0.05 ? "pos" : v < -0.05 ? "neg" : ""}>{fmt(v)}</span>;
-}
 
 export default async function MatchView({ a, backHref = "/app", league = "NBA", extras = null, path = null }) {
   const L = await getL();
   const isNBA = league === "NBA";
   const teamHref = (t) => L.href(isNBA ? `/app/equipe/${t.id}` : `/app/euroleague/equipe/${t.id}`);
-  // Série : W/L en anglais, V/D (victoire/défaite, victoria/derrota) en français et en espagnol.
-  const streak = (x) => (!x ? x : L.en ? x.replace(/^V/, "W").replace(/^D/, "L") : x.replace(/^W/, "V").replace(/^L/, "D"));
   const g = a.game;
-  const h = a.home, aw = a.away;
-  // Analyse complète : décidée par le serveur (compte, formule, analyses déjà lancées aujourd'hui).
-  const leagueKey = isNBA ? "NBA" : "EL";
-  const access = await analysisAccess(leagueKey, g.id);
-  const open = access.state === "open";
-  const target = {
-    league: leagueKey,
-    id: String(g.id),
-    path: path || (g.hypothetical ? `/app/duel?home=${g.home.id}&away=${g.away.id}` : isNBA ? `/app/match/${g.id}?d=${nbaDateOf(g.date)}` : `/app/euroleague/match/${g.id}`),
-    info: { date: g.date, home: { short: g.home.short, abbr: g.home.abbr, logo: g.home.logo || null }, away: { short: g.away.short, abbr: g.away.abbr, logo: g.away.logo || null } },
-  };
-  const narrative = open ? await aiNarrative(a, L) : null;
   const showScore = g.state !== "pre" && g.home.score != null;
-
-  const rows = [
-    [L.t("Bilan", "Record", "Balance"), aw.cur ? `${aw.cur.wins}-${aw.cur.losses}` : g.away.record || "–", h.cur ? `${h.cur.wins}-${h.cur.losses}` : g.home.record || "–"],
-    [L.t("Points marqués / match", "Points scored / game", "Puntos anotados / partido"), aw.ppg.toFixed(1), h.ppg.toFixed(1)],
-    [L.t("Points encaissés / match", "Points allowed / game", "Puntos encajados / partido"), aw.oppg.toFixed(1), h.oppg.toFixed(1)],
-    [L.t("Écart ajusté / match", "Adjusted margin / game", "Diferencia ajustada / partido"), fmt(aw.diff), fmt(h.diff)],
-    [L.t("Série en cours", "Current streak", "Racha actual"), streak(aw.cur?.streak) || "–", streak(h.cur?.streak) || "–"],
-    [L.t("10 derniers matchs", "Last 10 games", "Últimos 10 partidos"), aw.cur?.last10 || "–", h.cur?.last10 || "–"],
-    [L.t("Bilan dom. / ext.", "Home / road record", "Balance en casa / fuera"), aw.cur?.road ? `${aw.cur.road} ${L.t("ext.", "road", "fuera")}` : "–", h.cur?.home ? `${h.cur.home} ${L.t("dom.", "home", "casa")}` : "–"],
-    [L.t("Saison passée", "Last season", "Temporada pasada"), aw.prev ? `${aw.prev.wins}-${aw.prev.losses} (${fmt(aw.prev.diff)})` : "–", h.prev ? `${h.prev.wins}-${h.prev.losses} (${fmt(h.prev.diff)})` : "–"],
-    ...(g.hypothetical || league !== "NBA" ? [] : [[L.t("A joué hier", "Played yesterday", "Jugó ayer"), aw.b2b ? L.t("Oui", "Yes", "Sí") : L.t("Non", "No", "No"), h.b2b ? L.t("Oui", "Yes", "Sí") : L.t("Non", "No", "No")]]),
-  ];
 
   // Données structurées : le match (événement sportif) et la page, dont l'analyse détaillée est réservée aux abonnés.
   const url = path ? `${SITE}${L.href(path)}` : null;
@@ -81,7 +45,7 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
       url,
       inLanguage: L.hreflang,
       isAccessibleForFree: false,
-      hasPart: { "@type": "WebPageElement", isAccessibleForFree: false, cssSelector: ".gate-content" },
+      hasPart: { "@type": "WebPageElement", isAccessibleForFree: false, cssSelector: ".ar-locked" },
       isPartOf: { "@id": `${SITE}/#site` },
     },
   ];
@@ -131,78 +95,7 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
         )}</div>
       )}
 
-      <div className="kpis">
-        <div className="card kpi"><span>{L.t("Favori", "Favorite", "Favorito")}</span><strong>{a.fav.team.abbr}</strong></div>
-        <div className="card kpi"><span>{L.t("Écart projeté", "Projected margin", "Diferencia proyectada")}</span><strong>{Math.abs(a.margin).toFixed(1)}</strong></div>
-        <div className="card kpi"><span>{L.t("Total projeté", "Projected total", "Total proyectado")}</span><strong>{Math.round(a.total)}</strong></div>
-        <div className="card kpi"><span>{L.t("Confiance", "Confidence", "Confianza")}</span><strong>{confText(a.confidence, L)}</strong></div>
-      </div>
-
-      <div className="card block">
-        <h2>{L.t("En bref", "At a glance", "En resumen")}</h2>
-        <p className="narr">{matchSummary(a, league, L).join(" ")}</p>
-      </div>
-
-      <Gate access={access} target={target}>
-        {open && <>
-        <div className="card block">
-          <h2>{L.t("L'analyse", "The analysis", "El análisis")} {narrative.source === "ai" ? <span className="tag hot">{L.t("IA", "AI", "IA")}</span> : <span className="tag">{L.t("Modèle", "Model", "Modelo")}</span>}</h2>
-          <p className="narr">{narrative.text}</p>
-          {narrative.keys.length > 0 && <ul className="keys">{narrative.keys.map((k, i) => <li key={i}>{k}</li>)}</ul>}
-        </div>
-
-        <div className="grid2">
-          <div className="card block">
-            <h2>{L.t("Ce qui fait pencher la balance", "What tips the balance", "Lo que inclina la balanza")}</h2>
-            <div className="team-rec" style={{ marginBottom: 6 }}>{L.t("En points, positif = avantage", "In points, positive = edge", "En puntos, positivo = ventaja")} {g.home.short}</div>
-            {a.factors.map((f) => { const ft = factorText(f, a, L); return (
-              <div className="factor" key={f.label}><div>{ft.label}<small>{ft.detail}</small></div><div className="v mono"><Signed v={f.value} /></div></div>
-            ); })}
-            <div className="factor"><div><b>{L.t("Marge attendue", "Expected margin", "Margen esperado")}</b><small>{L.t("pour", "for", "para")} {g.home.short}</small></div><div className="v mono"><Signed v={a.margin} /></div></div>
-          </div>
-          <div className="card block">
-            <h2>{L.t("Scénarios", "Scenarios", "Escenarios")}</h2>
-            <div className="scen">
-              {a.scenarios.map((s) => (
-                <div className="scen-row" key={s.label}>
-                  <div>{scenarioText(s, a, L)}<div className="scen-bar"><div style={{ width: `${Math.round(s.p * 100)}%` }} /></div></div>
-                  <div className="mono" style={{ textAlign: "right", fontWeight: 700 }}>{pct(s.p)}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {isNBA ? <MatchExtras a={a} L={L} /> : extras}
-
-        <div className="card block">
-          <h2>{L.t("Fiche des deux équipes", "Team comparison", "Ficha de los dos equipos")}</h2>
-          <table className="cmp">
-            <thead><tr><th>{g.away.abbr}</th><th></th><th>{g.home.abbr}</th></tr></thead>
-            <tbody>{rows.map(([l, x, y]) => <tr key={l}><td className="mono">{x}</td><td>{l}</td><td className="mono">{y}</td></tr>)}</tbody>
-          </table>
-        </div>
-
-        {isNBA && (
-        <div className="grid2">
-          {[aw, h].map((s) => (
-            <div className="card block" key={s.team.id}>
-              <h2><TeamLogo team={s.team} size={24} /> {L.t("Infirmerie", "Injury report", "Parte médico")} {s.team.short}</h2>
-              {s.inj.out.length + s.inj.doubtful.length === 0 ? (
-                <div className="team-rec">{L.t("Aucune absence signalée.", "No injuries reported.", "No hay bajas comunicadas.")}</div>
-              ) : (
-                <div className="inj">
-                  {[...s.inj.out, ...s.inj.doubtful].map((i) => (
-                    <div className="inj-row" key={i.player}><span>{i.player} <span className="team-rec">{i.pos}</span></span><span className={/out/i.test(i.status) ? "neg" : ""}>{i.status}</span></div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-        )}
-        </>}
-      </Gate>
+      <AnalysisResult a={a} league={league} L={L} mode="page" path={path} extras={extras} />
 
       <p className="disclaimer">
         {L.t(

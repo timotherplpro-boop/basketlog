@@ -13,7 +13,7 @@ function Combo({ teams, value, onChange, placeholder, exclude, L }) {
   const [hi, setHi] = useState(0);
   const box = useRef(null);
 
-  useEffect(() => { setQ(value ? value.name : ""); }, [value]);
+  useEffect(() => { if (value) setQ(value.name); }, [value]); // on garde la saisie quand on efface l'équipe en tapant
   useEffect(() => {
     const close = (e) => box.current && !box.current.contains(e.target) && setOpen(false);
     document.addEventListener("pointerdown", close);
@@ -63,11 +63,11 @@ function Combo({ teams, value, onChange, placeholder, exclude, L }) {
   );
 }
 
-export default function DuelForm({ teams, initialHome }) {
+export default function DuelForm({ teams, initialHome, initialAway }) {
   const L = useL();
   const router = useRouter();
   const [home, setHome] = useState(initialHome || null);
-  const [away, setAway] = useState(null);
+  const [away, setAway] = useState(initialAway || null);
   const run = useAnalysisRun();
   const running = run.running;
   useEffect(() => {
@@ -80,12 +80,13 @@ export default function DuelForm({ teams, initialHome }) {
     e.preventDefault();
     if (!home || !away || run.running) return;
     track("Analyse lancée", { source: "formulaire", domicile: home.abbr, exterieur: away.abbr });
-    const fallback = `/app/duel?home=${home.id}&away=${away.id}`;
+    // Le résultat s'affiche sous le formulaire, comme sur Visifoot.
+    const dest = `${L.href(`/app?home=${home.id}&away=${away.id}`)}#resultat`;
     run.start(
       () => fetch("/api/pro/analyse", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ home: home.id, away: away.id }) }).then((r) => r.json()),
       (r) => {
         if (r?.used != null) window.dispatchEvent(new CustomEvent("bl-views", { detail: { used: r.used } }));
-        router.push(L.href(r?.path || fallback));
+        router.push(dest);
       }
     );
   };
@@ -94,15 +95,12 @@ export default function DuelForm({ teams, initialHome }) {
     <>
     <form className="panel" onSubmit={go}>
       <div className="panel-label">{L.t("MATCH À ANALYSER", "GAME TO ANALYZE", "PARTIDO A ANALIZAR")}</div>
-      <div className="pick-logo">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        {home ? <img key={home.id} src={home.logo} alt={home.name} /> : <span className="ph" />}
-        <span className="vs-dot">VS</span>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        {away ? <img key={away.id} src={away.logo} alt={away.name} /> : <span className="ph" />}
-      </div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      {home ? <img key={home.id} className="duel-crest" src={home.logo} alt={home.name} /> : <span className="duel-crest ph" aria-hidden />}
       <Combo teams={teams} value={home} onChange={setHome} exclude={away?.id} L={L} placeholder={L.t("Cherche une équipe (ex : Lakers, Celtics)", "Search a team (e.g. Lakers, Celtics)", "Busca un equipo (p. ej., Lakers, Celtics)")} />
       <div className="vs-sep">vs</div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      {away ? <img key={away.id} className="duel-crest" src={away.logo} alt={away.name} /> : <span className="duel-crest ph" aria-hidden />}
       <Combo teams={teams} value={away} onChange={setAway} exclude={home?.id} L={L} placeholder={L.t("Cherche une équipe (ex : Knicks, Warriors)", "Search a team (e.g. Knicks, Warriors)", "Busca un equipo (p. ej., Knicks, Warriors)")} />
       <p className="home-hint">{L.t("S'ils se jouent dans les 3 prochaines semaines, tu tombes sur le vrai match. Sinon, la 1re équipe reçoit.", "If they meet in the next 3 weeks, you land on the real game. Otherwise, the first team plays at home.", "Si se enfrentan en las próximas 3 semanas, verás el partido real. Si no, el primer equipo juega en casa.")}</p>
       <button className={`btn-solid ${run.running ? "an-busy" : ""}`} disabled={!home || !away || run.running}>
