@@ -9,21 +9,20 @@ import { useProStatus } from "../lib/useProStatus";
 import { stripLang } from "../lib/i18n";
 import LangSelect from "./LangSelect";
 
+// Mêmes pictogrammes que Visifoot (jeu d'icônes Lucide, licence ISC).
 const I = {
-  chart: <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />,
-  calendar: <><rect x="3" y="4.5" width="18" height="16" rx="2.5" /><path d="M3 9.5h18M8 2.5v4M16 2.5v4" /></>,
-  trophy: <><path d="M7 4h10v5a5 5 0 0 1-10 0V4Z" /><path d="M7 6H4.5a2.5 2.5 0 0 0 2.5 4M17 6h2.5A2.5 2.5 0 0 1 17 10M12 14v3.5M8.5 20.5h7M9.5 17.5h5v3h-5z" /></>,
-  history: <><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6" /><path d="M3 3.5V8h4.5M12 7.5V12l3 2" /></>,
-  target: <><circle cx="12" cy="12" r="8.5" /><circle cx="12" cy="12" r="4.5" /><circle cx="12" cy="12" r=".8" /></>,
-  card: <><rect x="2.5" y="5" width="19" height="14" rx="2.5" /><path d="M2.5 10h19M6 15h4" /></>,
-  bars: <path d="M5 20v-6M10 20V9M15 20v-9M20 20V5" />,
-  user: <><circle cx="12" cy="8" r="4" /><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0" /></>,
-  logout: <path d="M9.5 20.5H6a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2h3.5M15.5 16.5 20 12l-4.5-4.5M20 12H9.5" />,
-  mail: <><rect x="2.5" y="4.5" width="19" height="15" rx="2.5" /><path d="m3.5 6.5 8.5 6.5 8.5-6.5" /></>,
-  globe: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" /></>,
+  chart: <><path d="M3 3v16a2 2 0 0 0 2 2h16" /><path d="M18 17V9" /><path d="M13 17V5" /><path d="M8 17v-3" /></>,
+  trophy: <><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></>,
+  history: <><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M12 7v5l4 2" /></>,
+  card: <><rect width="20" height="14" x="2" y="5" rx="2" /><path d="M2 10h20" /></>,
+  bars: <><path d="M3 3v16a2 2 0 0 0 2 2h16" /><path d="M18 17V9" /><path d="M13 17V5" /><path d="M8 17v-3" /></>,
+  user: <><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></>,
+  logout: <><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="M16 17l5-5-5-5" /><path d="M21 12H9" /></>,
+  mail: <><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></>,
+  globe: <><circle cx="12" cy="12" r="10" /><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /><path d="M2 12h20" /></>,
 };
 const Icon = ({ name }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>{I[name]}</svg>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>{I[name]}</svg>
 );
 
 const FLAG = { fr: "🇫🇷", en: "🇺🇸", es: "🇪🇸" };
@@ -60,12 +59,12 @@ export default function AppShell({ session, children }) {
   const full = !unlimited && used >= limit; // compte gratuit : « 0 / 0 » et « Limite atteinte », comme Visifoot
   const plan = { compte: L.t("Gratuit", "Free", "Gratis"), starter: "Starter", pro: "Pro", lifetime: "Lifetime" }[tier] || L.t("Gratuit", "Free", "Gratis");
 
+  // Mêmes rubriques que Visifoot : Matchs, Compétitions, Historique, Pricing. Les matchs du jour et le bilan
+  // restent accessibles par les onglets en haut des pages.
   const items = [
-    ["/app", "chart", L.t("Analyse de match", "Game analysis", "Análisis de partido"), p === "/app" || p.startsWith("/app/duel") || p.startsWith("/app/match/")],
-    ["/app/matchs", "calendar", L.t("Matchs du jour", "Today's games", "Partidos de hoy"), p.startsWith("/app/matchs")],
+    ["/app", "chart", L.t("Matchs", "Games", "Partidos"), p === "/app" || p.startsWith("/app/duel") || p.startsWith("/app/match/") || p.startsWith("/app/matchs")],
     ["/app/competitions", "trophy", L.t("Compétitions", "Competitions", "Competiciones"), ["/app/competitions", "/app/classement", "/app/euroleague", "/app/equipe"].some((x) => p.startsWith(x))],
     ["/app/historique", "history", L.t("Historique", "History", "Historial"), p.startsWith("/app/historique")],
-    ["/app/bilan", "target", L.t("Bilan du modèle", "Track record", "Balance del modelo"), p.startsWith("/app/bilan")],
   ];
 
   return (
@@ -92,7 +91,7 @@ export default function AppShell({ session, children }) {
             </Link>
           ))}
           <Link href={L.href("/pro")} className={`sb-item boxed ${p.startsWith("/pro") ? "on" : ""}`}>
-            <Icon name="card" />{L.t("Formules", "Pricing", "Planes")}<span className="sb-badge">Pro</span>
+            <Icon name="card" />Pricing<span className="sb-badge">Pro</span>
           </Link>
         </nav>
 
