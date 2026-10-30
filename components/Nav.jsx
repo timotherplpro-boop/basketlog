@@ -28,10 +28,13 @@ export default function Nav() {
     return () => document.removeEventListener("keydown", esc);
   }, [open]);
 
+  // Toujours « » CONNEXION », comme sur Visifoot ; un membre déjà connecté arrive directement sur son compte.
   const connected = !!pro?.connected;
-  const account = connected
-    ? { href: L.href("/pro"), label: L.t("Mon compte", "My account", "Mi cuenta") }
-    : { href: `/api/whop/login?next=${encodeURIComponent(here)}`, label: L.t("Connexion", "Login", "Iniciar sesión") };
+  const account = {
+    href: connected ? L.href("/pro") : `/api/whop/login?next=${encodeURIComponent(here)}`,
+    label: L.t("Connexion", "Login", "Iniciar sesión"),
+    title: connected ? L.t("Tu es connecté : ouvrir ton compte", "You're logged in: open your account", "Has iniciado sesión: abrir tu cuenta") : undefined,
+  };
   const onAccount = () => !connected && track("Connexion Whop", { etape: "clic", source: "menu" });
   const menuLabel = open ? L.t("Fermer le menu", "Close menu", "Cerrar el menú") : L.t("Ouvrir le menu", "Open menu", "Abrir el menú");
 
@@ -54,7 +57,7 @@ export default function Nav() {
           </Link>
           <div className="nav-right">
             <LangSelect className="nav-only" />
-            <a href={account.href} className="nav-cta nav-only" onClick={onAccount}>
+            <a href={account.href} className="nav-cta nav-only" onClick={onAccount} title={account.title}>
               <Chevrons />
               {account.label}
             </a>
@@ -75,7 +78,7 @@ export default function Nav() {
           </div>
           <div className="mm-visi">
             <LangSelect />
-            <a href={account.href} className="nav-cta" onClick={onAccount}><Chevrons />{account.label}</a>
+            <a href={account.href} className="nav-cta" onClick={onAccount} title={account.title}><Chevrons />{account.label}</a>
             <InstallPlatforms source="menu" box />
           </div>
           <nav className="mm-links" aria-label={L.t("Pages du site", "Site pages", "Páginas del sitio")}>
