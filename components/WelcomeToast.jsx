@@ -4,8 +4,8 @@ import { track } from "../lib/analytics";
 import { useL } from "./LangProvider";
 
 const MSG = {
-  inscription: ["Bienvenue sur Basketlog ! Ton compte gratuit est créé : 1 analyse complète offerte chaque jour.", "Welcome to Basketlog! Your free account is ready: 1 full analysis free every day.", "¡Bienvenido a Basketlog! Tu cuenta gratis está creada: 1 análisis completo gratis cada día."],
-  connexion: ["Te revoilà ! Tu es connecté : ton analyse complète gratuite du jour t'attend.", "Welcome back! You're signed in: today's free full analysis is waiting.", "¡Hola de nuevo! Has iniciado sesión: te espera tu análisis completo gratis del día."],
+  inscription: ["Bienvenue sur Basketlog ! Ton compte est créé. Les analyses complètes se débloquent avec Starter, Pro ou Lifetime.", "Welcome to Basketlog! Your account is ready. Full analyses unlock with Starter, Pro or Lifetime.", "¡Bienvenido a Basketlog! Tu cuenta está creada. Los análisis completos se desbloquean con Starter, Pro o Lifetime."],
+  connexion: ["Te revoilà ! Tu es connecté.", "Welcome back! You're signed in.", "¡Hola de nuevo! Has iniciado sesión."],
   abonne: ["Ton abonnement est actif. Bonnes analyses !", "Your subscription is active. Enjoy the analyses!", "Tu suscripción está activa. ¡Buenos análisis!"],
 };
 

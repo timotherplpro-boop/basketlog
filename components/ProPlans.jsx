@@ -41,7 +41,7 @@ const PLANS = (L) => [
 
 const NOTICES = {
   ok: ["good", "Ton abonnement est actif. Bonnes analyses !", "Your subscription is active. Enjoy the analyses!", "Tu suscripción está activa. ¡Buenos análisis!"],
-  compte: ["good", "Ton compte gratuit est actif : 1 analyse complète offerte chaque jour. Pour en avoir plus, choisis une formule ci-dessous.", "Your free account is active: 1 full analysis free every day. Want more? Pick a plan below.", "Tu cuenta gratis está activa: 1 análisis completo gratis cada día. Si quieres más, elige un plan aquí abajo."],
+  compte: ["good", "Ton compte gratuit est actif. Pour débloquer les analyses complètes, choisis une formule ci-dessous.", "Your free account is active. To unlock full analyses, pick a plan below.", "Tu cuenta gratis está activa. Para desbloquear los análisis completos, elige un plan aquí abajo."],
   abonnement: ["warn", "Connexion réussie, mais aucun abonnement Basketlog actif n'a été trouvé sur ce compte Whop. Utilise le même compte que pour ton paiement.", "You're logged in, but no active Basketlog subscription was found on this Whop account. Use the same account you paid with.", "Has iniciado sesión, pero no hemos encontrado ninguna suscripción activa de Basketlog en esta cuenta de Whop. Usa la misma cuenta con la que pagaste."],
   connexion: ["warn", "La connexion avec Whop n'a pas abouti. Réessaie dans un instant.", "Logging in with Whop didn't work. Please try again in a moment.", "No se ha podido iniciar sesión con Whop. Vuelve a intentarlo en un momento."],
   config: ["warn", "Le paiement n'est pas encore activé sur Basketlog. Reviens très bientôt.", "Payments aren't enabled on Basketlog yet. Please come back soon.", "El pago todavía no está activado en Basketlog. Vuelve muy pronto."],
@@ -122,7 +122,7 @@ export default function ProPlans({ checkout, loginReady, notice }) {
           </p>
         ) : loginReady ? (
           <p>
-            {L.t("Pas encore de compte ?", "No account yet?", "¿Todavía no tienes cuenta?")} <a href={`/api/whop/signup?next=${encodeURIComponent(L.href("/app/matchs"))}`} className="pro-login" onClick={() => track("Clic créer un compte", { source: "page_pro" })}>{L.t("Créer mon compte gratuit", "Create my free account", "Crear mi cuenta gratis")}</a> {L.t("(1 analyse offerte par jour)", "(1 free analysis per day)", "(1 análisis gratis al día)")}
+            {L.t("Pas encore de compte ?", "No account yet?", "¿Todavía no tienes cuenta?")} <a href={`/api/whop/signup?next=${encodeURIComponent(L.href("/app/matchs"))}`} className="pro-login" onClick={() => track("Clic créer un compte", { source: "page_pro" })}>{L.t("Créer mon compte gratuit", "Create my free account", "Crear mi cuenta gratis")}</a>
             {" · "}{L.t("Déjà inscrit ?", "Already signed up?", "¿Ya estás registrado?")} <a href={`/api/whop/login?next=${encodeURIComponent(L.href("/pro"))}`} className="pro-login" onClick={() => track("Connexion Whop", { etape: "clic", source: "page_pro" })}>{L.t("Me connecter", "Log in", "Iniciar sesión")}</a>
           </p>
         ) : null}

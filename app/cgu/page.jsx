@@ -22,7 +22,7 @@ function CGUFr() {
     >
       <Sec n={1} title="Le service">
         <p>Basketlog analyse les matchs de NBA et d&apos;EuroLeague. Le site rassemble des données statistiques publiques (résultats, classements, scores, absences, calendrier) et les passe dans un modèle de calcul qui produit, pour chaque match, des probabilités de victoire, un score projeté, des scénarios et une analyse rédigée automatiquement.</p>
-        <p>Une partie du service est gratuite : les probabilités de victoire et les chiffres clés de chaque match, le classement, les fiches équipes et le bilan du modèle. Avec un compte gratuit, tu débloques 1 analyse complète par jour. Au-delà, les analyses complètes sont réservées aux abonnés Starter (5 par jour), Pro et Lifetime (illimitées), dans les conditions prévues par les <Link href="/cgv">CGV</Link>.</p>
+        <p>Une partie du service est gratuite : les probabilités de victoire et les chiffres clés de chaque match, l&apos;aperçu de chaque analyse (forme récente, résumé rapide, scénario n° 1 et confiance du modèle), le classement, les fiches équipes et le bilan du modèle. Les analyses complètes sont réservées aux abonnés Starter (5 par jour), Pro et Lifetime (illimitées), dans les conditions prévues par les <Link href="/cgv">CGV</Link>.</p>
       </Sec>
 
       <Sec n={2} title="Âge minimum">
@@ -36,7 +36,7 @@ function CGUFr() {
       </Sec>
 
       <Sec n={4} title="Compte gratuit et compte abonné">
-        <p>Le site est accessible sans inscription. Le compte gratuit, créé avec un compte Whop (par e-mail, Google ou Apple), donne en plus 1 analyse complète par jour. Les abonnés se connectent avec le compte Whop utilisé lors du paiement. Nous ne recevons jamais ton mot de passe : seulement ton identifiant Whop, ton nom d&apos;utilisateur et la formule à laquelle tu as accès. Tu peux supprimer ton compte gratuit à tout moment en nous écrivant.</p>
+        <p>Le site est accessible sans inscription. Le compte gratuit se crée avec un compte Whop (par e-mail, Google ou Apple) et donne accès à l&apos;espace membre ; il ne comprend pas d&apos;analyse complète. Les abonnés se connectent avec le compte Whop utilisé lors du paiement. Nous ne recevons jamais ton mot de passe : seulement ton identifiant Whop, ton nom d&apos;utilisateur et la formule à laquelle tu as accès. Tu peux supprimer ton compte gratuit à tout moment en nous écrivant.</p>
         <p>Ton accès est personnel. Il est interdit de le partager, de le revendre ou de le prêter. Tu es responsable de la sécurité de ton compte Whop.</p>
       </Sec>
 
@@ -94,7 +94,7 @@ function CGUEn({ L }) {
     >
       <Sec n={1} title="The service">
         <p>Basketlog analyzes NBA and EuroLeague games. The website gathers public statistical data (results, standings, scores, injuries, schedule) and runs it through a model that produces, for each game, win probabilities, a projected score, scenarios and an automatically written analysis.</p>
-        <p>Part of the service is free: win probabilities and key figures for every game, the standings, team pages and the model&apos;s track record. With a free account, you unlock 1 full analysis per day. Beyond that, full analyses are reserved for Starter (5 per day), Pro and Lifetime (unlimited) subscribers, under the conditions set out in the <Link href={L.href("/cgv")}>terms of sale</Link>.</p>
+        <p>Part of the service is free: win probabilities and key figures for every game, a preview of every analysis (recent form, quick summary, #1 scenario and the model&apos;s confidence), the standings, team pages and the model&apos;s track record. Full analyses are reserved for Starter (5 per day), Pro and Lifetime (unlimited) subscribers, under the conditions set out in the <Link href={L.href("/cgv")}>terms of sale</Link>.</p>
       </Sec>
 
       <Sec n={2} title="Minimum age">
@@ -108,7 +108,7 @@ function CGUEn({ L }) {
       </Sec>
 
       <Sec n={4} title="Free account and subscriber account">
-        <p>The website can be used without signing up. The free account, created with a Whop account (by email, Google or Apple), also gives you 1 full analysis per day. Subscribers log in with the Whop account used for payment. We never receive your password: only your Whop ID, your username and the plan you have access to. You can delete your free account at any time by emailing us.</p>
+        <p>The website can be used without signing up. The free account is created with a Whop account (by email, Google or Apple) and gives access to the member area; it does not include full analyses. Subscribers log in with the Whop account used for payment. We never receive your password: only your Whop ID, your username and the plan you have access to. You can delete your free account at any time by emailing us.</p>
         <p>Your access is personal. Sharing, reselling or lending it is prohibited. You are responsible for the security of your Whop account.</p>
       </Sec>
 
@@ -166,7 +166,7 @@ function CGUEs({ L }) {
     >
       <Sec n={1} title="El servicio">
         <p>Basketlog analiza los partidos de la NBA y de la Euroliga. El sitio reúne datos estadísticos públicos (resultados, clasificaciones, marcadores, bajas, calendario) y los pasa por un modelo de cálculo que genera, para cada partido, probabilidades de victoria, un marcador proyectado, escenarios y un análisis redactado automáticamente.</p>
-        <p>Una parte del servicio es gratuita: las probabilidades de victoria y las cifras clave de cada partido, la clasificación, las fichas de los equipos y el balance del modelo. Con una cuenta gratis, desbloqueas 1 análisis completo al día. Más allá, los análisis completos están reservados a los suscriptores Starter (5 al día), Pro y Lifetime (ilimitados), en las condiciones previstas en las <Link href={L.href("/cgv")}>condiciones de venta</Link>.</p>
+        <p>Una parte del servicio es gratuita: las probabilidades de victoria y las cifras clave de cada partido, el avance de cada análisis (forma reciente, resumen rápido, escenario n.º 1 y confianza del modelo), la clasificación, las fichas de los equipos y el balance del modelo. Los análisis completos están reservados a los suscriptores Starter (5 al día), Pro y Lifetime (ilimitados), en las condiciones previstas en las <Link href={L.href("/cgv")}>condiciones de venta</Link>.</p>
       </Sec>
 
       <Sec n={2} title="Edad mínima">
@@ -180,7 +180,7 @@ function CGUEs({ L }) {
       </Sec>
 
       <Sec n={4} title="Cuenta gratis y cuenta de suscriptor">
-        <p>El sitio se puede usar sin registrarse. La cuenta gratis, creada con una cuenta de Whop (por correo electrónico, Google o Apple), da además 1 análisis completo al día. Los suscriptores inician sesión con la cuenta de Whop que usaron para pagar. Nunca recibimos tu contraseña: solo tu identificador de Whop, tu nombre de usuario y el plan al que tienes acceso. Puedes eliminar tu cuenta gratis en cualquier momento escribiéndonos.</p>
+        <p>El sitio se puede usar sin registrarse. La cuenta gratis se crea con una cuenta de Whop (por correo electrónico, Google o Apple) y da acceso al área de miembros; no incluye análisis completos. Los suscriptores inician sesión con la cuenta de Whop que usaron para pagar. Nunca recibimos tu contraseña: solo tu identificador de Whop, tu nombre de usuario y el plan al que tienes acceso. Puedes eliminar tu cuenta gratis en cualquier momento escribiéndonos.</p>
         <p>Tu acceso es personal. Está prohibido compartirlo, revenderlo o prestarlo. Eres responsable de la seguridad de tu cuenta de Whop.</p>
       </Sec>
 

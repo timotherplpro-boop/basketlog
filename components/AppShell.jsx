@@ -55,9 +55,10 @@ export default function AppShell({ session, children }) {
   const p = stripLang(here.split("?")[0]) || "/";
   const tier = pro?.tier && pro.tier !== "gratuit" ? pro.tier : session?.tier || "compte";
   const name = pro?.name || session?.name || "";
-  const limit = pro ? pro.perDay : tier === "starter" ? 5 : tier === "compte" ? 1 : null; // null = illimité
+  const limit = pro ? pro.perDay : tier === "starter" ? 5 : tier === "compte" ? 0 : null; // null = illimité
   const unlimited = limit == null;
-  const full = !unlimited && used >= limit;
+  const none = limit === 0; // compte gratuit : 0 / 0, comme Visifoot
+  const full = !unlimited && !none && used >= limit;
   const plan = { compte: L.t("Gratuit", "Free", "Gratis"), starter: "Starter", pro: "Pro", lifetime: "Lifetime" }[tier] || L.t("Gratuit", "Free", "Gratis");
 
   const items = [
@@ -99,8 +100,10 @@ export default function AppShell({ session, children }) {
         <div className="sb-quota">
           <div className="sb-q-head"><Icon name="bars" />{L.t("Analyses du jour", "Today's analyses", "Análisis de hoy")}</div>
           <b className={full ? "full" : unlimited ? "free" : ""}>{unlimited ? L.t("Illimitées", "Unlimited", "Ilimitados") : `${Math.min(used, limit)} / ${limit}`}</b>
-          <div className={`sb-bar ${full ? "full" : ""}`}><i style={{ width: unlimited ? "100%" : `${limit ? Math.min(used / limit, 1) * 100 : 100}%` }} /></div>
-          {full ? (
+          <div className={`sb-bar ${full ? "full" : ""}`}><i style={{ width: unlimited ? "100%" : none ? "0%" : `${Math.min(used / limit, 1) * 100}%` }} /></div>
+          {none ? (
+            <Link href={L.href("/pro")} className="sb-q-note warn">{L.t("Analyses complètes avec Starter ou Pro", "Full analyses with Starter or Pro", "Análisis completos con Starter o Pro")}</Link>
+          ) : full ? (
             <Link href={L.href("/pro")} className="sb-q-note warn">
               {L.t("Limite atteinte", "Limit reached", "Límite alcanzado")} • {tier === "starter" ? L.t("Illimité avec Pro", "Unlimited with Pro", "Ilimitado con Pro") : L.t("Plus d'analyses avec Starter", "More analyses with Starter", "Más análisis con Starter")}
             </Link>

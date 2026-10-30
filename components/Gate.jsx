@@ -15,8 +15,9 @@ const SEEN = "bl-unlock-seen";
 // confiance) et le reste est flouté sous « Tu n'as accès qu'à X % de l'analyse ». Dès qu'une analyse s'affiche ainsi,
 // la fenêtre « Tu veux voir l'analyse complète ? » s'ouvre (après le formulaire d'analyse, ou en arrivant sur la
 // partie verrouillée d'une fiche match, une fois par session).
-// Compte gratuit = 1 analyse complète par jour, Starter = 5, Pro et Lifetime = illimitées. La limite est comptée par
-// le serveur, par compte : revenir en arrière, recharger ou changer d'appareil ne donne pas d'analyse en plus.
+// Visiteur et compte gratuit = aperçu seulement (comme Visifoot, 0/0), Starter = 5 analyses complètes par jour,
+// Pro et Lifetime = illimitées. La limite est comptée par le serveur, par compte : revenir en arrière, recharger
+// ou changer d'appareil ne donne pas d'analyse en plus.
 // Tant que l'analyse complète n'est pas lancée, son contenu n'est pas envoyé au navigateur.
 export default function Gate({ access, target, pct = 30, proof = null, match = null, mode = "page", children }) {
   const L = useL();
@@ -24,18 +25,10 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
   const run = useAnalysisRun();
   const [state, setState] = useState(access.state);
   const [here, setHere] = useState("");
-  const [back, setBack] = useState(""); // retour après l'inscription : l'analyse complète se lance toute seule
   const [modal, setModal] = useState(false);
   const box = useRef(null);
-  const autoRun = useRef(false);
   useEffect(() => { setState(access.state); }, [access.state]);
-  useEffect(() => {
-    const u = new URL(location.href);
-    u.searchParams.delete("unlock");
-    setHere(encodeURIComponent(u.pathname + u.search));
-    u.searchParams.set("unlock", "1");
-    setBack(encodeURIComponent(u.pathname + u.search + (mode === "analyzer" ? "#resultat" : "")));
-  }, [mode]);
+  useEffect(() => { setHere(encodeURIComponent(location.pathname + location.search)); }, []);
   useEffect(() => {
     const props = { match_id: target.id, ligue: target.league, formule: access.tier || "visiteur" };
     if (access.state === "open") track("Analyse consultée", props);
@@ -57,18 +50,6 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
       }
     );
   }, [start, router, target, tier]);
-
-  // Retour d'inscription (« Débloquer l'analyse complète » sans compte) : on lance l'analyse complète directement.
-  useEffect(() => {
-    const u = new URL(location.href);
-    if (u.searchParams.get("unlock") !== "1") return;
-    u.searchParams.delete("unlock");
-    window.history.replaceState(null, "", u.pathname + u.search + u.hash);
-    if (access.state === "available" && !autoRun.current) {
-      autoRun.current = true;
-      launch("retour_inscription");
-    }
-  }, [access.state, launch]);
 
   // « Tu veux voir l'analyse complète ? » dès que l'analyse s'affiche sans sa partie complète.
   useEffect(() => {
@@ -123,7 +104,7 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
     "The full analysis includes exact probabilities, the model's reasoning, every scenario, the stat comparison and the injury report.",
     "El análisis completo incluye las probabilidades exactas, la argumentación del modelo, todos los escenarios, las estadísticas comparadas y el parte médico."
   );
-  const signup = `/api/whop/signup?next=${back}`;
+  const free = tier === "compte"; // compte gratuit : aucune analyse complète, comme Visifoot
 
   return (
     <div className="gated locked ar-locked">
@@ -154,17 +135,17 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
                 </>
               ) : state === "visitor" ? (
                 <>
-                  <p>{contents} {L.t("Avec un compte gratuit, tu en débloques 1 par jour.", "A free account unlocks 1 per day.", "Con una cuenta gratis, desbloqueas 1 al día.")}</p>
-                  <a href={signup} className="btn-solid" onClick={() => track("Clic créer un compte", { source: "analyse_bloquee", ligue: target.league })}>🔓 {L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo")}</a>
-                  <a href={`/api/whop/login?next=${here}`} className="gate-login" onClick={() => track("Connexion Whop", { etape: "clic", source: "analyse_bloquee" })}>{L.t("Déjà un compte ? Se connecter", "Already have an account? Log in", "¿Ya tienes cuenta? Inicia sesión")}</a>
+                  <p>{contents} {L.t("Elle est incluse dans les formules Starter, Pro et Lifetime.", "It comes with the Starter, Pro and Lifetime plans.", "Está incluido en los planes Starter, Pro y Lifetime.")}</p>
+                  <Link href={L.href("/pro")} className="btn-solid" onClick={() => track("Clic Passer Pro", { source: "analyse_bloquee", ligue: target.league })}>🔓 {L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo")}</Link>
+                  <a href={`/api/whop/login?next=${here}`} className="gate-login" onClick={() => track("Connexion Whop", { etape: "clic", source: "analyse_bloquee" })}>{L.t("Déjà abonné ? Se connecter", "Already subscribed? Log in", "¿Ya estás suscrito? Inicia sesión")}</a>
                 </>
               ) : (
                 <>
                   <p>{contents} {tier === "starter"
                     ? L.t("Tes 5 analyses Starter du jour sont utilisées : Pro les rend illimitées.", "Your 5 Starter analyses for today are used: Pro makes them unlimited.", "Ya has usado tus 5 análisis Starter de hoy: Pro los hace ilimitados.")
-                    : L.t("Ton analyse complète gratuite du jour est utilisée : Starter t'en offre 5 par jour, Pro les rend illimitées.", "Today's free full analysis is used: Starter gives you 5 a day, Pro makes them unlimited.", "Ya has usado tu análisis completo gratis de hoy: Starter te da 5 al día y Pro los hace ilimitados.")}</p>
-                  <Link href={L.href("/pro")} className="btn-solid" onClick={() => track("Clic Passer Pro", { source: tier === "starter" ? "limite" : "limite_compte" })}>🔓 {L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo")}</Link>
-                  <small className="gate-reset">{L.t("Ou reviens demain : le compteur repart à minuit.", "Or come back tomorrow: the counter resets at midnight (Paris time).", "O vuelve mañana: el contador se reinicia a medianoche (hora de París).")}</small>
+                    : L.t("Elle est réservée aux abonnés : Starter en offre 5 par jour, Pro et Lifetime les rendent illimitées.", "It's for subscribers: Starter gives you 5 a day, Pro and Lifetime make them unlimited.", "Está reservado a los suscriptores: Starter te da 5 al día, Pro y Lifetime los hacen ilimitados.")}</p>
+                  <Link href={L.href("/pro")} className="btn-solid" onClick={() => track("Clic Passer Pro", { source: free ? "compte_gratuit" : "limite" })}>🔓 {L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo")}</Link>
+                  {!free && <small className="gate-reset">{L.t("Ou reviens demain : le compteur repart à minuit.", "Or come back tomorrow: the counter resets at midnight (Paris time).", "O vuelve mañana: el contador se reinicia a medianoche (hora de París).")}</small>}
                 </>
               )}
             </>
@@ -178,11 +159,9 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
           proof={proof}
           match={match}
           league={target.league}
-          href={state === "visitor" ? signup : L.href("/pro")}
+          href={L.href("/pro")}
           onClose={close}
-          onCta={() => state === "visitor"
-            ? track("Clic créer un compte", { source: "fenetre_analyse", ligue: target.league })
-            : track("Clic Passer Pro", { source: "fenetre_analyse", ligue: target.league })}
+          onCta={() => track("Clic Passer Pro", { source: "fenetre_analyse", ligue: target.league, etat: state === "visitor" ? "visiteur" : tier })}
         />
       )}
     </div>

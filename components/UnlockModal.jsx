@@ -1,6 +1,6 @@
 "use client";
 // Fenêtre « Tu veux voir l'analyse complète ? », comme Visifoot : elle s'ouvre dès qu'une analyse s'affiche
-// sans l'analyse complète (visiteur sans compte, ou limite du jour atteinte). Chiffres réels uniquement :
+// sans l'analyse complète (visiteur, compte gratuit, ou limite Starter du jour atteinte). Chiffres réels uniquement :
 // réussite du modèle tirée du bilan, membres Whop (à partir de +100) ou matchs analysés, vrai compte à rebours.
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -84,11 +84,9 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
     ? { lead: `${match.home} vs ${match.away}`, big: L.t("Match en cours", "Game in progress", "Partido en curso") }
     : { lead: L.t(`${match.home} vs ${match.away} commence dans`, `${match.home} vs ${match.away} starts in`, `${match.home} vs ${match.away} empieza en`), big: left(start - now, L) };
 
-  const foot = state === "visitor"
-    ? L.t("Accès instantané après inscription", "Instant access after sign-up", "Acceso inmediato tras registrarte")
-    : tier === "starter"
-      ? L.t("Accès instantané avec Pro, analyses illimitées", "Instant access with Pro, unlimited analyses", "Acceso inmediato con Pro, análisis ilimitados")
-      : L.t("Accès instantané avec Starter ou Pro", "Instant access with Starter or Pro", "Acceso inmediato con Starter o Pro");
+  const foot = state !== "visitor" && tier === "starter"
+    ? L.t("Accès instantané avec Pro, analyses illimitées", "Instant access with Pro, unlimited analyses", "Acceso inmediato con Pro, análisis ilimitados")
+    : L.t("Accès instantané après l'abonnement", "Instant access once you subscribe", "Acceso inmediato al suscribirte");
 
   return createPortal(
     <div className="modal ulk" role="dialog" aria-modal="true" aria-labelledby="ulk-title" onClick={(e) => e.target === e.currentTarget && onClose()}>

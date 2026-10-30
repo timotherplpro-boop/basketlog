@@ -43,7 +43,8 @@ export async function POST(req) {
 
   const tier = tierOf(session.tier);
   const limit = tierLimit(tier);
-  const r = await recordAnalysis(session.uid, matchKey(league, id), { ...info, league, path }, limit);
+  // Compte gratuit : pas d'analyse complète, rien à enregistrer.
+  const r = limit === 0 ? { ok: false, used: 0 } : await recordAnalysis(session.uid, matchKey(league, id), { ...info, league, path }, limit);
   const out = NextResponse.json({ state: r.ok ? "open" : "limit", used: r.used, limit, path }, { headers: { "Cache-Control": "no-store" } });
   if (refreshed) out.cookies.set(COOKIE, refreshed, cookieOptions);
   return out;
