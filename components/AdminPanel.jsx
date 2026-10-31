@@ -113,7 +113,7 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
           <h2 id="adm-avis">Avis</h2>
           <span className={`adm-count ${pending ? "on" : ""}`}>{pending ? `${pending} en attente` : "Rien à relire"}</span>
         </div>
-        <p className="adm-help">Un avis n&apos;apparaît sur le site qu&apos;une fois publié. Il faut un compte, gratuit ou abonné, pour en déposer, un par compte.</p>
+        <p className="adm-help">Un avis n&apos;apparaît sur le site qu&apos;une fois publié. Tout le monde peut en déposer, avec ou sans compte (un seul par compte) ; un avis sans compte s&apos;affiche sans mention de vérification.</p>
         {!data.avis.length ? (
           <p className="adm-empty">Aucun avis pour l&apos;instant.</p>
         ) : (
@@ -128,7 +128,7 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
                 <p className="adm-text">{a.texte}</p>
                 <div className="adm-foot">
                   <span className={`adm-tag ${a.approuve ? "ok" : "wait"}`}>{a.approuve ? "Publié" : "En attente"}</span>
-                  <span className={`adm-tag ${a.compte ? "ok" : ""}`}>{a.compte ? ({ compte: "Compte gratuit", starter: "Abonné Starter", pro: "Abonné Pro", lifetime: "Abonné Lifetime" }[a.formule] || "Compte vérifié") : "Sans compte (ancien formulaire)"}</span>
+                  <span className={`adm-tag ${a.compte ? "ok" : ""}`}>{a.compte ? ({ compte: "Compte gratuit", starter: "Abonné Starter", pro: "Abonné Pro", lifetime: "Abonné Lifetime" }[a.formule] || "Compte vérifié") : "Sans compte"}</span>
                   <span className="adm-date">{stamp(a.created_at)}</span>
                   <span className="adm-actions">
                     {a.approuve ? (

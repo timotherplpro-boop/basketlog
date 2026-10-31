@@ -589,7 +589,7 @@ footer { border-top: 1px solid var(--line); padding: 34px 16px 40px; color: var(
 .reviews-only a { color: var(--orange-2); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
 button.btn-white { border: 0; cursor: pointer; font-family: var(--body); }
 
-.modal { position: fixed; inset: 0; z-index: 80; background: rgba(2,4,12,.72); backdrop-filter: blur(6px); display: grid; place-items: center; padding: 16px; animation: fadeIn .2s ease; }
+.modal { position: fixed; inset: 0; z-index: 100; background: rgba(2,4,12,.72); backdrop-filter: blur(6px); display: grid; place-items: center; padding: 16px; animation: fadeIn .2s ease; }
 .modal-box { position: relative; width: min(460px, 100%); max-height: 92vh; overflow: auto; background: #0b1020; border: 1px solid rgba(255,255,255,.12); border-radius: 22px; padding: 28px 24px; box-shadow: 0 40px 100px -20px rgba(0,0,0,.8); animation: popIn .35s var(--ease) both; text-align: left; }
 .modal-box h3 { margin: 0; font-family: var(--head); font-weight: 800; font-size: 24px; }
 .modal-sub { margin: 6px 0 16px; color: var(--muted); font-size: 14px; }
@@ -1265,3 +1265,5 @@ body:has(.mmenu.open) .install-banner { display: none; }
 .preview-bar button { height: 34px; padding: 0 14px; border-radius: 999px; border: 0; background: linear-gradient(90deg, #d4560c, var(--orange) 60%, var(--orange-2)); color: #fff; font-weight: 700; font-size: 13.5px; font-family: inherit; cursor: pointer; }
 .preview-bar button:disabled { opacity: .6; cursor: default; }
 @media (max-width: 520px) { .preview-bar { border-radius: 18px; } }
+.modal-sub.guest { margin-top: -6px; font-size: 13px; color: var(--muted); }
+.modal-sub.guest a { color: var(--orange-2); font-weight: 600; }
