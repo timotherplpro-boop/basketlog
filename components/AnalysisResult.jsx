@@ -125,7 +125,7 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
     [L.t("Écart ajusté / match", "Adjusted margin / game", "Diferencia ajustada / partido"), sgn(aw.diff, L), sgn(h.diff, L)],
     [L.t("Série en cours", "Current streak", "Racha actual"), streak(aw.cur?.streak) || "–", streak(h.cur?.streak) || "–"],
     [L.t("10 derniers matchs", "Last 10 games", "Últimos 10 partidos"), aw.cur?.last10 || "–", h.cur?.last10 || "–"],
-    [L.t("Saison passée", "Last season", "Temporada pasada"), aw.prev ? `${aw.prev.wins}-${aw.prev.losses} (${fmt(aw.prev.diff)})` : "–", h.prev ? `${h.prev.wins}-${h.prev.losses} (${fmt(h.prev.diff)})` : "–"],
+    [L.t("Saison passée", "Last season", "Temporada pasada"), aw.prev ? `${aw.prev.wins}-${aw.prev.losses} (${sgn(aw.prev.diff, L)})` : "–", h.prev ? `${h.prev.wins}-${h.prev.losses} (${sgn(h.prev.diff, L)})` : "–"],
     ...(g.hypothetical || !isNBA ? [] : [[L.t("A joué hier", "Played yesterday", "Jugó ayer"), aw.b2b ? L.t("Oui", "Yes", "Sí") : L.t("Non", "No", "No"), h.b2b ? L.t("Oui", "Yes", "Sí") : L.t("Non", "No", "No")]]),
   ];
 
@@ -191,8 +191,8 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
         {[[g.home, fh], [g.away, fa]].map(([t, l]) => (
           <div className="ar-team" key={t.id}>
             <div className="ar-tname"><TeamLogo team={t} size={22} /> {t.name}</div>
-            <div>{L.t("Forme", "Form", "Forma")} : <span className="ar-chips">{l.length ? chips(l) : "–"}</span></div>
-            <div>{L.t("V-D", "W-L", "V-D")} : {l.length ? vd(l) : "–"}</div>
+            <div>{L.t("Forme\u00a0:", "Form:", "Forma:")} <span className="ar-chips">{l.length ? chips(l) : "–"}</span></div>
+            <div>{L.t("V-D\u00a0:", "W-L:", "V-D:")} {l.length ? vd(l) : "–"}</div>
           </div>
         ))}
       </div>
@@ -263,7 +263,7 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
             <div className="card block">
               <h2>🎲 {L.t("Tous les scénarios", "All scenarios", "Todos los escenarios")}</h2>
               <div className="scen">
-                {a.scenarios.map((s) => (
+                {(a.allScenarios || a.scenarios).map((s) => (
                   <div className="scen-row" key={s.label}>
                     <div>{scenarioText(s, a, L)}<div className="scen-bar"><div style={{ width: `${Math.round(s.p * 100)}%` }} /></div></div>
                     <div className="mono" style={{ textAlign: "right", fontWeight: 700 }}>{pctL(s.p, L)}</div>
