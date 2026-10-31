@@ -5,6 +5,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useL } from "./LangProvider";
+import { useFocusTrap } from "./useFocusTrap";
 
 const Svg = ({ children, size = 18 }) => (
   <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>{children}</svg>
@@ -32,6 +33,7 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
+  useFocusTrap(boxRef, mounted, null); // Tab reste dans la fenêtre (Échap est géré plus bas)
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 30000);
     return () => clearInterval(t);
@@ -67,9 +69,10 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
       : null;
 
   // Ce que contient vraiment l'analyse complète de Basketlog.
+  // (Le score projeté et les probabilités de victoire sont visibles gratuitement : on ne les vend pas ici.)
   const items = [
-    ["🎯", L.t("Score projeté", "Projected score", "Marcador proyectado")],
     ["📊", L.t("Probabilités détaillées", "Detailed probabilities", "Probabilidades detalladas")],
+    ["⚖️", L.t("Ce qui fait pencher la balance", "What tips the balance", "Lo que inclina la balanza")],
     ["🔮", L.t("Tous les scénarios du match", "Every game scenario", "Todos los escenarios del partido")],
     ["📝", L.t("L'argumentation complète du modèle", "The model's full reasoning", "La argumentación completa del modelo")],
     ["💡", league === "NBA"

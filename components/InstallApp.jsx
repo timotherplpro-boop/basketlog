@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useFocusTrap } from "./useFocusTrap";
 import { usePathname } from "next/navigation";
 import { useL } from "./LangProvider";
 import { subscribe, installMode, promptInstall, isStandalone, isIOS, isAndroid } from "../lib/pwa";
@@ -138,6 +139,10 @@ export default function InstallApp() {
     setBanner(true);
   }, [path, mode]);
 
+  const sheetRef = useRef(null);
+  const closeSheet = useCallback(() => setSheet(null), []);
+  useFocusTrap(sheetRef, !!sheet, closeSheet); // Tab reste dans la fenêtre, Échap la ferme
+
   const close = () => {
     setBanner(false);
     try { localStorage.setItem(DISMISS, String(Date.now())); } catch {}
@@ -189,7 +194,7 @@ export default function InstallApp() {
       )}
       {sheet && (
         <div className="modal" role="dialog" aria-modal="true" aria-labelledby="install-title" onClick={(e) => e.target === e.currentTarget && setSheet(null)}>
-          <div className="modal-box ios-sheet">
+          <div className="modal-box ios-sheet" ref={sheetRef} tabIndex={-1}>
             <button className="modal-x" onClick={() => setSheet(null)} aria-label={L.t("Fermer", "Close", "Cerrar")}>×</button>
             {sheet === "ios" ? (
               <>

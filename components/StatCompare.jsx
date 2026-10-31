@@ -1,5 +1,5 @@
 // Comparaison chiffrée de deux équipes, barre par barre (extérieur à gauche, domicile à droite).
-export default function StatCompare({ away, home, rows }) {
+export default function StatCompare({ away, home, rows, L }) {
   const valid = rows.filter((r) => r.a != null && r.h != null && !isNaN(r.a) && !isNaN(r.h));
   if (!valid.length) return null;
   return (
@@ -14,7 +14,7 @@ export default function StatCompare({ away, home, rows }) {
         const max = Math.max(Math.abs(r.a), Math.abs(r.h)) || 1;
         const aBetter = r.low ? r.a < r.h : r.a > r.h;
         const hBetter = r.low ? r.h < r.a : r.h > r.a;
-        const f = r.fmt || ((v) => v.toFixed(1));
+        const f = r.fmt || ((v) => (L && !L.en ? v.toFixed(1).replace(".", ",") : v.toFixed(1)));
         return (
           <div className="scmp-row" key={r.label} style={{ "--i": i }}>
             <b className={aBetter ? "win" : ""}>{f(r.a)}</b>

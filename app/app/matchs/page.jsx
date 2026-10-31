@@ -56,7 +56,8 @@ export async function generateMetadata({ searchParams }) {
     title,
     description,
     path: isToday ? "/app/matchs" : `/app/matchs?d=${date}`,
-    noindex: n === 0, // jour sans match : page vide, inutile dans Google
+    // Jour précis sans match (ou date invalide) : page vide, inutile dans Google. La page du jour reste toujours indexée.
+    noindex: (!!sp.d && !isValidDate(sp.d)) || (n === 0 && !isToday),
     L,
   });
 }
@@ -68,7 +69,7 @@ export default async function MatchsPage({ searchParams }) {
   const date = isValidDate(sp.d) ? sp.d : today;
   const { analyses } = await analyzeDay(date);
   const games = analyses
-    .map((a) => ({ id: a.game.id, d: date, date: a.game.date, state: a.game.state, live: a.game.state === "in", home: a.game.home, away: a.game.away, pHome: a.pHome }))
+    .map((a) => ({ id: a.game.id, d: date, date: a.game.date, state: a.game.state, postponed: a.game.postponed || null, live: a.game.state === "in", home: a.game.home, away: a.game.away, pHome: a.pHome }))
     .sort((x, y) => new Date(x.date) - new Date(y.date));
 
   return (

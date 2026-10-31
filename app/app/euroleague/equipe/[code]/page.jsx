@@ -45,7 +45,7 @@ export default async function ELTeamPage({ params }) {
 
   const kpis = [
     [L.t("Bilan", "Record", "Balance"), `${t.wins}-${t.losses}`],
-    [L.t("Classement", "Standing", "Clasificación"), rank && t.gp ? L.t(`${rank}e`, ord(rank), `${rank}.º`) : "–"],
+    [L.t("Classement", "Standing", "Clasificación"), rank && t.gp ? L.t(rank === 1 ? "1er" : `${rank}e`, ord(rank), `${rank}.º`) : "–"],
     [L.t("Points / match", "Points / game", "Puntos / partido"), t.ppg != null ? t.ppg.toFixed(1) : "–"],
     [L.t("Encaissés / match", "Allowed / game", "Encajados / partido"), t.oppg != null ? t.oppg.toFixed(1) : "–"],
     [L.t("Écart / match", "Margin / game", "Diferencia / partido"), t.diff != null ? `${t.diff > 0 ? "+" : ""}${t.diff.toFixed(1)}` : "–"],
@@ -82,7 +82,7 @@ export default async function ELTeamPage({ params }) {
                 <span className="d">{dfmt(g.date, { day: "numeric", month: "short" })}</span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <span className="t">{home ? "vs" : "@"} {opp.logo && <img src={opp.logo} alt="" />}{opp.short}</span>
-                <span className="s">{L.t(`${Math.round(p * 100)}% victoire`, `${Math.round(p * 100)}% to win`, `${Math.round(p * 100)}% de victoria`)}</span>
+                <span className="s">{L.t(`${Math.round(p * 100)}\u202f% de victoire`, `${Math.round(p * 100)}% to win`, `${Math.round(p * 100)}\u202f% de victoria`)}</span>
               </Link>
             );
           }) : <p className="team-rec">{L.t("Aucun match à venir.", "No upcoming games.", "No hay partidos próximos.")}</p>}

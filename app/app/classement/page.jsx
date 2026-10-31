@@ -38,9 +38,9 @@ function Table({ title, rows, L }) {
                 </Link>
               </td>
               <td>{t.wins}-{t.losses}</td>
-              <td>{t.gp ? t.pct.toFixed(3).replace(/^0/, "") : "–"}</td>
-              <td className={t.diff > 0 ? "pos" : t.diff < 0 ? "neg" : ""}>{t.diff == null || !t.gp ? "–" : `${t.diff > 0 ? "+" : ""}${t.diff.toFixed(1)}`}</td>
-              <td>{t.streak || "–"}</td>
+              <td>{t.gp ? (L.en ? t.pct.toFixed(3).replace(/^0/, "") : t.pct.toFixed(3).replace(".", ",")) : "–"}</td>
+              <td className={t.diff > 0 ? "pos" : t.diff < 0 ? "neg" : ""}>{t.diff == null || !t.gp ? "–" : `${t.diff > 0 ? "+" : ""}${L.en ? t.diff.toFixed(1) : t.diff.toFixed(1).replace(".", ",")}`}</td>
+              <td>{(t.streak && (L.en ? t.streak.replace(/^V/, "W").replace(/^D/, "L") : t.streak.replace(/^W/, "V").replace(/^L/, "D"))) || "–"}</td>
             </tr>
           ))}
         </tbody>

@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useFocusTrap } from "./useFocusTrap";
 import { track } from "../lib/analytics";
 import { useL } from "./LangProvider";
 
@@ -11,12 +12,13 @@ export default function ReviewForm({ label, className = "btn-white" }) {
   const [hover, setHover] = useState(0);
   const [state, setState] = useState({ status: "idle", error: "" });
 
+  const boxRef = useRef(null);
+  const closeForm = useCallback(() => setOpen(false), []);
+  useFocusTrap(boxRef, open, closeForm); // Tab reste dans la fenêtre, Échap la ferme
   useEffect(() => {
     if (!open) return;
-    const esc = (e) => e.key === "Escape" && setOpen(false);
-    document.addEventListener("keydown", esc);
     document.body.style.overflow = "hidden";
-    return () => { document.removeEventListener("keydown", esc); document.body.style.overflow = ""; };
+    return () => { document.body.style.overflow = ""; };
   }, [open]);
 
   async function submit(e) {
@@ -42,7 +44,7 @@ export default function ReviewForm({ label, className = "btn-white" }) {
       <button type="button" className={className} onClick={() => { setOpen(true); setState({ status: "idle", error: "" }); }}>{label || L.t("Donner mon avis", "Leave a review", "Dar mi opinión")}</button>
       {open && (
         <div className="modal" role="dialog" aria-modal="true" aria-labelledby="avis-title" onClick={(e) => e.target === e.currentTarget && setOpen(false)}>
-          <div className="modal-box">
+          <div className="modal-box" ref={boxRef} tabIndex={-1}>
             <button className="modal-x" onClick={() => setOpen(false)} aria-label={L.t("Fermer", "Close", "Cerrar")}>×</button>
             {state.status === "done" ? (
               <div className="modal-done">

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { teamById } from "../../../../lib/teams";
 import { conferenceStandings, upcomingAnalyses } from "../../../../lib/data";
-import { getTeamStats, getTeamSchedule, getRoster, getSummary, nbaDateOf } from "../../../../lib/espn";
+import { getTeamStats, getTeamSchedule, getRoster, getSummary, nbaDateOf, nbaToday, seasonForDate } from "../../../../lib/espn";
 import AppTabs from "../../../../components/AppTabs";
 import { teamSummary } from "../../../../lib/summary";
 import { pageMeta } from "../../../../lib/seo";
@@ -41,7 +41,7 @@ export default async function TeamPage({ params }) {
   const confName = team.conf === "E" ? L.t("Est", "East", "Este") : L.t("Ouest", "West", "Oeste");
 
   const [std, stats, sched, roster, up] = await Promise.all([
-    conferenceStandings(), getTeamStats(team.id), getTeamSchedule(team.id), getRoster(team.id), upcomingAnalyses(7),
+    conferenceStandings(), getTeamStats(team.id), getTeamSchedule(team.id), getRoster(team.id, L.lang), upcomingAnalyses(7),
   ]);
   const confRows = team.conf === "E" ? std.east : std.west;
   const rank = confRows.findIndex((r) => r.id === team.id) + 1;
@@ -54,11 +54,13 @@ export default async function TeamPage({ params }) {
   const leaders = summary?.leaders?.[team.id] || [];
 
   const streak = L.en ? toWL(me.streak) : toVD(me.streak);
+  const sz = seasonForDate(nbaToday());
+  const seasonLabel = `${sz - 1}-${String(sz).slice(2)}`;
   const kpis = [
     [L.t("Bilan", "Record", "Balance"), `${me.wins ?? 0}-${me.losses ?? 0}`],
-    [L.t("Classement", "Standing", "Clasificación"), rank ? L.t(`${rank}e ${confName}`, `${ord(rank)} ${confName}`, `${rank}.º ${confName}`) : "–"],
+    [L.t("Classement", "Standing", "Clasificación"), rank ? L.t(`${rank === 1 ? "1re" : `${rank}e`} ${confName}`, `${ord(rank)} ${confName}`, `${rank}.º ${confName}`) : "–"],
     [L.t("Points / match", "Points / game", "Puntos / partido"), stats?.ppg?.toFixed(1) ?? "–"],
-    [L.t("Adresse à 3 pts", "3-point %", "% de triples"), stats?.threePct != null ? (L.en ? `${stats.threePct.toFixed(1)}%` : `${stats.threePct.toFixed(1)} %`) : "–"],
+    [L.t("Adresse à 3 pts", "3-point %", "% de triples"), stats?.threePct != null ? (L.en ? `${stats.threePct.toFixed(1)}%` : `${stats.threePct.toFixed(1).replace(".", ",")}\u202f%`) : "–"],
     [L.t("Rebonds / match", "Rebounds / game", "Rebotes / partido"), stats?.reb?.toFixed(1) ?? "–"],
     [L.t("Passes / match", "Assists / game", "Asistencias / partido"), stats?.ast?.toFixed(1) ?? "–"],
     [L.t("Écart / match", "Margin / game", "Diferencia / partido"), me.gp && me.diff != null ? `${me.diff > 0 ? "+" : ""}${me.diff.toFixed(1)}` : "–"],
@@ -75,7 +77,7 @@ export default async function TeamPage({ params }) {
         <div>
           <span className="tag hot">{L.t(`Conférence ${confName}`, `${confName}ern Conference`, `Conferencia ${confName}`)}</span>
           <h1>{team.name}</h1>
-          <p className="team-rec">{streak ? L.t(`Série en cours : ${streak}`, `Current streak: ${streak}`, `Racha actual: ${streak}`) : L.t("Saison 2026-27", "2026-27 season", "Temporada 2026-27")}{me.last10 ? L.t(` · 10 derniers : ${me.last10}`, ` · Last 10: ${me.last10}`, ` · Últimos 10: ${me.last10}`) : ""}</p>
+          <p className="team-rec">{streak ? L.t(`Série en cours : ${streak}`, `Current streak: ${streak}`, `Racha actual: ${streak}`) : L.t(`Saison ${seasonLabel}`, `${seasonLabel} season`, `Temporada ${seasonLabel}`)}{me.last10 ? L.t(` · 10 derniers : ${me.last10}`, ` · Last 10: ${me.last10}`, ` · Últimos 10: ${me.last10}`) : ""}</p>
         </div>
         <Link href={L.href(`/app?team=${team.id}`)} className="btn-solid">{L.t("Analyser un duel", "Analyze a matchup", "Analizar un duelo")}</Link>
       </div>
@@ -118,7 +120,7 @@ export default async function TeamPage({ params }) {
                 <span className="d">{dfmt(g.date, { day: "numeric", month: "short" })}</span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <span className="t">{home ? "vs" : "@"} {opp.logo && <img src={opp.logo} alt="" />}{opp.short || opp.abbr}</span>
-                <span className="s">{mine != null ? L.t(`${Math.round(mine * 100)}% victoire`, `${Math.round(mine * 100)}% to win`, `${Math.round(mine * 100)}% de victoria`) : fmtTime(L, g.date)}</span>
+                <span className="s">{mine != null ? L.t(`${Math.round(mine * 100)}\u202f% de victoire`, `${Math.round(mine * 100)}% to win`, `${Math.round(mine * 100)}\u202f% de victoria`) : fmtTime(L, g.date)}</span>
               </Link>
             );
           }) : <p className="team-rec">{L.t("Aucun match à venir.", "No upcoming games.", "No hay partidos próximos.")}</p>}

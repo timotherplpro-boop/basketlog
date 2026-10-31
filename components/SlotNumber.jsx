@@ -20,7 +20,7 @@ export default function SlotNumber({ value, suffix = "" }) {
   }, []);
 
   return (
-    <span className="slot" ref={ref} aria-label={`${value}${suffix}`}>
+    <span className="slot" ref={ref} role="img" aria-label={`${value}${suffix}`}>
       {digits.map((d, i) => (
         <span className="col" key={i} aria-hidden>
           <span style={{ transform: `translateY(-${go ? (+d + 10) : 0}em)`, transitionDelay: `${i * 120}ms` }}>

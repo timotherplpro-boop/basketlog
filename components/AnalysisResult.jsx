@@ -17,10 +17,21 @@ import { analysisAccess, memberSession, questionUsage } from "../lib/usage";
 import { nbaRecentForm } from "../lib/data";
 import { unlockProof } from "../lib/proof";
 import { nbaDateOf } from "../lib/espn";
-import { fmtDate } from "../lib/i18n";
+import { fmtDate, deFr } from "../lib/i18n";
 
 const pctL = (p, L, d = 0) => `${(p * 100).toFixed(d).replace(".", L.en ? "." : ",")}${L.en ? "%" : " %"}`;
 const num = (v, L, d = 1) => v.toFixed(d).replace(".", L.en ? "." : ",");
+const sgn = (v, L) => (L.en ? fmt(v) : fmt(v).replace(".", ",")); // « +3,2 » en français et en espagnol
+// Statut ESPN d'un blessé, dans la langue de la page.
+function injStatus(st, L) {
+  const s = String(st || "");
+  if (/out/i.test(s)) return L.t("Absent", "Out", "Baja");
+  if (/doubt/i.test(s)) return L.t("Très incertain", "Doubtful", "Muy dudoso");
+  if (/question|game time/i.test(s)) return L.t("Incertain", "Questionable", "En duda");
+  if (/day-to-day/i.test(s)) return L.t("Au jour le jour", "Day-to-day", "Día a día");
+  if (/probable/i.test(s)) return L.t("Probable", "Probable", "Probable");
+  return s;
+}
 
 function formLabel(list, L) {
   if (!list.length) return L.t("⏳ Pas encore de match", "⏳ No games yet", "⏳ Todavía sin partidos");
@@ -48,12 +59,12 @@ function scenarioOne(a, league, L) {
   const why = !lead || (favHome ? lead.value <= 0 : lead.value >= 0) ? null : {
     level: L.t(`un meilleur niveau sur la saison (écart de points de ${d(a.fav.diff)} par match, contre ${d(a.dog.diff)})`, `a stronger season so far (point differential of ${d(a.fav.diff)} per game, against ${d(a.dog.diff)})`, `un mejor nivel en la temporada (diferencia de puntos de ${d(a.fav.diff)} por partido, frente a ${d(a.dog.diff)})`),
     home: L.t("l'avantage du terrain", "home-court advantage", "la ventaja de jugar en casa"),
-    b2b: L.t(`la fatigue ${nba ? `des ${dog.short}, qui ont` : `de ${dog.name}, qui a`} joué la veille`, `${nba ? `the ${dog.short}'` : `${dog.name}'s`} fatigue after playing the night before`, `el cansancio ${nba ? `de los ${dog.short}, que jugaron` : `de ${dog.name}, que jugó`} la víspera`),
-    inj: L.t(`les absences ${nba ? `côté ${dog.short}` : `de ${dog.name}`}`, `${nba ? `the ${dog.short}'` : `${dog.name}'s`} injuries`, `las bajas ${nba ? `de los ${dog.short}` : `de ${dog.name}`}`),
+    b2b: L.t(`la fatigue ${nba ? `des ${dog.short}, qui ont` : `${deFr(dog.name)}, qui a`} joué la veille`, `${nba ? `the ${dog.short}'` : `${dog.name}'s`} fatigue after playing the night before`, `el cansancio ${nba ? `de los ${dog.short}, que jugaron` : `de ${dog.name}, que jugó`} la víspera`),
+    inj: L.t(`les absences ${nba ? `côté ${dog.short}` : deFr(dog.name)}`, `${nba ? `the ${dog.short}'` : `${dog.name}'s`} injuries`, `las bajas ${nba ? `de los ${dog.short}` : `de ${dog.name}`}`),
   }[lead.key];
   const team = s.key === "home10" ? a.home.team : s.key === "away10" ? a.away.team : null;
   const what = team
-    ? L.t(`Victoire ${nba ? `des ${team.short}` : `de ${team.name}`} par 10 points ou plus`, `${nba ? `The ${team.short}` : team.name} win${nba ? "" : "s"} by 10 points or more`, `Victoria ${nba ? `de los ${team.short}` : `de ${team.name}`} por 10 puntos o más`)
+    ? L.t(`Victoire ${nba ? `des ${team.short}` : deFr(team.name)} par 10 points ou plus`, `${nba ? `The ${team.short}` : team.name} win${nba ? "" : "s"} by 10 points or more`, `Victoria ${nba ? `de los ${team.short}` : `de ${team.name}`} por 10 puntos o más`)
     : L.t("Un match serré, avec 5 points d'écart ou moins", "A close game, decided by 5 points or fewer", "Un partido igualado, con 5 puntos de diferencia o menos");
   return L.t(
     `${what} : c'est le scénario le plus probable parmi ceux étudiés par le modèle. ${nba ? `Les ${fav.short} partent favoris` : `${fav.name} part favori`}${why ? `, ${nba ? "portés" : "porté"} surtout par ${why}` : ""}. ${nba ? `Les ${dog.short} devront` : `${dog.name} devra`} faire mieux que ${nba ? "leurs" : "ses"} moyennes de la saison pour inverser la tendance.`,
@@ -111,7 +122,7 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
     [L.t("Bilan", "Record", "Balance"), aw.cur ? `${aw.cur.wins}-${aw.cur.losses}` : g.away.record || "–", h.cur ? `${h.cur.wins}-${h.cur.losses}` : g.home.record || "–"],
     [L.t("Points marqués / match", "Points scored / game", "Puntos anotados / partido"), num(aw.ppg, L), num(h.ppg, L)],
     [L.t("Points encaissés / match", "Points allowed / game", "Puntos encajados / partido"), num(aw.oppg, L), num(h.oppg, L)],
-    [L.t("Écart ajusté / match", "Adjusted margin / game", "Diferencia ajustada / partido"), fmt(aw.diff), fmt(h.diff)],
+    [L.t("Écart ajusté / match", "Adjusted margin / game", "Diferencia ajustada / partido"), sgn(aw.diff, L), sgn(h.diff, L)],
     [L.t("Série en cours", "Current streak", "Racha actual"), streak(aw.cur?.streak) || "–", streak(h.cur?.streak) || "–"],
     [L.t("10 derniers matchs", "Last 10 games", "Últimos 10 partidos"), aw.cur?.last10 || "–", h.cur?.last10 || "–"],
     [L.t("Saison passée", "Last season", "Temporada pasada"), aw.prev ? `${aw.prev.wins}-${aw.prev.losses} (${fmt(aw.prev.diff)})` : "–", h.prev ? `${h.prev.wins}-${h.prev.losses} (${fmt(h.prev.diff)})` : "–"],
@@ -245,9 +256,9 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
               <h2>⚖️ {L.t("Ce qui fait pencher la balance", "What tips the balance", "Lo que inclina la balanza")}</h2>
               <div className="team-rec" style={{ marginBottom: 6 }}>{L.t("En points, positif = avantage", "In points, positive = edge", "En puntos, positivo = ventaja")} {g.home.short}</div>
               {a.factors.map((f) => { const ft = factorText(f, a, L); return (
-                <div className="factor" key={f.label}><div>{ft.label}<small>{ft.detail}</small></div><div className="v mono"><span className={f.value > 0.05 ? "pos" : f.value < -0.05 ? "neg" : ""}>{fmt(f.value)}</span></div></div>
+                <div className="factor" key={f.label}><div>{ft.label}<small>{ft.detail}</small></div><div className="v mono"><span className={f.value > 0.05 ? "pos" : f.value < -0.05 ? "neg" : ""}>{sgn(f.value, L)}</span></div></div>
               ); })}
-              <div className="factor"><div><b>{L.t("Marge attendue", "Expected margin", "Margen esperado")}</b><small>{L.t("pour", "for", "para")} {g.home.short}</small></div><div className="v mono"><span className={a.margin > 0.05 ? "pos" : a.margin < -0.05 ? "neg" : ""}>{fmt(a.margin)}</span></div></div>
+              <div className="factor"><div><b>{L.t("Marge attendue", "Expected margin", "Margen esperado")}</b><small>{L.t("pour", "for", "para")} {g.home.short}</small></div><div className="v mono"><span className={a.margin > 0.05 ? "pos" : a.margin < -0.05 ? "neg" : ""}>{sgn(a.margin, L)}</span></div></div>
             </div>
             <div className="card block">
               <h2>🎲 {L.t("Tous les scénarios", "All scenarios", "Todos los escenarios")}</h2>
@@ -266,7 +277,7 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
 
           {ficheBlock(L.t("Fiche des deux équipes", "Team comparison", "Ficha de los dos equipos"))}
 
-          {isNBA && (
+          {isNBA && g.state !== "post" && (
             <div className="grid2">
               {[aw, h].map((s) => (
                 <div className="card block" key={s.team.id}>
@@ -276,7 +287,10 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
                   ) : (
                     <div className="inj">
                       {[...s.inj.out, ...s.inj.doubtful].map((i) => (
-                        <div className="inj-row" key={i.player}><span>{i.player} <span className="team-rec">{i.pos}</span></span><span className={/out/i.test(i.status) ? "neg" : ""}>{i.status}</span></div>
+                        <div className="inj-row" key={i.player}>
+                          <span>{i.player} <span className="team-rec">{i.pos}{i.ppg != null ? ` · ${num(i.ppg, L)} ${L.t("pts", "ppg", "pts")}` : ""}</span></span>
+                          <span className={/out/i.test(i.status) ? "neg" : ""}>{injStatus(i.status, L)}</span>
+                        </div>
                       ))}
                     </div>
                   )}

@@ -38,7 +38,7 @@ function Row({ p, href, L }) {
         <span className={`t ${favHome ? "fav" : ""}`}>{/* eslint-disable-next-line @next/next/no-img-element */}{p.home.logo && <img src={p.home.logo} alt="" />}{p.home.abbr}</span>
       </span>
       <span className="bl-pick">{fav.abbr} {pf}{L.en ? "%" : " %"}</span>
-      <span className="bl-res" aria-label={p.ok ? L.t("Pronostic correct", "Correct prediction", "Pronóstico acertado") : L.t("Pronostic raté", "Missed prediction", "Pronóstico fallado")}>{p.ok ? "✓" : "✗"}</span>
+      <span className="bl-res" role="img" aria-label={p.ok ? L.t("Pronostic correct", "Correct prediction", "Pronóstico acertado") : L.t("Pronostic raté", "Missed prediction", "Pronóstico fallado")}>{p.ok ? "✓" : "✗"}</span>
     </Link>
   );
 }
@@ -117,7 +117,7 @@ export default async function BilanPage({ searchParams }) {
               ))}
             </div>
             <div className="card block">
-              <h2>Calibration</h2>
+              <h2>{L.t("Calibration", "Calibration", "Calibración")}</h2>
               <p className="team-rec" style={{ marginTop: 0 }}>{L.t("Quand Basketlog annonce 70 %, le favori doit gagner environ 7 fois sur 10.", "When Basketlog says 70%, the favorite should win about 7 times out of 10.", "Cuando Basketlog anuncia un 70 %, el favorito debe ganar unas 7 veces de cada 10.")}</p>
               {s.buckets.map((b) => (
                 <div className="bl-cal" key={b.lo}>

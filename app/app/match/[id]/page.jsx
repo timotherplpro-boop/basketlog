@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { analyzeDay } from "../../../../lib/data";
-import { nbaToday, isValidDate, shiftDate } from "../../../../lib/espn";
+import { nbaToday, isValidDate, shiftDate, scoreboardReachable } from "../../../../lib/espn";
 import MatchView from "../../../../components/MatchView";
 import { pageMeta, dayLong, dayShort, pctTxt } from "../../../../lib/seo";
 import { getL } from "../../../../lib/lang-server";
@@ -15,6 +15,8 @@ async function findAnalysis(id, d) {
     const a = analyses.find((x) => x.id === String(id));
     if (a) return { a, date };
   }
+  // Introuvable parce qu'ESPN ne répond pas : erreur temporaire (Google repassera), pas une page supprimée.
+  if (!(await scoreboardReachable(candidates[0]))) throw new Error("Données NBA momentanément indisponibles");
   return null;
 }
 

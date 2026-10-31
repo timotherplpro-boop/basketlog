@@ -47,7 +47,7 @@ export default function ELExtras({ a, games, prevGames, L = mk("fr") }) {
     <>
       <div className="card block">
         <h2>{L.t("Stats comparées", "Stat comparison", "Estadísticas comparadas")} <span className="tag">{L.t("EuroLeague", "EuroLeague", "Euroliga")}</span></h2>
-        <StatCompare away={aw.team} home={h.team} rows={rows} />
+        <StatCompare away={aw.team} home={h.team} rows={rows} L={L} />
         {(!hc || !ac) && <p className="team-rec" style={{ marginTop: 10 }}>{L.t("Début de saison : les chiffres s'appuient aussi sur la saison passée.", "Early season: the numbers also lean on last season.", "Principio de temporada: las cifras también se apoyan en la temporada pasada.")}</p>}
       </div>
       <div className="grid2">

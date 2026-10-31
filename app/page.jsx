@@ -236,7 +236,7 @@ export default async function Home() {
                 <span>
                   <small>BASKETLOG</small>
                   <b>🏀 {g.home.short} - {g.away.short}</b>
-                  <span>{L.t("Victoire", "Win", "Victoria")} {fav.abbr} {pct(Math.max(g.pHome, 1 - g.pHome))}% 🔥</span>
+                  <span>{L.t("Victoire", "Win", "Victoria")} {fav.abbr} {pct(Math.max(g.pHome, 1 - g.pHome))}{L.en ? "%" : "\u202f%"} 🔥</span>
                 </span>
                 <time>{shortDay(g.date, L)}</time>
               </Link>
@@ -274,9 +274,9 @@ export default async function Home() {
               <>El marcador que proyecta nuestro modelo para {big.away.short} @ {big.home.short} ({shortDay(big.date, L)}). Nivel, forma, bajas y cansancio: todo se tiene en cuenta.</>
             )}</p>
             <div className="stats3">
-              <div className="stat reveal" style={{ "--d": "150ms" }}><strong><SlotNumber value={pct(big.pHome)} suffix="%" /></strong><span>{L.t(`Victoire ${big.home.short}`, `${big.home.short} win`, `Victoria ${big.home.short}`)}</span></div>
-              <div className="stat reveal" style={{ "--d": "300ms" }}><strong><SlotNumber value={pct(big.close)} suffix="%" /></strong><span>{L.t("Match serré", "Close game", "Partido igualado")}</span></div>
-              <div className="stat reveal" style={{ "--d": "450ms" }}><strong><SlotNumber value={pct(1 - big.pHome)} suffix="%" /></strong><span>{L.t(`Victoire ${big.away.short}`, `${big.away.short} win`, `Victoria ${big.away.short}`)}</span></div>
+              <div className="stat reveal" style={{ "--d": "150ms" }}><strong><SlotNumber value={pct(big.pHome)} suffix={L.en ? "%" : "\u202f%"} /></strong><span>{L.t(`Victoire ${big.home.short}`, `${big.home.short} win`, `Victoria ${big.home.short}`)}</span></div>
+              <div className="stat reveal" style={{ "--d": "300ms" }}><strong><SlotNumber value={pct(big.close)} suffix={L.en ? "%" : "\u202f%"} /></strong><span>{L.t("Match serré", "Close game", "Partido igualado")}</span></div>
+              <div className="stat reveal" style={{ "--d": "450ms" }}><strong><SlotNumber value={pct(1 - big.pHome)} suffix={L.en ? "%" : "\u202f%"} /></strong><span>{L.t(`Victoire ${big.away.short}`, `${big.away.short} win`, `Victoria ${big.away.short}`)}</span></div>
             </div>
             <div className="reveal" style={{ "--d": "500ms" }}><BallButton href={L.href(`/app/match/${big.id}?d=${big.d}`)}>{L.t("Analyse prête", "Analysis ready", "Análisis listo")}</BallButton></div>
             <p className="demo-note reveal" style={{ "--d": "600ms" }}>{L.t("Probabilités gratuites pour tous les matchs · analyses dès 10 €/mois", "Free probabilities for every game · analyses from €10/month", "Probabilidades gratis para todos los partidos · análisis desde 10 €/mes")}</p>
@@ -317,7 +317,7 @@ export default async function Home() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <div><img src={g.home.logo} alt="" /><b>{g.home.abbr}</b></div>
                   </div>
-                  <div className="ap">{pct(Math.max(g.pHome, 1 - g.pHome))}%<small>{L.t(`victoire ${(g.pHome >= 0.5 ? g.home : g.away).short}`, `${(g.pHome >= 0.5 ? g.home : g.away).short} win`, `victoria ${(g.pHome >= 0.5 ? g.home : g.away).short}`)}</small></div>
+                  <div className="ap">{pct(Math.max(g.pHome, 1 - g.pHome))}{L.en ? "%" : "\u202f%"}<small>{L.t(`victoire ${(g.pHome >= 0.5 ? g.home : g.away).short}`, `${(g.pHome >= 0.5 ? g.home : g.away).short} win`, `victoria ${(g.pHome >= 0.5 ? g.home : g.away).short}`)}</small></div>
                   <div className="abar"><i style={{ width: `${(1 - g.pHome) * 100}%` }} /></div>
                   <div className="arow"><span>{L.t("Score projeté", "Projected score", "Marcador proyectado")}</span><b>{Math.round(g.awayPts)}-{Math.round(g.homePts)}</b></div>
                   <div className="arow"><span>Total</span><b>{Math.round(g.total)}</b></div>

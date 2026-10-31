@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { pct } from "../lib/model";
+import { pctOf } from "../lib/i18n";
 import { TeamLogo, ProbBar, StatusTag } from "./ui";
 import AppTabs from "./AppTabs";
 import JsonLd from "./JsonLd";
@@ -25,12 +25,12 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
       name: `${g.away.name} – ${g.home.name}`,
       description: L.t(
         `Match ${isNBA ? "NBA" : "d'EuroLeague"} entre ${g.away.name} et ${g.home.name}. Probabilités Basketlog : ${Math.round(a.pAway * 100)} % / ${Math.round(a.pHome * 100)} %.`,
-        `${isNBA ? "NBA" : "EuroLeague"} game between ${g.away.name} and ${g.home.name}. Basketlog probabilities: ${Math.round(a.pAway * 100)}% / ${Math.round(a.pHome * 100)}%.`,
+        `${isNBA ? "NBA" : "EuroLeague"} game between ${g.away.name} and ${g.home.name}. Basketlog probabilities: ${pctOf(a.pAway, L)} / ${pctOf(a.pHome, L)}.`,
         `Partido de ${isNBA ? "la NBA" : "la Euroliga"} entre ${g.away.name} y ${g.home.name}. Probabilidades de Basketlog: ${Math.round(a.pAway * 100)} % / ${Math.round(a.pHome * 100)} %.`
       ),
       sport: "Basketball",
       startDate: g.date,
-      eventStatus: "https://schema.org/EventScheduled",
+      eventStatus: g.postponed === "canceled" ? "https://schema.org/EventCancelled" : g.postponed ? "https://schema.org/EventPostponed" : "https://schema.org/EventScheduled",
       eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
       ...(g.venue ? { location: { "@type": "Place", name: g.venue, address: g.city || g.venue } } : {}),
       homeTeam: team(g.home),
@@ -70,19 +70,19 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
           <span className="team-rec">{[g.venue, g.broadcast].filter(Boolean).join(" · ")}</span>
         </div>
         <div className="match-teams">
-          <Link href={teamHref(g.away)} className="team"><TeamLogo team={g.away} size={92} /><div className="team-name">{g.away.name}</div><div className="team-rec mono">{g.away.record || "0-0"} · {L.t("extérieur", "away", "visitante")}</div></Link>
+          <Link href={teamHref(g.away)} className="team"><TeamLogo team={g.away} size={92} /><div className="team-name">{g.away.name}</div><div className="team-rec mono"><span>{g.away.record || "0-0"}</span><span className="sep"> · </span><span>{L.t("extérieur", "away", "visitante")}</span></div></Link>
           <div className="proj">
             <div className="label">{showScore ? (g.state === "in" ? L.t("Score en direct", "Live score", "Marcador en directo") : L.t("Score final", "Final score", "Resultado final")) : L.t("Score projeté", "Projected score", "Marcador proyectado")}</div>
             <div className="score">{showScore ? `${g.away.score}-${g.home.score}` : `${Math.round(a.awayPts)}-${Math.round(a.homePts)}`}</div>
             {showScore && <div className="team-rec mono">{L.t("Projeté :", "Projected:", "Proyectado:")} {Math.round(a.awayPts)}-{Math.round(a.homePts)}</div>}
           </div>
-          <Link href={teamHref(g.home)} className="team"><TeamLogo team={g.home} size={92} /><div className="team-name">{g.home.name}</div><div className="team-rec mono">{g.home.record || "0-0"} · {L.t("domicile", "home", "casa")}</div></Link>
+          <Link href={teamHref(g.home)} className="team"><TeamLogo team={g.home} size={92} /><div className="team-name">{g.home.name}</div><div className="team-rec mono"><span>{g.home.record || "0-0"}</span><span className="sep"> · </span><span>{L.t("domicile", "home", "casa")}</span></div></Link>
         </div>
         <div style={{ marginTop: 26 }}>
-          <ProbBar pAway={a.pAway} pHome={a.pHome} away={g.away} home={g.home} />
+          <ProbBar pAway={a.pAway} pHome={a.pHome} away={g.away} home={g.home} L={L} />
           <div className="prob-labels mono">
-            <span><strong>{pct(a.pAway)}</strong> {L.t("victoire", "win", "victoria")} {g.away.abbr}</span>
-            <span>{L.t("victoire", "win", "victoria")} {g.home.abbr} <strong>{pct(a.pHome)}</strong></span>
+            <span><strong>{pctOf(a.pAway, L)}</strong><small>{L.t(`victoire ${g.away.abbr}`, `${g.away.abbr} win`, `victoria ${g.away.abbr}`)}</small></span>
+            <span><strong>{pctOf(a.pHome, L)}</strong><small>{L.t(`victoire ${g.home.abbr}`, `${g.home.abbr} win`, `victoria ${g.home.abbr}`)}</small></span>
           </div>
         </div>
       </div>

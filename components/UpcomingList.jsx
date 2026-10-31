@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { mk, fmtDate, fmtTime } from "../lib/i18n";
+import { mk, fmtDate, fmtTime, pctOf } from "../lib/i18n";
 
 const day = (iso, L) => fmtDate(L, iso, { weekday: "long", day: "numeric", month: "long" });
 const parts = (iso, L) => [fmtDate(L, iso, { day: "2-digit", month: "2-digit" }), fmtTime(L, iso)];
@@ -28,7 +28,7 @@ export default function UpcomingList({ games, title, grouped = true, href = (g) 
             const done = g.state === "post" && g.home.score != null;
             return (
               <Link key={g.id} href={L.href(href(g))} className="up-row" style={{ animationDelay: `${Math.min(n++, 12) * 50}ms` }}>
-                <div className="when">{d}<b>{g.live ? <span className="live">LIVE</span> : done ? L.t("FIN", "FINAL", "FINAL") : h}</b></div>
+                <div className="when">{d}<b>{g.live ? <span className="live">LIVE</span> : g.postponed === "canceled" ? L.t("ANNULÉ", "CANCELED", "CANCELADO") : g.postponed ? L.t("REPORTÉ", "POSTPONED", "APLAZADO") : done ? L.t("FIN", "FINAL", "FINAL") : h}</b></div>
                 <div className="m">
                   <span className="t">
                     <span className={!favHome ? "fav" : ""}>{g.away.short}</span>
@@ -42,7 +42,7 @@ export default function UpcomingList({ games, title, grouped = true, href = (g) 
                     <span className={favHome ? "fav" : ""}>{g.home.short}</span>
                   </span>
                 </div>
-                <span className="p">{(favHome ? g.home : g.away).abbr} {Math.round(Math.max(g.pHome, 1 - g.pHome) * 100)}%</span>
+                <span className="p">{g.postponed ? "–" : `${(favHome ? g.home : g.away).abbr} ${pctOf(Math.max(g.pHome, 1 - g.pHome), L)}`}</span>
               </Link>
             );
           })}
