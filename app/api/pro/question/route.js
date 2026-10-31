@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { COOKIE, QUESTIONS, aiReady, cookieOptions, currentSession } from "../../../../lib/pro";
+import { COOKIE, QUESTIONS, aiReady, cookieOptions, currentSession, usageKey } from "../../../../lib/pro";
 import { matchKey, questionUsage, recordQuestion, tierOf } from "../../../../lib/usage";
 import { analysisFor } from "../../../../lib/analysisFor";
 import { askAI } from "../../../../lib/ask";
@@ -34,7 +34,7 @@ export async function POST(req) {
   const lang = ["fr", "en", "es"].includes(body.lang) ? body.lang : "fr";
   if (!id) return json({ error: "match" }, 400, refreshed);
 
-  const used = await questionUsage(session.uid);
+  const used = await questionUsage(usageKey(session));
   if (used != null && used >= limit) return json({ error: "limite", used, limit: tier === "lifetime" ? null : limit }, 429, refreshed);
 
   const a = await analysisFor(league, id, d).catch(() => null);
@@ -42,6 +42,6 @@ export async function POST(req) {
   const answer = await askAI(a, league, question, lang, req.headers.get("x-vercel-oidc-token"));
   if (!answer) return json({ error: "ia" }, 502, refreshed);
 
-  const r = await recordQuestion(session.uid, matchKey(league, id), limit);
+  const r = await recordQuestion(usageKey(session), matchKey(league, id), limit);
   return json({ answer, used: r?.used ?? (used ?? 0) + 1, limit: tier === "lifetime" ? null : limit }, 200, refreshed);
 }

@@ -25,7 +25,7 @@ export async function POST(req) {
     return NextResponse.json({ ok: false, error: t("Connecte-toi avec ton compte abonné pour donner ton avis.", "Log in with your subscriber account to leave a review.", "Inicia sesión con tu cuenta de suscriptor para dar tu opinión.") }, { status: 401 });
   }
   // Admins et créateurs partenaires (accès offert) : pas d'avis, ce ne seraient pas des avis de clients.
-  const role = await getRole(session.uid).catch(() => session.role || null);
+  const role = await getRole(session.uid).catch(() => session.role || (session.admin ? "admin" : null));
   if (role) {
     return NextResponse.json({ ok: false, error: t("Les comptes admin et créateurs ne peuvent pas donner d'avis.", "Admin and creator accounts can't leave reviews.", "Las cuentas de administrador y de creador no pueden dar su opinión.") }, { status: 403 });
   }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
-import { COOKIE, decodeSession } from "../../../lib/pro";
+import { COOKIE, PREVIEW_TIERS, cookieOptions, decodeSession, encodeSession, resolveAccess } from "../../../lib/pro";
 import { adminData, dbRpc, getRole } from "../../../lib/roles";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +18,27 @@ export async function POST(req) {
   if (role !== "admin") return err("Réservé aux admins.", 403);
 
   const body = await req.json().catch(() => ({}));
+
+  // Aperçu d'une formule : la session devient celle d'un client de cette formule (ou redevient admin).
+  if (body.action === "apercu") {
+    const tier = PREVIEW_TIERS.includes(body.tier) ? body.tier : null;
+    let next;
+    if (tier) {
+      next = { ...s, tier, role: null, admin: true, preview: tier, checked: Date.now() };
+    } else {
+      let a;
+      try { a = await resolveAccess(s.uid, { ...s, role: "admin" }); } catch { a = { tier: "lifetime", paid: s.paid ?? "compte", role: "admin" }; }
+      next = { ...s, tier: a.tier, paid: a.paid, role: a.role, checked: Date.now() };
+      delete next.preview;
+      delete next.admin;
+    }
+    const value = encodeSession(next);
+    if (!value) return err("Session impossible à mettre à jour.", 500);
+    const res = NextResponse.json({ ok: true, preview: tier }, { headers: { "Cache-Control": "no-store" } });
+    res.cookies.set(COOKIE, value, cookieOptions);
+    return res;
+  }
+
   let extra = {};
   try {
     switch (body.action) {

@@ -2,7 +2,7 @@ import ProPlans from "../../components/ProPlans";
 import Faq from "../../components/Faq";
 import { pageMeta } from "../../lib/seo";
 import { getL } from "../../lib/lang-server";
-import { aiReady } from "../../lib/pro";
+import { CHECKOUT, aiReady } from "../../lib/pro";
 
 export async function generateMetadata() {
   const L = await getL();
@@ -21,11 +21,7 @@ export default async function ProPage({ searchParams }) {
   const L = await getL();
   const sp = await searchParams;
   // Paiement direct Whop (page de paiement, comme Visifoot), pas la fiche produit de la boutique.
-  const checkout = {
-    starter: process.env.NEXT_PUBLIC_WHOP_CHECKOUT_STARTER || "https://whop.com/checkout/plan_c8MZCxs2q1nl5/",
-    pro: process.env.NEXT_PUBLIC_WHOP_CHECKOUT_PRO || "https://whop.com/checkout/plan_9LcgVO0AP56pI/",
-    lifetime: process.env.NEXT_PUBLIC_WHOP_CHECKOUT_LIFETIME || "https://whop.com/checkout/plan_LEqDYDZ6KkVUL/",
-  };
+  const checkout = CHECKOUT;
   const loginReady = !!process.env.WHOP_CLIENT_ID;
   const ai = aiReady();
   const faqEs = [

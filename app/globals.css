@@ -1236,3 +1236,31 @@ body:has(.mmenu.open) .install-banner { display: none; }
 .invite-card .btn-solid { min-width: 240px; }
 .invite-card .invite-err { color: #fda4af; font-size: 14px; }
 @media (prefers-reduced-motion: reduce) { .invite-card .big-ball { animation: none; } }
+.adm-plans { margin-top: 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.adm-plan { display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 16px; background: #070c19; border: 1px solid rgba(255,255,255,.08); }
+.adm-plan.on { border-color: var(--orange); box-shadow: 0 0 0 1px var(--orange) inset; }
+.adm-plan-top { display: flex; flex-direction: column; gap: 2px; }
+.adm-plan-top b { font-size: 17px; }
+.adm-plan-top span { color: var(--orange-2); font-weight: 700; font-size: 14px; }
+.adm-plan ul { margin: 0; padding-left: 18px; color: rgba(255,255,255,.82); font-size: 14px; line-height: 1.5; display: grid; gap: 4px; flex: 1; }
+.adm-plan-foot { display: grid; gap: 8px; }
+.adm-plan-foot .adm-btn { width: 100%; }
+.adm-note { color: var(--muted); font-size: 13px; line-height: 1.45; }
+.adm-link-out { color: var(--orange-2); font-weight: 600; font-size: 13.5px; }
+.adm-link-out:hover { text-decoration: underline; }
+.adm .adm-plans + .adm-btn { margin-top: 14px; }
+.adm-checks { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 8px; }
+.adm-checks li { display: flex; gap: 10px; align-items: baseline; padding: 10px 14px; border-radius: 12px; background: #070c19; border: 1px solid rgba(255,255,255,.07); font-size: 14.5px; }
+.adm-checks li > span { flex: none; width: 18px; font-weight: 800; text-align: center; }
+.adm-checks li.ok > span { color: #86efac; }
+.adm-checks li.ko > span { color: #fda4af; }
+.adm-checks li.na > span { color: var(--muted); }
+.adm-checks li.na { color: var(--muted); }
+
+/* Barre « Aperçu client » (admin qui regarde le site comme un client d'une formule) */
+.preview-bar { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 120; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 14px; max-width: calc(100vw - 32px); padding: 10px 12px 10px 18px; border-radius: 999px; background: #1a0f07; border: 1px solid rgba(255,122,26,.6); box-shadow: 0 10px 30px rgba(0,0,0,.45); color: #fff; font-size: 14px; }
+.preview-bar b { color: var(--orange-2); }
+.preview-bar a { color: rgba(255,255,255,.8); text-decoration: underline; text-underline-offset: 3px; }
+.preview-bar button { height: 34px; padding: 0 14px; border-radius: 999px; border: 0; background: linear-gradient(90deg, #d4560c, var(--orange) 60%, var(--orange-2)); color: #fff; font-weight: 700; font-size: 13.5px; font-family: inherit; cursor: pointer; }
+.preview-bar button:disabled { opacity: .6; cursor: default; }
+@media (max-width: 520px) { .preview-bar { border-radius: 18px; } }

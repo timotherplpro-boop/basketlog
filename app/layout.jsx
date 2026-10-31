@@ -13,6 +13,7 @@ import Nav from "../components/Nav";
 import Analytics from "../components/Analytics";
 import CookieBanner from "../components/CookieBanner";
 import WelcomeToast from "../components/WelcomeToast";
+import PreviewBar from "../components/PreviewBar";
 import JsonLd from "../components/JsonLd";
 import { SITE, GOOGLE_SITE_VERIFICATION, BING_SITE_VERIFICATION } from "../lib/site";
 import { getL, getPath } from "../lib/lang-server";
@@ -70,7 +71,9 @@ export default async function RootLayout({ children }) {
   const L = await getL();
   const path = await getPath();
   // Membre connecté : dans l'espace analyse (/app, /pro), la barre latérale remplace l'en-tête et le pied de page du site.
-  const member = !!decodeSession((await cookies()).get(COOKIE)?.value)?.uid;
+  const sess = decodeSession((await cookies()).get(COOKIE)?.value);
+  const member = !!sess?.uid;
+  const preview = sess?.admin && sess?.preview ? sess.preview : null; // admin qui regarde le site comme un client
   return (
     <html lang={L.lang}>
       <head>
@@ -97,6 +100,7 @@ export default async function RootLayout({ children }) {
           <WelcomeToast />
           <CookieBanner />
           <InstallApp />
+          {preview && <PreviewBar tier={preview} />}
         </LangProvider>
       </body>
     </html>
