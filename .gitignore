@@ -5,3 +5,4 @@ node_modules
 # Vidéos : voix téléchargée et sorties
 video/.cache/
 video/out/
+__pycache__/
