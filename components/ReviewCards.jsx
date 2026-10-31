@@ -28,7 +28,7 @@ export default function ReviewCards({ reviews, max = 9, more = true, L = mk("fr"
       <div className="cards-empty reveal">
         <div className="ce-stars">★★★★★</div>
         <h3>{L.t("Aucun avis pour l'instant", "No reviews yet", "Todavía no hay opiniones")}</h3>
-        <p>{L.t("Basketlog vient d'ouvrir : les premiers avis de nos utilisateurs apparaîtront ici, après relecture.", "Basketlog just launched: the first reviews from our users will show up here, once checked.", "Basketlog acaba de abrir: las primeras opiniones de nuestros usuarios aparecerán aquí, tras revisarlas.")}</p>
+        <p>{L.t("Basketlog vient d'ouvrir : les premiers avis de nos abonnés apparaîtront ici, après relecture.", "Basketlog just launched: the first reviews from our subscribers will show up here, once checked.", "Basketlog acaba de abrir: las primeras opiniones de nuestros suscriptores aparecerán aquí, tras revisarlas.")}</p>
         <ReviewForm label={L.t("Donner le premier avis", "Write the first review", "Dar la primera opinión")} className="btn-solid" />
       </div>
     );

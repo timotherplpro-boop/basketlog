@@ -5,8 +5,11 @@ import { track } from "../lib/analytics";
 import { useL } from "./LangProvider";
 import { useProStatus } from "../lib/useProStatus";
 
-// Bouton "Donner mon avis" + fenêtre de dépôt, pour tous : avec un compte (mention « Abonné vérifié » ou « Membre
-// vérifié ») ou sans compte (avis sans mention). Les avis sont publiés après validation.
+// Formules payantes : seules elles permettent de donner un avis (la route /api/avis le revérifie chez Whop).
+const PAYANTES = ["starter", "pro", "lifetime"];
+
+// Bouton "Donner mon avis" + fenêtre de dépôt, réservés aux abonnés payants (mention « Abonné vérifié »).
+// Les avis sont publiés après validation.
 export default function ReviewForm({ label, className = "btn-white" }) {
   const L = useL();
   const status = useProStatus();
@@ -47,10 +50,17 @@ export default function ReviewForm({ label, className = "btn-white" }) {
   // Admin : lien vers la relecture des avis. Créateur partenaire : pas d'avis (accès offert).
   if (status.role === "admin") return <p className="reviews-only"><a href="/app/admin">{L.t("Relire les avis (admin)", "Review submissions (admin)", "Revisar las opiniones (admin)")}</a></p>;
   if (status.role) return null;
-  const guest = !status.connected; // visiteur sans compte : avis possible, publié sans mention de vérification
-  const back = encodeURIComponent(location.pathname + location.search);
+  if (!PAYANTES.includes(status.tier)) {
+    // Visiteur ou compte gratuit : pas de formulaire, avis réservés aux abonnés.
+    return (
+      <p className="reviews-only">
+        {L.t("Les avis sont réservés aux abonnés.", "Reviews are reserved for subscribers.", "Las opiniones están reservadas a los suscriptores.")}{" "}
+        <a href={L.href("/pro")}>{L.t("Voir les formules", "See the plans", "Ver los planes")}</a>
+      </p>
+    );
+  }
   const first = (status.name || "").trim().split(/\s+/)[0] || "";
-  const firstName = !guest && /^\p{L}[\p{L}'-]{1,39}$/u.test(first) ? first : "";
+  const firstName = /^\p{L}[\p{L}'-]{1,39}$/u.test(first) ? first : "";
 
   return (
     <>
@@ -70,14 +80,6 @@ export default function ReviewForm({ label, className = "btn-white" }) {
               <form onSubmit={submit}>
                 <h3 id="avis-title">{L.t("Ton avis sur Basketlog", "Your review of Basketlog", "Tu opinión sobre Basketlog")}</h3>
                 <p className="modal-sub">{L.t("Il sera publié avec ton prénom après relecture.", "It will be published with your first name after review.", "Se publicará con tu nombre tras una revisión.")} <a href={L.href("/confidentialite")} target="_blank" rel="noopener">{L.t("Tes données", "Your data", "Tus datos")}</a></p>
-                {guest && (
-                  <p className="modal-sub guest">
-                    {L.t("Sans compte, ton avis est publié sans mention de vérification.", "Without an account, your review is published without a verification label.", "Sin cuenta, tu opinión se publica sin mención de verificación.")}{" "}
-                    <a href={`/api/whop/login?next=${back}`}>{L.t("Se connecter", "Log in", "Iniciar sesión")}</a>
-                    {" · "}
-                    <a href={`/api/whop/signup?next=${back}`}>{L.t("Créer mon compte gratuit", "Create my free account", "Crear mi cuenta gratuita")}</a>
-                  </p>
-                )}
                 <div className="stars" role="radiogroup" aria-label={L.t("Note", "Rating", "Nota")} onMouseLeave={() => setHover(0)}>
                   {[1, 2, 3, 4, 5].map((n) => (
                     <button type="button" key={n} role="radio" aria-checked={note === n} aria-label={L.t(`${n} étoile${n > 1 ? "s" : ""}`, `${n} star${n > 1 ? "s" : ""}`, `${n} estrella${n > 1 ? "s" : ""}`)}

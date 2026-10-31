@@ -41,7 +41,7 @@ function CGUFr() {
       </Sec>
 
       <Sec n={5} title="Avis des utilisateurs">
-        <p>Tu peux publier un avis sur Basketlog, avec ou sans compte (un seul par compte) : prénom, description facultative, note et texte. Un avis déposé depuis un compte porte la mention « Abonné vérifié » ou « Membre vérifié » ; sans compte, il n&apos;est pas vérifié. Chaque avis est relu avant publication et peut être refusé s&apos;il est injurieux, hors sujet, publicitaire ou illicite. En publiant un avis, tu nous autorises à l&apos;afficher sur le site, sans contrepartie. Tu peux en demander la suppression à tout moment.</p>
+        <p>Si tu as une formule payante active (Starter, Pro ou Lifetime), tu peux publier un avis sur Basketlog, un seul par compte : prénom, description facultative, note et texte. Il porte la mention « Abonné vérifié ». Chaque avis est relu avant publication et peut être refusé s&apos;il est injurieux, hors sujet, publicitaire ou illicite. En publiant un avis, tu nous autorises à l&apos;afficher sur le site, sans contrepartie. Tu peux en demander la suppression à tout moment.</p>
       </Sec>
 
       <Sec n={6} title="Ce qui est interdit">
@@ -113,7 +113,7 @@ function CGUEn({ L }) {
       </Sec>
 
       <Sec n={5} title="User reviews">
-        <p>You can post a review of Basketlog, with or without an account (one per account): first name, optional description, rating and text. A review posted from an account carries a “Verified subscriber” or “Verified member” label; without an account, it isn&apos;t verified. Every review is checked before publication and may be rejected if it is abusive, off-topic, promotional or illegal. By posting a review, you allow us to display it on the website, free of charge. You can ask for it to be removed at any time.</p>
+        <p>If you have an active paid plan (Starter, Pro or Lifetime), you can post a review of Basketlog, one per account: first name, optional description, rating and text. It carries a “Verified subscriber” label. Every review is checked before publication and may be rejected if it is abusive, off-topic, promotional or illegal. By posting a review, you allow us to display it on the website, free of charge. You can ask for it to be removed at any time.</p>
       </Sec>
 
       <Sec n={6} title="What is prohibited">
@@ -185,7 +185,7 @@ function CGUEs({ L }) {
       </Sec>
 
       <Sec n={5} title="Opiniones de los usuarios">
-        <p>Puedes publicar una opinión sobre Basketlog, con o sin cuenta (una por cuenta): nombre, descripción opcional, nota y texto. Una opinión enviada desde una cuenta lleva la mención «Suscriptor verificado» o «Miembro verificado»; sin cuenta, no está verificada. Cada opinión se revisa antes de publicarse y puede rechazarse si es injuriosa, ajena al tema, publicitaria o ilícita. Al publicar una opinión, nos autorizas a mostrarla en el sitio, sin contraprestación. Puedes pedir que se elimine en cualquier momento.</p>
+        <p>Si tienes un plan de pago activo (Starter, Pro o Lifetime), puedes publicar una opinión sobre Basketlog, una por cuenta: nombre, descripción opcional, nota y texto. Lleva la mención «Suscriptor verificado». Cada opinión se revisa antes de publicarse y puede rechazarse si es injuriosa, ajena al tema, publicitaria o ilícita. Al publicar una opinión, nos autorizas a mostrarla en el sitio, sin contraprestación. Puedes pedir que se elimine en cualquier momento.</p>
       </Sec>
 
       <Sec n={6} title="Lo que está prohibido">

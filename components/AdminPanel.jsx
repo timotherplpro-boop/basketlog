@@ -113,7 +113,7 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
           <h2 id="adm-avis">Avis</h2>
           <span className={`adm-count ${pending ? "on" : ""}`}>{pending ? `${pending} en attente` : "Rien à relire"}</span>
         </div>
-        <p className="adm-help">Un avis n&apos;apparaît sur le site qu&apos;une fois publié. Tout le monde peut en déposer, avec ou sans compte (un seul par compte) ; un avis sans compte s&apos;affiche sans mention de vérification.</p>
+        <p className="adm-help">Un avis n&apos;apparaît sur le site qu&apos;une fois publié. Seuls les abonnés Starter, Pro et Lifetime peuvent en déposer, un par compte.</p>
         {!data.avis.length ? (
           <p className="adm-empty">Aucun avis pour l&apos;instant.</p>
         ) : (

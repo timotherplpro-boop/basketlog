@@ -5,10 +5,10 @@ import { getRole } from "../../../lib/roles";
 
 export const dynamic = "force-dynamic";
 
-// Avis ouverts à tous, avec ou sans compte, toujours relus avant publication.
-// Avec un compte : un seul avis par compte, et la formule du moment donne la mention « Abonné vérifié » (formule
-// payante) ou « Membre vérifié » (compte gratuit). Sans compte : avis affiché sans mention de vérification.
-const FORMULES = new Set(["compte", "starter", "pro", "lifetime"]);
+// Avis réservés aux abonnés payants : il faut être connecté avec une formule Starter, Pro ou Lifetime active,
+// revérifiée chez Whop au moment du dépôt. Un seul avis par compte, toujours relu avant publication, avec la
+// mention « Abonné vérifié ». La base refuse elle aussi tout avis sans formule payante.
+const PAYANTES = new Set(["starter", "pro", "lifetime"]);
 
 // Limite simple anti-spam par adresse IP (mémoire de l'instance).
 const hits = new Map();
@@ -19,24 +19,27 @@ export async function POST(req) {
 
   // Champ piège invisible : rempli uniquement par les robots.
   if (body.site) return NextResponse.json({ ok: true });
-  const t = (fr, en, es) => (body.lang === "en" ? en : body.lang === "es" ? es : fr);
-
   // Formulaire envoyé moins de 3 secondes après son ouverture : robot, ignoré sans le dire.
   if (Number.isFinite(body.elapsed) && body.elapsed < 3000) return NextResponse.json({ ok: true });
+  const t = (fr, en, es) => (body.lang === "en" ? en : body.lang === "es" ? es : fr);
 
   const { session } = await currentSession(req.cookies.get(COOKIE)?.value);
-  let uid = null;
-  let formule = null;
-  if (session?.uid) {
-    // Admins et créateurs partenaires (accès offert) : pas d'avis, ce ne seraient pas des avis de clients.
-    const role = await getRole(session.uid).catch(() => session.role || (session.admin ? "admin" : null));
-    if (role) {
-      return NextResponse.json({ ok: false, error: t("Les comptes admin et créateurs ne peuvent pas donner d'avis.", "Admin and creator accounts can't leave reviews.", "Las cuentas de administrador y de creador no pueden dar su opinión.") }, { status: 403 });
-    }
-    uid = session.uid;
-    // Formule réelle chez Whop au moment de l'avis ; Whop injoignable : dernière formule connue de la session.
-    formule = [session.paid, session.tier].find((x) => FORMULES.has(x)) || "compte";
-    try { formule = await whopTier(session.uid); } catch {}
+  if (!session?.uid) {
+    return NextResponse.json({ ok: false, error: t("Les avis sont réservés aux abonnés : connecte-toi avec ton compte abonné.", "Reviews are reserved for subscribers: log in with your subscriber account.", "Las opiniones están reservadas a los suscriptores: inicia sesión con tu cuenta de suscriptor.") }, { status: 401 });
+  }
+  // Admins et créateurs partenaires (accès offert) : pas d'avis, ce ne seraient pas des avis de clients.
+  const role = await getRole(session.uid).catch(() => session.role || (session.admin ? "admin" : null));
+  if (role) {
+    return NextResponse.json({ ok: false, error: t("Les comptes admin et créateurs ne peuvent pas donner d'avis.", "Admin and creator accounts can't leave reviews.", "Las cuentas de administrador y de creador no pueden dar su opinión.") }, { status: 403 });
+  }
+  let formule;
+  try {
+    formule = await whopTier(session.uid);
+  } catch {
+    return NextResponse.json({ ok: false, error: t("Impossible de vérifier ton abonnement pour le moment, réessaie dans un instant.", "Your subscription couldn't be checked right now, please try again in a moment.", "No se ha podido comprobar tu suscripción por ahora, inténtalo de nuevo en un momento.") }, { status: 503 });
+  }
+  if (!PAYANTES.has(formule)) {
+    return NextResponse.json({ ok: false, error: t("Les avis sont réservés aux abonnés Starter, Pro et Lifetime.", "Reviews are reserved for Starter, Pro and Lifetime subscribers.", "Las opiniones están reservadas a los suscriptores Starter, Pro y Lifetime.") }, { status: 403 });
   }
 
   const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || "?";
@@ -52,7 +55,7 @@ export async function POST(req) {
   if (!(note >= 1 && note <= 5)) return NextResponse.json({ ok: false, error: t("Choisis une note de 1 à 5 étoiles.", "Pick a rating from 1 to 5 stars.", "Elige una nota de 1 a 5 estrellas.") }, { status: 400 });
   if (texte.length < 15) return NextResponse.json({ ok: false, error: t("Ton avis doit faire au moins 15 caractères.", "Your review must be at least 15 characters.", "Tu opinión debe tener al menos 15 caracteres.") }, { status: 400 });
 
-  const r = await addReview({ uid, formule: uid ? (FORMULES.has(formule) ? formule : "compte") : null, prenom, profil, note, texte });
+  const r = await addReview({ uid: session.uid, formule, prenom, profil, note, texte });
   if (!r.ok && r.reason === "deja") {
     return NextResponse.json({ ok: false, error: t("Tu as déjà donné ton avis : un seul avis par compte. Merci !", "You've already left a review: one review per account. Thanks!", "Ya has dado tu opinión: una sola opinión por cuenta. ¡Gracias!") }, { status: 409 });
   }
