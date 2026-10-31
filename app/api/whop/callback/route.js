@@ -42,8 +42,8 @@ export async function GET(req) {
     const uid = info?.sub;
     if (!uid) return fail("connexion");
 
-    const { tier, paid, role } = await resolveAccess(uid); // formule Whop, ou accès complet d'un admin ou créateur
-    const value = encodeSession({ uid, name: info.preferred_username || info.name || "", tier, paid, role, checked: Date.now() });
+    const { tier, paid, role, nom, v } = await resolveAccess(uid); // formule Whop, ou accès complet d'un admin ou créateur
+    const value = encodeSession({ uid, name: nom || info.preferred_username || info.name || "", tier, paid, role, v, checked: Date.now() });
     if (!value) return fail("config");
     // Retour sur la page d'origine (ex. la fiche match), sinon l'espace membre.
     const next = safeNext(req.cookies.get(NEXT_COOKIE)?.value);

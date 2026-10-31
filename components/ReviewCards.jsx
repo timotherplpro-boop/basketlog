@@ -44,7 +44,11 @@ export default function ReviewCards({ reviews, max = 9, more = true, L = mk("fr"
               {r.photo_url
                 ? /* eslint-disable-next-line @next/next/no-img-element */ <img className="avatar" src={r.photo_url} alt="" loading="lazy" />
                 : <span className="initial" style={{ background: color(r.prenom) }} aria-hidden>{r.prenom.charAt(0).toUpperCase()}</span>}
-              <span className="id"><small>{r.prenom}</small><b>{r.profil || L.t("Utilisateur Basketlog", "Basketlog user", "Usuario de Basketlog")}</b></span>
+              <span className="id">
+                <small>{r.prenom}</small>
+                <b>{r.profil || L.t("Utilisateur Basketlog", "Basketlog user", "Usuario de Basketlog")}</b>
+                {r.abonne && <em className="verified">✓ {L.t("Abonné vérifié", "Verified subscriber", "Suscriptor verificado")}</em>}
+              </span>
               {r.lien && <SocialIcon url={r.lien} L={L} />}
             </div>
           </article>

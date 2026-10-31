@@ -27,8 +27,8 @@ export async function POST(req) {
       next = { ...s, tier, role: null, admin: true, preview: tier, checked: Date.now() };
     } else {
       let a;
-      try { a = await resolveAccess(s.uid, { ...s, role: "admin" }); } catch { a = { tier: "lifetime", paid: s.paid ?? "compte", role: "admin" }; }
-      next = { ...s, tier: a.tier, paid: a.paid, role: a.role, checked: Date.now() };
+      try { a = await resolveAccess(s.uid, { ...s, role: "admin" }); } catch { a = { tier: "lifetime", paid: s.paid ?? "compte", role: "admin", nom: null, v: s.v }; }
+      next = { ...s, tier: a.tier, paid: a.paid, role: a.role, name: a.nom || s.name, v: a.v, checked: Date.now() };
       delete next.preview;
       delete next.admin;
     }

@@ -29,9 +29,9 @@ export async function POST(req) {
   }
 
   let a;
-  try { a = await resolveAccess(s.uid, { ...s, role: r.role }); } catch { a = { tier: "lifetime", paid: s.paid ?? s.tier ?? "compte", role: r.role }; }
+  try { a = await resolveAccess(s.uid, { ...s, role: r.role }); } catch { a = { tier: "lifetime", paid: s.paid ?? s.tier ?? "compte", role: r.role, nom: null, v: s.v }; }
   const res = NextResponse.json({ ok: true, role: a.role }, { headers: { "Cache-Control": "no-store" } });
-  const value = encodeSession({ ...s, tier: a.tier, paid: a.paid, role: a.role, checked: Date.now() });
+  const value = encodeSession({ ...s, tier: a.tier, paid: a.paid, role: a.role, name: a.nom || s.name, v: a.v, checked: Date.now() });
   if (value) res.cookies.set(COOKIE, value, cookieOptions);
   return res;
 }
