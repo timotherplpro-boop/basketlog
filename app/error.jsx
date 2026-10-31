@@ -1,8 +1,10 @@
 "use client";
-// Erreur temporaire (ex. source de données NBA injoignable) : message clair et bouton pour réessayer, dans la langue de la page.
-import { usePathname } from "next/navigation";
+// Erreur temporaire (ex. source de données injoignable) : message clair et bouton pour réessayer, dans la langue de la page.
+import { startTransition } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function Error({ reset }) {
+  const router = useRouter();
   const path = usePathname() || "";
   const lang = /^\/en(\/|$)/.test(path) ? "en" : /^\/es(\/|$)/.test(path) ? "es" : "fr";
   const t = (fr, en, es) => (lang === "en" ? en : lang === "es" ? es : fr);
@@ -11,9 +13,9 @@ export default function Error({ reset }) {
       <div style={{ maxWidth: 460 }}>
         <h1 style={{ fontSize: 26, marginBottom: 10 }}>{t("Données momentanément indisponibles", "Data temporarily unavailable", "Datos no disponibles por el momento")}</h1>
         <p className="team-rec" style={{ marginBottom: 22 }}>
-          {t("La source des statistiques NBA ne répond pas pour l'instant. Réessaie dans un instant.", "The NBA stats source isn't responding right now. Please try again in a moment.", "La fuente de las estadísticas NBA no responde por ahora. Vuelve a intentarlo en un momento.")}
+          {t("Cette page n'a pas pu se charger : une de nos sources de données ne répond pas pour l'instant. Réessaie dans un instant.", "This page couldn't load: one of our data sources isn't responding right now. Please try again in a moment.", "Esta página no se ha podido cargar: una de nuestras fuentes de datos no responde por ahora. Vuelve a intentarlo en un momento.")}
         </p>
-        <button type="button" className="btn-solid" onClick={() => reset()}>{t("Réessayer", "Try again", "Reintentar")}</button>
+        <button type="button" className="btn-solid" onClick={() => startTransition(() => { router.refresh(); reset(); })}>{t("Réessayer", "Try again", "Reintentar")}</button>
       </div>
     </main>
   );

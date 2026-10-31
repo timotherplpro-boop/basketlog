@@ -94,7 +94,7 @@ function Form({ team, games, L }) {
 // Sections enrichies de la fiche match (stats comparées, joueurs, forme, confrontations, 2e avis).
 export default async function MatchExtras({ a, L = mk("fr") }) {
   const g = a.game;
-  const post = g.state === "post";
+  const post = g.state === "post" && !g.postponed; // reporté ou annulé : pas de « meilleurs joueurs du match »
   const season = seasonForDate(g.date ? nbaDateOf(g.date) : nbaToday());
   const [sum, hs, as, players, form] = await Promise.all([
     g.hypothetical ? null : getSummary(g.id),
@@ -106,6 +106,7 @@ export default async function MatchExtras({ a, L = mk("fr") }) {
   const h = a.home, aw = a.away;
   // Avant le match : meilleurs marqueurs disponibles de la saison ; match terminé : meilleurs joueurs du match.
   const seasonPlayers = (t, inj) => { const l = topPlayers(players, t.id, inj); return l.length ? l : null; };
+  const awayList = post ? null : seasonPlayers(aw.team, aw.inj), homeList = post ? null : seasonPlayers(h.team, h.inj);
 
   const rows = [
     { label: L.t("Points marqués / match", "Points scored / game", "Puntos anotados / partido"), a: aw.ppg, h: h.ppg },
@@ -150,22 +151,22 @@ export default async function MatchExtras({ a, L = mk("fr") }) {
         <div className="card block">
           <h2>{post ? L.t("Meilleurs joueurs du match", "Top performers", "Mejores jugadores del partido") : L.t("Joueurs à suivre", "Players to watch", "Jugadores a seguir")}</h2>
           <div className="grid2 pl-grid">
-            <Players team={aw.team} season={post ? null : seasonPlayers(aw.team, aw.inj)} leaders={sum?.leaders[aw.team.id]} title={post ? "game" : "season"} L={L} />
-            <Players team={h.team} season={post ? null : seasonPlayers(h.team, h.inj)} leaders={sum?.leaders[h.team.id]} title={post ? "game" : "season"} L={L} />
+            <Players team={aw.team} season={awayList} leaders={sum?.leaders[aw.team.id]} title={post ? "game" : "season"} L={L} />
+            <Players team={h.team} season={homeList} leaders={sum?.leaders[h.team.id]} title={post ? "game" : "season"} L={L} />
           </div>
-          {!post && <p className="team-rec" style={{ marginBottom: 0 }}>{L.t("Meilleurs marqueurs de la saison, hors joueurs annoncés absents.", "Season's top scorers, excluding players ruled out.", "Máximos anotadores de la temporada, sin contar a los jugadores de baja.")}</p>}
+          {!post && awayList && homeList && <p className="team-rec" style={{ marginBottom: 0 }}>{L.t("Meilleurs marqueurs de la saison, hors joueurs annoncés absents.", "Season's top scorers, excluding players ruled out.", "Máximos anotadores de la temporada, sin contar a los jugadores de baja.")}</p>}
         </div>
       )}
 
       {(sum || form) && (
-        <div className="grid2">
+        <div className={sum ? "grid2" : ""}>
           <div className="card block">
             <h2>{L.t("Derniers résultats", "Latest results", "Últimos resultados")}</h2>
             <div className="team-rec" style={{ marginBottom: 8 }}>{L.t("5 derniers matchs de la saison, avec le score", "Last 5 games of the season, with the score", "Últimos 5 partidos de la temporada, con el marcador")}</div>
             <Form team={aw.team} games={form?.[aw.team.id] || []} L={L} />
             <Form team={h.team} games={form?.[h.team.id] || []} L={L} />
           </div>
-          <div className="card block">
+          {sum && <div className="card block">
             <h2>{L.t("Confrontations", "Head-to-head", "Enfrentamientos")}</h2>
             {ser ? (
               <>
@@ -176,7 +177,7 @@ export default async function MatchExtras({ a, L = mk("fr") }) {
                       <span className="d">{day(x.date, L)}</span>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <span className="t">{x.away.logo && <img src={x.away.logo} alt="" />}{x.away.abbr}</span>
-                      <span className="s">{x.state === "post" && x.home.score != null ? `${x.away.score} - ${x.home.score}` : x.state === "postponed" ? L.t("reporté", "postponed", "aplazado") : x.id === g.id ? L.t("ce match", "this game", "este partido") : L.t("à venir", "upcoming", "próximamente")}</span>
+                      <span className="s">{x.state === "post" && x.home.score != null ? `${x.away.score} - ${x.home.score}` : x.state === "postponed" ? L.t("reporté ou annulé", "postponed or canceled", "aplazado o cancelado") : x.id === g.id ? L.t("ce match", "this game", "este partido") : L.t("à venir", "upcoming", "próximamente")}</span>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <span className="t">{x.home.abbr}{x.home.logo && <img src={x.home.logo} alt="" />}</span>
                     </Link>
@@ -184,7 +185,7 @@ export default async function MatchExtras({ a, L = mk("fr") }) {
                 </div>
               </>
             ) : <p className="team-rec">{L.t("Pas de confrontation programmée cette saison.", "No meetings scheduled this season.", "No hay enfrentamientos programados esta temporada.")}</p>}
-          </div>
+          </div>}
         </div>
       )}
 
