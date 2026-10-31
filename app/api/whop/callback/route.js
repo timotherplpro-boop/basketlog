@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { SITE } from "../../../../lib/site";
-import { COOKIE, cookieOptions, encodeSession, whopTier, safeNext, NEXT_COOKIE } from "../../../../lib/pro";
+import { COOKIE, cookieOptions, encodeSession, resolveAccess, safeNext, NEXT_COOKIE } from "../../../../lib/pro";
 
 // Retour de Whop : échange du code, identité de l'utilisateur, vérification de l'abonnement.
 export async function GET(req) {
@@ -42,14 +42,14 @@ export async function GET(req) {
     const uid = info?.sub;
     if (!uid) return fail("connexion");
 
-    const tier = await whopTier(uid);
-    const value = encodeSession({ uid, name: info.preferred_username || info.name || "", tier, checked: Date.now() });
+    const { tier, paid, role } = await resolveAccess(uid); // formule Whop, ou accès complet d'un admin ou créateur
+    const value = encodeSession({ uid, name: info.preferred_username || info.name || "", tier, paid, role, checked: Date.now() });
     if (!value) return fail("config");
     // Retour sur la page d'origine (ex. la fiche match), sinon l'espace membre.
     const next = safeNext(req.cookies.get(NEXT_COOKIE)?.value);
     const flow = req.cookies.get("bl_flow")?.value === "signup" ? "inscription" : "connexion";
     const dest = new URL(next || "/app", SITE);
-    dest.searchParams.set("bienvenue", tier === "compte" ? flow : "abonne");
+    dest.searchParams.set("bienvenue", role ? "connexion" : tier === "compte" ? flow : "abonne"); // admin, créateur : pas d'« abonnement actif »
     const r = NextResponse.redirect(dest.toString());
     r.cookies.set(COOKIE, value, cookieOptions);
     r.cookies.delete({ name: NEXT_COOKIE, path: "/api/whop" });

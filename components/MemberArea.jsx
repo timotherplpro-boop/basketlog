@@ -10,7 +10,7 @@ export default async function MemberArea({ children }) {
   const s = decodeSession((await cookies()).get(COOKIE)?.value);
   if (!s?.uid) return children;
   const [L, usage] = await Promise.all([getL(), getUsage(s.uid)]);
-  const session = { name: s.name || "", tier: s.tier === "gratuit" ? "compte" : s.tier || "compte", used: usage?.used ?? 0 };
+  const session = { name: s.name || "", tier: s.tier === "gratuit" ? "compte" : s.tier || "compte", role: s.role || null, used: usage?.used ?? 0 };
   return (
     <AppShell session={session} ai={aiReady()}>
       {children}

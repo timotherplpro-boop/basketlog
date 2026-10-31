@@ -57,7 +57,10 @@ export default function AppShell({ session, ai = false, children }) {
   const limit = pro ? pro.perDay : tier === "starter" ? 1 : tier === "compte" ? 0 : null; // null = illimité
   const unlimited = limit == null;
   const full = !unlimited && used >= limit; // compte gratuit : « 0 / 0 » et « Limite atteinte », comme Visifoot
-  const plan = { compte: L.t("Gratuit", "Free", "Gratis"), starter: "Starter", pro: "Pro", lifetime: "Lifetime" }[tier] || L.t("Gratuit", "Free", "Gratis");
+  const role = pro ? pro.role || null : session?.role || null; // admin ou créateur invité : accès complet
+  const plan = role === "admin" ? "Admin"
+    : role === "createur" ? L.t("Accès créateur", "Creator access", "Acceso de creador")
+    : { compte: L.t("Gratuit", "Free", "Gratis"), starter: "Starter", pro: "Pro", lifetime: "Lifetime" }[tier] || L.t("Gratuit", "Free", "Gratis");
 
   // Mêmes rubriques que Visifoot : Matchs, Compétitions, Historique, Pricing. Les matchs du jour et le bilan
   // restent accessibles par les onglets en haut des pages.
@@ -93,6 +96,11 @@ export default function AppShell({ session, ai = false, children }) {
           <Link href={L.href("/pro")} className={`sb-item boxed ${p.startsWith("/pro") ? "on" : ""}`}>
             <Icon name="card" />Pricing<span className="sb-badge">Pro</span>
           </Link>
+          {role === "admin" && (
+            <Link href="/app/admin" className={`sb-item ${p.startsWith("/app/admin") ? "on" : ""}`} aria-current={p.startsWith("/app/admin") ? "page" : undefined}>
+              <Icon name="user" />Admin
+            </Link>
+          )}
         </nav>
 
         <div className="sb-quota">
@@ -104,7 +112,7 @@ export default function AppShell({ session, ai = false, children }) {
               {L.t("Limite atteinte", "Limit reached", "Límite alcanzado")} • {L.t("Upgrade pour plus", "Upgrade for more", "Mejora tu plan para más")}
             </Link>
           ) : unlimited ? (
-            <span className="sb-q-note">{L.t(`Formule ${plan} : aucune limite`, `${plan} plan: no limit`, `Plan ${plan}: sin límite`)}</span>
+            <span className="sb-q-note">{role ? L.t("Accès complet : aucune limite", "Full access: no limit", "Acceso completo: sin límite") : L.t(`Formule ${plan} : aucune limite`, `${plan} plan: no limit`, `Plan ${plan}: sin límite`)}</span>
           ) : (
             <span className="sb-q-note">{L.t(`${limit - used} analyse${limit - used > 1 ? "s" : ""} réduite${limit - used > 1 ? "s" : ""} restante${limit - used > 1 ? "s" : ""}`, `${limit - used} reduced analys${limit - used > 1 ? "es" : "is"} left`, `${limit - used} análisis reducido${limit - used > 1 ? "s" : ""} restante${limit - used > 1 ? "s" : ""}`)}</span>
           )}

@@ -11,7 +11,7 @@ export async function GET(req) {
   const per = PLANS[tier].perDay;
   const used = session ? (await getUsage(session.uid))?.used ?? null : null; // analyses lancées aujourd'hui
   const res = NextResponse.json(
-    { tier, perDay: Number.isFinite(per) ? per : null, connected: !!session, uid: session?.uid || null, name: session?.name || null, used, changed: !!changed },
+    { tier, perDay: Number.isFinite(per) ? per : null, connected: !!session, uid: session?.uid || null, name: session?.name || null, role: session?.role || null, used, changed: !!changed },
     { headers: { "Cache-Control": "no-store" } }
   );
   if (refreshed) res.cookies.set(COOKIE, refreshed, cookieOptions);

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { addReview } from "../../../lib/reviews";
 import { COOKIE, currentSession, whopTier } from "../../../lib/pro";
+import { getRole } from "../../../lib/roles";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,11 @@ export async function POST(req) {
   const { session } = await currentSession(req.cookies.get(COOKIE)?.value);
   if (!session?.uid) {
     return NextResponse.json({ ok: false, error: t("Connecte-toi avec ton compte abonné pour donner ton avis.", "Log in with your subscriber account to leave a review.", "Inicia sesión con tu cuenta de suscriptor para dar tu opinión.") }, { status: 401 });
+  }
+  // Admins et créateurs partenaires (accès offert) : pas d'avis, ce ne seraient pas des avis de clients.
+  const role = await getRole(session.uid).catch(() => session.role || null);
+  if (role) {
+    return NextResponse.json({ ok: false, error: t("Les comptes admin et créateurs ne peuvent pas donner d'avis.", "Admin and creator accounts can't leave reviews.", "Las cuentas de administrador y de creador no pueden dar su opinión.") }, { status: 403 });
   }
   let tier;
   try {

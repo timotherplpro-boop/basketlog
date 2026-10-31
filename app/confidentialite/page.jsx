@@ -33,6 +33,7 @@ const DONNEES = [
   ["Questions à l'IA", "Texte de ta question et données du match, transmis à l'IA pour obtenir la réponse ; nombre de questions posées par jour", "Répondre à tes questions et appliquer la limite de ta formule", "Exécution du contrat", "Texte non conservé par Basketlog ; compteur : 90 jours", "ia"],
   ["Paiement", "Données de paiement et de facturation (traitées directement par Whop, jamais par Basketlog)", "Encaisser les paiements, établir les reçus", "Exécution du contrat, obligation légale", "10 ans pour les pièces comptables"],
   ["Avis (abonnés)", "Prénom, description facultative, note, texte de l'avis ; identifiant Whop, jamais affiché", "Publier les avis après relecture et vérifier qu'ils viennent d'abonnés (un avis par compte)", "Consentement", "Jusqu'à ta demande de suppression"],
+  ["Accès créateur ou admin (sur invitation)", "Identifiant et nom d'utilisateur Whop, rôle, nom noté sur l'invitation, date d'activation", "Ouvrir l'accès complet offert aux créateurs partenaires et aux administrateurs", "Exécution du contrat", "Jusqu'au retrait de l'accès"],
   ["Contact", "Adresse e-mail et contenu de tes messages", "Répondre à tes demandes", "Intérêt légitime", "3 ans après le dernier échange"],
 ];
 
@@ -122,6 +123,7 @@ const DATA_EN = [
   ["Questions to the AI", "Your question and the game data, sent to the AI to get the answer; number of questions asked per day", "Answer your questions and apply your plan's limit", "Performance of the contract", "Basketlog does not keep the text; counter: 90 days", "ia"],
   ["Payment", "Payment and billing data (processed directly by Whop, never by Basketlog)", "Collect payments, issue receipts", "Performance of the contract, legal obligation", "10 years for accounting records"],
   ["Reviews (subscribers)", "First name, optional description, rating, review text; Whop user ID, never displayed", "Publish reviews after they are checked and verify they come from subscribers (one review per account)", "Consent", "Until you ask for removal"],
+  ["Creator or admin access (by invitation)", "Whop user ID and username, role, name noted on the invitation, activation date", "Provide the free full access given to partner creators and administrators", "Performance of the contract", "Until the access is removed"],
   ["Contact", "Email address and content of your messages", "Reply to your requests", "Legitimate interest", "3 years after the last exchange"],
 ];
 
@@ -212,6 +214,7 @@ const DATA_ES = [
   ["Preguntas a la IA", "Tu pregunta y los datos del partido, enviados a la IA para obtener la respuesta; número de preguntas al día", "Responder a tus preguntas y aplicar el límite de tu plan", "Ejecución del contrato", "Basketlog no conserva el texto; contador: 90 días", "ia"],
   ["Pago", "Datos de pago y de facturación (tratados directamente por Whop, nunca por Basketlog)", "Cobrar los pagos y emitir los recibos", "Ejecución del contrato, obligación legal", "10 años para los documentos contables"],
   ["Opiniones (suscriptores)", "Nombre, descripción opcional, nota y texto de la opinión; identificador de Whop, nunca se muestra", "Publicar las opiniones tras revisarlas y comprobar que vienen de suscriptores (una opinión por cuenta)", "Consentimiento", "Hasta que pidas su eliminación"],
+  ["Acceso de creador o administrador (por invitación)", "Identificador y nombre de usuario de Whop, rol, nombre anotado en la invitación, fecha de activación", "Dar el acceso completo gratuito a los creadores colaboradores y a los administradores", "Ejecución del contrato", "Hasta que se retire el acceso"],
   ["Contacto", "Dirección de correo electrónico y contenido de tus mensajes", "Responder a tus solicitudes", "Interés legítimo", "3 años después del último intercambio"],
 ];
 
