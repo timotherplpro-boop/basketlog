@@ -32,7 +32,7 @@ const DONNEES = [
   ["Analyses lancées", "Identifiant Whop, match analysé, date et heure de l'analyse", "Appliquer la limite d'analyses du jour de ta formule et afficher ton historique", "Exécution du contrat", "12 mois"],
   ["Questions à l'IA", "Texte de ta question et données du match, transmis à l'IA pour obtenir la réponse ; nombre de questions posées par jour", "Répondre à tes questions et appliquer la limite de ta formule", "Exécution du contrat", "Texte non conservé par Basketlog ; compteur : 90 jours", "ia"],
   ["Paiement", "Données de paiement et de facturation (traitées directement par Whop, jamais par Basketlog)", "Encaisser les paiements, établir les reçus", "Exécution du contrat, obligation légale", "10 ans pour les pièces comptables"],
-  ["Avis", "Prénom, description facultative, note, texte de l'avis", "Publier les avis après relecture", "Consentement", "Jusqu'à ta demande de suppression"],
+  ["Avis (abonnés)", "Prénom, description facultative, note, texte de l'avis ; identifiant Whop, jamais affiché", "Publier les avis après relecture et vérifier qu'ils viennent d'abonnés (un avis par compte)", "Consentement", "Jusqu'à ta demande de suppression"],
   ["Contact", "Adresse e-mail et contenu de tes messages", "Répondre à tes demandes", "Intérêt légitime", "3 ans après le dernier échange"],
 ];
 
@@ -121,7 +121,7 @@ const DATA_EN = [
   ["Analyses run", "Whop ID, game analyzed, date and time of the analysis", "Apply your plan's daily analysis limit and show your history", "Performance of the contract", "12 months"],
   ["Questions to the AI", "Your question and the game data, sent to the AI to get the answer; number of questions asked per day", "Answer your questions and apply your plan's limit", "Performance of the contract", "Basketlog does not keep the text; counter: 90 days", "ia"],
   ["Payment", "Payment and billing data (processed directly by Whop, never by Basketlog)", "Collect payments, issue receipts", "Performance of the contract, legal obligation", "10 years for accounting records"],
-  ["Reviews", "First name, optional description, rating, review text", "Publish reviews after they are checked", "Consent", "Until you ask for removal"],
+  ["Reviews (subscribers)", "First name, optional description, rating, review text; Whop user ID, never displayed", "Publish reviews after they are checked and verify they come from subscribers (one review per account)", "Consent", "Until you ask for removal"],
   ["Contact", "Email address and content of your messages", "Reply to your requests", "Legitimate interest", "3 years after the last exchange"],
 ];
 
@@ -211,7 +211,7 @@ const DATA_ES = [
   ["Análisis realizados", "Identificador de Whop, partido analizado, fecha y hora del análisis", "Aplicar el límite diario de análisis de tu plan y mostrar tu historial", "Ejecución del contrato", "12 meses"],
   ["Preguntas a la IA", "Tu pregunta y los datos del partido, enviados a la IA para obtener la respuesta; número de preguntas al día", "Responder a tus preguntas y aplicar el límite de tu plan", "Ejecución del contrato", "Basketlog no conserva el texto; contador: 90 días", "ia"],
   ["Pago", "Datos de pago y de facturación (tratados directamente por Whop, nunca por Basketlog)", "Cobrar los pagos y emitir los recibos", "Ejecución del contrato, obligación legal", "10 años para los documentos contables"],
-  ["Opiniones", "Nombre, descripción opcional, nota y texto de la opinión", "Publicar las opiniones tras revisarlas", "Consentimiento", "Hasta que pidas su eliminación"],
+  ["Opiniones (suscriptores)", "Nombre, descripción opcional, nota y texto de la opinión; identificador de Whop, nunca se muestra", "Publicar las opiniones tras revisarlas y comprobar que vienen de suscriptores (una opinión por cuenta)", "Consentimiento", "Hasta que pidas su eliminación"],
   ["Contacto", "Dirección de correo electrónico y contenido de tus mensajes", "Responder a tus solicitudes", "Interés legítimo", "3 años después del último intercambio"],
 ];
 

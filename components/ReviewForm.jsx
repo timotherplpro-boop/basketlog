@@ -3,10 +3,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useFocusTrap } from "./useFocusTrap";
 import { track } from "../lib/analytics";
 import { useL } from "./LangProvider";
+import { useProStatus } from "../lib/useProStatus";
 
-// Bouton "Donner mon avis" + fenêtre de dépôt. Les avis sont publiés après validation.
+// Formules payantes : seules elles permettent de donner un avis (la route /api/avis le revérifie chez Whop).
+const ABONNES = ["starter", "pro", "lifetime"];
+
+// Bouton "Donner mon avis" + fenêtre de dépôt, réservés aux abonnés. Les avis sont publiés après validation.
 export default function ReviewForm({ label, className = "btn-white" }) {
   const L = useL();
+  const status = useProStatus();
   const [open, setOpen] = useState(false);
   const [note, setNote] = useState(0);
   const [hover, setHover] = useState(0);
@@ -39,6 +44,18 @@ export default function ReviewForm({ label, className = "btn-white" }) {
     }
   }
 
+  if (!status) return null; // formule en cours de vérification
+  if (!ABONNES.includes(status.tier)) {
+    return (
+      <p className="reviews-only">
+        {L.t("Les avis sont réservés aux abonnés.", "Reviews are reserved for subscribers.", "Las opiniones están reservadas a los suscriptores.")}{" "}
+        <a href={L.href("/pro")}>{L.t("Voir les formules", "See the plans", "Ver los planes")}</a>
+      </p>
+    );
+  }
+  const first = (status.name || "").trim().split(/\s+/)[0] || "";
+  const firstName = /^\p{L}[\p{L}'-]{1,39}$/u.test(first) ? first : "";
+
   return (
     <>
       <button type="button" className={className} onClick={() => { setOpen(true); setState({ status: "idle", error: "" }); }}>{label || L.t("Donner mon avis", "Leave a review", "Dar mi opinión")}</button>
@@ -63,7 +80,7 @@ export default function ReviewForm({ label, className = "btn-white" }) {
                       className={(hover || note) >= n ? "on" : ""} onMouseEnter={() => setHover(n)} onClick={() => setNote(n)}>★</button>
                   ))}
                 </div>
-                <label>{L.t("Prénom", "First name", "Nombre")}<input name="prenom" required minLength={2} maxLength={40} placeholder={L.t("Ex : Karim", "E.g. Jordan", "P. ej.: Javier")} autoComplete="given-name" /></label>
+                <label>{L.t("Prénom", "First name", "Nombre")}<input name="prenom" required minLength={2} maxLength={40} defaultValue={firstName} placeholder={L.t("Ex : Karim", "E.g. Jordan", "P. ej.: Javier")} autoComplete="given-name" /></label>
                 <label><span>{L.t("Qui es-tu ?", "Who are you?", "¿Quién eres?")} <small>{L.t("(facultatif)", "(optional)", "(opcional)")}</small></span><input name="profil" maxLength={60} placeholder={L.t("Ex : Fan des Celtics depuis 2008", "E.g. Celtics fan since 2008", "P. ej.: fan de los Celtics desde 2008")} /></label>
                 <label>{L.t("Ton avis", "Your review", "Tu opinión")}<textarea name="texte" required minLength={15} maxLength={500} rows={4} placeholder={L.t("Qu'est-ce que Basketlog t'apporte ?", "What does Basketlog do for you?", "¿Qué te aporta Basketlog?")} /></label>
                 <input name="site" tabIndex={-1} autoComplete="off" className="hp" aria-hidden="true" />
