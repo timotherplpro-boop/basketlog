@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { getL } from "../lib/lang-server";
 
+// Titre de l'onglet sur une page introuvable (au lieu du titre général du site).
+export async function generateMetadata() {
+  const L = await getL();
+  return { title: L.t("Page introuvable – Basketlog", "Page not found – Basketlog", "Página no encontrada – Basketlog"), robots: { index: false, follow: true } };
+}
+
 export default async function NotFound() {
   const L = await getL();
   return (
