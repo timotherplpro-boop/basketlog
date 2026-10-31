@@ -41,8 +41,11 @@ jobs:
             case "$CRON|$OFF" in
               "15 6 * * *|+0100"|"15 5 * * *|+0200") go=true ;;
               "45 6 * * *|+0100"|"45 5 * * *|+0200")
-                TAG="videos-$(TZ=America/New_York date +%Y-%m-%d)"
-                if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then go=false; else go=true; fi ;;
+                # secours : seulement si le premier passage n'a rien laissé (ni vidéos, ni « pas de match »)
+                DATE=$(TZ=America/New_York date +%Y-%m-%d)
+                if gh release view "videos-$DATE" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then go=false
+                elif gh release view videos-etat --repo "$GITHUB_REPOSITORY" --json body -q .body 2>/dev/null | grep -q "^$DATE"; then go=false
+                else go=true; fi ;;
               *) go=false ;;
             esac
           fi
@@ -68,6 +71,15 @@ jobs:
           N=$(python3 -c "import json; j = json.load(open('jour.json')); print(sum(1 for g in j.get('games') or [] if g.get('state', 'pre') == 'pre'))")
           echo "$N matchs à venir le $D"
           echo "n=$N" >> "$GITHUB_OUTPUT"
+      # « videos-etat » : une seule release dont le texte dit où en est le jour (lue par la livraison de 8 h)
+      - name: État du jour (pas de match)
+        if: github.event_name != 'push' && steps.jour.outputs.n == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NOTE="${D:0:4}-${D:4:2}-${D:6:2} : pas de match NBA ce soir (vérifié à $(TZ=Europe/Paris date +%H:%M), heure de Paris)."
+          if gh release view videos-etat > /dev/null 2>&1; then gh release edit videos-etat --notes "$NOTE"
+          else gh release create videos-etat --title "État des vidéos du jour" --notes "$NOTE" --latest=false; fi
       - uses: actions/setup-node@v4
         if: steps.jour.outputs.n != '0'
         with:
@@ -104,6 +116,7 @@ jobs:
         if: github.event_name != 'push' && steps.jour.outputs.n != '0'
         env:
           GH_TOKEN: ${{ github.token }}
+          N: ${{ steps.jour.outputs.n }}
         run: |
           DATE="${D:0:4}-${D:4:2}-${D:6:2}"
           DIR="out/$DATE"
@@ -115,3 +128,6 @@ jobs:
             gh release create "$TAG" "$DIR"/*.mp4 "$DIR/legendes.txt" "$DIR/videos.json" --title "Vidéos du $DATE" \
               --notes "Vidéos TikTok / Reels du $DATE, fabriquées automatiquement à partir des matchs NBA. Rien n'est publié sur les réseaux sociaux." --latest=false
           fi
+          NOTE="$DATE : $N matchs, vidéos prêtes dans la release videos-$DATE (fabriquées à $(TZ=Europe/Paris date +%H:%M), heure de Paris)."
+          if gh release view videos-etat > /dev/null 2>&1; then gh release edit videos-etat --notes "$NOTE"
+          else gh release create videos-etat --title "État des vidéos du jour" --notes "$NOTE" --latest=false; fi
