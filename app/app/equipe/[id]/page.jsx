@@ -100,7 +100,7 @@ export default async function TeamPage({ params }) {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 {p.head ? <img className="pl-head" src={p.head} alt="" /> : <span className="pl-head ph" />}
                 <span className="pl-id"><b>{p.name}</b><small>{p.pos}{p.jersey ? ` · #${p.jersey}` : ""}</small></span>
-                <span className="pl-val"><strong>{L.en ? p.value : String(p.value).replace(".", ",")}</strong><small>{catLabel(p.cat, L)}</small></span>
+                <span className="pl-val"><strong>{p.value == null ? "–" : L.en ? p.value : String(p.value).replace(".", ",")}</strong><small>{catLabel(p.cat, L)}</small></span>
               </div>
             ))}
           </div>
