@@ -16,7 +16,7 @@ SPOKEN = {
     "HOU": "Youstonne", "IND": "Indiana", "LAC": "les Clippeurs", "LAL": "les Léïkeurs", "MEM": "Memmfisse",
     "MIA": "Maïami", "MIL": "Milwaukee", "MIN": "Minnessota", "NO": "La Nouvelle-Orléans", "NY": "Niou York",
     "OKC": "Oklahoma City", "ORL": "Orlando", "PHI": "Philadelphie", "PHX": "Phoenix", "POR": "Portland",
-    "SAC": "Sacramento", "SA": "San Antonio", "TOR": "Toronto", "UTAH": "Youtah", "WSH": "Washington",
+    "SAC": "Sakraménnto", "SA": "San Antonio", "TOR": "Toronto", "UTAH": "Youtah", "WSH": "Washington",
 }
 BRAND = "Baskète logue"  # « Basketlog » prononcé correctement
 

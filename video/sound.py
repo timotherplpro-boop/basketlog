@@ -206,15 +206,16 @@ def build(dur, voice, cues, music_opts, out_voice, out_novoice, tmpdir, seed=11)
     Lv, Lm = _lufs(f"{tmpdir}/_v.wav"), _lufs(f"{tmpdir}/_m.wav")
     gm = 10 ** ((Lv - 5.5 - Lm) / 20)
     gs = 0.55 * np.max(np.abs(vo)) / (np.max(np.abs(sfx)) + 1e-9)
-    # la musique baisse de 9 dB pendant la voix
+    # pendant la voix, la musique baisse de 15 dB et les bruitages de 6 dB (la voix reste nette)
     env = np.convolve(np.abs(vo), np.ones(int(0.03 * SR)) / int(0.03 * SR), "same")
     on = (env > 0.02 * env.max()).astype(float)
     att, rel = np.exp(-1 / (0.03 * SR)), np.exp(-1 / (0.32 * SR))
     g = np.zeros(N); s = 0.0
     for i in range(N):
         c = on[i]; s = (att * s + (1 - att) * c) if c > s else (rel * s + (1 - rel) * c); g[i] = s
-    duck = 1 - (1 - 10 ** (-9 / 20)) * g
-    for x, out in ((vo + gm * music * duck + gs * sfx, out_voice), (gm * music * 1.25 + gs * sfx, out_novoice)):
+    duck = 1 - (1 - 10 ** (-15 / 20)) * g
+    sduck = 1 - (1 - 10 ** (-6 / 20)) * g
+    for x, out in ((vo + gm * music * duck + gs * sfx * sduck, out_voice), (gm * music * 1.25 + gs * sfx, out_novoice)):
         pre = out.replace(".wav", "_pre.wav")
         sf.write(pre, np.stack([x, x], 1).astype(np.float32), SR, subtype="FLOAT")
         subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", pre, "-af", "loudnorm=I=-14:TP=-1.5:LRA=11", "-ar", str(SR), out], check=True)

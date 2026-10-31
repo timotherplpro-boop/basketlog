@@ -47,7 +47,18 @@ jobs:
           python3 -c "import json; j = json.load(open('jour.json')); print(len(j['games']), 'matchs le', j['d'])"
       - name: Fabrication
         run: python3 video/make.py --day jour.json --out out
+      # Après une modification du code (push), les vidéos sont seulement gardées 3 jours comme résultat du test :
+      # la release du jour, celle que Tim reçoit, ne change pas.
+      - name: Résultat du test (après une modification)
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: videos-test
+          path: out/
+          retention-days: 3
+          if-no-files-found: ignore
       - name: Dépôt dans la release du jour
+        if: github.event_name != 'push'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

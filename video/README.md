@@ -30,6 +30,17 @@ pas repris en « choc », `--check` pour quelques images fixes par vidéo (avec 
 
 Sortie : `video/out/AAAA-MM-JJ/` avec les MP4, `legendes.txt` (texte de publication proposé) et `videos.json`.
 
+## Chaque jour
+
+Le workflow GitHub « Vidéos du jour » (`.github/workflows/videos.yml`) tourne vers 16 h 30 à Paris (17 h 30 l'été) :
+il lit `/api/videos` du jour, fabrique les vidéos et les dépose dans la release `videos-AAAA-MM-JJ`, que Tim reçoit à
+18 h 08. On peut le relancer pour une date précise depuis l'onglet Actions (« Run workflow »).
+Après une modification du dossier `video/`, le workflow refait les vidéos pour test (gardées 3 jours dans Actions)
+sans toucher à la release du jour.
+
+Voix : les lignes sont vérifiées par reconnaissance vocale (Whisper) ; la musique baisse de 15 dB et les bruitages
+de 6 dB pendant la voix. Un nom d'équipe mal prononcé se corrige dans `SPOKEN` (`voice.py`).
+
 ## Fichiers
 
 - `make.py` : choix des matchs, textes, minutage, rendu image par image (Chromium), assemblage.

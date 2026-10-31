@@ -103,7 +103,7 @@ def facts(g, side):
         out.append((7, f"{em} sans {big[0]['name'].split(' ')[-1]}", f"{big[0]['name']} : {str(big[0]['pts']).replace('.', ',')} pts par match",
                     f"{T} {agree(A, 'doit', 'doivent')} faire sans un joueur à plus de {fr_num(int(big[0]['pts']))} points par match."))
     if w >= 3 and l == 0:
-        out.append((8, f"{em} invaincu", f"{w} victoires en {w} matchs", f"{T} {agree(A, 'est invaincu', 'sont invaincus')} cette saison."))
+        out.append((8, f"{em} invaincu", f"{w} victoires en {w} matchs", f"{T} n'{agree(A, 'a', 'ont')} pas encore perdu cette saison."))
     if w == 0 and l >= 3:
         out.append((8, f"{em} : 0 victoire", f"{l} défaites en {l} matchs", f"{T} n'{agree(A, 'a', 'ont')} toujours pas gagné cette saison."))
     st = t["streak"]
@@ -113,7 +113,7 @@ def facts(g, side):
     sw, sl = wl(t["split"])
     if t["split"] and sl == 0 and sw >= 2:
         where = "à domicile" if side == "h" else "à l'extérieur"
-        out.append((5, f"{em} : {t['rec']}", f"et invaincu {where} ({t['split']})", f"{T} {agree(A, 'est invaincu', 'sont invaincus')} {where} cette saison."))
+        out.append((5, f"{em} : {t['rec']}", f"et invaincu {where} ({t['split']})", f"{T} n'{agree(A, 'a', 'ont')} pas encore perdu {where} cette saison."))
     if t["b2b"]:
         out.append((4, f"{em} a joué hier", "deuxième match en deux soirs", f"{T} {agree(A, 'joue son', 'jouent leur')} deuxième match en deux soirs."))
     f = t["form"].lower()
@@ -198,7 +198,7 @@ def fmt_choc(g, day):
     s["pills"] = {"title": "Le modèle <em>analyse</em>", "items": [{"at": word_at(line, w, rel[0], durs[0]), "text": w} for w in ("Forme", "Absences", "Fatigue", "Scénarios")],
                   "hotAt": word_at(line, "le modèle", rel[0], durs[0])}
     s = {"type": "phone", "page": "list", "hlRow": g["id"], "caps": []}
-    rel, durs = v.add(s, ["Et il fait ça pour chaque match NBA et d'Euro-ligue, tous les soirs."], lead=0.15, tail=0.25, min_dur=3.6)
+    rel, durs = v.add(s, ["Et il fait ça pour chaque match NBA, tous les soirs."], lead=0.15, tail=0.25, min_dur=3.6)
     s["caps"] = [{"at": 0.15, "until": s["t1"] - s["t0"] + 0.1, "l1": "Chaque match <em>NBA</em>", "l2": "+ EuroLeague · tous les soirs"}]
     pf = max(g["pA"], g["pH"])
     s = {"type": "verdict", "chip": "Verdict du modèle", "team": F["short"], "pct": pf,
@@ -231,7 +231,7 @@ def fmt_favori(g, day):
     s.update(chipAt=0.1, teamAt=rel[0] + 0.25, countA=rel[0] + durs[0] * 0.45, countB=rel[0] + durs[0] * 0.92, scoreAt=rel[1] - 0.05, confAt=rel[1] + durs[1] + 0.1)
     s = {"type": "twist", "chip": "Mais attention", "line1": D["short"], "pct": 100 - pf, "line2": "de chances de victoire selon le modèle"}
     rel, durs = v.add(s, ["Mais attention :", f"{spoken(D['abbr'])} {agree(D['abbr'], 'garde', 'gardent')} {fr_num(100 - pf)} pour cent de chances.", "Surprise possible ?"], lead=0.25, tail=0.3)
-    s.update(chipAt=max(0.1, rel[0] - 0.1), bigAt=rel[1] + 0.1)
+    s.update(chipAt=max(0.1, rel[0] - 0.1), bigAt=max(0.2, rel[1] - 0.95))  # le chiffre tombe juste avant la phrase qui l'annonce
     cta(v, "Toute l'analyse<br>est sur <em>Basketlog</em>", "Favori solide ou match piège ?", "Dis-le en commentaire",
         "Favori solide ou match piège ? Dis-le en commentaire.", f"Toute l'analyse est sur {BRAND}, va voir.")
     return v, f"Le plus gros favori de la nuit en NBA : {les(F['short'])} à {pf} % contre {les(D['short'])}. Favori solide ou match piège ?"
@@ -301,19 +301,20 @@ def cues_for(segs):
             c.append(("pop", t0 + p["at"], {"f": 820, "g": 0.2}))
         if s.get("pills"):
             c.append(("tick", t0 + s["pills"]["hotAt"], {"f": 1900, "g": 0.32}))
+        # montées (« riser ») discrètes : elles tombent pendant que la voix annonce le chiffre
         if s["type"] == "verdict":
-            c += [("impact", t0 + s["teamAt"], {"g": 0.45, "big": False}), ("riser", t0 + s["countA"], {"d": max(0.3, s["countB"] - s["countA"]), "g": 0.22}),
+            c += [("impact", t0 + s["teamAt"], {"g": 0.45, "big": False}), ("riser", t0 + s["countA"], {"d": max(0.3, s["countB"] - s["countA"]), "g": 0.12}),
                   ("impact", t0 + s["countB"], {"g": 0.7})]
         if s["type"] == "split":
-            c += [("riser", t0 + s["splitAt"], {"d": 1.0, "g": 0.2}), ("impact", t0 + s["splitAt"] + 1.0, {"g": 0.7})]
+            c += [("riser", t0 + s["splitAt"], {"d": 1.0, "g": 0.11}), ("impact", t0 + s["splitAt"] + 1.0, {"g": 0.7})]
         if s["type"] == "twist":
-            c += [("riser", t0 + s["bigAt"], {"d": 0.8, "g": 0.2}), ("impact", t0 + s["bigAt"] + 0.8, {"g": 0.5})]
+            c += [("riser", t0 + s["bigAt"], {"d": 0.8, "g": 0.11}), ("impact", t0 + s["bigAt"] + 0.8, {"g": 0.5})]
         if s["type"] == "program":
             c += [("pop", t0 + s["cardsAt"] + k * s["cardStep"], {"f": 760, "g": 0.15}) for k in range(len(s["cards"]))]
             c += [("tick", t0 + m["at"], {"f": 1700, "g": 0.3}) for m in s["marks"]]
         if s["type"] == "cta":
             n = len(s["word"])
-            c += [("key", t0 + s["typeA"] + k * (s["typeB"] - s["typeA"]) / n, {"g": 0.22}) for k in range(n)]
+            c += [("key", t0 + s["typeA"] + k * (s["typeB"] - s["typeA"]) / n, {"g": 0.06}) for k in range(n)]  # discret : ne couvre pas la voix
             c += [("pop", t0 + s["tapAt"], {"f": 620, "g": 0.4}), ("impact", t0 + s["logoAt"], {"g": 0.8})]
     return c
 
