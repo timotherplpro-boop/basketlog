@@ -5,10 +5,8 @@ import { track } from "../lib/analytics";
 import { useL } from "./LangProvider";
 import { useProStatus } from "../lib/useProStatus";
 
-// Formules payantes : seules elles permettent de donner un avis (la route /api/avis le revérifie chez Whop).
-const ABONNES = ["starter", "pro", "lifetime"];
-
-// Bouton "Donner mon avis" + fenêtre de dépôt, réservés aux abonnés. Les avis sont publiés après validation.
+// Bouton "Donner mon avis" + fenêtre de dépôt, pour tout compte Basketlog (gratuit ou abonné) ; un visiteur sans
+// compte est invité à se connecter ou à créer son compte gratuit. Les avis sont publiés après validation.
 export default function ReviewForm({ label, className = "btn-white" }) {
   const L = useL();
   const status = useProStatus();
@@ -48,11 +46,14 @@ export default function ReviewForm({ label, className = "btn-white" }) {
   // Admin : lien vers la relecture des avis. Créateur partenaire : pas d'avis (accès offert).
   if (status.role === "admin") return <p className="reviews-only"><a href="/app/admin">{L.t("Relire les avis (admin)", "Review submissions (admin)", "Revisar las opiniones (admin)")}</a></p>;
   if (status.role) return null;
-  if (!ABONNES.includes(status.tier)) {
+  if (!status.connected) {
+    const back = encodeURIComponent(location.pathname + location.search);
     return (
       <p className="reviews-only">
-        {L.t("Les avis sont réservés aux abonnés.", "Reviews are reserved for subscribers.", "Las opiniones están reservadas a los suscriptores.")}{" "}
-        <a href={L.href("/pro")}>{L.t("Voir les formules", "See the plans", "Ver los planes")}</a>
+        {L.t("Pour donner ton avis, connecte-toi ou crée ton compte gratuit.", "To leave a review, log in or create your free account.", "Para dar tu opinión, inicia sesión o crea tu cuenta gratuita.")}{" "}
+        <a href={`/api/whop/signup?next=${back}`}>{L.t("Créer mon compte gratuit", "Create my free account", "Crear mi cuenta gratuita")}</a>
+        {" · "}
+        <a href={`/api/whop/login?next=${back}`}>{L.t("Se connecter", "Log in", "Iniciar sesión")}</a>
       </p>
     );
   }

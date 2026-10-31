@@ -28,7 +28,7 @@ export default function ReviewCards({ reviews, max = 9, more = true, L = mk("fr"
       <div className="cards-empty reveal">
         <div className="ce-stars">★★★★★</div>
         <h3>{L.t("Aucun avis pour l'instant", "No reviews yet", "Todavía no hay opiniones")}</h3>
-        <p>{L.t("Basketlog vient d'ouvrir : les premiers avis de nos abonnés apparaîtront ici, après relecture.", "Basketlog just launched: the first reviews from our subscribers will show up here, once checked.", "Basketlog acaba de abrir: las primeras opiniones de nuestros suscriptores aparecerán aquí, tras revisarlas.")}</p>
+        <p>{L.t("Basketlog vient d'ouvrir : les premiers avis de nos utilisateurs apparaîtront ici, après relecture.", "Basketlog just launched: the first reviews from our users will show up here, once checked.", "Basketlog acaba de abrir: las primeras opiniones de nuestros usuarios aparecerán aquí, tras revisarlas.")}</p>
         <ReviewForm label={L.t("Donner le premier avis", "Write the first review", "Dar la primera opinión")} className="btn-solid" />
       </div>
     );
@@ -47,7 +47,8 @@ export default function ReviewCards({ reviews, max = 9, more = true, L = mk("fr"
               <span className="id">
                 <small>{r.prenom}</small>
                 <b>{r.profil || L.t("Utilisateur Basketlog", "Basketlog user", "Usuario de Basketlog")}</b>
-                {r.abonne && <em className="verified">✓ {L.t("Abonné vérifié", "Verified subscriber", "Suscriptor verificado")}</em>}
+                {r.verif === "abonne" && <em className="verified">✓ {L.t("Abonné vérifié", "Verified subscriber", "Suscriptor verificado")}</em>}
+                {r.verif === "membre" && <em className="verified">✓ {L.t("Membre vérifié", "Verified member", "Miembro verificado")}</em>}
               </span>
               {r.lien && <SocialIcon url={r.lien} L={L} />}
             </div>

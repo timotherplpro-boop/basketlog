@@ -10,8 +10,8 @@ export async function generateMetadata() {
   return pageMeta({
     title: L.t("Avis sur Basketlog : ce qu'en pensent les utilisateurs", "Basketlog reviews: what users think", "Opiniones sobre Basketlog: lo que piensan los usuarios"),
     description: L.t(
-      "Les avis des utilisateurs de Basketlog, l'outil d'analyse et de pronostics NBA et EuroLeague. Publiés tels quels ; les avis d'abonnés portent la mention « Abonné vérifié ».",
-      "Reviews from Basketlog users, the NBA and EuroLeague analysis and prediction tool. Published as is; reviews from subscribers carry a “Verified subscriber” label.", "Las opiniones de los usuarios de Basketlog, la herramienta de análisis y pronósticos de la NBA y la Euroliga. Publicadas tal cual; las de suscriptores llevan la mención «Suscriptor verificado»."
+      "Les avis des utilisateurs de Basketlog, l'outil d'analyse et de pronostics NBA et EuroLeague. Chaque avis est publié tel quel, après relecture.",
+      "Reviews from Basketlog users, the NBA and EuroLeague analysis and prediction tool. Every review is published as is, after a check.", "Las opiniones de los usuarios de Basketlog, la herramienta de análisis y pronósticos de la NBA y la Euroliga. Cada opinión se publica tal cual, tras una revisión."
     ),
     path: "/avis",
     L,
