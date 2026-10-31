@@ -124,12 +124,21 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
             <AnalysisProgress p={run.p} league={target.league} />
           ) : (
             <>
-              <h3>{L.t(`Tu n'as accès qu'à ${pctTxt} de l'analyse`, `You only have access to ${pctTxt} of the analysis`, `Solo tienes acceso al ${pctTxt} del análisis`)}</h3>
-              <div className="gate-meter"><i style={{ width: `${pct}%` }} /></div>
+              {state === "available" ? (
+                // Abonné : l'analyse est incluse, on ne lui dit pas qu'il n'a accès qu'à une partie.
+                <h3>{left == null
+                  ? L.t("L'analyse complète est incluse dans ta formule", "The full analysis is included in your plan", "El análisis completo está incluido en tu plan")
+                  : L.t("Ton analyse Starter du jour est disponible", "Your daily Starter analysis is available", "Tu análisis Starter del día está disponible")}</h3>
+              ) : (
+                <>
+                  <h3>{L.t(`Tu n'as accès qu'à ${pctTxt} de l'analyse`, `You only have access to ${pctTxt} of the analysis`, `Solo tienes acceso al ${pctTxt} del análisis`)}</h3>
+                  <div className="gate-meter"><i style={{ width: `${pct}%` }} /></div>
+                </>
+              )}
               {state === "available" ? (
                 <>
                   <p>{left == null
-                    ? <>{contents} {L.t("Ta formule les débloque sans limite.", "Your plan unlocks them with no limit.", "Tu plan los desbloquea sin límite.")}</>
+                    ? <>{contents} {L.t("Ta formule les débloque sur tous les matchs, sans limite.", "Your plan unlocks them on every game, with no limit.", "Tu plan los desbloquea en todos los partidos, sin límite.")}</>
                     : L.t(`Ton analyse Starter du jour montre les probabilités exactes, le score projeté et les stats clés du match. Il te reste ${left} analyse aujourd'hui.`, `Your daily Starter analysis shows the exact probabilities, projected score and key stats. You have ${left} analysis left today.`, `Tu análisis Starter del día muestra las probabilidades exactas, el marcador proyectado y las estadísticas clave. Te queda ${left} análisis hoy.`)}</p>
                   <button type="button" className="btn-solid" onClick={() => launch()}>🔓 {left == null ? L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo") : L.t("Débloquer mon analyse du jour", "Unlock my daily analysis", "Desbloquear mi análisis del día")}</button>
                 </>
