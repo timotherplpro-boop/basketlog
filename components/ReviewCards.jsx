@@ -48,7 +48,6 @@ export default function ReviewCards({ reviews, max = 9, more = true, L = mk("fr"
                 <small>{r.prenom}</small>
                 <b>{r.profil || L.t("Utilisateur Basketlog", "Basketlog user", "Usuario de Basketlog")}</b>
                 {r.verif === "abonne" && <em className="verified">✓ {L.t("Abonné vérifié", "Verified subscriber", "Suscriptor verificado")}</em>}
-                {r.verif === "membre" && <em className="verified">✓ {L.t("Membre vérifié", "Verified member", "Miembro verificado")}</em>}
               </span>
               {r.lien && <SocialIcon url={r.lien} L={L} />}
             </div>
