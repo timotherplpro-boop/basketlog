@@ -4,7 +4,7 @@ import { elContext, elAnalyze, elStandings } from "../../../../../lib/euroleague
 import AppTabs from "../../../../../components/AppTabs";
 import { pageMeta } from "../../../../../lib/seo";
 import { getL } from "../../../../../lib/lang-server";
-import { fmtDate } from "../../../../../lib/i18n";
+import { fmtDate, numOf } from "../../../../../lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -46,9 +46,9 @@ export default async function ELTeamPage({ params }) {
   const kpis = [
     [L.t("Bilan", "Record", "Balance"), `${t.wins}-${t.losses}`],
     [L.t("Classement", "Standing", "Clasificación"), rank && t.gp ? L.t(rank === 1 ? "1er" : `${rank}e`, ord(rank), `${rank}.º`) : "–"],
-    [L.t("Points / match", "Points / game", "Puntos / partido"), t.ppg != null ? t.ppg.toFixed(1) : "–"],
-    [L.t("Encaissés / match", "Allowed / game", "Encajados / partido"), t.oppg != null ? t.oppg.toFixed(1) : "–"],
-    [L.t("Écart / match", "Margin / game", "Diferencia / partido"), t.diff != null ? `${t.diff > 0 ? "+" : ""}${t.diff.toFixed(1)}` : "–"],
+    [L.t("Points / match", "Points / game", "Puntos / partido"), numOf(t.ppg, L)],
+    [L.t("Encaissés / match", "Allowed / game", "Encajados / partido"), numOf(t.oppg, L)],
+    [L.t("Écart / match", "Margin / game", "Diferencia / partido"), t.diff != null ? `${t.diff > 0 ? "+" : ""}${numOf(t.diff, L)}` : "–"],
     [L.t("À domicile", "Home", "En casa"), t.home],
     [L.t("À l'extérieur", "Road", "Fuera"), t.road],
     [L.t("Saison passée", "Last season", "Temporada pasada"), prev?.gp ? `${prev.wins}-${prev.losses}` : "–"],

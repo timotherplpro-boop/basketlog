@@ -90,7 +90,7 @@ export default async function MethodePage() {
         <h2>5. De la diferencia a la probabilidad</h2>
         <p className="narr">
           La diferencia esperada nunca se cumple exactamente: en la NBA, el resultado final se aleja de ella una docena de puntos de media. Por eso el modelo usa una distribución normal centrada en la diferencia esperada, con una desviación típica de 12,5 puntos.
-          De ahí obtiene la probabilidad de victoria de cada equipo, las opciones de un partido igualado (5 puntos o menos) y las de una victoria amplia (10 puntos o más).
+          De ahí obtiene la probabilidad de victoria de cada equipo y la de cada diferencia posible: partido igualado (5 puntos o menos), victoria por 6 a 9 puntos o victoria amplia (10 puntos o más).
           El marcador proyectado combina el ataque de cada equipo con la defensa de su rival.
         </p>
       </div>
@@ -154,7 +154,7 @@ export default async function MethodePage() {
         <h2>5. From margin to probability</h2>
         <p className="narr">
           The expected margin is never spot on: in the NBA, the final score misses it by about a dozen points on average. So the model uses a normal distribution centered on the expected margin, with a standard deviation of 12.5 points.
-          From it, the model derives each team&apos;s win probability, the chances of a close game (a margin of 5 points or fewer) and of a blowout (10 points or more).
+          From it, the model derives each team&apos;s win probability and the chances of every possible margin: a close game (5 points or fewer), a 6-to-9-point win or a blowout (10 points or more).
           The projected score combines each team&apos;s offense with its opponent&apos;s defense.
         </p>
       </div>
@@ -218,7 +218,7 @@ export default async function MethodePage() {
         <h2>5. De l&apos;écart à la probabilité</h2>
         <p className="narr">
           L&apos;écart attendu ne tombe jamais pile : en NBA, le score final s&apos;en éloigne en moyenne d&apos;une douzaine de points. Le modèle utilise donc une loi normale centrée sur l&apos;écart attendu, avec un écart-type de 12,5 points.
-          Il en tire la probabilité de victoire de chaque équipe, les chances d&apos;un match serré (5 points d&apos;écart ou moins) et celles d&apos;une large victoire (10 points ou plus).
+          Il en tire la probabilité de victoire de chaque équipe et les chances de chaque écart possible : match serré (5 points d&apos;écart ou moins), victoire de 6 à 9 points ou large victoire (10 points ou plus).
           Le score projeté combine l&apos;attaque de chaque équipe et la défense de son adversaire.
         </p>
       </div>

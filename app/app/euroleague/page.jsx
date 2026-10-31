@@ -4,6 +4,7 @@ import UpcomingList from "../../../components/UpcomingList";
 import AppTabs from "../../../components/AppTabs";
 import { pageMeta } from "../../../lib/seo";
 import { getL } from "../../../lib/lang-server";
+import { numOf } from "../../../lib/i18n";
 
 export const dynamic = "force-dynamic";
 export async function generateMetadata() {
@@ -53,7 +54,7 @@ export default async function EuroLeaguePage() {
                     </Link>
                   </td>
                   <td>{t.wins}-{t.losses}</td>
-                  <td className={t.diff > 0 ? "pos" : t.diff < 0 ? "neg" : ""}>{t.gp ? `${t.diff > 0 ? "+" : ""}${t.diff.toFixed(1)}` : "–"}</td>
+                  <td className={t.diff > 0 ? "pos" : t.diff < 0 ? "neg" : ""}>{t.gp ? `${t.diff > 0 ? "+" : ""}${numOf(t.diff, L)}` : "–"}</td>
                   <td>{(L.en ? toWL(t.streak) : t.streak) || "–"}</td>
                 </tr>
               ))}

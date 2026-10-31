@@ -7,7 +7,7 @@ import AppTabs from "../../../../components/AppTabs";
 import { teamSummary } from "../../../../lib/summary";
 import { pageMeta } from "../../../../lib/seo";
 import { getL } from "../../../../lib/lang-server";
-import { fmtDate, fmtTime } from "../../../../lib/i18n";
+import { fmtDate, fmtTime, numOf } from "../../../../lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -59,11 +59,11 @@ export default async function TeamPage({ params }) {
   const kpis = [
     [L.t("Bilan", "Record", "Balance"), `${me.wins ?? 0}-${me.losses ?? 0}`],
     [L.t("Classement", "Standing", "Clasificación"), rank ? L.t(`${rank === 1 ? "1re" : `${rank}e`} ${confName}`, `${ord(rank)} ${confName}`, `${rank}.º ${confName}`) : "–"],
-    [L.t("Points / match", "Points / game", "Puntos / partido"), stats?.ppg?.toFixed(1) ?? "–"],
+    [L.t("Points / match", "Points / game", "Puntos / partido"), numOf(stats?.ppg, L)],
     [L.t("Adresse à 3 pts", "3-point %", "% de triples"), stats?.threePct != null ? (L.en ? `${stats.threePct.toFixed(1)}%` : `${stats.threePct.toFixed(1).replace(".", ",")}\u202f%`) : "–"],
-    [L.t("Rebonds / match", "Rebounds / game", "Rebotes / partido"), stats?.reb?.toFixed(1) ?? "–"],
-    [L.t("Passes / match", "Assists / game", "Asistencias / partido"), stats?.ast?.toFixed(1) ?? "–"],
-    [L.t("Écart / match", "Margin / game", "Diferencia / partido"), me.gp && me.diff != null ? `${me.diff > 0 ? "+" : ""}${me.diff.toFixed(1)}` : "–"],
+    [L.t("Rebonds / match", "Rebounds / game", "Rebotes / partido"), numOf(stats?.reb, L)],
+    [L.t("Passes / match", "Assists / game", "Asistencias / partido"), numOf(stats?.ast, L)],
+    [L.t("Écart / match", "Margin / game", "Diferencia / partido"), me.gp && me.diff != null ? `${me.diff > 0 ? "+" : ""}${numOf(me.diff, L)}` : "–"],
     [L.t("Saison passée", "Last season", "Temporada pasada"), me.prev || "–"],
   ];
 
@@ -100,7 +100,7 @@ export default async function TeamPage({ params }) {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 {p.head ? <img className="pl-head" src={p.head} alt="" /> : <span className="pl-head ph" />}
                 <span className="pl-id"><b>{p.name}</b><small>{p.pos}{p.jersey ? ` · #${p.jersey}` : ""}</small></span>
-                <span className="pl-val"><strong>{p.value}</strong><small>{catLabel(p.cat, L)}</small></span>
+                <span className="pl-val"><strong>{L.en ? p.value : String(p.value).replace(".", ",")}</strong><small>{catLabel(p.cat, L)}</small></span>
               </div>
             ))}
           </div>
@@ -152,7 +152,7 @@ export default async function TeamPage({ params }) {
               [L.t("Lancers francs", "Free throw %", "% de tiros libres"), stats.ftPct, "%"], [L.t("Rebonds offensifs", "Offensive rebounds", "Rebotes ofensivos"), stats.oreb, ""], [L.t("Interceptions", "Steals", "Robos"), stats.stl, ""],
               [L.t("Contres", "Blocks", "Tapones"), stats.blk, ""], [L.t("Balles perdues", "Turnovers", "Pérdidas"), stats.tov, ""], [L.t("Matchs joués", "Games played", "Partidos jugados"), stats.gp, ""],
             ].filter(([, v]) => v != null).map(([l, v, u]) => (
-              <div key={l}><span>{l}</span><b>{Number.isInteger(v) ? v : v.toFixed(1)}{u && (L.en ? u : ` ${u}`)}</b></div>
+              <div key={l}><span>{l}</span><b>{Number.isInteger(v) ? v : numOf(v, L)}{u && (L.en ? u : `\u202f${u}`)}</b></div>
             ))}
           </div>
         </div>
