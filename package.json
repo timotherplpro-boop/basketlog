@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "node tests/smoke.mjs"
   },
   "dependencies": {
     "@amplitude/analytics-browser": "^2.48.1",

@@ -1,3 +1,7 @@
 node_modules
 .next
 .env*
+
+# Vidéos : voix téléchargée et sorties
+video/.cache/
+video/out/

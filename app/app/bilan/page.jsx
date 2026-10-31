@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { nbaPicks, elPicks, summarize, lastDays } from "../../../lib/history";
+import { publishedPicks, TRACK_START } from "../../../lib/pronos";
 import { nbaToday, seasonForDate } from "../../../lib/espn";
 import { currentSeasonCode } from "../../../lib/euroleague";
 import AppTabs from "../../../components/AppTabs";
@@ -48,18 +49,23 @@ export default async function BilanPage({ searchParams }) {
   const L = await getL();
   const pct = (x) => (x == null ? "–" : `${Math.round(x * 100)}${L.en ? "%" : " %"}`);
   const of = (a, b) => L.t(`${a} sur ${b}`, `${a} of ${b}`, `${a} de ${b}`);
-  const view = ["nba", "past", "el"].includes(sp?.l) ? sp.l : "nba";
   const season = seasonForDate(nbaToday());
   const elYear = Number(currentSeasonCode().slice(1));
   const label = (y) => `${y - 1}-${String(y).slice(2)}`;
 
-  const picks = view === "el" ? await elPicks() : await nbaPicks(view === "past" ? season - 1 : season);
+  // Pronostics publiés (enregistrés avant chaque match) : onglet par défaut dès qu'il y a assez de matchs notés.
+  const published = await publishedPicks();
+  const pubN = published?.graded.length || 0;
+  const view = ["pub", "nba", "past", "el"].includes(sp?.l) ? sp.l : pubN >= 30 ? "pub" : "nba";
+  const picks = view === "pub" ? published?.graded || null : view === "el" ? await elPicks() : await nbaPicks(view === "past" ? season - 1 : season);
+  const pending = view === "pub" ? published?.pending.length || 0 : 0;
+  const since = new Intl.DateTimeFormat(L.locale, { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${TRACK_START}T12:00:00Z`));
   const list = picks || [];
   const s = summarize(list);
   const week = summarize(lastDays(list, 7));
   const strongL = list.filter((p) => Math.max(p.pHome, 1 - p.pHome) >= 0.7);
   const strong = { n: strongL.length, ok: strongL.filter((p) => p.ok).length };
-  const href = (p) => L.href(view === "el" ? `/app/euroleague/match/${p.id}` : `/app/match/${p.id}?d=${p.d}`);
+  const href = (p) => L.href(view === "el" || p.league === "EL" ? `/app/euroleague/match/${p.id}` : `/app/match/${p.id}?d=${p.d}`);
 
   // Derniers résultats, groupés par jour (plus récents d'abord).
   const recent = [...list].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 45);
@@ -71,7 +77,8 @@ export default async function BilanPage({ searchParams }) {
   }
 
   const tabs = [
-    ["nba", `NBA ${label(season)}`],
+    ["pub", L.t("Pronostics publiés", "Published picks", "Pronósticos publicados")],
+    ["nba", `NBA ${label(season)} (${L.t("recalculé", "recalculated", "recalculado")})`],
     ["past", `NBA ${label(season - 1)} (${L.t("test", "backtest", "prueba")})`],
     ["el", L.t("EuroLeague", "EuroLeague", "Euroliga")],
   ];
@@ -94,9 +101,18 @@ export default async function BilanPage({ searchParams }) {
       {!picks ? (
         <div className="card block empty">{L.t("Données momentanément indisponibles. Réessaie dans quelques minutes.", "Data temporarily unavailable. Please try again in a few minutes.", "Datos no disponibles por el momento. Vuelve a intentarlo en unos minutos.")}</div>
       ) : !s.n ? (
-        <div className="card block empty">{L.t("Aucun match terminé pour l'instant sur cette période.", "No completed games yet for this period.", "Todavía no hay partidos terminados en este periodo.")}</div>
+        <div className="card block empty">{view === "pub"
+          ? L.t(
+            `Le suivi des pronostics publiés a commencé le ${since}. ${pending ? `${pending} pronostic${pending > 1 ? "s" : ""} enregistré${pending > 1 ? "s" : ""} avant le match, en attente du résultat.` : ""} Les premiers résultats apparaîtront ici après les matchs.`,
+            `Tracking of published picks started on ${since}. ${pending ? `${pending} pick${pending > 1 ? "s" : ""} recorded before tip-off, waiting for the result.` : ""} The first results will show up here after the games.`,
+            `El seguimiento de los pronósticos publicados empezó el ${since}. ${pending ? `${pending} pronóstico${pending > 1 ? "s" : ""} guardado${pending > 1 ? "s" : ""} antes del partido, a la espera del resultado.` : ""} Los primeros resultados aparecerán aquí después de los partidos.`)
+          : L.t("Aucun match terminé pour l'instant sur cette période.", "No completed games yet for this period.", "Todavía no hay partidos terminados en este periodo.")}</div>
       ) : (
         <>
+          {view === "pub" && <p className="note" style={{ textAlign: "center", margin: "0 0 12px" }}>{L.t(
+            `Depuis le ${since} · ${pending} pronostic${pending > 1 ? "s" : ""} en attente du résultat`,
+            `Since ${since} · ${pending} pick${pending > 1 ? "s" : ""} waiting for the result`,
+            `Desde el ${since} · ${pending} pronóstico${pending > 1 ? "s" : ""} a la espera del resultado`)}</p>}
           <div className="kpis kpis8">
             <div className="card kpi bl-hero"><span>{L.t("Bons pronostics", "Correct predictions", "Pronósticos acertados")}</span><strong>{pct(s.pct)}</strong><small>{L.t(`${s.ok} sur ${s.n} matchs`, `${s.ok} of ${s.n} games`, `${s.ok} de ${s.n} partidos`)}</small></div>
             <div className="card kpi"><span>{L.t("7 derniers jours", "Last 7 days", "Últimos 7 días")}</span><strong>{week.n ? pct(week.pct) : "–"}</strong><small>{week.n ? of(week.ok, week.n) : L.t("pas de match", "no games", "sin partidos")}</small></div>
@@ -146,7 +162,19 @@ export default async function BilanPage({ searchParams }) {
       )}
 
       <div className="card block bl-method">
-        {L.es ? (<>
+        {view === "pub" ? (L.es ? (<>
+          <h2>Cómo se calcula este balance</h2>
+          <p>Cada pronóstico se guarda <b>antes del salto inicial</b>, tal y como aparece en Basketlog (bajas incluidas): cuenta la última versión anterior al partido. Después se compara con el resultado final. No se recalcula nada a posteriori.</p>
+          <p>El seguimiento empezó el {since}. Las otras pestañas muestran el modelo recalculado sobre temporadas enteras, para juzgarlo en más partidos.</p>
+        </>) : L.en ? (<>
+          <h2>How this track record is calculated</h2>
+          <p>Every pick is recorded <b>before tip-off</b>, exactly as shown on Basketlog (injuries included): the last pregame version counts. It is then compared with the final score. Nothing is recalculated afterwards.</p>
+          <p>Tracking started on {since}. The other tabs show the model recalculated over full seasons, to judge it on more games.</p>
+        </>) : (<>
+          <h2>Comment ce bilan est calculé</h2>
+          <p>Chaque pronostic est enregistré <b>avant le coup d&apos;envoi</b>, tel qu&apos;il est affiché sur Basketlog (absences comprises) : c&apos;est la dernière version d&apos;avant-match qui compte. Il est ensuite comparé au score final. Rien n&apos;est recalculé après coup.</p>
+          <p>Le suivi a commencé le {since}. Les autres onglets montrent le modèle recalculé sur des saisons entières, pour le juger sur plus de matchs.</p>
+        </>)) : L.es ? (<>
           <h2>Cómo se calcula este balance</h2>
           <p>Para cada partido terminado, volvemos a ejecutar el modelo de Basketlog <b>solo con los resultados conocidos antes del salto inicial</b> y comparamos el favorito señalado con el ganador real. No se usa ninguna información del futuro.</p>
           <p>Las bajas no se incluyen en este balance, porque no siempre se conoce la lista exacta antes del partido. Los pronósticos que se muestran antes de los partidos sí las tienen en cuenta: por eso están algo mejor informados que este balance.</p>
@@ -161,6 +189,7 @@ export default async function BilanPage({ searchParams }) {
           <p>Pour chaque match terminé, on refait tourner le modèle Basketlog <b>uniquement avec les résultats connus avant le coup d&apos;envoi</b>, puis on compare le favori désigné au vainqueur réel. Aucune information du futur n&apos;est utilisée.</p>
           <p>Les absences ne sont pas reprises dans ce bilan, car on ne connaît pas toujours la liste exacte d&apos;avant-match. Les pronostics affichés avant les matchs les prennent en compte : ils sont donc légèrement mieux informés que ce bilan.</p>
           <p>L&apos;onglet {label(season - 1)} est un test sur une saison entière déjà jouée, pour juger le modèle sur plus de 1 000 matchs.</p>
+          <p>L&apos;onglet « Pronostics publiés » montre, lui, les pronostics enregistrés avant chaque match depuis le {since}.</p>
         </>)}
       </div>
       <p className="disclaimer">{L.t("Basketlog n'est pas un service de paris. Un bon taux de réussite passé ne garantit pas les résultats futurs.", "Basketlog is not a betting service. A good past track record does not guarantee future results.", "Basketlog no es un servicio de apuestas. Un buen porcentaje de acierto en el pasado no garantiza resultados futuros.")}</p>

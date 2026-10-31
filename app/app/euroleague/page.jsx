@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { elUpcoming, elStandings } from "../../../lib/euroleague";
+import { recordPronosSoon } from "../../../lib/pronos";
 import UpcomingList from "../../../components/UpcomingList";
 import AppTabs from "../../../components/AppTabs";
 import { pageMeta } from "../../../lib/seo";
@@ -25,6 +26,7 @@ const toWL = (s) => (s ? s.replace(/^V/, "W").replace(/^D/, "L") : s);
 export default async function EuroLeaguePage() {
   const L = await getL();
   const { list, cur, season } = await elUpcoming(10);
+  recordPronosSoon("EL", list.map((x) => x.a));
   const games = list.map(({ g, a }) => ({ id: g.id, date: g.date, state: a.game.state, live: g.live, home: g.home, away: g.away, pHome: a.pHome }));
   const table = elStandings(cur);
   const year = Number(season.slice(1));

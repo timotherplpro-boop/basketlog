@@ -1,0 +1,31 @@
+/* Rendu "capture d'écran" : polices locales + emoji, aucune animation (images déterministes), pas de barre de défilement. */
+:root {
+  --title: "Tilt Warp", "Noto Color Emoji", system-ui, sans-serif;
+  --head: "Inter", "Noto Color Emoji", system-ui, sans-serif;
+  --body: "Inter", "Noto Color Emoji", system-ui, sans-serif;
+  --mono: "JetBrains Mono", "Noto Color Emoji", ui-monospace, monospace;
+}
+*, *::before, *::after { animation: none !important; transition: none !important; }
+html { scroll-behavior: auto !important; scrollbar-width: none; }
+::-webkit-scrollbar { display: none; }
+body { overflow-x: hidden; }
+.reveal { opacity: 1 !important; transform: none !important; }
+
+/* Pastilles d'équipe (sigles) à la place des logos */
+.tb { font-style: normal;
+  display: inline-grid !important; place-items: center; flex: none; box-sizing: border-box;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #26304a, #141b2c 70%);
+  border: 1px solid rgba(255, 224, 199, .22);
+  color: var(--peach); font: 700 7.5px/1 var(--mono); letter-spacing: 0;
+}
+.match-teams .team .tb { width: 58px; height: 58px; font-size: 15px; border-width: 1.5px; }
+.ar-fside .tb { width: 40px; height: 40px; font-size: 11px; }
+.scmp-head .tb { width: 26px; height: 26px; font-size: 8px; }
+.pl-team .tb, .block h2 .tb { width: 24px; height: 24px; font-size: 7.5px; }
+.chip .tb { width: 18px; height: 18px; font-size: 6px; }
+.h2h-row .tb { width: 20px; height: 20px; font-size: 6.5px; }
+.up-row .m .tb { width: 26px; height: 26px; font-size: 8px; }
+.pl-head.ph { font-family: var(--title); font-size: 15px; }
+.burger { width: 40px; height: 40px; border: 0; background: transparent; display: grid; place-content: center; gap: 6px; }
+.burger i { display: block; width: 22px; height: 2px; border-radius: 2px; background: #fff; }

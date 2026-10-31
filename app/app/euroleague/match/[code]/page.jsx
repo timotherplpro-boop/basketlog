@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { elContext, elAnalyze, elTable } from "../../../../../lib/euroleague";
+import { recordPronosSoon } from "../../../../../lib/pronos";
 import MatchView from "../../../../../components/MatchView";
 import ELExtras from "../../../../../components/ELExtras";
 import { pageMeta, dayLong, dayShort, pctTxt } from "../../../../../lib/seo";
@@ -49,6 +50,7 @@ export default async function ELMatchPage({ params }) {
   // Match terminé : pronostic recalculé avec les seuls matchs joués avant lui.
   const before = g.played ? elTable(ctx.games.filter((x) => x.played && new Date(x.date) < new Date(g.date))) : ctx.cur;
   const a = elAnalyze(g, before, ctx.prev);
+  recordPronosSoon("EL", [a]);
   const L = await getL();
   return (
     <MatchView

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { analyzeDay } from "../../../lib/data";
+import { recordPronosSoon } from "../../../lib/pronos";
 import { nbaToday, shiftDate, isValidDate } from "../../../lib/espn";
 import UpcomingList from "../../../components/UpcomingList";
 import AppTabs from "../../../components/AppTabs";
@@ -68,6 +69,7 @@ export default async function MatchsPage({ searchParams }) {
   const today = nbaToday();
   const date = isValidDate(sp.d) ? sp.d : today;
   const { analyses } = await analyzeDay(date);
+  recordPronosSoon("NBA", analyses); // pronostic d'avant-match enregistré pour le bilan réel
   const games = analyses
     .map((a) => ({ id: a.game.id, d: date, date: a.game.date, state: a.game.state, postponed: a.game.postponed || null, live: a.game.state === "in", home: a.game.home, away: a.game.away, pHome: a.pHome }))
     .sort((x, y) => new Date(x.date) - new Date(y.date));

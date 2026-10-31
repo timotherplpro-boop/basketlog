@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { analyzeDay } from "../../../../lib/data";
+import { recordPronosSoon } from "../../../../lib/pronos";
 import { nbaToday, isValidDate, shiftDate, scoreboardReachable } from "../../../../lib/espn";
 import MatchView from "../../../../components/MatchView";
 import { pageMeta, dayLong, dayShort, pctTxt } from "../../../../lib/seo";
@@ -60,5 +61,6 @@ export default async function MatchPage({ params, searchParams }) {
   const sp = (await searchParams) || {};
   const found = await findAnalysis(id, sp.d);
   if (!found) notFound();
+  recordPronosSoon("NBA", [found.a]);
   return <MatchView a={found.a} backHref={`/app/matchs?d=${found.date}`} path={`/app/match/${id}?d=${found.date}`} />;
 }
