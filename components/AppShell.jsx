@@ -27,7 +27,7 @@ const Icon = ({ name }) => (
 
 const FLAG = { fr: "🇫🇷", en: "🇺🇸", es: "🇪🇸" };
 
-export default function AppShell({ session, children }) {
+export default function AppShell({ session, ai = false, children }) {
   const L = useL();
   const pro = useProStatus();
   const pathname = usePathname();
@@ -80,7 +80,7 @@ export default function AppShell({ session, children }) {
       <aside className="sb" aria-label={L.t("Espace membre", "Member area", "Área de miembros")}>
         <div className="sb-brand">
           <Link href={L.href("/")} className="logo"><span className="ball" aria-hidden /> Basketlog</Link>
-          <small>{L.t("Analyse IA de matchs", "AI match analysis", "Análisis IA de partidos")}</small>
+          <small>{ai ? L.t("Analyse IA de matchs", "AI match analysis", "Análisis IA de partidos") : L.t("Analyse de matchs", "Match analysis", "Análisis de partidos")}</small>
         </div>
 
         <nav className="sb-nav" aria-label={L.t("Analyse", "Analysis", "Análisis")}>

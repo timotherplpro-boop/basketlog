@@ -15,7 +15,8 @@ import { getReviews } from "../lib/reviews";
 import { memberCount } from "../lib/members";
 import { MEMBERS_MIN, plusFloor, memberStep } from "../lib/proof";
 import JsonLd from "../components/JsonLd";
-import { pageMeta } from "../lib/seo";
+import { pageMeta, homeTitle } from "../lib/seo";
+import { aiReady } from "../lib/pro";
 import { getL } from "../lib/lang-server";
 import { fmtDate } from "../lib/i18n";
 
@@ -26,7 +27,7 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata() {
   const L = await getL();
   return pageMeta({
-    title: L.t("Basketlog : pronostics NBA et EuroLeague analysés par IA", "Basketlog: AI-powered NBA and EuroLeague predictions", "Basketlog: pronósticos NBA y Euroliga analizados con IA"),
+    title: homeTitle(L, aiReady()),
     description: L.t(
       "Pronostics NBA et EuroLeague pour chaque match : probabilités de victoire gratuites, score projeté, absences, forme et scénarios. Taux de réussite public.",
       "NBA and EuroLeague predictions for every game: free win probabilities, projected score, injuries, form and scenarios. Public track record.", "Pronósticos de la NBA y la Euroliga para cada partido: probabilidades de victoria gratis, marcador proyectado, bajas, forma y escenarios. Balance público."

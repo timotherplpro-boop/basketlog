@@ -20,11 +20,12 @@ import LangProvider from "../components/LangProvider";
 import InstallApp from "../components/InstallApp";
 import SiteFooter from "../components/SiteFooter";
 import SiteChrome from "../components/SiteChrome";
-import { COOKIE, decodeSession } from "../lib/pro";
+import { COOKIE, decodeSession, aiReady } from "../lib/pro";
+import { homeTitle } from "../lib/seo";
 
 export async function generateMetadata() {
   const L = await getL();
-  const title = L.t("Basketlog : pronostics NBA et EuroLeague analysés par IA", "Basketlog: AI-powered NBA and EuroLeague predictions", "Basketlog: pronósticos NBA y Euroliga analizados con IA");
+  const title = homeTitle(L, aiReady());
   const description = L.t(
     "Pronostics NBA et EuroLeague pour chaque match : probabilités de victoire gratuites, score projeté, absences, forme et scénarios. Taux de réussite public.",
     "NBA and EuroLeague predictions for every game: free win probabilities, projected score, injuries, form and scenarios. Public track record.",

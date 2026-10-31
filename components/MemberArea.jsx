@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { COOKIE, decodeSession } from "../lib/pro";
+import { COOKIE, decodeSession, aiReady } from "../lib/pro";
 import { getL } from "../lib/lang-server";
 import { getUsage } from "../lib/usage";
 import AppShell from "./AppShell";
@@ -12,7 +12,7 @@ export default async function MemberArea({ children }) {
   const [L, usage] = await Promise.all([getL(), getUsage(s.uid)]);
   const session = { name: s.name || "", tier: s.tier === "gratuit" ? "compte" : s.tier || "compte", used: usage?.used ?? 0 };
   return (
-    <AppShell session={session}>
+    <AppShell session={session} ai={aiReady()}>
       {children}
       <SiteFooter L={L} compact />
     </AppShell>

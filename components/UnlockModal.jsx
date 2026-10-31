@@ -59,9 +59,9 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
   const h = proof?.hits;
   const badge = !h ? null : h.span === "day"
     ? h.ok === h.n
-      ? L.t(`L'IA a correctement anticipé les ${h.n} matchs d'hier`, `The AI called all ${h.n} of yesterday's games`, `La IA acertó los ${h.n} partidos de ayer`)
-      : L.t(`L'IA a correctement anticipé ${h.ok} matchs sur ${h.n} hier`, `The AI correctly called ${h.ok} of ${h.n} games yesterday`, `La IA acertó ${h.ok} de ${h.n} partidos ayer`)
-    : L.t(`L'IA a correctement anticipé ${h.ok} matchs sur ${h.n} ces 7 derniers jours`, `The AI correctly called ${h.ok} of ${h.n} games in the last 7 days`, `La IA acertó ${h.ok} de ${h.n} partidos en los últimos 7 días`);
+      ? L.t(`Le modèle a correctement anticipé les ${h.n} matchs d'hier`, `The model called all ${h.n} of yesterday's games`, `El modelo acertó los ${h.n} partidos de ayer`)
+      : L.t(`Le modèle a correctement anticipé ${h.ok} matchs sur ${h.n} hier`, `The model correctly called ${h.ok} of ${h.n} games yesterday`, `El modelo acertó ${h.ok} de ${h.n} partidos ayer`)
+    : L.t(`Le modèle a correctement anticipé ${h.ok} matchs sur ${h.n} ces 7 derniers jours`, `The model correctly called ${h.ok} of ${h.n} games in the last 7 days`, `El modelo acertó ${h.ok} de ${h.n} partidos en los últimos 7 días`);
   const crowd = proof?.members
     ? { icon: <Users />, txt: L.t(`+${num(proof.members)} membres inscrits`, `+${num(proof.members)} registered members`, `+${num(proof.members)} miembros registrados`) }
     : proof?.analysed

@@ -16,7 +16,7 @@ const Icon = ({ name }) => {
 // configurée : on n'affiche jamais une fonction qui ne marche pas.
 const PLANS = (L, ai) => [
   {
-    id: "starter", name: "Starter", icon: "bolt", price: L.t("10 €", "€10", "10 €"), per: L.t("/mois", "/month", "/mes"), sub: L.t("Pour découvrir l'IA", "To discover the AI", "Para descubrir la IA"), cta: L.t("Débloquer - 10 €/mois", "Unlock - €10/month", "Desbloquear - 10 €/mes"),
+    id: "starter", name: "Starter", icon: "bolt", price: L.t("10 €", "€10", "10 €"), per: L.t("/mois", "/month", "/mes"), sub: ai ? L.t("Pour découvrir l'IA", "To discover the AI", "Para descubrir la IA") : L.t("Pour découvrir les analyses", "To try the analyses", "Para descubrir los análisis"), cta: L.t("Débloquer - 10 €/mois", "Unlock - €10/month", "Desbloquear - 10 €/mes"),
     items: [
       ["ok", L.t("1 analyse par jour", "1 analysis per day", "1 análisis al día")],
       ["ok", L.t("Analyse réduite", "Reduced analysis", "Análisis reducido")],
