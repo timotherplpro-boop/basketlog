@@ -1,9 +1,15 @@
-# Vidéos TikTok / Reels du jour : fabriquées chaque après-midi à partir des matchs NBA de la nuit, puis déposées dans
-# une « release » GitHub du jour (videos-AAAA-MM-JJ). Rien n'est publié sur les réseaux sociaux.
+# Vidéos TikTok / Reels du jour : fabriquées chaque matin vers 7 h 15 (heure de Paris) à partir des matchs NBA de la
+# nuit à venir, puis déposées dans une « release » GitHub du jour (videos-AAAA-MM-JJ), que Tim reçoit vers 8 h.
+# Rien n'est publié sur les réseaux sociaux.
 name: Vidéos du jour
 on:
   schedule:
-    - cron: "30 15 * * *" # 16 h 30 à Paris l'hiver, 17 h 30 l'été
+    # GitHub ne connaît que l'heure UTC : chaque passage a deux horaires, et le job « horaire » garde celui qui
+    # tombe à la bonne heure de Paris (heure d'hiver ou d'été).
+    - cron: "15 5 * * *" # 7 h 15 à Paris l'été
+    - cron: "15 6 * * *" # 7 h 15 à Paris l'hiver
+    - cron: "45 5 * * *" # 7 h 45 l'été : secours, seulement si les vidéos du jour manquent
+    - cron: "45 6 * * *" # 7 h 45 l'hiver : secours, seulement si les vidéos du jour manquent
   workflow_dispatch:
     inputs:
       d:
@@ -18,39 +24,76 @@ concurrency:
   group: videos
   cancel-in-progress: false
 jobs:
+  horaire:
+    runs-on: ubuntu-latest
+    outputs:
+      go: ${{ steps.h.outputs.go }}
+    steps:
+      - id: h
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          CRON: ${{ github.event.schedule }}
+        run: |
+          go=true
+          if [ "$EVENT" = "schedule" ]; then
+            OFF=$(TZ=Europe/Paris date +%z) # +0100 l'hiver, +0200 l'été
+            case "$CRON|$OFF" in
+              "15 6 * * *|+0100"|"15 5 * * *|+0200") go=true ;;
+              "45 6 * * *|+0100"|"45 5 * * *|+0200")
+                TAG="videos-$(TZ=America/New_York date +%Y-%m-%d)"
+                if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then go=false; else go=true; fi ;;
+              *) go=false ;;
+            esac
+          fi
+          echo "Passage $EVENT ${CRON} (Paris $(TZ=Europe/Paris date +%H:%M)) : fabrication = $go"
+          echo "go=$go" >> "$GITHUB_OUTPUT"
   videos:
+    needs: horaire
+    if: needs.horaire.outputs.go == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+      - name: Matchs du jour
+        id: jour
+        env:
+          INPUT_D: ${{ github.event.inputs.d }}
+        run: |
+          D="$INPUT_D"
+          [ -z "$D" ] && D=$(TZ=America/New_York date +%Y%m%d)
+          [[ "$D" =~ ^[0-9]{8}$ ]] || { echo "Date invalide : $D"; exit 1; }
+          echo "D=$D" >> "$GITHUB_ENV"
+          curl -sf --retry 4 --retry-delay 30 --retry-all-errors "https://basketlog-app.com/api/videos?d=$D" -o jour.json
+          N=$(python3 -c "import json; j = json.load(open('jour.json')); print(sum(1 for g in j.get('games') or [] if g.get('state', 'pre') == 'pre'))")
+          echo "$N matchs à venir le $D"
+          echo "n=$N" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v4
+        if: steps.jour.outputs.n != '0'
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      - if: steps.jour.outputs.n != '0'
+        run: npm ci
       - uses: actions/setup-python@v5
+        if: steps.jour.outputs.n != '0'
         with:
           python-version: "3.12"
       - name: Outils (ffmpeg, emoji, Chromium, voix)
+        if: steps.jour.outputs.n != '0'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg fonts-noto-color-emoji > /dev/null
           pip install -q playwright "sherpa-onnx==1.12.40" soundfile scipy numpy
           python -m playwright install --with-deps chromium > /dev/null
           bash video/setup.sh
-      - name: Matchs du jour
-        run: |
-          D="${{ github.event.inputs.d }}"
-          [ -z "$D" ] && D=$(TZ=America/New_York date +%Y%m%d)
-          echo "D=$D" >> "$GITHUB_ENV"
-          curl -sf --retry 3 --retry-delay 20 "https://basketlog-app.com/api/videos?d=$D" -o jour.json
-          python3 -c "import json; j = json.load(open('jour.json')); print(len(j['games']), 'matchs le', j['d'])"
       - name: Fabrication
+        if: steps.jour.outputs.n != '0'
         run: python3 video/make.py --day jour.json --out out
       # Après une modification du code (push), les vidéos sont seulement gardées 3 jours comme résultat du test :
       # la release du jour, celle que Tim reçoit, ne change pas.
       - name: Résultat du test (après une modification)
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' && steps.jour.outputs.n != '0'
         uses: actions/upload-artifact@v4
         with:
           name: videos-test
@@ -58,7 +101,7 @@ jobs:
           retention-days: 3
           if-no-files-found: ignore
       - name: Dépôt dans la release du jour
-        if: github.event_name != 'push'
+        if: github.event_name != 'push' && steps.jour.outputs.n != '0'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

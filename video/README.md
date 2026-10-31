@@ -32,9 +32,12 @@ Sortie : `video/out/AAAA-MM-JJ/` avec les MP4, `legendes.txt` (texte de publicat
 
 ## Chaque jour
 
-Le workflow GitHub « Vidéos du jour » (`.github/workflows/videos.yml`) tourne vers 16 h 30 à Paris (17 h 30 l'été) :
-il lit `/api/videos` du jour, fabrique les vidéos et les dépose dans la release `videos-AAAA-MM-JJ`, que Tim reçoit à
-18 h 08. On peut le relancer pour une date précise depuis l'onglet Actions (« Run workflow »).
+Le workflow GitHub « Vidéos du jour » (`.github/workflows/videos.yml`) tourne chaque matin vers 7 h 15 à Paris
+(hiver comme été) : il lit `/api/videos` du jour, fabrique les vidéos des matchs de la nuit à venir et les dépose dans
+la release `videos-AAAA-MM-JJ`, que Tim reçoit vers 8 h. Un passage de secours à 7 h 45 refait les vidéos seulement si
+elles manquent. Les jours sans match NBA, rien n'est fabriqué. On peut relancer pour une date précise depuis l'onglet
+Actions (« Run workflow »). Les absences annoncées après 7 h 15 ne sont pas dans les vidéos : vérifier la fiche du
+match avant de publier.
 Après une modification du dossier `video/`, le workflow refait les vidéos pour test (gardées 3 jours dans Actions)
 sans toucher à la release du jour.
 
