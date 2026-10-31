@@ -77,7 +77,8 @@ def _engine():
         d = VOICE
         cfg = sherpa_onnx.OfflineTtsConfig(
             model=sherpa_onnx.OfflineTtsModelConfig(
-                vits=sherpa_onnx.OfflineTtsVitsModelConfig(model=f"{d}/fr_FR-tom-medium.onnx", lexicon="", tokens=f"{d}/tokens.txt", data_dir=f"{d}/espeak-ng-data"),
+                vits=sherpa_onnx.OfflineTtsVitsModelConfig(model=f"{d}/fr_FR-tom-medium.onnx", lexicon="", tokens=f"{d}/tokens.txt", data_dir=f"{d}/espeak-ng-data",
+                                                  noise_scale=0.4, noise_scale_w=0.6),  # diction plus régulière
                 num_threads=2),
             max_num_sentences=2)
         _tts = sherpa_onnx.OfflineTts(cfg)

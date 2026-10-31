@@ -4,8 +4,12 @@ on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    - cron: "11 6 * * *" # chaque matin : vérification du site en ligne
+  workflow_dispatch:
 jobs:
   tests:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -27,3 +31,13 @@ jobs:
       - run: node tests/smoke.mjs http://localhost:3000
       - if: failure()
         run: tail -100 next.log
+  production:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node tests/smoke.mjs https://basketlog-app.com

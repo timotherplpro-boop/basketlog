@@ -208,14 +208,14 @@ def fmt_choc(g, day):
     rel, durs = v.add(s, ["Verdict :", f"{spoken(F['abbr'])} {agree(F['abbr'], 'favori', 'favoris')} à {fr_num(pf)} pour cent.", f"Score projeté : {fr_num(fa)}, {fr_num(fb)}."], lead=0.25, tail=0.35)
     s.update(chipAt=max(0.1, rel[0] - 0.1), teamAt=rel[1] + 0.05, countA=rel[1] + 0.45, countB=rel[1] + durs[1] * 0.8, scoreAt=rel[2] - 0.05, confAt=rel[2] + durs[2] + 0.1)
     cta(v, "Le reste de l'analyse<br>est sur <em>Basketlog</em>", "Et toi, tu mets qui gagnant ?", "Dis-le en commentaire",
-        "Et toi, tu mets qui gagnant ?", f"Le reste de l'analyse est sur {BRAND}.")
+        "Et toi, tu mets qui gagnant ?", f"Le reste de l'analyse est sur {BRAND}, va voir.")
     return v, f"{A['short']} – {H['short']} cette nuit ({g['time']}) : le modèle Basketlog donne {les(F['short'])} à {pf} %. Et toi, tu mets qui gagnant ?"
 
 
 def fmt_favori(g, day):
     v = Video(); fs = fav_side(g); F = g[fs]; D = g["h" if fs == "a" else "a"]; pf = max(g["pA"], g["pH"])
     s = {"type": "hook", "kind": "title", "chip": "NBA · Cette nuit", "b1": "Le plus gros", "b2": "favori", "sub": "selon le modèle <em>Basketlog</em>"}
-    rel, _ = v.add(s, ["Le plus gros favori de la nuit en NBA,", f"selon le modèle {BRAND}."], lead=0.1, tail=0.25)
+    rel, _ = v.add(s, ["Le plus gros favori de la nuit en NBA ?", f"Le modèle {BRAND} a la réponse."], lead=0.1, tail=0.25)
     s["subAt"] = rel[1] - 0.05
     c1 = (0, f"<em>{F['abbr']}</em> vs {D['abbr']}", f"{g['time']} · {g['venue']}", f"{spoken(F['abbr'])} contre {spoken(D['abbr'])}, cette nuit.")
     pool = facts(g, fs) + [x for x in facts(g, "h" if fs == "a" else "a") if x[0] >= 6]
@@ -233,14 +233,14 @@ def fmt_favori(g, day):
     rel, durs = v.add(s, ["Mais attention :", f"{spoken(D['abbr'])} {agree(D['abbr'], 'garde', 'gardent')} {fr_num(100 - pf)} pour cent de chances.", "Surprise possible ?"], lead=0.25, tail=0.3)
     s.update(chipAt=max(0.1, rel[0] - 0.1), bigAt=rel[1] + 0.1)
     cta(v, "Toute l'analyse<br>est sur <em>Basketlog</em>", "Favori solide ou match piège ?", "Dis-le en commentaire",
-        "Favori solide ou match piège ? Dis-le en commentaire.", f"Toute l'analyse est sur {BRAND}.")
+        "Favori solide ou match piège ? Dis-le en commentaire.", f"Toute l'analyse est sur {BRAND}, va voir.")
     return v, f"Le plus gros favori de la nuit en NBA : {les(F['short'])} à {pf} % contre {les(D['short'])}. Favori solide ou match piège ?"
 
 
 def fmt_serre(g, day):
     v = Video(); A, H = g["a"], g["h"]
     s = {"type": "hook", "kind": "title", "chip": "NBA · Cette nuit", "b1": "Le match", "b2": "le plus serré", "sub": "selon le modèle <em>Basketlog</em>"}
-    rel, _ = v.add(s, ["Le match le plus serré de la nuit en NBA,", f"selon le modèle {BRAND}."], lead=0.1, tail=0.25)
+    rel, _ = v.add(s, ["Le match le plus serré de la nuit en NBA ?", f"Le modèle {BRAND} a la réponse."], lead=0.1, tail=0.25)
     s["subAt"] = rel[1] - 0.05
     c1 = (0, f"{A['abbr']} <em>@</em> {H['abbr']}", f"{g['time']} · {g['venue']}", f"{spoken(A['abbr'])} contre {spoken(H['abbr'])}.")
     c2 = sorted(facts(g, "a") + facts(g, "h"), key=lambda x: -x[0])[0]
@@ -252,14 +252,14 @@ def fmt_serre(g, day):
     rel, durs = v.add(s, [f"{fr_num(g['pA'])} pour cent contre {fr_num(g['pH'])}.", f"Score projeté : {fr_num(g['projA'])}, {fr_num(g['projH'])}.", "Ça peut basculer des deux côtés."], lead=0.25, tail=0.35)
     s.update(chipAt=0.1, splitAt=rel[0], scoreAt=rel[1] - 0.05, noteAt=rel[2] - 0.05)
     cta(v, "Toute l'analyse<br>est sur <em>Basketlog</em>", "Et toi, tu vois qui gagner ?", "Ton pronostic en commentaire",
-        "Et toi, tu vois qui gagner ?", f"Toute l'analyse est sur {BRAND}.")
+        "Et toi, tu vois qui gagner ?", f"Toute l'analyse est sur {BRAND}, va voir.")
     return v, f"Le match le plus serré de la nuit en NBA : {A['short']} – {H['short']}, {g['pA']} % contre {g['pH']} % selon le modèle Basketlog. Et toi, tu vois qui gagner ?"
 
 
 def fmt_programme(games, day):
     v = Video(); n = len(games)
     s = {"type": "hook", "kind": "title", "chip": "NBA · Cette nuit", "b1": f"{n} matchs", "b2": "au programme", "sub": "Les favoris du modèle <em>Basketlog</em>"}
-    rel, _ = v.add(s, [f"{fr_num(n).capitalize()} matchs NBA cette nuit.", f"Voici les favoris du modèle {BRAND}."], lead=0.1, tail=0.25)
+    rel, _ = v.add(s, [f"{fr_num(n).capitalize()} matchs NBA cette nuit.", f"Le modèle {BRAND} a choisi ses favoris."], lead=0.1, tail=0.25)
     s["subAt"] = rel[1] - 0.05
     order = {r: i for i, r in enumerate(x["id"] for x in games)}
     cards = []
@@ -274,7 +274,7 @@ def fmt_programme(games, day):
                           f"Le plus serré : {spoken(close['a']['abbr'])} contre {spoken(close['h']['abbr'])}."], lead=lead, tail=0.5)
     s["marks"] = [{"id": fav["id"], "at": rel[0], "label": "Plus gros favori"}, {"id": close["id"], "at": rel[1], "label": "Le plus serré"}]
     cta(v, "Toutes les analyses<br>sont sur <em>Basketlog</em>", "Ton pronostic pour cette nuit ?", "Dis-le en commentaire",
-        "Et toi, ton pronostic pour cette nuit ?", f"Toutes les analyses sont sur {BRAND}.")
+        "Et toi, ton pronostic pour cette nuit ?", f"Toutes les analyses sont sur {BRAND}, va voir.")
     return v, f"{n} matchs NBA cette nuit : les favoris du modèle Basketlog. Le plus gros favori : {les(F['short'])} ({max(fav['pA'], fav['pH'])} %). Ton pronostic ?"
 
 
@@ -450,7 +450,8 @@ def main():
     ap.add_argument("--check", action="store_true", help="quelques images fixes par vidéo, sans rendu complet")
     a = ap.parse_args()
     day = json.load(open(a.day))
-    games = [parse(g) for g in day.get("games") or []]
+    # Seulement les matchs à venir (un match déjà commencé n'a plus d'intérêt pour une vidéo de pronostic)
+    games = [parse(g) for g in day.get("games") or [] if g.get("state", "pre") == "pre"]
     if not games:
         print("Aucun match ce jour-là : pas de vidéo.")
         return
