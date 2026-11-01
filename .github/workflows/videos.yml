@@ -1,15 +1,16 @@
-# Vidéos TikTok / Reels du jour : fabriquées chaque matin vers 7 h 15 (heure de Paris) à partir des matchs NBA de la
-# nuit à venir, puis déposées dans une « release » GitHub du jour (videos-AAAA-MM-JJ), que Tim reçoit vers 8 h.
-# Rien n'est publié sur les réseaux sociaux.
+# Vidéos TikTok / Reels du jour : fabriquées chaque matin à partir des matchs NBA de la nuit à venir, puis déposées
+# dans une « release » GitHub du jour (videos-AAAA-MM-JJ), que Tim reçoit vers 8 h. Rien n'est publié sur les réseaux.
+# Le matin, GitHub lance souvent les passages planifiés avec 30 à 60 minutes de retard : d'où le départ prévu à 6 h 20
+# (heure de Paris) et un passage de secours à 7 h 05. Le premier qui part fabrique, l'autre ne fait rien.
 name: Vidéos du jour
 on:
   schedule:
     # GitHub ne connaît que l'heure UTC : chaque passage a deux horaires, et le job « horaire » garde celui qui
     # tombe à la bonne heure de Paris (heure d'hiver ou d'été).
-    - cron: "15 5 * * *" # 7 h 15 à Paris l'été
-    - cron: "15 6 * * *" # 7 h 15 à Paris l'hiver
-    - cron: "45 5 * * *" # 7 h 45 l'été : secours, seulement si les vidéos du jour manquent
-    - cron: "45 6 * * *" # 7 h 45 l'hiver : secours, seulement si les vidéos du jour manquent
+    - cron: "20 4 * * *" # 6 h 20 à Paris l'été
+    - cron: "20 5 * * *" # 6 h 20 à Paris l'hiver
+    - cron: "5 5 * * *" # 7 h 05 l'été : secours
+    - cron: "5 6 * * *" # 7 h 05 l'hiver : secours
   workflow_dispatch:
     inputs:
       d:
@@ -39,9 +40,8 @@ jobs:
           if [ "$EVENT" = "schedule" ]; then
             OFF=$(TZ=Europe/Paris date +%z) # +0100 l'hiver, +0200 l'été
             case "$CRON|$OFF" in
-              "15 6 * * *|+0100"|"15 5 * * *|+0200") go=true ;;
-              "45 6 * * *|+0100"|"45 5 * * *|+0200")
-                # secours : seulement si le premier passage n'a rien laissé (ni vidéos, ni « pas de match »)
+              "20 5 * * *|+0100"|"20 4 * * *|+0200"|"5 6 * * *|+0100"|"5 5 * * *|+0200")
+                # un seul passage fabrique : rien à faire si le jour est déjà traité (vidéos ou « pas de match »)
                 DATE=$(TZ=America/New_York date +%Y-%m-%d)
                 if gh release view "videos-$DATE" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then go=false
                 elif gh release view videos-etat --repo "$GITHUB_REPOSITORY" --json body -q .body 2>/dev/null | grep -q "^$DATE"; then go=false
