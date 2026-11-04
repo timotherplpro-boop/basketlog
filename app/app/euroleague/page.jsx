@@ -11,9 +11,9 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata() {
   const L = await getL();
   return pageMeta({
-    title: L.t("Pronostics EuroLeague : matchs, analyses et classement – Basketlog", "EuroLeague predictions: games, analysis and standings – Basketlog", "Pronósticos Euroliga: partidos, análisis y clasificación – Basketlog"),
+    title: L.t("Pronostic EuroLeague (Euroligue) : matchs et classement – Basketlog", "EuroLeague predictions: games, analysis and standings – Basketlog", "Pronósticos Euroliga: partidos, análisis y clasificación – Basketlog"),
     description: L.t(
-      "Pronostics EuroLeague pour chaque journée : probabilités de victoire, score projeté et forme des 20 clubs, avec le classement à jour.",
+      "Pronostic Euroligue gratuit pour chaque journée d'EuroLeague : probabilités de victoire, score projeté et forme des 20 clubs, avec le classement à jour.",
       "EuroLeague predictions for every round: win probabilities, projected score and form for all 20 clubs, with up-to-date standings.", "Pronósticos de la Euroliga para cada jornada: probabilidades de victoria, marcador proyectado y forma de los 20 clubes, con la clasificación actualizada."
     ),
     path: "/app/euroleague",

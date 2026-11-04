@@ -53,6 +53,14 @@ function faqOf(L) {
       ),
     },
     {
+      q: L.t("Où trouver une analyse NBA pour ce soir ?", "Where can I find an NBA analysis for tonight?", "¿Dónde encuentro un análisis NBA para esta noche?"),
+      a: L.t(
+        "Chaque match NBA de ce soir a sa fiche d'analyse sur Basketlog : probabilités, score projeté, forme, absences. La liste complète est sur la page Pronostics NBA du jour, et les matchs NBA et EuroLeague du jour sont réunis sur la page Pronostic basket.",
+        "Every NBA game tonight has its own analysis page on Basketlog: probabilities, projected score, form, injuries. The full list is on the Today's NBA predictions page, and the day's NBA and EuroLeague games are gathered on the Basketball predictions page.",
+        "Cada partido de la NBA de esta noche tiene su ficha de análisis en Basketlog: probabilidades, marcador proyectado, forma, bajas. La lista completa está en la página Pronósticos NBA de hoy, y los partidos de la NBA y la Euroliga del día están reunidos en la página Pronósticos de baloncesto."
+      ),
+    },
+    {
       q: L.t("Quelle différence entre une analyse et un pronostic ?", "What's the difference between an analysis and a prediction?", "¿Qué diferencia hay entre un análisis y un pronóstico?"),
       a: L.t(
         "Un pronostic donne un vainqueur ; une analyse explique pourquoi et avec quelles chances. Basketlog donne les deux : le favori, sa probabilité de gagner et les facteurs qui la font bouger.",
@@ -132,11 +140,11 @@ export default async function AnalyseBasketPage() {
         )}</p>
       </div>
 
-      <h2 className="ab-sec">{L.t("Les analyses NBA du moment", "Current NBA analyses", "Los análisis NBA del momento")}</h2>
+      <h2 className="ab-sec">{L.t("Analyse NBA : les matchs à venir", "NBA analysis: upcoming games", "Análisis NBA: próximos partidos")}</h2>
       <UpcomingList games={nba} title="" L={L} />
-      <p className="ab-more"><Link href={L.href("/app/matchs")}>{L.t("Tous les pronostics NBA du jour", "All of today's NBA predictions", "Todos los pronósticos NBA de hoy")}</Link></p>
+      <p className="ab-more"><Link href={L.href("/app/matchs")}>{L.t("Tous les pronostics NBA du jour", "All of today's NBA predictions", "Todos los pronósticos NBA de hoy")}</Link> · <Link href={L.href("/pronostic-basket")}>{L.t("Pronostic basket du jour", "Today's basketball predictions", "Pronósticos de baloncesto de hoy")}</Link></p>
 
-      <h2 className="ab-sec">{L.t("Les analyses EuroLeague du moment", "Current EuroLeague analyses", "Los análisis de la Euroliga del momento")}</h2>
+      <h2 className="ab-sec">{L.t("Analyse EuroLeague : les matchs à venir", "EuroLeague analysis: upcoming games", "Análisis de la Euroliga: próximos partidos")}</h2>
       <UpcomingList games={elGames} title="" L={L} href={(g) => `/app/euroleague/match/${g.id}`} />
       <p className="ab-more"><Link href={L.href("/app/euroleague")}>{L.t("Tous les pronostics EuroLeague", "All EuroLeague predictions", "Todos los pronósticos de la Euroliga")}</Link></p>
 

@@ -20,7 +20,7 @@ const both = ({ path, ...rest }) => {
 
 export default async function sitemap() {
   const pages = [
-    u("", 1, "daily"), u("/analyse-basket", 0.9, "daily"), u("/app/matchs", 0.9, "hourly"), u("/app", 0.8, "daily"), u("/app/classement", 0.8, "daily"),
+    u("", 1, "daily"), u("/analyse-basket", 0.9, "daily"), u("/pronostic-basket", 0.9, "hourly"), u("/app/matchs", 0.9, "hourly"), u("/app", 0.8, "daily"), u("/app/classement", 0.8, "daily"),
     u("/app/euroleague", 0.8, "daily"), u("/app/competitions", 0.7, "daily"), u("/app/bilan", 0.8, "daily"), u("/methode", 0.7, "monthly"), u("/pro", 0.6, "weekly"), u("/avis", 0.5, "weekly"),
     u("/mentions-legales", 0.2, "yearly"), u("/cgu", 0.2, "yearly"), u("/cgv", 0.2, "yearly"), u("/confidentialite", 0.2, "yearly"), u("/cookies", 0.2, "yearly"),
   ];

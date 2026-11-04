@@ -38,6 +38,7 @@ export default function SiteFooter({ L, compact = false }) {
       <div className="foot">
         <Link href={L.href("/")} className="logo"><span className="ball" aria-hidden /> Basketlog</Link>
         <nav className="foot-links" aria-label={L.t("Liens du site", "Site links", "Enlaces del sitio")}>
+          <Link href={L.href("/pronostic-basket")}>{L.t("Pronostic basket", "Basketball predictions", "Pronósticos de baloncesto")}</Link>
           <Link href={L.href("/analyse-basket")}>{L.t("Analyse basket", "Basketball analysis", "Análisis de baloncesto")}</Link>
           <Link href={L.href("/app/matchs")}>{L.t("Pronostics NBA du jour", "Today's NBA predictions", "Pronósticos NBA de hoy")}</Link>
           <Link href={L.href("/app/classement")}>{L.t("Classement NBA", "NBA standings", "Clasificación NBA")}</Link>

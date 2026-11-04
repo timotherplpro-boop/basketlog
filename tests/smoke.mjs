@@ -28,7 +28,7 @@ const ERROR_PAGE = /Une erreur est survenue|Application error|Internal Server Er
 
 async function pages() {
   console.log("Pages");
-  for (const p of ["/", "/en", "/es", "/analyse-basket", "/en/analyse-basket", "/es/analyse-basket", "/app", "/app/matchs", "/app/bilan", "/app/bilan?l=pub", "/app/classement", "/app/euroleague", "/pro", "/avis", "/methode", "/cgu", "/cgv", "/confidentialite", "/mentions-legales", "/cookies", "/sitemap.xml", "/robots.txt"]) {
+  for (const p of ["/", "/en", "/es", "/analyse-basket", "/en/analyse-basket", "/es/analyse-basket", "/pronostic-basket", "/en/pronostic-basket", "/es/pronostic-basket", "/app", "/app/matchs", "/app/bilan", "/app/bilan?l=pub", "/app/classement", "/app/euroleague", "/pro", "/avis", "/methode", "/cgu", "/cgv", "/confidentialite", "/mentions-legales", "/cookies", "/sitemap.xml", "/robots.txt"]) {
     const r = await get(p);
     if (r.status !== 200) ko(p, `HTTP ${r.status}`);
     else if (ERROR_PAGE.test(r.text)) ko(p, "page d'erreur affichée");
