@@ -43,9 +43,11 @@ function PickRow({ g, href, L }) {
     <Link href={L.href(href)} className="pk-row">
       <span className="pk-time">{g.live ? <span className="live">LIVE</span> : fmtTime(L, g.date)}</span>
       <span className="pk-match">{g.away.short} <i>@</i> {g.home.short}</span>
-      <span className="pk-fav">{L.t("Favori", "Favorite", "Favorito")} : <b>{fav.short} {pctOf(p, L)}</b></span>
-      <span className="pk-score">{L.t("Score projeté", "Projected score", "Marcador proyectado")} <b>{Math.round(g.awayPts)}-{Math.round(g.homePts)}</b></span>
-      <span className="pk-total">{L.t("Total", "Total", "Total")} <b>{Math.round(g.total)}</b>{g.confidence ? <> · {L.t("confiance", "confidence", "confianza")} {confText(g.confidence, L).toLowerCase()}</> : null}</span>
+      <span className="pk-fav">
+        {L.t("Favori", "Favorite", "Favorito")}{L.fr ? " :" : ":"} <b>{fav.short} {pctOf(p, L)}</b>
+        {g.confidence ? <small>{L.t("Confiance", "Confidence", "Confianza")} {confText(g.confidence, L).toLowerCase()}</small> : null}
+      </span>
+      <span className="pk-score">{L.t("Score projeté", "Projected score", "Marcador proyectado")} <b>{Math.round(g.awayPts)}-{Math.round(g.homePts)}</b> · {L.t("total", "total", "total")} <b>{Math.round(g.total)}</b></span>
     </Link>
   );
 }
