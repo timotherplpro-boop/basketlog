@@ -28,7 +28,7 @@ export async function generateMetadata() {
   const L = await getL();
   const title = homeTitle(L, aiReady());
   const description = L.t(
-    "Pronostics NBA et EuroLeague pour chaque match : probabilités de victoire gratuites, score projeté, absences, forme et scénarios. Taux de réussite public.",
+    "Analyse basket et pronostics NBA, EuroLeague pour chaque match : probabilités de victoire gratuites, score projeté, absences, forme. Taux de réussite public.",
     "NBA and EuroLeague predictions for every game: free win probabilities, projected score, injuries, form and scenarios. Public track record.",
     "Pronósticos de la NBA y la Euroliga para cada partido: probabilidades de victoria gratis, marcador proyectado, bajas, forma y escenarios. Balance público."
   );
@@ -51,9 +51,11 @@ const SITE_LD = [
     "@type": "Organization",
     "@id": `${SITE}/#organisation`,
     name: "Basketlog",
+    alternateName: ["Basket Log", "basketlog-app.com"],
     url: SITE,
-    logo: `${SITE}/icon.svg`,
-    description: "Analyses et pronostics statistiques des matchs NBA et EuroLeague.",
+    // Logo carré en PNG (512 px) : format conseillé par Google pour le logo de marque dans les résultats.
+    logo: { "@type": "ImageObject", url: `${SITE}/icons/icon-512.png`, width: 512, height: 512 },
+    description: "Analyse basket et pronostics statistiques des matchs NBA et EuroLeague.",
   },
   {
     "@context": "https://schema.org",

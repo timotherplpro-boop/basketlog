@@ -29,7 +29,7 @@ export async function generateMetadata() {
   return pageMeta({
     title: homeTitle(L, aiReady()),
     description: L.t(
-      "Pronostics NBA et EuroLeague pour chaque match : probabilités de victoire gratuites, score projeté, absences, forme et scénarios. Taux de réussite public.",
+      "Analyse basket et pronostics NBA, EuroLeague pour chaque match : probabilités de victoire gratuites, score projeté, absences, forme. Taux de réussite public.",
       "NBA and EuroLeague predictions for every game: free win probabilities, projected score, injuries, form and scenarios. Public track record.", "Pronósticos de la NBA y la Euroliga para cada partido: probabilidades de victoria gratis, marcador proyectado, bajas, forma y escenarios. Balance público."
     ),
     path: "/",
@@ -346,7 +346,7 @@ export default async function Home() {
           <h2 className="t-sec reveal" style={{ "--d": "100ms" }}>We analyze<br />every NBA game</h2>,
           <h2 className="t-sec reveal" style={{ "--d": "100ms" }}>Analizamos<br />cada partido de la NBA</h2>
         )}
-        <p className="lead reveal" style={{ "--d": "200ms" }}>{L.t("Calendrier, scores, stats de tirs, joueurs clés, classements et infirmerie : les données NBA et EuroLeague sont croisées en continu pour prédire chaque match.", "Schedule, scores, shooting stats, key players, standings and injury reports: NBA and EuroLeague data is cross-checked continuously to predict every game.", "Calendario, resultados, estadísticas de tiro, jugadores clave, clasificaciones y parte médico: los datos de la NBA y la Euroliga se cruzan continuamente para predecir cada partido.")}</p>
+        <p className="lead reveal" style={{ "--d": "200ms" }}>{L.t("Calendrier, scores, stats de tirs, joueurs clés, classements et infirmerie : les données NBA et EuroLeague sont croisées en continu pour prédire chaque match.", "Schedule, scores, shooting stats, key players, standings and injury reports: NBA and EuroLeague data is cross-checked continuously to predict every game.", "Calendario, resultados, estadísticas de tiro, jugadores clave, clasificaciones y parte médico: los datos de la NBA y la Euroliga se cruzan continuamente para predecir cada partido.")}{" "}<Link href={L.href("/analyse-basket")} className="sources-link">{L.t("Voir comment se fait l'analyse basket", "See how every game is analyzed", "Ver cómo se hace el análisis de baloncesto")}</Link></p>
         <div className="marquee">
           <div className="marquee-track" style={{ animationDirection: "reverse", animationDuration: "65s" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}

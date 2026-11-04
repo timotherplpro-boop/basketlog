@@ -83,7 +83,7 @@ export default async function MethodePage() {
 
       <div className="card block">
         <h2>4. Las bajas</h2>
-        <p className="narr">El parte médico se revisa antes de cada partido. Un jugador descartado resta unos 0,9 puntos a su equipo y uno en duda unos 0,35 puntos, con un tope de 4,5 puntos para no sobrerreaccionar. Las bajas solo se tienen en cuenta para los próximos partidos.</p>
+        <p className="narr">El parte médico se revisa antes de cada partido. Cada baja se pondera según la producción del jugador, más allá de lo que aportaría un suplente: una estrella de 25 puntos por partido resta unos 5 puntos a su equipo, un titular de 14 puntos unos 2,5 puntos y un suplente casi nada. Un jugador en duda cuenta un 40&nbsp;%, y el efecto total tiene un tope de 9 puntos para no sobrerreaccionar. Un jugador que lleva mucho tiempo de baja no se cuenta dos veces: su ausencia ya se refleja en los resultados del equipo esta temporada. Las bajas solo se tienen en cuenta para los próximos partidos.</p>
       </div>
 
       <div className="card block">
@@ -147,7 +147,7 @@ export default async function MethodePage() {
 
       <div className="card block">
         <h2>4. Injuries</h2>
-        <p className="narr">The injury report is checked before every game. A player ruled out takes about 0.9 points away from his team and a questionable player about 0.35 points, capped at 4.5 points to avoid overreacting. Injuries are only factored in for upcoming games.</p>
+        <p className="narr">The injury report is checked before every game. Each missing player is weighted by his production beyond what a replacement would bring: a star scoring 25 points a game takes about 5 points away from his team, a 14-point starter about 2.5 points and a bench player almost nothing. A questionable player counts for 40%, and the total effect is capped at 9 points to avoid overreacting. A player who has been out for a long time isn&apos;t counted twice: his absence already shows in the team&apos;s results this season. Injuries are only factored in for upcoming games.</p>
       </div>
 
       <div className="card block">
@@ -211,7 +211,7 @@ export default async function MethodePage() {
 
       <div className="card block">
         <h2>4. Les absences</h2>
-        <p className="narr">La liste des joueurs blessés est relue avant chaque match. Un joueur forfait retire environ 0,9 point à son équipe et un joueur incertain environ 0,35 point, avec un plafond de 4,5 points pour ne pas surréagir. Les absences ne sont prises en compte que pour les matchs à venir.</p>
+        <p className="narr">La liste des joueurs blessés est relue avant chaque match. Chaque absent est pesé selon sa production, au-delà de ce qu&apos;apporterait un remplaçant : une star à 25 points par match retire environ 5 points à son équipe, un titulaire à 14 points environ 2,5 points et un remplaçant presque rien. Un joueur incertain compte pour 40&nbsp;%, et l&apos;effet total est plafonné à 9 points pour ne pas surréagir. Un joueur absent depuis longtemps n&apos;est pas compté deux fois : son absence se voit déjà dans les résultats de l&apos;équipe cette saison. Les absences ne sont prises en compte que pour les matchs à venir.</p>
       </div>
 
       <div className="card block">
