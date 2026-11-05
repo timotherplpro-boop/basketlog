@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { teamById } from "../../../../lib/teams";
+import { sized } from "../../../../lib/img";
 import { conferenceStandings, upcomingAnalyses } from "../../../../lib/data";
 import { getTeamStats, getTeamSchedule, getRoster, getSummary, nbaDateOf, nbaToday, seasonForDate } from "../../../../lib/espn";
 import AppTabs from "../../../../components/AppTabs";
@@ -78,7 +79,7 @@ export default async function TeamPage({ params }) {
       <Link href={L.href("/app/classement")} className="back">← {L.t("Classement", "Standings", "Clasificación")}</Link>
       <div className="card match-hero team-hero">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={team.logo} alt="" />
+        <img src={sized(team.logo, 330)} alt="" />
         <div>
           <span className="tag hot">{L.t(`Conférence ${confName}`, `${confName}ern Conference`, `Conferencia ${confName}`)}</span>
           <h1>{team.name}</h1>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { elContext, elAnalyze, elStandings } from "../../../../../lib/euroleague";
+import { sized } from "../../../../../lib/img";
 import AppTabs from "../../../../../components/AppTabs";
 import { pageMeta, fitTitle } from "../../../../../lib/seo";
 import { getL } from "../../../../../lib/lang-server";
@@ -64,7 +65,7 @@ export default async function ELTeamPage({ params }) {
       <Link href={L.href("/app/euroleague")} className="back">← {L.t("EuroLeague", "EuroLeague", "Euroliga")}</Link>
       <div className="card match-hero team-hero">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        {t.logo ? <img src={t.logo} alt="" /> : <span />}
+        {t.logo ? <img src={sized(t.logo, 330)} alt="" /> : <span />}
         <div>
           <span className="tag hot">{L.t("EuroLeague", "EuroLeague", "Euroliga")}</span>
           <h1>{t.name}</h1>

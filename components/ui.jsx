@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { mk, fmtDate, fmtTime, pctOf } from "../lib/i18n";
 import { confText } from "../lib/matchtext";
+import { sized, LOGO_W } from "../lib/img";
 
 export function TeamLogo({ team, size = 30 }) {
   if (!team.logo) return <div style={{ width: size, height: size, borderRadius: 8, background: team.color }} />;
+  // Fichier à la taille affichée × 3 (écrans haute densité), jamais sous les 200 px communs aux autres logos (même fichier en cache).
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={team.logo} alt={team.name} width={size} height={size} loading="lazy" />;
+  return <img src={sized(team.logo, Math.max(LOGO_W, size * 3))} alt={team.name} width={size} height={size} loading="lazy" />;
 }
 
 export function ProbBar({ pAway, pHome, away, home, L = mk("fr") }) {

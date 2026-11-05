@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { recentAccuracy, upcomingAnalyses, conferenceStandings } from "../lib/data";
 import { TEAMS, teamById } from "../lib/teams";
+import { sized } from "../lib/img";
 import { nbaToday, seasonForDate } from "../lib/espn";
 import { nbaPicks } from "../lib/history";
 import { getELGames } from "../lib/euroleague";
@@ -226,10 +227,10 @@ export default async function Home() {
         </div>
 
         <div className="stage">
-          <div className="flogo f1"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={teamById("2").logo} alt="" /></div></div>
-          <div className="flogo f2"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={teamById("9").logo} alt="" /></div></div>
-          <div className="flogo f3"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={teamById("18").logo} alt="" /></div></div>
-          <div className="flogo f4"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={teamById("4").logo} alt="" /></div></div>
+          <div className="flogo f1"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(teamById("2").logo, 360)} alt="" /></div></div>
+          <div className="flogo f2"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(teamById("9").logo, 360)} alt="" /></div></div>
+          <div className="flogo f3"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(teamById("18").logo, 360)} alt="" /></div></div>
+          <div className="flogo f4"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(teamById("4").logo, 360)} alt="" /></div></div>
           <div className="phone-in"><PhoneHero team={{ id: heroTeam.id, name: heroTeam.name, logo: heroTeam.logo }} rivals={rivals} rows={rows.map(({ a, ...r }) => r)} /></div>
           {notifs.map((g, i) => {
             const fav = g.pHome >= 0.5 ? g.home : g.away;
@@ -267,8 +268,8 @@ export default async function Home() {
       {big && (
         <section className="demo">
           <div className="demo-bg" aria-hidden />
-          <div className="demo-side l reveal left"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={big.home.logo} alt={big.home.name} /></div></div>
-          <div className="demo-side r reveal right"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={big.away.logo} alt={big.away.name} /></div></div>
+          <div className="demo-side l reveal left"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(big.home.logo)} alt={big.home.name} /></div></div>
+          <div className="demo-side r reveal right"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(big.away.logo)} alt={big.away.name} /></div></div>
           <div className="demo-in">
             <h2 className="t-big reveal zoom">{nameFor(big.home)} {Math.round(big.homePts)} - {Math.round(big.awayPts)} {nameFor(big.away)}</h2>
             <p className="lead reveal" style={{ "--d": "120ms" }}>{L.t(

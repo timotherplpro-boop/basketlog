@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { fmtDate } from "../lib/i18n";
+import { logo } from "../lib/img";
 
 // Historique des analyses lancées avec le compte (enregistré par le serveur), groupé par jour.
 export default function HistoryList({ list, L }) {
@@ -24,11 +25,11 @@ export default function HistoryList({ list, L }) {
               <Link key={`${e.day}-${e.key}`} href={L.href(i.path || "/app")} className="hist-row">
                 <span className="hist-teams">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  {i.away?.logo ? <img src={i.away.logo} alt="" /> : <span className="ph" />}
+                  {i.away?.logo ? <img src={logo(i.away.logo)} alt="" /> : <span className="ph" />}
                   <b>{i.away?.short || "?"}</b>
                   <em>@</em>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  {i.home?.logo ? <img src={i.home.logo} alt="" /> : <span className="ph" />}
+                  {i.home?.logo ? <img src={logo(i.home.logo)} alt="" /> : <span className="ph" />}
                   <b>{i.home?.short || "?"}</b>
                 </span>
                 <span className="hist-meta">
