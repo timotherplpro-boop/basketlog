@@ -361,7 +361,7 @@ export default async function Home() {
       {/* ================= FAQ ================= */}
       <section className="faq" id="faq">
         <div className="faq-in">
-          <h2 className="t-sec reveal">{L.t("Question fréquente", "FAQ", "Pregunta frecuente")}</h2>
+          <h2 className="t-sec reveal">{L.t("Questions fréquentes", "FAQ", "Preguntas frecuentes")}</h2>
           <p className="lead reveal" style={{ "--d": "100ms" }}>{L.t("Une réponse claire à toutes vos questions sur Basketlog.", "Clear answers to all your questions about Basketlog.", "Una respuesta clara a todas tus preguntas sobre Basketlog.")}</p>
           <div className="reveal" style={{ "--d": "200ms" }}><Faq items={faq} /></div>
         </div>
