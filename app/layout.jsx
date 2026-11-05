@@ -56,6 +56,8 @@ const SITE_LD = [
     // Logo carré en PNG (512 px) : format conseillé par Google pour le logo de marque dans les résultats.
     logo: { "@type": "ImageObject", url: `${SITE}/icons/icon-512.png`, width: 512, height: 512 },
     description: "Analyse basket et pronostics statistiques des matchs NBA et EuroLeague.",
+    // Comptes officiels de la marque (leur bio renvoie vers le site) : aide Google à relier « Basketlog » au site.
+    sameAs: ["https://www.tiktok.com/@basketlog", "https://www.tiktok.com/@basketlogapp"],
   },
   {
     "@context": "https://schema.org",
@@ -64,7 +66,7 @@ const SITE_LD = [
     name: "Basketlog",
     alternateName: ["Basket Log", "basketlog-app.com"],
     url: SITE,
-    inLanguage: ["fr-FR", "en-US"],
+    inLanguage: ["fr-FR", "en-US", "es-ES"],
     publisher: { "@id": `${SITE}/#organisation` },
   },
 ];

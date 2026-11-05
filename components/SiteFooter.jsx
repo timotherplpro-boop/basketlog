@@ -47,6 +47,7 @@ export default function SiteFooter({ L, compact = false }) {
           <Link href={L.href("/methode")}>{L.t("Méthode", "Methodology", "Metodología")}</Link>
           <Link href={L.href("/pro")}>Basketlog Pro</Link>
           <Link href={L.href("/avis")}>{L.t("Avis", "Reviews", "Opiniones")}</Link>
+          <a href="https://www.tiktok.com/@basketlog" target="_blank" rel="me noopener">{L.t("Basketlog sur TikTok", "Basketlog on TikTok", "Basketlog en TikTok")}</a>
         </nav>
         {legal}
         <div>{notBetting}</div>
