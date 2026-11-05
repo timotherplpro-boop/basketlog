@@ -5,7 +5,7 @@ import { conferenceStandings, upcomingAnalyses } from "../../../../lib/data";
 import { getTeamStats, getTeamSchedule, getRoster, getSummary, nbaDateOf, nbaToday, seasonForDate } from "../../../../lib/espn";
 import AppTabs from "../../../../components/AppTabs";
 import { teamSummary } from "../../../../lib/summary";
-import { pageMeta } from "../../../../lib/seo";
+import { pageMeta, fitTitle } from "../../../../lib/seo";
 import { getL } from "../../../../lib/lang-server";
 import { fmtDate, fmtTime, numOf } from "../../../../lib/i18n";
 
@@ -17,7 +17,12 @@ export async function generateMetadata({ params }) {
   const t = teamById(id);
   if (!t) return { title: L.t("Équipe – Basketlog", "Team – Basketlog", "Equipo – Basketlog"), robots: { index: false } };
   return pageMeta({
-    title: L.t(`${t.name} : stats, calendrier et pronostics – Basketlog`, `${t.name}: stats, schedule and predictions – Basketlog`, `${t.name}: estadísticas, calendario y pronósticos – Basketlog`),
+    // « Pronostic » en tête : c'est ce que tapent ceux qui cherchent le prochain match d'une équipe.
+    title: L.t(
+      fitTitle(`Pronostic ${t.name} : prochains matchs et stats – Basketlog`, `Pronostic ${t.name} : prochains matchs et stats`),
+      fitTitle(`${t.name} predictions: upcoming games and stats – Basketlog`, `${t.name} predictions: upcoming games and stats`),
+      fitTitle(`Pronóstico ${t.name}: próximos partidos y estadísticas – Basketlog`, `Pronóstico ${t.name}: próximos partidos y estadísticas`)
+    ),
     description: L.t(
       `${t.name} : bilan, stats de la saison NBA, joueurs clés, calendrier et pronostic Basketlog pour chaque prochain match.`,
       `${t.name}: record, NBA season stats, key players, schedule and a Basketlog prediction for every upcoming game.`, `${t.name}: balance, estadísticas de la temporada NBA, jugadores clave, calendario y un pronóstico de Basketlog para cada próximo partido.`

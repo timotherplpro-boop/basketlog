@@ -3,7 +3,7 @@ import { elContext, elAnalyze, elTable } from "../../../../../lib/euroleague";
 import { recordPronosSoon } from "../../../../../lib/pronos";
 import MatchView from "../../../../../components/MatchView";
 import ELExtras from "../../../../../components/ELExtras";
-import { pageMeta, dayLong, dayShort, pctTxt } from "../../../../../lib/seo";
+import { pageMeta, dayLong, dayShort, pctTxt, fitTitle } from "../../../../../lib/seo";
 import { getL } from "../../../../../lib/lang-server";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +18,12 @@ export async function generateMetadata({ params }) {
   const a = elAnalyze(g, before, ctx.prev);
   const done = g.played && g.home.score != null;
   if (L.es) return pageMeta({
-    title: `Pronóstico ${g.away.short} – ${g.home.short} (${dayShort(g.date, L)}): análisis Euroliga – Basketlog`,
+    title: fitTitle(
+      `Pronóstico ${g.away.name} – ${g.home.name} (${dayShort(g.date, L)}): Euroliga – Basketlog`,
+      `Pronóstico ${g.away.name} – ${g.home.name} (${dayShort(g.date, L)}) – Basketlog`,
+      `Pronóstico ${g.away.name} – ${g.home.name} (${dayShort(g.date, L)})`,
+      `Pronóstico ${g.away.short} – ${g.home.short} (${dayShort(g.date, L)}): análisis Euroliga – Basketlog`
+    ),
     description: done
       ? `${g.away.name} – ${g.home.name}, ${dayLong(g.date, L)}: resultado final ${g.away.score}-${g.home.score}. El pronóstico de Basketlog antes del partido y su análisis de la Euroliga.`
       : `${g.away.name} – ${g.home.name}, ${dayLong(g.date, L)}: ${a.fav.team.name}, favorito al ${pctTxt(Math.max(a.pHome, a.pAway), L)}. Marcador proyectado, forma y escenarios de este partido de la Euroliga.`,
@@ -26,7 +31,12 @@ export async function generateMetadata({ params }) {
     L,
   });
   if (L.en) return pageMeta({
-    title: `${g.away.short} vs ${g.home.short} prediction (${dayShort(g.date, L)}): EuroLeague analysis – Basketlog`,
+    title: fitTitle(
+      `${g.away.name} vs ${g.home.name} prediction (${dayShort(g.date, L)}): EuroLeague – Basketlog`,
+      `${g.away.name} vs ${g.home.name} prediction (${dayShort(g.date, L)}) – Basketlog`,
+      `${g.away.name} vs ${g.home.name} prediction (${dayShort(g.date, L)})`,
+      `${g.away.short} vs ${g.home.short} prediction (${dayShort(g.date, L)}): EuroLeague analysis – Basketlog`
+    ),
     description: done
       ? `${g.away.name} vs ${g.home.name}, ${dayLong(g.date, L)}: final score ${g.away.score}-${g.home.score}. Basketlog's pregame prediction and its EuroLeague analysis.`
       : `${g.away.name} vs ${g.home.name}, ${dayLong(g.date, L)}: ${a.fav.team.name} favored at ${pctTxt(Math.max(a.pHome, a.pAway), L)}. Projected score, form and scenarios for this EuroLeague game.`,
@@ -34,7 +44,12 @@ export async function generateMetadata({ params }) {
     L,
   });
   return pageMeta({
-    title: `Pronostic ${g.away.short} – ${g.home.short} (${dayShort(g.date)}) : analyse EuroLeague – Basketlog`,
+    title: fitTitle(
+      `Pronostic ${g.away.name} – ${g.home.name} (${dayShort(g.date)}) : EuroLeague – Basketlog`,
+      `Pronostic ${g.away.name} – ${g.home.name} (${dayShort(g.date)}) – Basketlog`,
+      `Pronostic ${g.away.name} – ${g.home.name} (${dayShort(g.date)})`,
+      `Pronostic ${g.away.short} – ${g.home.short} (${dayShort(g.date)}) : analyse EuroLeague – Basketlog`
+    ),
     description: done
       ? `${g.away.name} – ${g.home.name}, ${dayLong(g.date)} : score final ${g.away.score}-${g.home.score}. Le pronostic Basketlog d'avant-match et son analyse EuroLeague.`
       : `${g.away.name} – ${g.home.name}, ${dayLong(g.date)} : ${a.fav.team.name} favori à ${pctTxt(Math.max(a.pHome, a.pAway))}. Score projeté, forme et scénarios du match d'EuroLeague.`,

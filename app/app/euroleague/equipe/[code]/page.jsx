@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { elContext, elAnalyze, elStandings } from "../../../../../lib/euroleague";
 import AppTabs from "../../../../../components/AppTabs";
-import { pageMeta } from "../../../../../lib/seo";
+import { pageMeta, fitTitle } from "../../../../../lib/seo";
 import { getL } from "../../../../../lib/lang-server";
 import { fmtDate, numOf } from "../../../../../lib/i18n";
 
@@ -18,7 +18,11 @@ export async function generateMetadata({ params }) {
   const t = cur[code];
   if (!t) return { title: L.t("Club EuroLeague – Basketlog", "EuroLeague club – Basketlog", "Club de la Euroliga – Basketlog"), robots: { index: false } };
   return pageMeta({
-    title: L.t(`${t.name} : EuroLeague, stats et pronostics – Basketlog`, `${t.name}: EuroLeague stats and predictions – Basketlog`, `${t.name}: estadísticas y pronósticos de la Euroliga – Basketlog`),
+    title: L.t(
+      fitTitle(`Pronostic ${t.name} : EuroLeague, matchs et stats – Basketlog`, `Pronostic ${t.name} : EuroLeague, matchs et stats`, `Pronostic ${t.name} (EuroLeague)`),
+      fitTitle(`${t.name} predictions: EuroLeague games and stats – Basketlog`, `${t.name} predictions: EuroLeague games and stats`, `${t.name} EuroLeague predictions`),
+      fitTitle(`Pronóstico ${t.name}: Euroliga, partidos y estadísticas – Basketlog`, `Pronóstico ${t.name}: Euroliga, partidos y estadísticas`, `Pronóstico ${t.name} (Euroliga)`)
+    ),
     description: L.t(
       `${t.name} en EuroLeague : bilan, classement, forme récente, calendrier et pronostic Basketlog pour chaque prochain match.`,
       `${t.name} in the EuroLeague: record, standing, recent form, schedule and a Basketlog prediction for every upcoming game.`, `${t.name} en la Euroliga: balance, clasificación, forma reciente, calendario y un pronóstico de Basketlog para cada próximo partido.`

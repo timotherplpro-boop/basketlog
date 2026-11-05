@@ -3,7 +3,7 @@ import { analyzeDay } from "../../../../lib/data";
 import { recordPronosSoon } from "../../../../lib/pronos";
 import { nbaToday, isValidDate, shiftDate, scoreboardReachable } from "../../../../lib/espn";
 import MatchView from "../../../../components/MatchView";
-import { pageMeta, dayLong, dayShort, pctTxt } from "../../../../lib/seo";
+import { pageMeta, dayLong, dayShort, pctTxt, fitTitle } from "../../../../lib/seo";
 import { getL } from "../../../../lib/lang-server";
 
 export const dynamic = "force-dynamic";
@@ -32,7 +32,12 @@ export async function generateMetadata({ params, searchParams }) {
   const pFav = Math.max(a.pHome, a.pAway);
   const done = g.state === "post" && g.home.score != null;
   if (L.es) return pageMeta({
-    title: `Pronóstico ${g.away.short} – ${g.home.short} (${dayShort(g.date, L)}): análisis NBA – Basketlog`,
+    title: fitTitle(
+      `Pronóstico NBA ${g.away.name} – ${g.home.name} (${dayShort(g.date, L)}) – Basketlog`,
+      `Pronóstico ${g.away.name} – ${g.home.name} (${dayShort(g.date, L)}) – Basketlog`,
+      `Pronóstico ${g.away.name} – ${g.home.name} (${dayShort(g.date, L)})`,
+      `Pronóstico ${g.away.short} – ${g.home.short} (${dayShort(g.date, L)}): análisis NBA – Basketlog`
+    ),
     description: done
       ? `${g.away.name} – ${g.home.name}, ${dayLong(g.date, L)}: resultado final ${g.away.score}-${g.home.score}. El pronóstico de Basketlog antes del partido, sus probabilidades y su análisis.`
       : `${g.away.name} – ${g.home.name}, ${dayLong(g.date, L)}: ${a.fav.team.name}, favorito al ${pctTxt(pFav, L)}. Marcador proyectado ${Math.round(a.awayPts)}-${Math.round(a.homePts)}, bajas, forma y escenarios del partido.`,
@@ -40,7 +45,11 @@ export async function generateMetadata({ params, searchParams }) {
     L,
   });
   if (L.en) return pageMeta({
-    title: `${g.away.short} vs ${g.home.short} prediction (${dayShort(g.date, L)}): NBA analysis – Basketlog`,
+    title: fitTitle(
+      `${g.away.name} vs ${g.home.name} prediction (${dayShort(g.date, L)}) – Basketlog`,
+      `${g.away.name} vs ${g.home.name} prediction (${dayShort(g.date, L)})`,
+      `${g.away.short} vs ${g.home.short} prediction (${dayShort(g.date, L)}): NBA analysis – Basketlog`
+    ),
     description: done
       ? `${g.away.name} vs ${g.home.name}, ${dayLong(g.date, L)}: final score ${g.away.score}-${g.home.score}. Basketlog's pregame prediction, its probabilities and analysis.`
       : `${g.away.name} vs ${g.home.name}, ${dayLong(g.date, L)}: ${a.fav.team.name} favored at ${pctTxt(pFav, L)}. Projected score ${Math.round(a.awayPts)}-${Math.round(a.homePts)}, injuries, form and game scenarios.`,
@@ -48,7 +57,12 @@ export async function generateMetadata({ params, searchParams }) {
     L,
   });
   return pageMeta({
-    title: `Pronostic ${g.away.short} – ${g.home.short} (${dayShort(g.date)}) : analyse NBA – Basketlog`,
+    title: fitTitle(
+      `Pronostic NBA ${g.away.name} – ${g.home.name} (${dayShort(g.date)}) – Basketlog`,
+      `Pronostic ${g.away.name} – ${g.home.name} (${dayShort(g.date)}) – Basketlog`,
+      `Pronostic ${g.away.name} – ${g.home.name} (${dayShort(g.date)})`,
+      `Pronostic ${g.away.short} – ${g.home.short} (${dayShort(g.date)}) : analyse NBA – Basketlog`
+    ),
     description: done
       ? `${g.away.name} – ${g.home.name}, ${dayLong(g.date)} : score final ${g.away.score}-${g.home.score}. Le pronostic Basketlog d'avant-match, ses probabilités et son analyse.`
       : `${g.away.name} – ${g.home.name}, ${dayLong(g.date)} : ${a.fav.team.name} favori à ${pctTxt(pFav)}. Score projeté ${Math.round(a.awayPts)}-${Math.round(a.homePts)}, absences, forme et scénarios du match.`,
