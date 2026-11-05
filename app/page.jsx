@@ -193,13 +193,15 @@ export default async function Home() {
             {badgeTxt}
           </div>
           <h1 className="t-hero">
+            {/* Marque en tête du titre : le H1 se lit « Basketlog : Prédis chaque match… » (recherches « basketlog »). */}
+            <span className="w hero-brand" style={{ "--d": "120ms" }}>Basketlog<span className="sr-only">{L.en ? ": " : " : "}</span></span>
             {hero.words.map((w, i) => <span key={i}><span className="w" style={{ "--d": `${180 + i * 70}ms` }}>{w}</span>{" "}</span>)}
             <span className="w accent" style={{ "--d": `${180 + hero.words.length * 70}ms` }}>{hero.accent}</span>
           </h1>
           <p className="lead rise" style={{ "--d": "650ms" }}>{L.t(
-            "Probabilités, statistiques avancées et scénarios de match pour anticiper les résultats et mieux comprendre le jeu.",
-            "Probabilities, advanced statistics and game scenarios to anticipate outcomes and better understand the game.",
-            "Probabilidades, estadísticas avanzadas y escenarios de partido para anticipar los resultados y comprender mejor el juego."
+            "Basketlog réunit probabilités, statistiques avancées et scénarios de match pour anticiper les résultats et mieux comprendre le jeu.",
+            "Basketlog brings together probabilities, advanced statistics and game scenarios to anticipate outcomes and better understand the game.",
+            "Basketlog reúne probabilidades, estadísticas avanzadas y escenarios de partido para anticipar los resultados y comprender mejor el juego."
           )}</p>
           <div className="rise" style={{ "--d": "800ms", width: "100%", display: "flex", justifyContent: "center" }}><TeamSearch games={up.map(({ a, ...r }) => r)} /></div>
           <p className="proof rise" style={{ "--d": "950ms" }}>
