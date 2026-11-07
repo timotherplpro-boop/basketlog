@@ -45,6 +45,7 @@ function CookiesFr() {
 
       <Sec n={3} title="Mesure d'audience (Amplitude)">
         <p>Avec ton accord, Basketlog utilise Amplitude (données hébergées dans l&apos;Union européenne) pour savoir quelles pages et fonctionnalités sont utilisées, et améliorer le site. Ces statistiques ne servent jamais à la publicité et ne sont pas revendues. Sans ton accord, aucun de ces traceurs n&apos;est déposé.</p>
+        <p>À part, Basketlog compte de façon anonyme les grandes étapes des visites (arrivée sur le site, ouverture d&apos;une analyse, page des formules, clic sur une formule), avec la source d&apos;arrivée (par exemple TikTok ou Google), la langue et le type d&apos;appareil. Ce compteur ne dépose ni cookie ni traceur, n&apos;utilise aucun identifiant et ne garde ni ton adresse IP ni aucune donnée sur toi : seulement des totaux par jour.</p>
       </Sec>
 
       <Sec n={4} title="Services tiers">
@@ -94,6 +95,7 @@ function CookiesEn({ L }) {
 
       <Sec n={3} title="Audience measurement (Amplitude)">
         <p>With your consent, Basketlog uses Amplitude (data hosted in the European Union) to know which pages and features are used, and to improve the website. These statistics are never used for advertising and are not sold. Without your consent, none of these trackers is set.</p>
+        <p>Separately, Basketlog anonymously counts the main steps of visits (arriving on the site, opening an analysis, the plans page, clicking a plan), with the visit source (for example TikTok or Google), the language and the device type. This counter sets no cookie or tracker, uses no identifier and keeps neither your IP address nor any data about you: only daily totals.</p>
       </Sec>
 
       <Sec n={4} title="Third-party services">
@@ -143,6 +145,7 @@ function CookiesEs({ L }) {
 
       <Sec n={3} title="Medición de audiencia (Amplitude)">
         <p>Con tu consentimiento, Basketlog usa Amplitude (datos alojados en la Unión Europea) para saber qué páginas y funciones se usan y mejorar el sitio. Estas estadísticas nunca se usan para publicidad ni se venden. Sin tu consentimiento, no se instala ninguno de estos rastreadores.</p>
+        <p>Aparte, Basketlog cuenta de forma anónima las grandes etapas de las visitas (llegada al sitio, apertura de un análisis, página de planes, clic en un plan), con el origen de la visita (por ejemplo TikTok o Google), el idioma y el tipo de dispositivo. Este contador no instala cookies ni rastreadores, no usa ningún identificador y no guarda ni tu dirección IP ni ningún dato sobre ti: solo totales diarios.</p>
       </Sec>
 
       <Sec n={4} title="Servicios de terceros">
