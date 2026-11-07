@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { COOKIE, PREVIEW_TIERS, cookieOptions, decodeSession, encodeSession, resolveAccess } from "../../../lib/pro";
 import { adminData, dbRpc, getRole } from "../../../lib/roles";
+import { LANGS, mk } from "../../../lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -10,14 +11,21 @@ const CODE = /^[0-9a-f]{20}$/;
 const err = (error, status = 400) => NextResponse.json({ ok: false, error }, { status, headers: { "Cache-Control": "no-store" } });
 
 // Actions de l'espace admin. Le rôle est relu dans la base à chaque appel (jamais seulement dans le cookie).
+// Les messages d'erreur sont rendus dans la langue de l'écran (body.lang : fr, en ou es ; français par défaut).
 export async function POST(req) {
-  const s = decodeSession(req.cookies.get(COOKIE)?.value);
-  if (!s?.uid) return err("Connecte-toi avec ton compte admin.", 401);
-  let role = null;
-  try { role = await getRole(s.uid); } catch { return err("Base momentanément injoignable, réessaie dans un instant.", 503); }
-  if (role !== "admin") return err("Réservé aux admins.", 403);
+  const raw = await req.json().catch(() => null);
+  const body = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+  const { t } = mk(LANGS.includes(body.lang) ? body.lang : "fr");
 
-  const body = await req.json().catch(() => ({}));
+  const s = decodeSession(req.cookies.get(COOKIE)?.value);
+  if (!s?.uid) return err(t("Connecte-toi avec ton compte admin.", "Log in with your admin account.", "Inicia sesión con tu cuenta de administrador."), 401);
+  let role = null;
+  try {
+    role = await getRole(s.uid);
+  } catch {
+    return err(t("Base momentanément injoignable, réessaie dans un instant.", "The database is temporarily unreachable, please try again in a moment.", "La base de datos no está accesible por el momento, inténtalo de nuevo en un instante."), 503);
+  }
+  if (role !== "admin") return err(t("Réservé aux admins.", "Admins only.", "Reservado a los administradores."), 403);
 
   // Aperçu d'une formule : la session devient celle d'un client de cette formule (ou redevient admin).
   if (body.action === "apercu") {
@@ -33,7 +41,7 @@ export async function POST(req) {
       delete next.admin;
     }
     const value = encodeSession(next);
-    if (!value) return err("Session impossible à mettre à jour.", 500);
+    if (!value) return err(t("Session impossible à mettre à jour.", "Couldn't update the session.", "No se ha podido actualizar la sesión."), 500);
     const res = NextResponse.json({ ok: true, preview: tier }, { headers: { "Cache-Control": "no-store" } });
     res.cookies.set(COOKIE, value, cookieOptions);
     return res;
@@ -45,7 +53,7 @@ export async function POST(req) {
       case "avis_publier":
       case "avis_retirer":
       case "avis_supprimer": {
-        if (!UUID.test(String(body.id || ""))) return err("Avis introuvable.");
+        if (!UUID.test(String(body.id || ""))) return err(t("Avis introuvable.", "Review not found.", "Opinión no encontrada."));
         await dbRpc("basketlog_admin_avis", { p_id: body.id, p_action: body.action.slice(5) });
         revalidateTag("avis"); // le site affiche tout de suite la liste à jour
         break;
@@ -58,26 +66,26 @@ export async function POST(req) {
         break;
       }
       case "annuler_invitation": {
-        if (!CODE.test(String(body.code || ""))) return err("Invitation introuvable.");
+        if (!CODE.test(String(body.code || ""))) return err(t("Invitation introuvable.", "Invitation not found.", "Invitación no encontrada."));
         await dbRpc("basketlog_admin_annuler", { p_code: body.code });
         break;
       }
       case "retirer_acces": {
         const uid = String(body.uid || "");
-        if (!uid || uid.length > 80) return err("Compte introuvable.");
-        if (uid === s.uid) return err("Tu ne peux pas retirer ton propre accès admin.");
+        if (!uid || uid.length > 80) return err(t("Compte introuvable.", "Account not found.", "Cuenta no encontrada."));
+        if (uid === s.uid) return err(t("Tu ne peux pas retirer ton propre accès admin.", "You can't remove your own admin access.", "No puedes retirar tu propio acceso de administrador."));
         const res = await dbRpc("basketlog_admin_retirer", { p_uid: uid });
-        if (res?.reason === "dernier_admin") return err("Il faut garder au moins un admin.");
+        if (res?.reason === "dernier_admin") return err(t("Il faut garder au moins un admin.", "At least one admin must remain.", "Debe quedar al menos un administrador."));
         break;
       }
       case "lister":
         break;
       default:
-        return err("Action inconnue.");
+        return err(t("Action inconnue.", "Unknown action.", "Acción desconocida."));
     }
     const data = await adminData();
     return NextResponse.json({ ok: true, data, ...extra }, { headers: { "Cache-Control": "no-store" } });
   } catch {
-    return err("L'action n'a pas pu être enregistrée. Réessaie dans un instant.", 502);
+    return err(t("L'action n'a pas pu être enregistrée. Réessaie dans un instant.", "The action couldn't be saved. Please try again in a moment.", "No se ha podido guardar la acción. Inténtalo de nuevo en un instante."), 502);
   }
 }

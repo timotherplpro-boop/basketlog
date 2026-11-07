@@ -97,7 +97,7 @@ function BallButton({ href, children }) {
 export default async function Home() {
   const L = await getL();
   const cur = await getCurrency(L); // prix en euros dans la zone euro, en dollars ailleurs
-  const [up, acc, std, reviews, elGames, stats, members, sureRec] = await Promise.all([upcomingAnalyses(7), recentAccuracy(7), conferenceStandings(), getReviews(30), getELGames(), pickStats(), memberCount(), sureRecordSoon()]);
+  const [up, acc, std, reviews, elGames, stats, members, sureRec] = await Promise.all([upcomingAnalyses(7), recentAccuracy(7), conferenceStandings(), getReviews(30, L.lang), getELGames(), pickStats(), memberCount(), sureRecordSoon()]);
   const pre = up.filter((g) => !g.live);
   // Confiance très élevée (favori à 88 % et plus) : NBA et EuroLeague des 7 prochains jours, mis en avant sous le hero.
   const sure = await surePicks(up, { el: true });

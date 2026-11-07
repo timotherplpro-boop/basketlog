@@ -20,7 +20,7 @@ export async function generateMetadata() {
 
 export default async function AvisPage() {
   const L = await getL();
-  const { list, count, avg } = await getReviews(200);
+  const { list, count, avg } = await getReviews(200, L.lang);
   return (
     <main className="voices" style={{ paddingTop: 140, minHeight: "80vh" }}>
       <RevealObserver />

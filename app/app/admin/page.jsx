@@ -3,14 +3,23 @@ import { notFound } from "next/navigation";
 import { CHECKOUT, COOKIE, FREE_SIGNUP_URL, aiReady, decodeSession, whopConfigured, whopTier } from "../../../lib/pro";
 import { CHECKOUT_USD } from "../../../lib/pricing";
 import { adminData, getRole } from "../../../lib/roles";
+import { getL } from "../../../lib/lang-server";
 import AdminPanel from "../../../components/AdminPanel";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Admin – Basketlog", robots: { index: false, follow: false } };
+export async function generateMetadata() {
+  const L = await getL();
+  return {
+    title: L.t("Admin – Basketlog", "Admin – Basketlog", "Administración – Basketlog"),
+    robots: { index: false, follow: false },
+  };
+}
 
-// Espace admin : avis, formules (avec aperçu « comme un client »), créateurs et état du back-office.
+// Espace admin : avis, formules (avec aperçu « comme un client »), créateurs et état du back-office,
+// en français, anglais et espagnol (adresses /app/admin, /en/app/admin et /es/app/admin).
 // Le rôle est relu dans la base à chaque affichage ; pour tout autre compte (ou un visiteur), la page n'existe pas.
 export default async function AdminPage() {
+  const L = await getL();
   const s = decodeSession((await cookies()).get(COOKIE)?.value);
   let role = null;
   if (s?.uid) {
@@ -35,8 +44,8 @@ export default async function AdminPage() {
   return (
     <main className="app-page wide">
       <div className="app-head">
-        <h1>Admin</h1>
-        <p>Avis, formules, créateurs et état du site.</p>
+        <h1>{L.t("Admin", "Admin", "Administración")}</h1>
+        <p>{L.t("Avis, formules, créateurs et état du site.", "Reviews, plans, creators and site status.", "Opiniones, planes, creadores y estado del sitio.")}</p>
       </div>
       <AdminPanel initial={data} me={s.uid} preview={s.preview || null} health={health} />
     </main>

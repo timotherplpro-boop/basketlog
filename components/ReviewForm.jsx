@@ -48,7 +48,7 @@ export default function ReviewForm({ label, className = "btn-white" }) {
 
   if (!status) return null; // formule en cours de vérification
   // Admin : lien vers la relecture des avis. Créateur partenaire : pas d'avis (accès offert).
-  if (status.role === "admin") return <p className="reviews-only"><a href="/app/admin">{L.t("Relire les avis (admin)", "Review submissions (admin)", "Revisar las opiniones (admin)")}</a></p>;
+  if (status.role === "admin") return <p className="reviews-only"><a href={L.href("/app/admin")}>{L.t("Relire les avis (admin)", "Review submissions (admin)", "Revisar las opiniones (admin)")}</a></p>;
   if (status.role) return null;
   if (!PAYANTES.includes(status.tier)) {
     // Visiteur ou compte gratuit : pas de formulaire, avis réservés aux abonnés.

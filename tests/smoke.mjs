@@ -2,6 +2,7 @@
 // avis, espace admin, routes protégées. Usage : SESSION_SECRET=... node tests/smoke.mjs http://localhost:3000
 // Les sessions de test sont signées avec SESSION_SECRET, comme celles du site (cookie bl_pro).
 import crypto from "node:crypto";
+import { unit } from "./unit.mjs";
 
 const BASE = (process.argv[2] || process.env.BASE_URL || "http://localhost:3000").replace(/\/$/, "");
 const SECRET = process.env.SESSION_SECRET || "";
@@ -28,7 +29,7 @@ const ERROR_PAGE = /Une erreur est survenue|Application error|Internal Server Er
 
 async function pages() {
   console.log("Pages");
-  for (const p of ["/", "/en", "/es", "/analyse-basket", "/en/analyse-basket", "/es/analyse-basket", "/pronostic-basket", "/en/pronostic-basket", "/es/pronostic-basket", "/app", "/app/matchs", "/app/bilan", "/app/bilan?l=pub", "/app/classement", "/app/euroleague", "/pro", "/avis", "/methode", "/cgu", "/cgv", "/confidentialite", "/mentions-legales", "/cookies", "/sitemap.xml", "/robots.txt"]) {
+  for (const p of ["/", "/en", "/es", "/analyse-basket", "/en/analyse-basket", "/es/analyse-basket", "/pronostic-basket", "/en/pronostic-basket", "/es/pronostic-basket", "/app", "/app/matchs", "/app/bilan", "/app/bilan?l=pub", "/app/classement", "/app/euroleague", "/pro", "/avis", "/en/avis", "/es/avis", "/methode", "/cgu", "/cgv", "/confidentialite", "/mentions-legales", "/cookies", "/sitemap.xml", "/robots.txt"]) {
     const r = await get(p);
     if (r.status !== 200) ko(p, `HTTP ${r.status}`);
     else if (ERROR_PAGE.test(r.text)) ko(p, "page d'erreur affichée");
@@ -94,5 +95,6 @@ await pages();
 await access();
 await protectedRoutes();
 await videosApi();
+{ const u = await unit(); passed += u.passed; failed += u.failed; } // traduction des avis (sans serveur)
 console.log(`\n${passed} réussis, ${failed} en échec, ${skipped} ignorés`);
 process.exit(failed ? 1 : 0);

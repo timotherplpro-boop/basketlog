@@ -97,7 +97,7 @@ export default function AppShell({ session, ai = false, children }) {
             <Icon name="card" />Pricing<span className="sb-badge">Pro</span>
           </Link>
           {role === "admin" && (
-            <Link href="/app/admin" className={`sb-item ${p.startsWith("/app/admin") ? "on" : ""}`} aria-current={p.startsWith("/app/admin") ? "page" : undefined}>
+            <Link href={L.href("/app/admin")} className={`sb-item ${p.startsWith("/app/admin") ? "on" : ""}`} aria-current={p.startsWith("/app/admin") ? "page" : undefined}>
               <Icon name="user" />Admin
             </Link>
           )}

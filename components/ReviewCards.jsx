@@ -39,7 +39,18 @@ export default function ReviewCards({ reviews, max = 9, more = true, L = mk("fr"
       <div className={`cards masonry ${long ? "clip" : ""}`}>
         {list.map((r, i) => (
           <article key={r.id} className="vcard reveal" style={{ "--d": `${(i % 3) * 120}ms` }}>
-            <p>{r.texte}</p>
+            <p lang={r.translated ? L.lang : undefined}>{r.texte}</p>
+            {r.translated && r.orig && (
+              <details className="tr">
+                <summary>
+                  {L.t("Traduit automatiquement", "Automatically translated", "Traducido automáticamente")} · <span className="lnk">{L.t("voir l'original", "see the original", "ver el original")}</span>
+                </summary>
+                <p className="orig" lang={r.orig.lang}>
+                  {r.orig.texte}
+                  {r.orig.profil ? <small> — {r.orig.profil}</small> : null}
+                </p>
+              </details>
+            )}
             <div className="who">
               {r.photo_url
                 ? /* eslint-disable-next-line @next/next/no-img-element */ <img className="avatar" src={r.photo_url} alt="" loading="lazy" />
