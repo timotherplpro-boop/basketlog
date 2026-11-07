@@ -36,6 +36,13 @@ async function proposePromo({ inv, nom, pct }) {
   return null;
 }
 
+// Code choisi par l'admin pour un créateur qu'on vient d'inviter : une seule tentative, avec exactement ce code.
+// Renvoie { code, pct }, ou null s'il vient d'être pris entre-temps.
+async function setPromo({ inv, nom, pct, code }) {
+  const res = await dbRpc("basketlog_admin_promo_set", { p_uid: null, p_inv_code: inv, p_code: code, p_pct: pct, p_nom: nom || null });
+  return res?.ok ? { code, pct } : null;
+}
+
 // Supprime le code d'un créateur qui disparaît (accès retiré, invitation annulée) et renvoie ce qui a été supprimé,
 // pour rappeler à l'admin de le désactiver aussi chez Whop. Sans conséquence si les codes promo ne sont pas en base.
 async function closePromo(args) {
@@ -108,13 +115,27 @@ export async function POST(req) {
         const askedPct = r === "createur" && body.pct != null && String(body.pct).trim() !== "";
         const pct = askedPct ? cleanPct(body.pct) : null;
         if (askedPct && pct == null) return err(msg.pct());
+        // Nom du code choisi par l'admin (vide : proposé d'après le nom du créateur et la remise). Sans remise, pas de code.
+        // Contrôlé, et vérifié libre, AVANT de créer le lien : un code refusé ne laisse pas d'invitation orpheline.
+        if (pct != null && body.code != null && typeof body.code !== "string") return err(msg.code());
+        const wanted = pct != null && typeof body.code === "string" ? body.code.trim().toUpperCase() : "";
+        if (wanted) {
+          if (!CODE_RE.test(wanted)) return err(msg.code());
+          let used = false;
+          try { used = (await dbRpc("basketlog_admin_promos"))?.some?.((p) => p.code === wanted) === true; } catch { /* codes promo non installés : signalé plus bas */ }
+          if (used) return err(msg.taken(), 409);
+        }
         const res = await dbRpc("basketlog_admin_inviter", { p_role: r, p_note: note || null });
         extra = { code: res?.code || null };
         // Le lien est créé quoi qu'il arrive : un souci avec le code promo est signalé à côté, sans bloquer.
         if (pct != null && res?.code) {
           try {
-            extra.promo = await proposePromo({ inv: res.code, nom: note, pct });
-            if (!extra.promo) extra.promoError = t("Le lien est créé, mais aucun code promo libre n'a été trouvé : ajoutes-en un dans la liste ci-dessous.", "The link is created, but no free promo code was found: add one in the list below.", "El enlace está creado, pero no se ha encontrado ningún código promocional libre: añade uno en la lista de abajo.");
+            extra.promo = wanted ? await setPromo({ inv: res.code, nom: note, pct, code: wanted }) : await proposePromo({ inv: res.code, nom: note, pct });
+            if (!extra.promo) {
+              extra.promoError = wanted
+                ? t(`Le lien est créé, mais le code ${wanted} vient d'être pris : choisis-en un autre dans la liste ci-dessous.`, `The link is created, but the code ${wanted} was just taken: pick another one in the list below.`, `El enlace está creado, pero el código ${wanted} acaba de ser ocupado: elige otro en la lista de abajo.`)
+                : t("Le lien est créé, mais aucun code promo libre n'a été trouvé : ajoute-en un dans la liste ci-dessous.", "The link is created, but no free promo code was found: add one in the list below.", "El enlace está creado, pero no se ha encontrado ningún código promocional libre: añade uno en la lista de abajo.");
+            }
           } catch (e) {
             extra.promoError = promoNotInstalled(e)
               ? msg.off()

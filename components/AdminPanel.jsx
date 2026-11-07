@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { money, price } from "../lib/pricing";
 import { LANGS, LANG_NAMES, fmtDate, mk, pctOf } from "../lib/i18n";
-import { CODE_RE, PROMO_DEFAULT, PROMO_MAX, PROMO_MIN, cleanPct, suggestCode } from "../lib/promo";
+import { CODE_RE, PROMO_DEFAULT, PROMO_MAX, PROMO_MIN, cleanCode, cleanPct, suggestCode } from "../lib/promo";
 import { useL } from "./LangProvider";
 
 // Tableau de bord Whop de Basketlog et sa page des codes promo (où chaque code de créateur doit aussi être créé).
@@ -98,7 +98,7 @@ function PromoLine({ L, target, name, promo, busy, confirm, twoStep, copied, onC
       <div className="adm-promo">
         <form className="adm-promo-form" onSubmit={submit}>
           <label><span>{t("Code (celui que le client saisit)", "Code (what the customer types)", "Código (el que escribe el cliente)")}</span>
-            <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 24))} maxLength={24} autoComplete="off" autoCapitalize="characters" spellCheck={false} required />
+            <input value={code} onChange={(e) => setCode(cleanCode(e.target.value))} maxLength={24} autoComplete="off" autoCapitalize="characters" spellCheck={false} required />
           </label>
           <label><span>{t("Remise pour le client", "Customer discount", "Descuento para el cliente")}</span>
             <span className="adm-pct">
@@ -167,8 +167,12 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
   const [inviteNote, setInviteNote] = useState("");
   const [inviteRole, setInviteRole] = useState("createur");
   const [invitePct, setInvitePct] = useState(String(PROMO_DEFAULT)); // remise du code promo du prochain créateur invité
+  const [inviteCode, setInviteCode] = useState(null); // nom du code : null tant qu'il suit la proposition (nom + remise), sinon ce que l'admin a saisi
+  const [inviteProblem, setInviteProblem] = useState(""); // refus du formulaire d'invitation (code déjà pris…), affiché sous le formulaire
   const noticeRef = useRef(null);
   const promosOn = !!data?.promosOk; // faux tant que supabase/codes-promo.sql n'a pas été lancé
+  const suggestedCode = cleanPct(invitePct) ? suggestCode(inviteNote, invitePct) : ""; // « @lanuitnba » + 20 -> LANUITNBA20 (vide sans remise valide, ou si le nom est trop court)
+  const shownCode = inviteCode ?? suggestedCode;
 
   useEffect(() => {
     if (!confirm) return;
@@ -213,14 +217,26 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
 
   async function invite(e) {
     e.preventDefault();
-    const withPct = promosOn && inviteRole === "createur" && invitePct.trim() !== "";
-    const j = await act("inviter", { note: inviteNote, role: inviteRole, ...(withPct ? { pct: invitePct } : {}) }, "inviter");
+    const forCreator = promosOn && inviteRole === "createur";
+    const withPct = forCreator && invitePct.trim() !== "";
+    if (forCreator && !withPct && inviteCode) { // un nom de code saisi sans remise : pas de lien créé en silence sans son code
+      setInviteProblem(t("Indique la remise (en %) pour créer ce code, ou efface le nom du code.", "Enter the discount (in %) to create this code, or clear the code name.", "Indica el descuento (en %) para crear este código, o borra el nombre del código."));
+      return;
+    }
+    const code = withPct ? shownCode : ""; // vide : le serveur propose un code d'après le nom du créateur
+    setInviteProblem("");
+    setLink(""); // l'ancien lien disparaît : s'il y a un refus (code pris…), on ne le prend pas pour celui du créateur refusé
+    setLinkPromo(null);
+    setCopied("");
+    const j = await act("inviter", { note: inviteNote, role: inviteRole, ...(withPct ? { pct: invitePct } : {}), ...(code ? { code } : {}) }, "inviter", true);
+    if (j?.ok === false) { setInviteProblem(j.error); return; }
     if (j?.code) {
       const url = inviteUrl(j.code, linkLang);
       setLink(url);
       setLinkPromo(j.promo || null);
       if (j.promoError) setNotice({ kind: "text", text: j.promoError });
       setInviteNote("");
+      setInviteCode(null);
       if (await copyText(url)) setCopied("new");
     }
   }
@@ -391,35 +407,55 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
           )}
         </p>
         <form className={`adm-invite ${promosOn ? "with-pct" : ""}`} onSubmit={invite}>
-          <label><span>{t("Nom du créateur", "Creator name", "Nombre del creador")}</span><input name="note" value={inviteNote} onChange={(e) => setInviteNote(e.target.value)} maxLength={80} placeholder={t("Ex : @tipoff_off", "E.g. @tipoff_off", "Ej.: @tipoff_off")} autoComplete="off" /></label>
+          <label><span>{t("Nom du créateur", "Creator name", "Nombre del creador")}</span><input name="note" value={inviteNote} onChange={(e) => { setInviteNote(e.target.value); setInviteProblem(""); }} maxLength={80} placeholder={t("Ex : @tipoff_off", "E.g. @tipoff_off", "Ej.: @tipoff_off")} autoComplete="off" /></label>
           <label><span>{t("Accès", "Access", "Acceso")}</span>
-            <select name="role" value={inviteRole} onChange={(e) => setInviteRole(e.target.value)}>
+            <select name="role" value={inviteRole} onChange={(e) => { setInviteRole(e.target.value); setInviteProblem(""); }}>
               <option value="createur">{t("Créateur : toute l'application", "Creator: the whole app", "Creador: toda la aplicación")}</option>
               <option value="admin">{t("Admin : application, avis et invitations", "Admin: app, reviews and invitations", "Administrador: aplicación, opiniones e invitaciones")}</option>
             </select>
           </label>
-          {promosOn && (
-            <label><span>{t("Remise du code promo", "Promo code discount", "Descuento del código")}</span>
-              <span className="adm-pct">
-                <input name="pct" type="number" inputMode="numeric" min={PROMO_MIN} max={PROMO_MAX} step="1" value={inviteRole === "createur" ? invitePct : ""} onChange={(e) => setInvitePct(e.target.value)} disabled={inviteRole !== "createur"} placeholder={inviteRole === "createur" ? String(PROMO_DEFAULT) : "–"} />
-                <b aria-hidden>%</b>
-              </span>
-            </label>
-          )}
           <label><span>{t("Langue du lien", "Link language", "Idioma del enlace")}</span>
             <select value={linkLang} onChange={(e) => setLinkLang(e.target.value)}>
               {LANGS.map((l) => <option key={l} value={l}>{LANG_NAMES[l]}</option>)}
             </select>
           </label>
+          {promosOn && (
+            <>
+              <label><span>{t("Nom du code promo", "Promo code name", "Nombre del código promocional")}</span>
+                <input
+                  name="code"
+                  className="adm-code-input"
+                  value={inviteRole === "createur" ? shownCode : ""}
+                  onChange={(e) => { setInviteCode(cleanCode(e.target.value)); setInviteProblem(""); }}
+                  onBlur={() => { if (inviteCode === "") setInviteCode(null); }} // champ vidé : il reprend la proposition
+                  disabled={inviteRole !== "createur"}
+                  placeholder={inviteRole === "createur" ? (suggestedCode || t("Ex : LANUITNBA20", "E.g. LANUITNBA20", "Ej.: LANUITNBA20")) : "–"}
+                  maxLength={24}
+                  pattern="[A-Z0-9]{3,24}"
+                  title={t("3 à 24 lettres ou chiffres, sans espace ni accent.", "3 to 24 letters or digits, no spaces or accents.", "De 3 a 24 letras o cifras, sin espacios ni acentos.")}
+                  autoComplete="off"
+                  autoCapitalize="characters"
+                  spellCheck={false}
+                />
+              </label>
+              <label><span>{t("Remise du code promo", "Promo code discount", "Descuento del código")}</span>
+                <span className="adm-pct">
+                  <input name="pct" type="number" inputMode="numeric" min={PROMO_MIN} max={PROMO_MAX} step="1" value={inviteRole === "createur" ? invitePct : ""} onChange={(e) => { setInvitePct(e.target.value); setInviteProblem(""); }} disabled={inviteRole !== "createur"} placeholder={inviteRole === "createur" ? String(PROMO_DEFAULT) : "–"} />
+                  <b aria-hidden>%</b>
+                </span>
+              </label>
+            </>
+          )}
           <button type="submit" className="adm-btn primary" disabled={!!busy}>{busy === "inviter" ? t("Création…", "Creating…", "Creando…") : t("Créer le lien", "Create link", "Crear el enlace")}</button>
         </form>
+        {inviteProblem && <p className="adm-err" role="alert">{inviteProblem}</p>}
         <p className="adm-help">{t("La page d'invitation s'ouvre dans la langue choisie : prends celle de ton créateur (français, anglais ou espagnol).", "The invitation page opens in the chosen language: pick your creator's (French, English or Spanish).", "La página de invitación se abre en el idioma elegido: elige el de tu creador (francés, inglés o español).")}</p>
         {promosOn ? (
           <p className="adm-help">
             {t(
-              "Chaque créateur a aussi un code promo : tu choisis la remise (en %) que ses clients obtiennent en le saisissant au paiement. Le code est proposé à partir de son nom et reste modifiable dans la liste ci-dessous ; laisse la remise vide pour ne pas en créer. Pour fonctionner à l'achat, il doit aussi exister chez Whop.",
-              "Every creator also gets a promo code: you choose the discount (in %) their customers get by entering it at checkout. The code is suggested from their name and can still be edited in the list below; leave the discount empty to skip it. To work at purchase, it must also exist in Whop.",
-              "Cada creador tiene además un código promocional: tú eliges el descuento (en %) que obtienen sus clientes al introducirlo en el pago. El código se propone a partir de su nombre y se puede modificar en la lista de abajo; deja el descuento vacío para no crear ninguno. Para que funcione al comprar, también tiene que existir en Whop."
+              "Chaque créateur a aussi un code promo : tu choisis son nom (3 à 24 lettres ou chiffres) et la remise (en %) que ses clients obtiennent en le saisissant au paiement. Le nom est proposé d'après celui du créateur et la remise : change-le comme tu veux, il reste modifiable dans la liste ci-dessous ; laisse la remise vide pour ne pas créer de code. Pour fonctionner à l'achat, il doit aussi exister chez Whop.",
+              "Every creator also gets a promo code: you choose its name (3 to 24 letters or digits) and the discount (in %) their customers get by entering it at checkout. The name is suggested from the creator's name and the discount: change it however you like, it can still be edited in the list below; leave the discount empty to skip the code. To work at purchase, it must also exist in Whop.",
+              "Cada creador tiene además un código promocional: tú eliges su nombre (de 3 a 24 letras o cifras) y el descuento (en %) que obtienen sus clientes al introducirlo en el pago. El nombre se propone a partir del nombre del creador y del descuento: cámbialo como quieras, se puede modificar en la lista de abajo; deja el descuento vacío para no crear ningún código. Para que funcione al comprar, también tiene que existir en Whop."
             )}
           </p>
         ) : (

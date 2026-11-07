@@ -1334,7 +1334,12 @@ body:has(.mmenu.open) .install-banner { display: none; }
 .adm-rows li > span:first-child { color: var(--muted); overflow-wrap: anywhere; min-width: 0; }
 .adm-rows li b { color: #fff; }
 /* Codes promo des créateurs : remise dans le formulaire d'invitation, ligne « code » sous chaque créateur */
-.adm-invite.with-pct { grid-template-columns: 1.1fr 1.3fr .8fr .8fr auto; } /* nom, accès, remise, langue du lien, bouton */
+.adm-invite.with-pct { grid-template-columns: repeat(12, minmax(0, 1fr)); } /* ligne 1 : nom du créateur, accès, langue du lien ; ligne 2 : nom du code, remise, bouton */
+.adm-invite.with-pct > :nth-child(-n+3) { grid-column: span 4; }
+.adm-invite.with-pct > :nth-child(4) { grid-column: span 5; }
+.adm-invite.with-pct > :nth-child(5) { grid-column: span 3; }
+.adm-invite.with-pct > :nth-child(6) { grid-column: span 4; }
+.adm-invite input.adm-code-input { font-family: var(--mono); letter-spacing: .04em; }
 .adm-invite input:disabled { opacity: .5; }
 .adm-pct { position: relative; display: block; }
 .adm-pct input { width: 100%; box-sizing: border-box; padding-right: 30px; -moz-appearance: textfield; appearance: textfield; }
@@ -1358,7 +1363,7 @@ body:has(.mmenu.open) .install-banner { display: none; }
 .adm-guide summary:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; border-radius: 6px; }
 .adm-guide ol { margin: 0 0 12px; padding-left: 20px; display: grid; gap: 6px; color: rgba(255,255,255,.82); font-size: 14.5px; line-height: 1.55; }
 .adm-guide p { margin: 0 0 14px; color: var(--muted); font-size: 14px; line-height: 1.5; }
-@media (max-width: 980px) { .adm-invite, .adm-invite.with-pct { grid-template-columns: 1fr 1fr; } .adm-invite .adm-btn { grid-column: 1 / -1; } }
+@media (max-width: 980px) { .adm-invite, .adm-invite.with-pct { grid-template-columns: 1fr 1fr; } .adm-invite .adm-btn { grid-column: 1 / -1; } .adm-invite.with-pct > :nth-child(n) { grid-column: auto; } }
 @media (max-width: 700px) {
   .adm-invite, .adm-invite.with-pct { grid-template-columns: 1fr; }
   .adm-actions { margin-left: 0; }
