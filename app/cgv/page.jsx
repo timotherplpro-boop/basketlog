@@ -15,9 +15,9 @@ export async function generateMetadata() {
 
 // Contenu des formules (comme Visifoot). Les questions à l'IA ne figurent que si l'IA est configurée.
 const OFFRES = (ai) => [
-  ["Starter", "10 € par mois", "1 analyse réduite par jour : probabilités exactes, score projeté et stats clés du match", "Abonnement mensuel, renouvelé automatiquement chaque mois"],
-  ["Pro", "19 € par mois", `Analyses complètes illimitées, actualités en temps réel${ai ? ", 1 question personnelle par jour à l'IA" : ""}`, "Abonnement mensuel, renouvelé automatiquement chaque mois"],
-  ["Lifetime", "99 € une seule fois", `Analyses complètes illimitées, comme Pro${ai ? ", questions personnelles à l'IA illimitées dans la limite d'un usage raisonnable (50 par jour)" : ""}`, "Paiement unique, sans renouvellement, pour toute la durée d'exploitation du service"],
+  ["Starter", "10 € par mois (11,99 $ hors zone euro)", "1 analyse réduite par jour : probabilités exactes, score projeté et stats clés du match", "Abonnement mensuel, renouvelé automatiquement chaque mois"],
+  ["Pro", "19 € par mois (21,99 $ hors zone euro)", `Analyses complètes illimitées, actualités en temps réel${ai ? ", 1 question personnelle par jour à l'IA" : ""}`, "Abonnement mensuel, renouvelé automatiquement chaque mois"],
+  ["Lifetime", "99 € une seule fois (109 $ hors zone euro)", `Analyses complètes illimitées, comme Pro${ai ? ", questions personnelles à l'IA illimitées dans la limite d'un usage raisonnable (50 par jour)" : ""}`, "Paiement unique, sans renouvellement, pour toute la durée d'exploitation du service"],
 ];
 
 function CGVFr() {
@@ -40,7 +40,7 @@ function CGVFr() {
           </table>
         </div>
         <p>Une analyse réduite (Starter) comprend les probabilités exactes, le score projeté et les stats clés du match. Une analyse complète (Pro et Lifetime) est la fiche détaillée d&apos;un match : argumentation du modèle, facteurs, tous les scénarios, stats comparées, joueurs à suivre, forme récente, confrontations, absences et actualités en temps réel. Les probabilités de victoire de la liste des matchs et l&apos;aperçu de chaque analyse restent gratuits pour tous.</p>
-        <p>Les prix sont en euros, sans frais supplémentaires de notre part ({e.tva.charAt(0).toLowerCase() + e.tva.slice(1)}). Le prix total est affiché sur la page de paiement avant validation. Les prix peuvent évoluer ; un changement de prix ne s&apos;applique jamais à une période déjà payée, et les abonnés sont prévenus avant toute hausse.</p>
+        <p>Les prix sont en euros dans la zone euro et en dollars américains ailleurs, sans frais supplémentaires de notre part ({e.tva.charAt(0).toLowerCase() + e.tva.slice(1)}). Le prix total, dans la monnaie de paiement, est affiché sur la page de paiement avant validation. Les prix peuvent évoluer ; un changement de prix ne s&apos;applique jamais à une période déjà payée, et les abonnés sont prévenus avant toute hausse.</p>
       </Sec>
 
       <Sec n={3} title="Commande et paiement">
@@ -103,9 +103,9 @@ function CGVFr() {
 }
 
 const OFFERS_EN = (ai) => [
-  ["Starter", "€10 per month", "1 reduced analysis per day: exact probabilities, projected score and key stats for the game", "Monthly subscription, renewed automatically every month"],
-  ["Pro", "€19 per month", `Unlimited full analyses, real-time news${ai ? ", 1 personal question a day to the AI" : ""}`, "Monthly subscription, renewed automatically every month"],
-  ["Lifetime", "€99 one-time", `Unlimited full analyses, same as Pro${ai ? ", unlimited personal questions to the AI within fair use (50 per day)" : ""}`, "One-time payment, no renewal, for as long as the service is operated"],
+  ["Starter", "€10 per month ($11.99 outside the euro area)", "1 reduced analysis per day: exact probabilities, projected score and key stats for the game", "Monthly subscription, renewed automatically every month"],
+  ["Pro", "€19 per month ($21.99 outside the euro area)", `Unlimited full analyses, real-time news${ai ? ", 1 personal question a day to the AI" : ""}`, "Monthly subscription, renewed automatically every month"],
+  ["Lifetime", "€99 one-time ($109 outside the euro area)", `Unlimited full analyses, same as Pro${ai ? ", unlimited personal questions to the AI within fair use (50 per day)" : ""}`, "One-time payment, no renewal, for as long as the service is operated"],
 ];
 
 function CGVEn({ L }) {
@@ -129,7 +129,7 @@ function CGVEn({ L }) {
           </table>
         </div>
         <p>A reduced analysis (Starter) includes the exact probabilities, projected score and key stats for the game. A full analysis (Pro and Lifetime) is the detailed page for a game: the model&apos;s reasoning, factors, every scenario, stat comparison, players to watch, recent form, head-to-head, injuries and real-time news. Win probabilities in the games list and the preview of every analysis remain free for everyone.</p>
-        <p>Prices are in euros, with no additional fees from us (VAT not applicable). The total price is shown on the checkout page before you confirm. Prices may change; a price change never applies to a period already paid, and subscribers are notified before any increase.</p>
+        <p>Prices are in euros in the euro area and in US dollars elsewhere, with no additional fees from us (VAT not applicable). The total price, in the payment currency, is shown on the checkout page before you confirm. Prices may change; a price change never applies to a period already paid, and subscribers are notified before any increase.</p>
       </Sec>
 
       <Sec n={3} title="Ordering and payment">
@@ -192,9 +192,9 @@ function CGVEn({ L }) {
 }
 
 const OFFERS_ES = (ai) => [
-  ["Starter", "10 € al mes", "1 análisis reducido al día: probabilidades exactas, marcador proyectado y estadísticas clave del partido", "Suscripción mensual, renovada automáticamente cada mes"],
-  ["Pro", "19 € al mes", `Análisis completos ilimitados, noticias en tiempo real${ai ? ", 1 pregunta personal al día a la IA" : ""}`, "Suscripción mensual, renovada automáticamente cada mes"],
-  ["Lifetime", "99 € en un solo pago", `Análisis completos ilimitados, como Pro${ai ? ", preguntas personales a la IA ilimitadas dentro de un uso razonable (50 al día)" : ""}`, "Pago único, sin renovación, mientras se preste el servicio"],
+  ["Starter", "10 € al mes (11,99 $ fuera de la zona euro)", "1 análisis reducido al día: probabilidades exactas, marcador proyectado y estadísticas clave del partido", "Suscripción mensual, renovada automáticamente cada mes"],
+  ["Pro", "19 € al mes (21,99 $ fuera de la zona euro)", `Análisis completos ilimitados, noticias en tiempo real${ai ? ", 1 pregunta personal al día a la IA" : ""}`, "Suscripción mensual, renovada automáticamente cada mes"],
+  ["Lifetime", "99 € en un solo pago (109 $ fuera de la zona euro)", `Análisis completos ilimitados, como Pro${ai ? ", preguntas personales a la IA ilimitadas dentro de un uso razonable (50 al día)" : ""}`, "Pago único, sin renovación, mientras se preste el servicio"],
 ];
 
 function CGVEs({ L }) {
@@ -218,7 +218,7 @@ function CGVEs({ L }) {
           </table>
         </div>
         <p>Un análisis reducido (Starter) incluye las probabilidades exactas, el marcador proyectado y las estadísticas clave del partido. Un análisis completo (Pro y Lifetime) es la ficha detallada de un partido: argumentación del modelo, factores, todos los escenarios, estadísticas comparadas, jugadores a seguir, forma reciente, enfrentamientos, bajas y noticias en tiempo real. Las probabilidades de victoria de la lista de partidos y el avance de cada análisis siguen siendo gratis para todos.</p>
-        <p>Los precios están en euros, sin gastos adicionales por nuestra parte (IVA no aplicable). El precio total se muestra en la página de pago antes de confirmar. Los precios pueden cambiar; un cambio de precio nunca se aplica a un periodo ya pagado, y los suscriptores reciben aviso antes de cualquier subida.</p>
+        <p>Los precios están en euros en la zona euro y en dólares estadounidenses fuera de ella, sin gastos adicionales por nuestra parte (IVA no aplicable). El precio total, en la moneda de pago, se muestra en la página de pago antes de confirmar. Los precios pueden cambiar; un cambio de precio nunca se aplica a un periodo ya pagado, y los suscriptores reciben aviso antes de cualquier subida.</p>
       </Sec>
 
       <Sec n={3} title="Pedido y pago">

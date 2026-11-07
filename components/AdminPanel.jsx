@@ -16,9 +16,9 @@ async function copyText(text) {
 const FORMULES = [
   { id: null, name: "Visiteur", price: "Gratuit, sans compte", lines: ["Probabilités de victoire et chiffres clés de chaque match", "Aperçu de chaque analyse : forme récente, résumé rapide, scénario n°1, confiance du modèle", "Classements, fiches équipes et bilan du modèle"] },
   { id: "compte", name: "Compte gratuit", price: "0 €", lines: ["Tout ce que voit un visiteur", "Aucune analyse complète (0 par jour), comme Visifoot", "Compte Whop : e-mail, Google ou Apple"] },
-  { id: "starter", name: "Starter", price: "10 € par mois", lines: ["1 analyse par jour", "Analyse réduite : probabilités exactes et stats clés", "Sans engagement, résiliable depuis Whop"] },
-  { id: "pro", name: "Pro", price: "19 € par mois", lines: ["Analyses complètes illimitées", "Scénarios probables détaillés et analyse statistique", "Actualités en temps réel", "Sans engagement, résiliable depuis Whop"] },
-  { id: "lifetime", name: "Lifetime", price: "99 € une seule fois", lines: ["Tout ce qu'offre Pro, à vie", "Plus aucun paiement mensuel", "Priorité sur les nouveautés"] },
+  { id: "starter", name: "Starter", price: "10 € par mois · 11,99 $ hors zone euro", lines: ["1 analyse par jour", "Analyse réduite : probabilités exactes et stats clés", "Sans engagement, résiliable depuis Whop"] },
+  { id: "pro", name: "Pro", price: "19 € par mois · 21,99 $ hors zone euro", lines: ["Analyses complètes illimitées", "Scénarios probables détaillés et analyse statistique", "Actualités en temps réel", "Sans engagement, résiliable depuis Whop"] },
+  { id: "lifetime", name: "Lifetime", price: "99 € une seule fois · 109 $ hors zone euro", lines: ["Tout ce qu'offre Pro, à vie", "Plus aucun paiement mensuel", "Priorité sur les nouveautés"] },
 ];
 
 const Check = ({ ok, children }) => (
@@ -167,7 +167,8 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
                 ) : (
                   <span className="adm-note">Pour la vue visiteur : ouvre le site dans une fenêtre de navigation privée.</span>
                 )}
-                {health?.checkout?.[f.id] && <a className="adm-link-out" href={health.checkout[f.id]} target="_blank" rel="noopener noreferrer">{f.id === "compte" ? "Page d'inscription Whop" : "Page de paiement Whop"} ↗</a>}
+                {health?.checkout?.[f.id] && <a className="adm-link-out" href={health.checkout[f.id]} target="_blank" rel="noopener noreferrer">{f.id === "compte" ? "Page d'inscription Whop" : "Page de paiement Whop (euros)"} ↗</a>}
+                {health?.checkoutUsd?.[f.id] && <a className="adm-link-out" href={health.checkoutUsd[f.id]} target="_blank" rel="noopener noreferrer">Page de paiement Whop (dollars) ↗</a>}
               </div>
             </article>
           ))}

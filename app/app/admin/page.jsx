@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { CHECKOUT, COOKIE, FREE_SIGNUP_URL, aiReady, decodeSession, whopConfigured, whopTier } from "../../../lib/pro";
+import { CHECKOUT_USD } from "../../../lib/pricing";
 import { adminData, getRole } from "../../../lib/roles";
 import AdminPanel from "../../../components/AdminPanel";
 
@@ -28,6 +29,7 @@ export default async function AdminPage() {
     db: !!data,
     ai: aiReady(),
     checkout: { ...CHECKOUT, compte: FREE_SIGNUP_URL },
+    checkoutUsd: CHECKOUT_USD,
   };
 
   return (

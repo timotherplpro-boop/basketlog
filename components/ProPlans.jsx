@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useProStatus } from "../lib/useProStatus";
 import { track } from "../lib/analytics";
 import { useL } from "./LangProvider";
+import { price, money } from "../lib/pricing";
 
 const Icon = ({ name }) => {
   const p = { fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
@@ -14,9 +15,10 @@ const Icon = ({ name }) => {
 
 // Mêmes offres que Visifoot, ligne par ligne. Les questions personnelles à l'IA n'apparaissent que si l'IA est
 // configurée : on n'affiche jamais une fonction qui ne marche pas.
-const PLANS = (L, ai) => [
+// Prix dans la monnaie du visiteur (`cur` : EUR dans la zone euro, USD ailleurs), choisie côté serveur.
+const PLANS = (L, ai, cur) => [
   {
-    id: "starter", name: "Starter", icon: "bolt", price: L.t("10 €", "€10", "10 €"), per: L.t("/mois", "/month", "/mes"), sub: ai ? L.t("Pour découvrir l'IA", "To discover the AI", "Para descubrir la IA") : L.t("Pour découvrir les analyses", "To try the analyses", "Para descubrir los análisis"), cta: L.t("Débloquer - 10 €/mois", "Unlock - €10/month", "Desbloquear - 10 €/mes"),
+    id: "starter", name: "Starter", icon: "bolt", price: price("starter", cur, L), per: L.t("/mois", "/month", "/mes"), sub: ai ? L.t("Pour découvrir l'IA", "To discover the AI", "Para descubrir la IA") : L.t("Pour découvrir les analyses", "To try the analyses", "Para descubrir los análisis"), cta: L.t(`Débloquer - ${price("starter", cur, L)}/mois`, `Unlock - ${price("starter", cur, L)}/month`, `Desbloquear - ${price("starter", cur, L)}/mes`),
     items: [
       ["ok", L.t("1 analyse par jour", "1 analysis per day", "1 análisis al día")],
       ["ok", L.t("Analyse réduite", "Reduced analysis", "Análisis reducido")],
@@ -26,7 +28,7 @@ const PLANS = (L, ai) => [
     ].filter(Boolean),
   },
   {
-    id: "pro", name: "Pro", icon: "crown", price: L.t("19 €", "€19", "19 €"), per: L.t("/mois", "/month", "/mes"), sub: L.t("Pour les passionnés de basket", "For basketball fans", "Para los apasionados del baloncesto"), badge: L.t("Populaire", "Popular", "Popular"), cta: L.t("Débloquer - 19 €/mois", "Unlock - €19/month", "Desbloquear - 19 €/mes"),
+    id: "pro", name: "Pro", icon: "crown", price: price("pro", cur, L), per: L.t("/mois", "/month", "/mes"), sub: L.t("Pour les passionnés de basket", "For basketball fans", "Para los apasionados del baloncesto"), badge: L.t("Populaire", "Popular", "Popular"), cta: L.t(`Débloquer - ${price("pro", cur, L)}/mois`, `Unlock - ${price("pro", cur, L)}/month`, `Desbloquear - ${price("pro", cur, L)}/mes`),
     items: [
       ["ok", L.t("Analyses illimitées", "Unlimited analyses", "Análisis ilimitados")],
       ["ok", L.t("Analyse complète détaillée", "Detailed full analysis", "Análisis completo detallado")],
@@ -37,7 +39,7 @@ const PLANS = (L, ai) => [
     ].filter(Boolean),
   },
   {
-    id: "lifetime", name: "Lifetime", icon: "infinity", price: L.t("99 €", "€99", "99 €"), per: L.t("une seule fois", "one-time", "pago único"), sub: L.t("Économise +100 €/an vs mensuel", "Save €100+/year vs monthly", "Ahorra +100 €/año frente al mensual"), badge: L.t("À vie", "Lifetime", "De por vida"), cta: L.t("Débloquer - 99 €", "Unlock - €99", "Desbloquear - 99 €"),
+    id: "lifetime", name: "Lifetime", icon: "infinity", price: price("lifetime", cur, L), per: L.t("une seule fois", "one-time", "pago único"), sub: L.t(`Économise +${money(100, cur, L)}/an vs mensuel`, `Save ${money(100, cur, L)}+/year vs monthly`, `Ahorra +${money(100, cur, L)}/año frente al mensual`), badge: L.t("À vie", "Lifetime", "De por vida"), cta: L.t(`Débloquer - ${price("lifetime", cur, L)}`, `Unlock - ${price("lifetime", cur, L)}`, `Desbloquear - ${price("lifetime", cur, L)}`),
     items: [
       ["ok", L.t("Analyses illimitées à vie", "Unlimited analyses for life", "Análisis ilimitados de por vida")],
       ["ok", L.t("Analyse complète détaillée", "Detailed full analysis", "Análisis completo detallado")],
@@ -64,7 +66,7 @@ const NOTICES = {
   config: ["warn", "Le paiement n'est pas encore activé sur Basketlog. Reviens très bientôt.", "Payments aren't enabled on Basketlog yet. Please come back soon.", "El pago todavía no está activado en Basketlog. Vuelve muy pronto."],
 };
 
-export default function ProPlans({ checkout, loginReady, notice, ai = false }) {
+export default function ProPlans({ checkout, loginReady, notice, ai = false, cur = "EUR" }) {
   const L = useL();
   const pro = useProStatus();
   const [agree, setAgree] = useState(false);
@@ -72,7 +74,7 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false }) {
   // Avant le paiement : acceptation des CGV et demande d'accès immédiat (renonciation à la rétractation, art. L221-28 13°).
   const buy = (id) => (e) => {
     if (!agree) { e.preventDefault(); setNudge(true); document.getElementById("pro-agree")?.focus(); return; }
-    track("Clic abonnement", { formule: id });
+    track("Clic abonnement", { formule: id, devise: cur });
   };
   useEffect(() => {
     if (!pro) return;
@@ -101,7 +103,7 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false }) {
       </label>
       {nudge && !agree && <p className="pro-agree-hint" role="alert">{L.t("Coche la case ci-dessus pour continuer vers le paiement.", "Tick the box above to continue to checkout.", "Marca la casilla de arriba para continuar con el pago.")}</p>}
       <div className="plans">
-        {PLANS(L, ai).map((p, i) => {
+        {PLANS(L, ai, cur).map((p, i) => {
           const url = checkout[p.id];
           return (
             <article key={p.id} className={`plan plan-${p.id} reveal-in`} style={{ animationDelay: `${i * 90}ms` }}>
