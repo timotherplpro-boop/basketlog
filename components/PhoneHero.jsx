@@ -52,18 +52,18 @@ export default function PhoneHero({ team, rivals, rows }) {
             <div className="sc-logo">
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={team.logo} alt="" />
+                <img src={team.logo} alt={team.name} />
                 {done && rival && (<>
                   <span style={{ fontSize: 11, color: "rgba(255,255,255,.5)" }}>vs</span>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img key={rival.id} src={rival.logo} alt="" />
+                  <img key={rival.id} src={rival.logo} alt={rival.name} />
                 </>)}
               </div>
             </div>
             <div className="sc-input">{team.name}</div>
             <div className="sc-vs">vs</div>
             <div className={`sc-input ${typed ? "" : "empty"}`}>
-              {done && rival && (/* eslint-disable-next-line @next/next/no-img-element */ <img src={rival.logo} alt="" />)}
+              {done && rival && (/* eslint-disable-next-line @next/next/no-img-element */ <img src={rival.logo} alt={rival.name} />)}
               {typed || L.t("Cherche une équipe (ex : Celtics, Knicks…)", "Search a team (e.g. Celtics, Knicks…)", "Busca un equipo (p. ej., Celtics, Knicks…)")}
               {!done && <span className="caret" />}
             </div>
@@ -79,10 +79,10 @@ export default function PhoneHero({ team, rivals, rows }) {
                   <div className="m">
                     <b className={g.home.id === team.id ? "me" : ""}>{g.home.name}</b>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={g.home.logo} alt="" />
+                    <img src={g.home.logo} alt={g.home.name} />
                     <span>vs</span>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={g.away.logo} alt="" />
+                    <img src={g.away.logo} alt={g.away.name} />
                     <b className={g.away.id === team.id ? "me" : ""}>{g.away.name}</b>
                   </div>
                 </div>

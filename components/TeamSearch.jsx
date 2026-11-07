@@ -50,11 +50,11 @@ export default function TeamSearch({ games }) {
               <Link key={g.id} href={L.href(`/app/match/${g.id}?d=${g.d}`)} className="search-row" role="option">
                 <span className="search-teams">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={g.away.logo} alt="" width={26} height={26} />
+                  <img src={g.away.logo} alt={g.away.name} width={26} height={26} />
                   <b>{g.away.short}</b>
                   <span className="vs">@</span>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={g.home.logo} alt="" width={26} height={26} />
+                  <img src={g.home.logo} alt={g.home.name} width={26} height={26} />
                   <b>{g.home.short}</b>
                 </span>
                 <span className="search-when">{g.live ? L.t("● En direct", "● Live", "● En directo") : when(g.date, L)}</span>

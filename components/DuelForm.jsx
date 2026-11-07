@@ -52,7 +52,7 @@ function Combo({ teams, value, onChange, placeholder, exclude, L }) {
           {list.map((t, i) => (
             <button type="button" key={t.id} className={i === hi ? "hi" : ""} onMouseEnter={() => setHi(i)} onClick={() => pick(t)} role="option" aria-selected={i === hi}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={t.logo} alt="" />
+              <img src={t.logo} alt={t.name} />
               {t.name}
               <small>{t.conf === "E" ? L.t("Est", "East", "Este") : L.t("Ouest", "West", "Oeste")}</small>
             </button>

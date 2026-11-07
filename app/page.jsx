@@ -154,8 +154,9 @@ export default async function Home() {
     : L.t(`+${num(analysed)} matchs NBA analysés`, `+${num(analysed)} NBA games analyzed`, `+${num(analysed)} partidos NBA analizados`);
   const hero = HERO[L.lang];
   const cards = pre.slice(0, 12);
-  const elCrests = [...new Map(elGames.flatMap((g) => [g.home, g.away]).filter((c) => c.logo).map((c) => [c.id, c.logo])).values()];
-  const LOGOS = TEAMS.map((t) => t.logo);
+  // Logos avec le nom de l'équipe en texte alternatif (lu par les moteurs de recherche et les lecteurs d'écran).
+  const elCrests = [...new Map(elGames.flatMap((g) => [g.home, g.away]).filter((c) => c.logo).map((c) => [c.id, { src: c.logo, name: c.name || c.short || c.abbr || "EuroLeague" }])).values()];
+  const LOGOS = TEAMS.map((t) => ({ src: t.logo, name: t.name }));
   const MIX = LOGOS.flatMap((l, i) => (elCrests[i] ? [l, elCrests[i]] : [l]));
   const nTeams = 30 + elCrests.length;
 
@@ -246,10 +247,10 @@ export default async function Home() {
         </div>
 
         <div className="stage">
-          <div className="flogo f1"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(teamById("2").logo, 360)} alt="" /></div></div>
-          <div className="flogo f2"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(teamById("9").logo, 360)} alt="" /></div></div>
-          <div className="flogo f3"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(teamById("18").logo, 360)} alt="" /></div></div>
-          <div className="flogo f4"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(teamById("4").logo, 360)} alt="" /></div></div>
+          <div className="flogo f1"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(teamById("2").logo, 360)} alt={teamById("2").name} /></div></div>
+          <div className="flogo f2"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(teamById("9").logo, 360)} alt={teamById("9").name} /></div></div>
+          <div className="flogo f3"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(teamById("18").logo, 360)} alt={teamById("18").name} /></div></div>
+          <div className="flogo f4"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(teamById("4").logo, 360)} alt={teamById("4").name} /></div></div>
           <div className="phone-in"><PhoneHero team={{ id: heroTeam.id, name: heroTeam.name, logo: heroTeam.logo }} rivals={rivals} rows={rows.map(({ a, ...r }) => r)} /></div>
           {notifs.map((g, i) => {
             const fav = g.pHome >= 0.5 ? g.home : g.away;
@@ -278,7 +279,7 @@ export default async function Home() {
         <div className="marquee reveal" style={{ "--d": "150ms" }}>
           <div className="marquee-track">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            {[...MIX, ...MIX].map((l, i) => <img key={i} src={l} alt="" loading="lazy" />)}
+            {[...MIX, ...MIX].map((l, i) => <img key={i} src={l.src} alt={l.name} loading="lazy" />)}
           </div>
         </div>
       </section>
@@ -316,7 +317,7 @@ export default async function Home() {
           {reviews.list.length
             ? reviews.list.slice(0, 5).map((r) => <span key={r.id} className="initial" style={{ background: avatarColor(r.prenom) }}>{r.prenom.charAt(0).toUpperCase()}</span>)
             : /* eslint-disable-next-line @next/next/no-img-element */
-              ["13", "2", "9", "25", "18"].map((id) => <img key={id} src={teamById(id).logo} alt="" />)}
+              ["13", "2", "9", "25", "18"].map((id) => <img key={id} src={teamById(id).logo} alt={teamById(id).name} />)}
         </div>
         <h2 className="t-80 reveal">{L.t("Ce que pensent les utilisateurs de Basketlog", "What Basketlog users think", "Lo que piensan los usuarios de Basketlog")}</h2>
         <p className="lead reveal" style={{ "--d": "120ms" }}>
@@ -338,10 +339,10 @@ export default async function Home() {
                   <div className="ah"><span className="logo"><span className="ball" />Basketlog</span><span>{shortDay(g.date, L)}</span></div>
                   <div className="at">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <div><img src={g.away.logo} alt="" /><b>{g.away.abbr}</b></div>
+                    <div><img src={g.away.logo} alt={g.away.name} /><b>{g.away.abbr}</b></div>
                     <em>@</em>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <div><img src={g.home.logo} alt="" /><b>{g.home.abbr}</b></div>
+                    <div><img src={g.home.logo} alt={g.home.name} /><b>{g.home.abbr}</b></div>
                   </div>
                   <div className="ap">{pct(Math.max(g.pHome, 1 - g.pHome))}{L.en ? "%" : "\u202f%"}<small>{L.t(`victoire ${(g.pHome >= 0.5 ? g.home : g.away).short}`, `${(g.pHome >= 0.5 ? g.home : g.away).short} win`, `victoria ${(g.pHome >= 0.5 ? g.home : g.away).short}`)}</small></div>
                   <div className="abar"><i style={{ width: `${(1 - g.pHome) * 100}%` }} /></div>
@@ -375,7 +376,7 @@ export default async function Home() {
         <div className="marquee">
           <div className="marquee-track" style={{ animationDirection: "reverse", animationDuration: "65s" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            {[...LOGOS.slice().reverse(), ...LOGOS.slice().reverse()].map((l, i) => <img key={i} src={l} alt="" loading="lazy" />)}
+            {[...LOGOS.slice().reverse(), ...LOGOS.slice().reverse()].map((l, i) => <img key={i} src={l.src} alt={l.name} loading="lazy" />)}
           </div>
         </div>
       </section>

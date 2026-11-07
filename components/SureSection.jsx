@@ -24,7 +24,7 @@ function Card({ p, today, L, i }) {
   const team = (t, isFav) => (
     <span className={`su-team${isFav ? " fav" : ""}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      {t.logo ? <img src={t.logo} alt="" /> : <i className="su-noimg" />}
+      {t.logo ? <img src={t.logo} alt={t.name} /> : <i className="su-noimg" />}
       <b>{t.abbr}</b>
     </span>
   );
