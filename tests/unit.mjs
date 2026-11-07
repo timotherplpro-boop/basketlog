@@ -1,8 +1,10 @@
-// Tests sans serveur : détection de la langue des avis, découpage et traduction automatique (appels simulés).
+// Tests sans serveur : détection de la langue des avis, découpage et traduction automatique (appels simulés),
+// codes promo des créateurs (nettoyage, lien de paiement, prix remisé) et vérification de ce que Whop a enregistré.
 // Usage : node tests/unit.mjs  (lancé aussi par tests/smoke.mjs)
 import { pathToFileURL } from "node:url";
 import { chunkText, detectLang, localizeReviews, translateRaw } from "../lib/translate.js";
-import { CODE_RE, cleanCode, cleanPct, mergePromos, randomChars, suggestCode } from "../lib/promo.js";
+import { CODE_RE, cleanCode, cleanPct, discounted, mergePromos, randomChars, suggestCode, withPromo } from "../lib/promo.js";
+import { asPct, checkPromo, describeProblem, describeProblems, promoMonths, whopPromoReady } from "../lib/whop-promo.js";
 
 export async function unit() {
   let passed = 0, failed = 0;
@@ -105,6 +107,63 @@ export async function unit() {
   eq("promos : un code sans créateur est isolé", merged.orphelins.map((p) => p.code), ["OLD10"]);
   eq("promos : sans codes, tout reste affichable", [mergePromos({ roles, invitations }, []).roles.map((r) => r.promo), mergePromos({ roles, invitations }, []).orphelins], [[null, null], []]);
   eq("promos : sans arguments", mergePromos(), { roles: [], invitations: [], orphelins: [] });
+
+  // --- Code promo dans le lien de paiement et prix remisé (lib/promo.js)
+  console.log("Code promo dans le paiement");
+  const LINK = "https://whop.com/checkout/plan_abc";
+  eq("lien : le code est ajouté (promoCode)", withPromo(LINK, "ZEBRA20"), `${LINK}?promoCode=ZEBRA20`);
+  eq("lien : les paramètres existants sont gardés", withPromo(`${LINK}?d2c=true`, "ZEBRA20"), `${LINK}?d2c=true&promoCode=ZEBRA20`);
+  eq("lien : un ancien code est remplacé, pas doublé", withPromo(`${LINK}?promoCode=OLD10`, "ZEBRA20"), `${LINK}?promoCode=ZEBRA20`);
+  eq("lien : sans code ou avec un code invalide, lien inchangé", [withPromo(LINK, ""), withPromo(LINK, null), withPromo(LINK, undefined), withPromo(LINK, "ab"), withPromo(LINK, "zebra20"), withPromo(LINK, "A&B=1")], [LINK, LINK, LINK, LINK, LINK, LINK]);
+  eq("lien : vide ou illisible, rendu tel quel", [withPromo("", "ZEBRA20"), withPromo(undefined, "ZEBRA20"), withPromo("pas un lien", "ZEBRA20")], ["", undefined, "pas un lien"]);
+  eq("prix remisé : arrondi au centime", [discounted(13.99, 20), discounted(29.99, 20), discounted(99.99, 20), discounted(13.99, 15), discounted(10, 50), discounted(29.99, 90), discounted(13.99, 1)], [11.19, 23.99, 79.99, 11.89, 5, 3, 13.85]);
+  eq("prix remisé : jamais négatif ni supérieur au prix", [13.99, 29.99, 99.99].every((a) => [1, 20, 50, 90].every((pct) => discounted(a, pct) > 0 && discounted(a, pct) < a)), true);
+
+  // --- Vérification de ce que Whop a enregistré (lib/whop-promo.js)
+  console.log("Codes promo chez Whop");
+  const pctOf = (o) => asPct({ promo_type: "percentage", ...o });
+  eq("Whop : remise relue en % (fraction décimale)", [pctOf({ amount_off: 0.25 }), pctOf({ amount_off: 0.2 }), pctOf({ amount_off: 0.07 }), pctOf({ amount_off: 0.9 }), pctOf({ amount_off: 0.01 })], [25, 20, 7, 90, 1]);
+  eq("Whop : un entier est lu tel quel (20 → « 2000 % »), donc détecté", pctOf({ amount_off: 20 }), 2000);
+  eq("Whop : montant fixe, valeur absente ou réponse vide : pas de %", [asPct({ promo_type: "flat_amount", amount_off: 5 }), pctOf({}), pctOf({ amount_off: null }), asPct(null), asPct(undefined)], [null, null, null, null, null]);
+  const conform = (over = {}) => ({ id: "promo_1", code: "zebra20", promo_type: "percentage", amount_off: 0.2, status: "active", duration: "forever", promo_duration_months: null, new_users_only: false, expires_at: null, unlimited_stock: true, stock: null, ...over });
+  const kinds = (p, opt = {}) => checkPromo(p, { code: "ZEBRA20", pct: 20, months: 0, ...opt }).map((x) => x.k);
+  eq("code conforme : aucun écart (la casse du nom est ignorée)", [kinds(conform()), kinds(conform({ code: "ZEBRA20" })), kinds(conform({ code: "Zebra20" }))], [[], [], []]);
+  eq("écart : remise en entier au lieu de fraction", kinds(conform({ amount_off: 20 })), ["remise"]);
+  eq("écart : 1 % relu comme 100 %", checkPromo(conform({ amount_off: 1 }), { code: "ZEBRA20", pct: 1, months: 0 }), [{ k: "remise", got: 100, want: 1 }]);
+  eq("écart : remise différente", checkPromo(conform({ amount_off: 0.1 }), { code: "ZEBRA20", pct: 20, months: 0 }), [{ k: "remise", got: 10, want: 20 }]);
+  eq("écart : remise très proche mais pas égale (12,5 % pour 12 %)", checkPromo(conform({ amount_off: 0.125 }), { code: "ZEBRA20", pct: 12, months: 0 }).map((x) => x.k), ["remise"]);
+  eq("écart : montant fixe au lieu d'un pourcentage", kinds(conform({ promo_type: "flat_amount", amount_off: 5 })), ["type", "remise"]);
+  eq("écart : désactivé ou archivé", [kinds(conform({ status: "inactive" })), kinds(conform({ status: "archived" })), kinds(conform({ status: undefined }))], [["etat"], ["etat"], ["etat"]]);
+  eq("écart : réservé aux nouveaux clients", kinds(conform({ new_users_only: true })), ["nouveaux"]);
+  eq("écart : date d'expiration", checkPromo(conform({ expires_at: "2026-12-01T00:00:00Z" }), { code: "ZEBRA20", pct: 20, months: 0 }), [{ k: "expire", got: "2026-12-01T00:00:00Z" }]);
+  eq("écart : nombre d'utilisations limité", checkPromo(conform({ unlimited_stock: false, stock: 10 }), { code: "ZEBRA20", pct: 20, months: 0 }), [{ k: "stock", got: 10 }]);
+  eq("écart : autre nom de code", kinds(conform({ code: "autre" })), ["code"]);
+  eq("écart : plusieurs à la fois, tous relevés", kinds(conform({ amount_off: 0.5, status: "inactive", new_users_only: true })), ["remise", "etat", "nouveaux"]);
+  eq("durée : à chaque paiement attendu", [kinds(conform({ duration: "once" })), kinds(conform({ duration: "repeating", promo_duration_months: 3 })), kinds(conform({ duration: undefined }))], [["duree"], ["duree"], ["duree"]]);
+  eq("durée : premier paiement seulement attendu (1)", [kinds(conform({ duration: "once" }), { months: 1 }), kinds(conform({ duration: "forever" }), { months: 1 })], [[], ["duree"]]);
+  eq("durée : 3 premiers paiements attendus", [kinds(conform({ duration: "repeating", promo_duration_months: 3 }), { months: 3 }), kinds(conform({ duration: "repeating", promo_duration_months: 2 }), { months: 3 }), kinds(conform({ duration: "once" }), { months: 3 })], [[], ["paiements"], ["duree"]]);
+  eq("réponse vide ou illisible : écart « vide »", [checkPromo(null, { code: "ZEBRA20", pct: 20 }), checkPromo(undefined, { code: "ZEBRA20", pct: 20 }), checkPromo("x", { code: "ZEBRA20", pct: 20 })], [[{ k: "vide" }], [{ k: "vide" }], [{ k: "vide" }]]);
+  const tEn = (fr, e) => e, tEs = (fr, e, sp) => sp;
+  const gap = { k: "remise", got: 2000, want: 20 };
+  eq("écart en phrase : français par défaut, anglais, espagnol", [describeProblem(gap), describeProblem(gap, tEn), describeProblem(gap, tEs)], ["remise de 2000 % au lieu de 20 %", "discount of 2000% instead of 20%", "descuento del 2000 % en lugar del 20 %"]);
+  eq("écart en phrase : durée, avec des mots plutôt que le jargon de Whop", [describeProblem({ k: "duree", got: "once", want: "forever" }), describeProblem({ k: "duree", got: "once", want: "forever" }, tEn)], ["durée : premier paiement seulement au lieu de à chaque paiement", "duration: first payment only instead of every payment"]);
+  eq("écart en phrase : tous les types ont une phrase dans les trois langues", ["vide", "code", "type", "remise", "etat", "duree", "paiements", "nouveaux", "expire", "stock"].every((k) => [undefined, tEn, tEs].every((t) => describeProblem({ k, got: "x", want: "y" }, t).length > 3 && !/^\?$/.test(describeProblem({ k, got: "x", want: "y" }, t)))), true);
+  eq("écart en phrase : valeur absente affichée « ? »", describeProblem({ k: "remise", got: null, want: 20 }), "remise de ? % au lieu de 20 %");
+  eq("écarts en liste : séparés par « ; » (français) ou « ; » collé (anglais, espagnol), liste vide = texte vide", [describeProblems([gap, { k: "etat", got: "inactive" }]), describeProblems([gap, { k: "etat", got: "inactive" }], tEn), describeProblems([gap, { k: "etat", got: "inactive" }], tEs), describeProblems([]), describeProblems(undefined)], ["remise de 2000 % au lieu de 20 % ; statut « inactive »", "discount of 2000% instead of 20%; status “inactive”", "descuento del 2000 % en lugar del 20 %; estado «inactive»", "", ""]);
+
+  const env = { key: process.env.WHOP_API_KEY, months: process.env.WHOP_PROMO_MONTHS };
+  const setEnv = (name, v) => { if (v === undefined) delete process.env[name]; else process.env[name] = v; };
+  const months = (v) => { setEnv("WHOP_PROMO_MONTHS", v); return promoMonths(); };
+  eq("durée de la remise (WHOP_PROMO_MONTHS) : à chaque paiement par défaut", [months(undefined), months(""), months("0")], [0, 0, 0]);
+  eq("durée de la remise : de 1 à 36 paiements", [months("1"), months("3"), months("12"), months("36")], [1, 3, 12, 36]);
+  eq("durée de la remise : valeur invalide = valeur par défaut", [months("37"), months("-1"), months("2.5"), months("abc"), months(" ")], [0, 0, 0, 0, 0]);
+  setEnv("WHOP_PROMO_MONTHS", env.months);
+  setEnv("WHOP_API_KEY", undefined);
+  const noKey = whopPromoReady();
+  setEnv("WHOP_API_KEY", "k");
+  const withKey = whopPromoReady();
+  setEnv("WHOP_API_KEY", env.key);
+  eq("liaison Whop : active seulement si la clé API est présente", [noKey, withKey], [false, true]);
 
   return { passed, failed };
 }

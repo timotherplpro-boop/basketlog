@@ -29,7 +29,7 @@ const ERROR_PAGE = /Une erreur est survenue|Application error|Internal Server Er
 
 async function pages() {
   console.log("Pages");
-  for (const p of ["/", "/en", "/es", "/analyse-basket", "/en/analyse-basket", "/es/analyse-basket", "/pronostic-basket", "/en/pronostic-basket", "/es/pronostic-basket", "/app", "/app/matchs", "/app/bilan", "/app/bilan?l=pub", "/app/classement", "/app/euroleague", "/pro", "/avis", "/en/avis", "/es/avis", "/methode", "/cgu", "/cgv", "/confidentialite", "/mentions-legales", "/cookies", "/sitemap.xml", "/robots.txt"]) {
+  for (const p of ["/", "/en", "/es", "/analyse-basket", "/en/analyse-basket", "/es/analyse-basket", "/pronostic-basket", "/en/pronostic-basket", "/es/pronostic-basket", "/app", "/app/matchs", "/app/bilan", "/app/bilan?l=pub", "/app/classement", "/app/euroleague", "/pro", "/en/pro", "/es/pro", "/pro?code=TESTAUTO", "/avis", "/en/avis", "/es/avis", "/methode", "/cgu", "/cgv", "/confidentialite", "/mentions-legales", "/cookies", "/sitemap.xml", "/robots.txt"]) {
     const r = await get(p);
     if (r.status !== 200) ko(p, `HTTP ${r.status}`);
     else if (ERROR_PAGE.test(r.text)) ko(p, "page d'erreur affichée");
@@ -73,7 +73,9 @@ async function protectedRoutes() {
   beacon.status === 204 ? ok("compteur du parcours : réponse vide") : ko("compteur du parcours : réponse vide", `HTTP ${beacon.status}`);
   const api = await get("/api/admin", { method: "POST", body: { action: "avis_publier", id: "x" } });
   [401, 403, 404].includes(api.status) ? ok("API admin refusée sans session") : ko("API admin refusée sans session", `HTTP ${api.status}`);
-  const avis = await get("/api/avis", { method: "POST", body: { prenom: "Test", note: 5, texte: "Test automatique, ne pas publier.", elapsed: 10000 } });
+  const sync = await get("/api/admin", { method: "POST", body: { action: "promo_sync", id: "00000000-0000-0000-0000-000000000000" } });
+  [401, 403, 404].includes(sync.status) ? ok("synchronisation Whop refusée sans session") : ko("synchronisation Whop refusée sans session", `HTTP ${sync.status}`);
+  const avis =await get("/api/avis", { method: "POST", body: { prenom: "Test", note: 5, texte: "Test automatique, ne pas publier.", elapsed: 10000 } });
   [401, 403].includes(avis.status) ? ok("avis refusé sans compte") : ko("avis refusé sans compte", `HTTP ${avis.status}`);
   if (SECRET) {
     const avis2 = await get("/api/avis", { method: "POST", cookie: session("compte"), body: { prenom: "Test", note: 5, texte: "Test automatique, ne pas publier.", elapsed: 10000 } });
@@ -81,6 +83,27 @@ async function protectedRoutes() {
   }
   const cron = await get("/api/cron/pronos");
   cron.status === 401 ? ok("tâche planifiée refusée aux inconnus") : ko("tâche planifiée refusée aux inconnus", `HTTP ${cron.status}`);
+}
+
+// Codes promo des créateurs : champ sur /pro dans les trois langues, et vérification publique d'un code (/api/promo).
+// Sans base ou sans code connu, la réponse doit être un refus (« inconnu », ou « indisponible » en 503), jamais une remise.
+async function promoCodes() {
+  console.log("Codes promo");
+  for (const [path, re, label] of [["/pro", /J(&#x27;|')ai un code promo/, "J'ai un code promo"], ["/en/pro", /I have a promo code/, "I have a promo code"], ["/es/pro", /Tengo un código promocional/, "Tengo un código promocional"]]) {
+    const r = await get(path);
+    re.test(r.text) ? ok(`${path} : champ « ${label} » proposé`) : ko(`${path} : champ « ${label} » proposé`, "libellé absent");
+  }
+  const json = async (path) => {
+    const r = await get(path);
+    try { return { status: r.status, body: JSON.parse(r.text) }; } catch { return { status: r.status, body: null }; }
+  };
+  for (const [path, name] of [["/api/promo", "sans code"], ["/api/promo?code=a", "trop court"], ["/api/promo?code=%21%21%21%20", "symboles seuls"]]) {
+    const r = await json(path);
+    r.status === 200 && r.body?.ok === false && r.body.raison === "format" ? ok(`/api/promo : ${name} refusé`) : ko(`/api/promo : ${name} refusé`, `HTTP ${r.status} ${JSON.stringify(r.body)}`);
+  }
+  const unk = await json("/api/promo?code=TESTAUTO0000");
+  const refused = unk.body?.ok === false && ((unk.status === 200 && unk.body.raison === "inconnu") || (unk.status === 503 && unk.body.raison === "indisponible"));
+  refused ? ok("/api/promo : code inconnu jamais accepté") : ko("/api/promo : code inconnu jamais accepté", `HTTP ${unk.status} ${JSON.stringify(unk.body)}`);
 }
 
 async function videosApi() {
@@ -98,6 +121,7 @@ async function videosApi() {
 await pages();
 await access();
 await protectedRoutes();
+await promoCodes();
 await videosApi();
 { const u = await unit(); passed += u.passed; failed += u.failed; } // traduction des avis (sans serveur)
 console.log(`\n${passed} réussis, ${failed} en échec, ${skipped} ignorés`);

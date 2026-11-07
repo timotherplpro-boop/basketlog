@@ -864,9 +864,9 @@ a.team:hover .team-name { color: var(--peach); }
 .plan-lifetime .plan-buy { color: #1a0b00; background: linear-gradient(90deg, var(--amber), #ffa24d); }
 .pro-free { text-align: center; margin: 26px auto 0; color: var(--muted); font-size: 15px; }
 .pro-free a { color: var(--orange-2); }
-.plan-price { margin-top: 14px; display: flex; align-items: baseline; gap: 6px; }
+.plan-price { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; } /* à la ligne plutôt qu'écrasé : prix barré + prix remisé + « une seule fois » */
 .plan-price b { font-family: var(--title); font-weight: 400; font-size: 44px; color: var(--peach); line-height: 1; }
-.plan-price span { color: var(--muted); font-size: 15px; }
+.plan-price span { color: var(--muted); font-size: 15px; white-space: nowrap; }
 .plans { margin-top: 56px; }
 .plan-sub { margin-top: 6px; font-size: 14px; color: var(--muted); min-height: 20px; }
 .plan-pro .plan-sub { color: var(--orange-2); }
@@ -966,6 +966,24 @@ a.team:hover .team-name { color: var(--peach); }
 .pro-agree.nudge { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(255, 122, 26, .25); animation: agreeShake .4s; }
 .pro-agree-hint { text-align: center; color: var(--orange-2); font-size: 13px; margin: -12px 0 18px; }
 .plan-buy.plan-wait { filter: saturate(.55) brightness(.85); }
+
+/* Code promo d'un créateur (page Pro) : lien « J'ai un code promo », champ de saisie, puis confirmation avec la remise */
+.pro-promo { max-width: 720px; margin: 22px auto 0; text-align: center; }
+.pro-promo-toggle { background: none; border: 0; padding: 6px 4px; color: var(--orange-2); font: inherit; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.pro-promo-toggle:hover { color: var(--orange); }
+.pro-promo-form { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.pro-promo-form input { flex: 1 1 180px; min-width: 0; max-width: 260px; height: 44px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--card); color: var(--text); font-family: var(--mono); font-size: 16px; letter-spacing: .06em; text-transform: uppercase; }
+.pro-promo-form input::placeholder { color: var(--dim); letter-spacing: .04em; }
+.pro-promo-form input:focus-visible { outline: 2px solid var(--orange); outline-offset: 1px; }
+.pro-promo-form input[aria-invalid="true"] { border-color: var(--orange); }
+.pro-promo-form button { height: 44px; padding: 0 20px; border-radius: 12px; border: 0; background: var(--orange); color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+.pro-promo-form button:disabled { opacity: .55; cursor: default; }
+.pro-promo-msg { margin: 10px 0 0; color: var(--orange-2); font-size: 13.5px; }
+.pro-promo-ok { display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(74,222,128,.4); background: rgba(74,222,128,.1); color: #bbf7d0; font-size: 14.5px; line-height: 1.45; text-align: left; }
+.pro-promo-ok small { display: block; margin-top: 3px; color: var(--muted); font-size: 12.5px; }
+.pro-promo-tick { color: var(--green); font-weight: 700; }
+.pro-promo-x { margin-left: auto; flex-shrink: 0; background: none; border: 0; color: var(--muted); font: inherit; font-size: 13px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 2px 4px; }
+.plan-old { color: var(--dim); font-size: 18px; margin-right: 2px; }
 @keyframes agreeShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 
 
@@ -1347,6 +1365,7 @@ body:has(.mmenu.open) .install-banner { display: none; }
 .adm-pct b { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: 700; font-size: 15px; pointer-events: none; }
 .adm-notice { margin: 14px 0 0; padding: 12px 16px; border-radius: 12px; background: rgba(255,122,26,.1); border: 1px solid rgba(255,122,26,.4); color: #fed7aa; font-size: 14.5px; line-height: 1.5; }
 .adm-notice b { color: #fff; font-family: var(--mono); font-weight: 700; }
+.adm-notice.ok { background: rgba(34,197,94,.1); border-color: rgba(34,197,94,.4); color: #bbf7d0; }
 .adm-code { font-family: var(--mono); font-size: 14px; font-weight: 700; letter-spacing: .04em; padding: 4px 10px; border-radius: 8px; background: rgba(255,122,26,.1); border: 1px solid rgba(255,122,26,.4); color: #fff; overflow-wrap: anywhere; }
 .adm-promo { flex: 1 1 100%; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; margin-top: 4px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,.14); }
 .adm-promo-main { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; min-width: 0; color: var(--muted); }

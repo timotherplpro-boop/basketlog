@@ -1,10 +1,12 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useProStatus } from "../lib/useProStatus";
 import { track } from "../lib/analytics";
 import { useL } from "./LangProvider";
-import { price, money } from "../lib/pricing";
+import { price, money, PRICES } from "../lib/pricing";
+import { pctOf } from "../lib/i18n";
+import { CODE_RE, cleanCode, discounted, withPromo } from "../lib/promo";
 
 const Icon = ({ name }) => {
   const p = { fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
@@ -16,9 +18,13 @@ const Icon = ({ name }) => {
 // Mêmes offres que Visifoot, ligne par ligne. Les questions personnelles à l'IA n'apparaissent que si l'IA est
 // configurée : on n'affiche jamais une fonction qui ne marche pas.
 // Prix dans la monnaie du visiteur (`cur` : EUR dans la zone euro, USD ailleurs), choisie côté serveur.
-const PLANS = (L, ai, cur) => [
+// `pct` : remise d'un code promo de créateur appliqué sur la page ; le prix plein s'affiche alors barré (`old`).
+const PLANS = (L, ai, cur, pct = 0) => {
+  const show = (id) => (pct ? money(discounted(PRICES[cur][id], pct), cur, L) : price(id, cur, L));
+  const was = (id) => (pct ? price(id, cur, L) : null);
+  return [
   {
-    id: "starter", name: "Starter", icon: "bolt", price: price("starter", cur, L), per: L.t("/mois", "/month", "/mes"), sub: ai ? L.t("Pour découvrir l'IA", "To discover the AI", "Para descubrir la IA") : L.t("Pour découvrir les analyses", "To try the analyses", "Para descubrir los análisis"), cta: L.t(`Débloquer - ${price("starter", cur, L)}/mois`, `Unlock - ${price("starter", cur, L)}/month`, `Desbloquear - ${price("starter", cur, L)}/mes`),
+    id: "starter", name: "Starter", icon: "bolt", price: show("starter"), old: was("starter"), per: L.t("/mois", "/month", "/mes"), sub: ai ? L.t("Pour découvrir l'IA", "To discover the AI", "Para descubrir la IA") : L.t("Pour découvrir les analyses", "To try the analyses", "Para descubrir los análisis"), cta: L.t(`Débloquer - ${show("starter")}/mois`, `Unlock - ${show("starter")}/month`, `Desbloquear - ${show("starter")}/mes`),
     items: [
       ["ok", L.t("1 analyse par jour", "1 analysis per day", "1 análisis al día")],
       ["ok", L.t("Analyse réduite", "Reduced analysis", "Análisis reducido")],
@@ -28,7 +34,7 @@ const PLANS = (L, ai, cur) => [
     ].filter(Boolean),
   },
   {
-    id: "pro", name: "Pro", icon: "crown", price: price("pro", cur, L), per: L.t("/mois", "/month", "/mes"), sub: L.t("Pour les passionnés de basket", "For basketball fans", "Para los apasionados del baloncesto"), badge: L.t("Populaire", "Popular", "Popular"), cta: L.t(`Débloquer - ${price("pro", cur, L)}/mois`, `Unlock - ${price("pro", cur, L)}/month`, `Desbloquear - ${price("pro", cur, L)}/mes`),
+    id: "pro", name: "Pro", icon: "crown", price: show("pro"), old: was("pro"), per: L.t("/mois", "/month", "/mes"), sub: L.t("Pour les passionnés de basket", "For basketball fans", "Para los apasionados del baloncesto"), badge: L.t("Populaire", "Popular", "Popular"), cta: L.t(`Débloquer - ${show("pro")}/mois`, `Unlock - ${show("pro")}/month`, `Desbloquear - ${show("pro")}/mes`),
     items: [
       ["ok", L.t("Analyses illimitées", "Unlimited analyses", "Análisis ilimitados")],
       ["ok", L.t("Analyse complète détaillée", "Detailed full analysis", "Análisis completo detallado")],
@@ -39,7 +45,7 @@ const PLANS = (L, ai, cur) => [
     ].filter(Boolean),
   },
   {
-    id: "lifetime", name: "Lifetime", icon: "infinity", price: price("lifetime", cur, L), per: L.t("une seule fois", "one-time", "pago único"), sub: L.t(`Économise +${money(100, cur, L)}/an vs mensuel`, `Save ${money(100, cur, L)}+/year vs monthly`, `Ahorra +${money(100, cur, L)}/año frente al mensual`), badge: L.t("À vie", "Lifetime", "De por vida"), cta: L.t(`Débloquer - ${price("lifetime", cur, L)}`, `Unlock - ${price("lifetime", cur, L)}`, `Desbloquear - ${price("lifetime", cur, L)}`),
+    id: "lifetime", name: "Lifetime", icon: "infinity", price: show("lifetime"), old: was("lifetime"), per: L.t("une seule fois", "one-time", "pago único"), sub: L.t(`Économise +${money(100, cur, L)}/an vs mensuel`, `Save ${money(100, cur, L)}+/year vs monthly`, `Ahorra +${money(100, cur, L)}/año frente al mensual`), badge: L.t("À vie", "Lifetime", "De por vida"), cta: L.t(`Débloquer - ${show("lifetime")}`, `Unlock - ${show("lifetime")}`, `Desbloquear - ${show("lifetime")}`),
     items: [
       ["ok", L.t("Analyses illimitées à vie", "Unlimited analyses for life", "Análisis ilimitados de por vida")],
       ["ok", L.t("Analyse complète détaillée", "Detailed full analysis", "Análisis completo detallado")],
@@ -49,7 +55,8 @@ const PLANS = (L, ai, cur) => [
       ai && ["ai", L.t("Questions personnelles à l'IA illimitées", "Unlimited personal questions to the AI", "Preguntas personales a la IA ilimitadas")],
     ].filter(Boolean),
   },
-];
+  ];
+};
 
 const ItemIcon = ({ kind }) => {
   const p = { viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
@@ -71,10 +78,45 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
   const pro = useProStatus();
   const [agree, setAgree] = useState(false);
   const [nudge, setNudge] = useState(false);
+  // Code promo d'un créateur : saisi ici, ou pré-rempli par le lien du créateur (/pro?code=NOM20). Vérifié par /api/promo
+  // (seuls les codes déjà créés chez Whop passent), puis ajouté aux liens de paiement Whop (paramètre promoCode) ;
+  // les prix affichés tiennent compte de la remise.
+  const [promo, setPromo] = useState(null); // { code, pct } une fois le code vérifié
+  const [promoOpen, setPromoOpen] = useState(false);
+  const [promoInput, setPromoInput] = useState("");
+  const [promoState, setPromoState] = useState("idle"); // idle | checking | invalid | down
+  const applyPromo = useCallback(async (raw) => {
+    const code = cleanCode(raw);
+    if (!CODE_RE.test(code)) { setPromo(null); setPromoState("invalid"); return; }
+    setPromoState("checking");
+    try {
+      const res = await fetch(`/api/promo?code=${encodeURIComponent(code)}`, { cache: "no-store" });
+      const j = await res.json().catch(() => ({}));
+      if (j.ok && CODE_RE.test(j.code) && Number.isInteger(j.pct) && j.pct > 0 && j.pct < 100) {
+        setPromo({ code: j.code, pct: j.pct });
+        setPromoInput(j.code);
+        setPromoState("idle");
+        track("Code promo", { etape: "appliqué", code: j.code, remise: j.pct });
+      } else {
+        setPromo(null);
+        setPromoState(res.status >= 500 ? "down" : "invalid");
+      }
+    } catch {
+      setPromo(null);
+      setPromoState("down");
+    }
+  }, []);
+  useEffect(() => {
+    try {
+      const q = new URLSearchParams(window.location.search);
+      const c = q.get("code") || q.get("promo");
+      if (c) { setPromoOpen(true); setPromoInput(cleanCode(c)); applyPromo(c); }
+    } catch { /* adresse illisible : pas de code pré-rempli */ }
+  }, [applyPromo]);
   // Avant le paiement : acceptation des CGV et demande d'accès immédiat (renonciation à la rétractation, art. L221-28 13°).
   const buy = (id) => (e) => {
     if (!agree) { e.preventDefault(); setNudge(true); document.getElementById("pro-agree")?.focus(); return; }
-    track("Clic abonnement", { formule: id, devise: cur });
+    track("Clic abonnement", { formule: id, devise: cur, ...(promo ? { code_promo: promo.code } : {}) });
   };
   useEffect(() => {
     if (!pro) return;
@@ -93,6 +135,46 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
   return (
     <>
       {n && <div className={`pro-notice ${n[0]}`} role="status">{L.t(n[1], n[2], n[3])}</div>}
+      <div className="pro-promo">
+        {promo ? (
+          <div className="pro-promo-ok" role="status">
+            <span className="pro-promo-tick" aria-hidden>✓</span>
+            <span>
+              {L.t(
+                `Code ${promo.code} appliqué : −${pctOf(promo.pct / 100, L)} sur ta formule.`,
+                `Code ${promo.code} applied: ${pctOf(promo.pct / 100, L)} off your plan.`,
+                `Código ${promo.code} aplicado: −${pctOf(promo.pct / 100, L)} en tu plan.`
+              )}
+              <small>{L.t("Les prix ci-dessous sont indicatifs : le montant exact s'affiche sur la page de paiement.", "Prices below are indicative: the exact amount is shown on the checkout page.", "Los precios de abajo son orientativos: el importe exacto se muestra en la página de pago.")}</small>
+            </span>
+            <button type="button" className="pro-promo-x" onClick={() => { setPromo(null); setPromoInput(""); setPromoOpen(false); setPromoState("idle"); }}>{L.t("Retirer", "Remove", "Quitar")}</button>
+          </div>
+        ) : !promoOpen ? (
+          <button type="button" className="pro-promo-toggle" aria-expanded="false" onClick={() => { setPromoOpen(true); setTimeout(() => document.getElementById("pro-promo-input")?.focus(), 0); }}>
+            {L.t("J'ai un code promo", "I have a promo code", "Tengo un código promocional")}
+          </button>
+        ) : (
+          <>
+            <form className="pro-promo-form" onSubmit={(e) => { e.preventDefault(); applyPromo(promoInput); }}>
+              <label className="vh" htmlFor="pro-promo-input">{L.t("Code promo", "Promo code", "Código promocional")}</label>
+              <input
+                id="pro-promo-input"
+                value={promoInput}
+                onChange={(e) => { setPromoInput(cleanCode(e.target.value)); if (promoState !== "checking") setPromoState("idle"); }}
+                placeholder={L.t("CODE PROMO", "PROMO CODE", "CÓDIGO")}
+                maxLength={24}
+                autoComplete="off"
+                autoCapitalize="characters"
+                spellCheck={false}
+                aria-invalid={promoState === "invalid"}
+              />
+              <button type="submit" disabled={promoState === "checking" || !promoInput}>{promoState === "checking" ? "…" : L.t("Appliquer", "Apply", "Aplicar")}</button>
+            </form>
+            {promoState === "invalid" && <p className="pro-promo-msg" role="alert">{L.t("Ce code n'est pas valide ou n'est plus actif.", "This code isn't valid or is no longer active.", "Este código no es válido o ya no está activo.")}</p>}
+            {promoState === "down" && <p className="pro-promo-msg" role="alert">{L.t("Vérification impossible pour le moment, réessaie dans un instant.", "Couldn't check the code right now, please try again in a moment.", "No se ha podido comprobar el código por ahora, inténtalo de nuevo en un instante.")}</p>}
+          </>
+        )}
+      </div>
       <label className={`pro-agree ${nudge && !agree ? "nudge" : ""}`}>
         <input id="pro-agree" type="checkbox" checked={agree} onChange={(e) => { setAgree(e.target.checked); setNudge(false); }} />
         {L.t(
@@ -103,13 +185,16 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
       </label>
       {nudge && !agree && <p className="pro-agree-hint" role="alert">{L.t("Coche la case ci-dessus pour continuer vers le paiement.", "Tick the box above to continue to checkout.", "Marca la casilla de arriba para continuar con el pago.")}</p>}
       <div className="plans">
-        {PLANS(L, ai, cur).map((p, i) => {
-          const url = checkout[p.id];
+        {PLANS(L, ai, cur, promo?.pct || 0).map((p, i) => {
+          const url = withPromo(checkout[p.id], promo?.code);
           return (
             <article key={p.id} className={`plan plan-${p.id} reveal-in`} style={{ animationDelay: `${i * 90}ms` }}>
               {p.badge && <span className="plan-badge">{p.id === "pro" ? "⭐⭐ " : "∞∞ "}{p.badge}</span>}
               <h3><span className="plan-ic"><Icon name={p.icon} /></span>{p.name}</h3>
-              <div className="plan-price"><b>{p.price}</b><span>{p.per}</span></div>
+              <div className="plan-price">
+                {p.old && <s className="plan-old"><span className="vh">{L.t("Prix sans le code : ", "Price without the code: ", "Precio sin el código: ")}</span>{p.old}</s>}
+                <b>{p.price}</b><span>{p.per}</span>
+              </div>
               <div className="plan-sub">{p.sub}</div>
               <ul>{p.items.map(([kind, text, extra]) => (
                 <li key={text} className={`pi pi-${kind}`}>

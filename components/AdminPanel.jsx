@@ -5,14 +5,19 @@ import { LANGS, LANG_NAMES, fmtDate, mk, pctOf } from "../lib/i18n";
 import { CODE_RE, PROMO_DEFAULT, PROMO_MAX, PROMO_MIN, cleanCode, cleanPct, suggestCode } from "../lib/promo";
 import { useL } from "./LangProvider";
 
-// Tableau de bord Whop de Basketlog et sa page des codes promo (où chaque code de créateur doit aussi être créé).
+// Tableau de bord Whop de Basketlog et sa page des codes promo (où les codes des créateurs sont créés par le site, ou à la main),
+// et la page des clés API de Whop (permissions de la clé que le site utilise pour créer les codes).
 const WHOP_DASH = "https://whop.com/dashboard/biz_pE2L6siofBGnW6/";
 const WHOP_PROMO = `${WHOP_DASH}promo/`;
+const WHOP_KEYS = "https://whop.com/dashboard/developer";
 
 const day = (L, iso) => fmtDate(L, iso, { day: "numeric", month: "long", year: "numeric" });
 const stamp = (L, iso) => fmtDate(L, iso, { day: "numeric", month: "short", hour: L.en ? "numeric" : "2-digit", minute: "2-digit" });
 // Lien d'invitation dans la langue du créateur : /invitation/…, /en/invitation/… ou /es/invitation/…
-const inviteUrl = (code, lang) => `${typeof location !== "undefined" ? location.origin : "https://basketlog-app.com"}${mk(lang).href(`/invitation/${code}`)}`;
+const siteUrl = (lang, path) => `${typeof location !== "undefined" ? location.origin : "https://basketlog-app.com"}${mk(lang).href(path)}`;
+const inviteUrl = (code, lang) => siteUrl(lang, `/invitation/${code}`);
+// Lien d'un code promo à donner au créateur pour son public : la page Pro (dans la langue choisie) avec le code déjà appliqué.
+const promoUrl = (code, lang) => `${siteUrl(lang, "/pro")}?code=${code}`;
 
 async function copyText(text) {
   try { await navigator.clipboard.writeText(text); return true; } catch { return false; }
@@ -63,7 +68,8 @@ const Check = ({ ok, children }) => (
 
 // Code promo d'un créateur : code, remise, état chez Whop, et création ou modification sur place.
 // target : { uid } pour un compte, { inv } pour une invitation pas encore activée ; name : nom du créateur (propose le code).
-function PromoLine({ L, target, name, promo, busy, confirm, twoStep, copied, onCopy, onSave, onWhop, onRemove }) {
+// auto : le site crée lui-même les codes chez Whop (clé API présente) ; sinon l'admin les crée à la main et les marque.
+function PromoLine({ L, target, name, promo, auto, linkLang, busy, confirm, twoStep, copied, onCopy, onSave, onSync, onWhop, onRemove }) {
   const t = L.t;
   const [open, setOpen] = useState(false);
   const [pct, setPct] = useState(String(PROMO_DEFAULT));
@@ -110,7 +116,11 @@ function PromoLine({ L, target, name, promo, busy, confirm, twoStep, copied, onC
           <button type="button" className="adm-btn" onClick={() => setOpen(false)}>{t("Fermer", "Close", "Cerrar")}</button>
         </form>
         {changed && promo.whop_ok && (
-          <p className="adm-help">{t("Le code actuel existe chez Whop : un nouveau code ou une autre remise est à refaire là-bas, et l'ancien code à désactiver.", "The current code exists in Whop: a new code or a different discount has to be redone there, and the old code deactivated.", "El código actual existe en Whop: un código nuevo o un descuento distinto hay que rehacerlo allí, y desactivar el código anterior.")}</p>
+          <p className="adm-help">
+            {auto
+              ? t("Whop ne permet pas de modifier un code : l'ancien sera désactivé chez Whop et le nouveau créé. Si seule la remise change, Whop peut refuser de réutiliser le même nom : choisis alors un autre nom de code.", "Whop doesn't allow editing a code: the old one will be deactivated in Whop and the new one created. If only the discount changes, Whop may refuse to reuse the same name: pick another code name then.", "Whop no permite modificar un código: el anterior se desactivará en Whop y se creará el nuevo. Si solo cambia el descuento, Whop puede negarse a reutilizar el mismo nombre: elige entonces otro nombre de código.")
+              : t("Le code actuel existe chez Whop : un nouveau code ou une autre remise est à refaire là-bas, et l'ancien code à désactiver.", "The current code exists in Whop: a new code or a different discount has to be redone there, and the old code deactivated.", "El código actual existe en Whop: un código nuevo o un descuento distinto hay que rehacerlo allí, y desactivar el código anterior.")}
+          </p>
         )}
         {problem && <p className="adm-err" role="alert">{problem}</p>}
       </div>
@@ -133,14 +143,29 @@ function PromoLine({ L, target, name, promo, busy, confirm, twoStep, copied, onC
         <span>{t("Code promo", "Promo code", "Código promocional")}</span>
         <code className="adm-code">{promo.code}</code>
         <b>−{pctOf(promo.pct / 100, L)}</b>
-        <span className={`adm-tag ${promo.whop_ok ? "ok" : "wait"}`}>{promo.whop_ok ? t("Créé chez Whop", "Created in Whop", "Creado en Whop") : t("À créer chez Whop", "To create in Whop", "Por crear en Whop")}</span>
+        <span className={`adm-tag ${promo.whop_ok ? "ok" : "wait"}`}>
+          {auto
+            ? (promo.whop_ok ? t("Actif chez Whop", "Active in Whop", "Activo en Whop") : t("Pas encore chez Whop", "Not in Whop yet", "Aún no está en Whop"))
+            : (promo.whop_ok ? t("Créé chez Whop", "Created in Whop", "Creado en Whop") : t("À créer chez Whop", "To create in Whop", "Por crear en Whop"))}
+        </span>
       </span>
       <span className="adm-actions">
         <button type="button" className="adm-btn" onClick={() => onCopy(promo.code, `pc-${promo.id}`)}>{copied === `pc-${promo.id}` ? t("Copié", "Copied", "Copiado") : t("Copier le code", "Copy code", "Copiar el código")}</button>
+        {promo.whop_ok && (
+          <button type="button" className="adm-btn" onClick={() => onCopy(promoUrl(promo.code, linkLang), `pl-${promo.id}`)}>
+            {copied === `pl-${promo.id}` ? t("Copié", "Copied", "Copiado") : `${t("Copier le lien promo", "Copy promo link", "Copiar enlace promo")} (${linkLang.toUpperCase()})`}
+          </button>
+        )}
         <button type="button" className="adm-btn" disabled={!!busy} onClick={edit}>{t("Modifier", "Edit", "Editar")}</button>
-        <button type="button" className="adm-btn" disabled={!!busy} onClick={() => onWhop(promo.id, !promo.whop_ok)}>
-          {promo.whop_ok ? t("Marquer comme non créé", "Mark as not created", "Marcar como no creado") : t("Marquer comme créé chez Whop", "Mark as created in Whop", "Marcar como creado en Whop")}
-        </button>
+        {auto ? (
+          <button type="button" className={`adm-btn ${promo.whop_ok ? "" : "primary"}`} disabled={!!busy} onClick={() => onSync(promo.id)}>
+            {busy === `ps-${promo.id}` ? t("Vérification…", "Checking…", "Comprobando…") : promo.whop_ok ? t("Vérifier chez Whop", "Check in Whop", "Comprobar en Whop") : t("Créer chez Whop", "Create in Whop", "Crear en Whop")}
+          </button>
+        ) : (
+          <button type="button" className="adm-btn" disabled={!!busy} onClick={() => onWhop(promo.id, !promo.whop_ok)}>
+            {promo.whop_ok ? t("Marquer comme non créé", "Mark as not created", "Marcar como no creado") : t("Marquer comme créé chez Whop", "Mark as created in Whop", "Marcar como creado en Whop")}
+          </button>
+        )}
         <button type="button" className={`adm-btn danger ${confirm === delKey ? "armed" : ""}`} disabled={!!busy} onClick={() => twoStep(delKey, () => onRemove(target))}>
           {confirm === delKey ? t("Confirmer la suppression", "Confirm deletion", "Confirmar la eliminación") : t("Supprimer le code", "Delete code", "Eliminar el código")}
         </button>
@@ -163,6 +188,7 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
   const [copied, setCopied] = useState("");
   const [linkLang, setLinkLang] = useState(L.lang); // langue des liens d'invitation (celle du créateur)
   const [linkPromo, setLinkPromo] = useState(null); // code promo créé avec le dernier lien
+  const [linkWhop, setLinkWhop] = useState(null); // son résultat chez Whop (state : created, error…), absent sans liaison automatique
   const [notice, setNotice] = useState(null); // rappel après une action sur un code promo
   const [inviteNote, setInviteNote] = useState("");
   const [inviteRole, setInviteRole] = useState("createur");
@@ -171,6 +197,7 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
   const [inviteProblem, setInviteProblem] = useState(""); // refus du formulaire d'invitation (code déjà pris…), affiché sous le formulaire
   const noticeRef = useRef(null);
   const promosOn = !!data?.promosOk; // faux tant que supabase/codes-promo.sql n'a pas été lancé
+  const auto = promosOn && !!data?.whopAuto; // vrai : le site crée lui-même les codes chez Whop (clé API présente)
   const suggestedCode = cleanPct(invitePct) ? suggestCode(inviteNote, invitePct) : ""; // « @lanuitnba » + 20 -> LANUITNBA20 (vide sans remise valide, ou si le nom est trop court)
   const shownCode = inviteCode ?? suggestedCode;
 
@@ -227,6 +254,7 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
     setInviteProblem("");
     setLink(""); // l'ancien lien disparaît : s'il y a un refus (code pris…), on ne le prend pas pour celui du créateur refusé
     setLinkPromo(null);
+    setLinkWhop(null);
     setCopied("");
     const j = await act("inviter", { note: inviteNote, role: inviteRole, ...(withPct ? { pct: invitePct } : {}), ...(code ? { code } : {}) }, "inviter", true);
     if (j?.ok === false) { setInviteProblem(j.error); return; }
@@ -234,15 +262,33 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
       const url = inviteUrl(j.code, linkLang);
       setLink(url);
       setLinkPromo(j.promo || null);
+      setLinkWhop(j.whop || null);
       if (j.promoError) setNotice({ kind: "text", text: j.promoError });
+      else if (j.whop?.state === "error") setNotice(whopNotice(j.whop, j.promo?.code, j.promo?.pct)); // le code est enregistré ici mais pas chez Whop : on dit pourquoi
       setInviteNote("");
       setInviteCode(null);
       if (await copyText(url)) setCopied("new");
     }
   }
 
-  // Rappel à l'écran quand un code qui existe chez Whop disparaît ici (supprimé ou remplacé) : il faut le désactiver là-bas.
+  // Rappel à l'écran quand un code disparaît ici (supprimé ou remplacé) : désactivé chez Whop par le site, ou à désactiver à la main.
   const remind = (kind, codes) => { if (codes?.length) setNotice({ kind, codes }); };
+
+  // Phrase après une action qui a touché Whop (créer, vérifier, réactiver). Une erreur arrive déjà rédigée par le serveur ;
+  // on y ajoute le lien utile (clés API si la permission manque, codes promo de Whop si le nom pose problème).
+  function whopNotice(w, code, pct) {
+    if (!w) return null;
+    if (w.state === "error") {
+      return { kind: "text", tone: "warn", text: w.message, link: w.kind === "scope" ? "keys" : ["differs", "conflict", "mismatch"].includes(w.kind) ? "promos" : null };
+    }
+    const off = `−${pctOf(pct / 100, L)}`;
+    const text = {
+      created: t(`Code ${code} (${off}) créé chez Whop : il est prêt, tes clients peuvent le saisir sur la page Pro.`, `Code ${code} (${off}) created in Whop: it's ready, your customers can enter it on the Pro page.`, `Código ${code} (${off}) creado en Whop: está listo, tus clientes pueden introducirlo en la página Pro.`),
+      exists: t(`Code ${code} : il existe déjà chez Whop avec la bonne remise, tout est en ordre.`, `Code ${code}: it already exists in Whop with the right discount, all good.`, `Código ${code}: ya existe en Whop con el descuento correcto, todo en orden.`),
+      reactivated: t(`Code ${code} : il existait chez Whop (désactivé), il est de nouveau actif.`, `Code ${code}: it existed in Whop (deactivated), it's active again.`, `Código ${code}: existía en Whop (desactivado), vuelve a estar activo.`),
+    }[w.state];
+    return text ? { kind: "text", tone: "ok", text } : null;
+  }
 
   async function cancelInvite(code) {
     const j = await act("annuler_invitation", { code }, `a-${code}`);
@@ -255,8 +301,31 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
   // Crée ou modifie le code d'un créateur ; renvoie { ok, error } au formulaire.
   async function savePromo(args) {
     const j = await act("promo_definir", args, "promo", true);
-    if (j?.ok && j.ancien?.whop_ok) remind("replaced", [j.ancien]);
+    if (!j?.ok) return j;
+    if (!j.whop) {
+      if (j.ancien?.whop_ok) remind("replaced", [j.ancien]); // sans liaison automatique : l'ancien code est à désactiver à la main
+      return j;
+    }
+    const first = whopNotice(j.whop, args.code, args.pct);
+    const old = j.ancien;
+    const parts = [first?.text];
+    let warn = first?.tone === "warn";
+    let link = first?.link || null;
+    if (old?.whop?.state === "disabled") {
+      parts.push(t(`L'ancien code ${old.code} a été désactivé chez Whop.`, `The old code ${old.code} was deactivated in Whop.`, `El código anterior ${old.code} se ha desactivado en Whop.`));
+    } else if (old?.whop?.state === "error") {
+      if (!warn) parts.push(old.whop.message);
+      parts.push(t(`L'ancien code ${old.code} n'a pas pu être désactivé : désactive-le toi-même chez Whop.`, `The old code ${old.code} couldn't be deactivated: deactivate it yourself in Whop.`, `El código anterior ${old.code} no se ha podido desactivar: desactívalo tú mismo en Whop.`));
+      warn = true;
+      link = link || (old.whop.kind === "scope" ? "keys" : "promos");
+    }
+    setNotice({ kind: "text", tone: warn ? "warn" : "ok", text: parts.filter(Boolean).join(" "), link });
     return j;
+  }
+  // « Créer chez Whop » / « Vérifier chez Whop » : crée le code chez Whop, ou vérifie qu'il y existe avec la bonne remise.
+  async function syncPromo(id) {
+    const j = await act("promo_sync", { id }, `ps-${id}`);
+    if (j?.ok) setNotice(whopNotice(j.whop, j.promo?.code, j.promo?.pct));
   }
   async function markWhop(id, ok) {
     await act("promo_whop", { id, ok }, `pw-${id}`);
@@ -306,9 +375,10 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
       lifetime: t("Abonné Lifetime", "Lifetime subscriber", "Suscriptor Lifetime"),
     }[a.formule] || t("Compte vérifié", "Verified account", "Cuenta verificada"))
     : t("Sans compte", "No account", "Sin cuenta"));
-  const promoProps = { L, busy, confirm, twoStep, copied, onCopy: copy, onSave: savePromo, onWhop: markWhop, onRemove: removePromo };
+  const promoProps = { L, auto, linkLang, busy, confirm, twoStep, copied, onCopy: copy, onSave: savePromo, onSync: syncPromo, onWhop: markWhop, onRemove: removePromo };
   const codeList = (codes) => codes.map((c) => `${c.code} (−${pctOf(c.pct / 100, L)})`).join(", ");
   const whopLink = <a className="adm-link-out" href={WHOP_PROMO} target="_blank" rel="noopener noreferrer">{t("Codes promo Whop", "Whop promo codes", "Códigos promocionales de Whop")} ↗</a>;
+  const keysLink = <a className="adm-link-out" href={WHOP_KEYS} target="_blank" rel="noopener noreferrer">{t("Clés API Whop", "Whop API keys", "Claves API de Whop")} ↗</a>;
 
   return (
     <>
@@ -453,10 +523,13 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
         {promosOn ? (
           <p className="adm-help">
             {t(
-              "Chaque créateur a aussi un code promo : tu choisis son nom (3 à 24 lettres ou chiffres) et la remise (en %) que ses clients obtiennent en le saisissant au paiement. Le nom est proposé d'après celui du créateur et la remise : change-le comme tu veux, il reste modifiable dans la liste ci-dessous ; laisse la remise vide pour ne pas créer de code. Pour fonctionner à l'achat, il doit aussi exister chez Whop.",
-              "Every creator also gets a promo code: you choose its name (3 to 24 letters or digits) and the discount (in %) their customers get by entering it at checkout. The name is suggested from the creator's name and the discount: change it however you like, it can still be edited in the list below; leave the discount empty to skip the code. To work at purchase, it must also exist in Whop.",
-              "Cada creador tiene además un código promocional: tú eliges su nombre (de 3 a 24 letras o cifras) y el descuento (en %) que obtienen sus clientes al introducirlo en el pago. El nombre se propone a partir del nombre del creador y del descuento: cámbialo como quieras, se puede modificar en la lista de abajo; deja el descuento vacío para no crear ningún código. Para que funcione al comprar, también tiene que existir en Whop."
-            )}
+              "Chaque créateur a aussi un code promo : tu choisis son nom (3 à 24 lettres ou chiffres) et la remise (en %) que ses clients obtiennent en le saisissant au paiement. Le nom est proposé d'après celui du créateur et la remise : change-le comme tu veux, il reste modifiable dans la liste ci-dessous ; laisse la remise vide pour ne pas créer de code.",
+              "Every creator also gets a promo code: you choose its name (3 to 24 letters or digits) and the discount (in %) their customers get by entering it at checkout. The name is suggested from the creator's name and the discount: change it however you like, it can still be edited in the list below; leave the discount empty to skip the code.",
+              "Cada creador tiene además un código promocional: tú eliges su nombre (de 3 a 24 letras o cifras) y el descuento (en %) que obtienen sus clientes al introducirlo en el pago. El nombre se propone a partir del nombre del creador y del descuento: cámbialo como quieras, se puede modificar en la lista de abajo; deja el descuento vacío para no crear ningún código."
+            )}{" "}
+            {auto
+              ? t("Basketlog crée aussi le code chez Whop pour toi.", "Basketlog also creates the code in Whop for you.", "Basketlog también crea el código en Whop por ti.")
+              : t("Pour fonctionner à l'achat, il doit aussi exister chez Whop.", "To work at purchase, it must also exist in Whop.", "Para que funcione al comprar, también tiene que existir en Whop.")}
           </p>
         ) : (
           <p className="adm-notice">
@@ -477,13 +550,23 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
         {link && linkPromo && (
           <p className="adm-help">
             {t("Code promo créé", "Promo code created", "Código promocional creado")}{colon}<code className="adm-code">{linkPromo.code}</code> (−{pctOf(linkPromo.pct / 100, L)}){" "}
-            {t("— à créer aussi chez Whop (guide ci-dessous).", "— also create it in Whop (guide below).", "— créalo también en Whop (guía de abajo).")}
+            {linkWhop?.state === "error"
+              ? t("— pas encore chez Whop (voir le message ci-dessous).", "— not in Whop yet (see the message below).", "— aún no está en Whop (mira el mensaje de abajo).")
+              : linkWhop && linkWhop.state !== "manual"
+                ? t("— créé chez Whop : prêt à l'emploi.", "— created in Whop: ready to use.", "— creado en Whop: listo para usar.")
+                : t("— à créer aussi chez Whop (guide ci-dessous).", "— also create it in Whop (guide below).", "— créalo también en Whop (guía de abajo).")}
           </p>
         )}
 
         {notice && (
-          <p className="adm-notice" role="status" ref={noticeRef}>
-            {notice.kind === "text" && notice.text}
+          <p className={`adm-notice ${notice.tone === "ok" ? "ok" : ""}`} role="status" ref={noticeRef}>
+            {notice.kind === "text" && (
+              <>
+                {notice.text}
+                {notice.link === "keys" && <>{" "}{keysLink}</>}
+                {notice.link === "promos" && <>{" "}{whopLink}</>}
+              </>
+            )}
             {notice.kind === "replaced" && (
               <>
                 {t("L'ancien code", "The old code", "El código anterior")} <b>{codeList(notice.codes)}</b>{" "}
@@ -493,7 +576,20 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
             {notice.kind === "removed" && (
               <>
                 {notice.codes.length > 1 ? t("Codes promo supprimés", "Promo codes deleted", "Códigos promocionales eliminados") : t("Code promo supprimé", "Promo code deleted", "Código promocional eliminado")}{colon}<b>{codeList(notice.codes)}</b>.
-                {notice.codes.some((c) => c.whop_ok) && (
+                {notice.codes.some((c) => c.whop) ? (
+                  <>
+                    {notice.codes.some((c) => c.whop?.state === "disabled") && (
+                      <>{" "}{t("Désactivé chez Whop.", "Deactivated in Whop.", "Desactivado en Whop.")}</>
+                    )}
+                    {notice.codes.some((c) => c.whop?.state === "error") && (
+                      <>
+                        {" "}{notice.codes.find((c) => c.whop?.state === "error").whop.message}{" "}
+                        {t("Désactive-le toi-même chez Whop :", "Deactivate it yourself in Whop:", "Desactívalo tú mismo en Whop:")}{" "}
+                        {notice.codes.find((c) => c.whop?.state === "error").whop.kind === "scope" ? keysLink : whopLink}
+                      </>
+                    )}
+                  </>
+                ) : notice.codes.some((c) => c.whop_ok) && (
                   <>
                     {" "}
                     {notice.codes.length > 1
@@ -506,7 +602,24 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
           </p>
         )}
 
-        {promosOn && (
+        {auto && (
+          <details className="adm-guide">
+            <summary>{t("Comment les codes marchent avec Whop", "How the codes work with Whop", "Cómo funcionan los códigos con Whop")}</summary>
+            <ol>
+              <li>{t("Quand tu crées ou modifies un code ici, Basketlog le crée tout seul chez Whop : remise en %, pour tous les clients, une fois par client, sur toutes les formules, sans date limite. Il relit ensuite ce que Whop a enregistré et ne l'annonce « actif » que si tout correspond.", "When you create or edit a code here, Basketlog creates it in Whop by itself: discount in %, for all customers, once per customer, on every plan, no end date. It then reads back what Whop saved and only reports it “active” if everything matches.", "Cuando creas o modificas un código aquí, Basketlog lo crea solo en Whop: descuento en %, para todos los clientes, una vez por cliente, en todos los planes, sin fecha límite. Después vuelve a leer lo que Whop ha guardado y solo lo da por «activo» si todo coincide.")}</li>
+              <li>
+                {data.whopMonths === 0 && t("La remise s'applique à chaque paiement tant que l'abonnement dure (pour Lifetime, au paiement unique).", "The discount applies to every payment for as long as the subscription lasts (for Lifetime, the one-time payment).", "El descuento se aplica a cada pago mientras dure la suscripción (en Lifetime, al pago único).")}
+                {data.whopMonths === 1 && t("La remise s'applique au premier paiement seulement.", "The discount applies to the first payment only.", "El descuento se aplica solo al primer pago.")}
+                {data.whopMonths > 1 && t(`La remise s'applique aux ${data.whopMonths} premiers paiements.`, `The discount applies to the first ${data.whopMonths} payments.`, `El descuento se aplica a los primeros ${data.whopMonths} pagos.`)}
+              </li>
+              <li>{t("Le client saisit le code sur la page Pro (« J'ai un code promo »), ou ouvre le lien du créateur (bouton « Copier le lien promo », de la forme basketlog-app.com/pro?code=NOM20, avec /en ou /es devant pour un public anglophone ou hispanophone) : le prix réduit s'affiche et le lien de paiement Whop applique le code.", "The customer enters the code on the Pro page (“I have a promo code”), or opens the creator's link (“Copy promo link” button, like basketlog-app.com/pro?code=NAME20, with /en or /es in front for an English- or Spanish-speaking audience): the reduced price shows and the Whop checkout link applies the code.", "El cliente introduce el código en la página Pro («Tengo un código promocional») o abre el enlace del creador (botón «Copiar enlace promo», del tipo basketlog-app.com/pro?code=NOMBRE20, con /en o /es delante para un público angloparlante o hispanohablante): se muestra el precio reducido y el enlace de pago de Whop aplica el código.")}</li>
+              <li>{t("Whop ne permet pas de modifier un code : changer le nom ou la remise désactive l'ancien code chez Whop et en crée un nouveau. Supprimer un code ici le désactive chez Whop.", "Whop doesn't allow editing a code: changing the name or the discount deactivates the old code in Whop and creates a new one. Deleting a code here deactivates it in Whop.", "Whop no permite modificar un código: cambiar el nombre o el descuento desactiva el código anterior en Whop y crea uno nuevo. Eliminar un código aquí lo desactiva en Whop.")}</li>
+              <li>{t("Si Whop refuse quelque chose, un message t'explique quoi faire, et le bouton « Créer chez Whop » réessaie. Pour tout contrôler à la main :", "If Whop refuses something, a message explains what to do, and the “Create in Whop” button tries again. To check everything by hand:", "Si Whop rechaza algo, un mensaje te explica qué hacer y el botón «Crear en Whop» lo vuelve a intentar. Para comprobarlo todo a mano:")} {whopLink}</li>
+            </ol>
+          </details>
+        )}
+
+        {promosOn && !auto && (
           <details className="adm-guide">
             <summary>{t("Comment créer le code chez Whop", "How to create the code in Whop", "Cómo crear el código en Whop")}</summary>
             <ol>

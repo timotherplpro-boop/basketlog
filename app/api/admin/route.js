@@ -4,6 +4,7 @@ import { COOKIE, PREVIEW_TIERS, cookieOptions, decodeSession, encodeSession, res
 import { adminData, dbRpc, getRole } from "../../../lib/roles";
 import { LANGS, mk } from "../../../lib/i18n";
 import { CODE_RE, cleanPct, randomChars, suggestCode } from "../../../lib/promo";
+import { describeProblems, disablePromo, ensurePromo, whopPromoReady } from "../../../lib/whop-promo";
 
 export const dynamic = "force-dynamic";
 
@@ -25,30 +26,91 @@ function promoTarget(body) {
 }
 
 // Premier code libre pour un créateur qu'on vient d'inviter : son nom + la remise, puis avec deux caractères en plus,
-// puis un code tiré au hasard. Renvoie { code, pct }, ou null si rien n'était libre.
+// puis un code tiré au hasard. Renvoie { code, pct, id }, ou null si rien n'était libre.
 async function proposePromo({ inv, nom, pct }) {
   const first = suggestCode(nom, pct, randomChars);
   for (const code of [first, `${first}${randomChars(2)}`.slice(0, 24), suggestCode("", pct, randomChars)]) {
     const res = await dbRpc("basketlog_admin_promo_set", { p_uid: null, p_inv_code: inv, p_code: code, p_pct: pct, p_nom: nom || null });
-    if (res?.ok) return { code, pct };
+    if (res?.ok) return { code, pct, id: res.id };
     if (res?.reason !== "code_pris") break;
   }
   return null;
 }
 
 // Code choisi par l'admin pour un créateur qu'on vient d'inviter : une seule tentative, avec exactement ce code.
-// Renvoie { code, pct }, ou null s'il vient d'être pris entre-temps.
+// Renvoie { code, pct, id }, ou null s'il vient d'être pris entre-temps.
 async function setPromo({ inv, nom, pct, code }) {
   const res = await dbRpc("basketlog_admin_promo_set", { p_uid: null, p_inv_code: inv, p_code: code, p_pct: pct, p_nom: nom || null });
-  return res?.ok ? { code, pct } : null;
+  return res?.ok ? { code, pct, id: res.id } : null;
 }
 
-// Supprime le code d'un créateur qui disparaît (accès retiré, invitation annulée) et renvoie ce qui a été supprimé,
-// pour rappeler à l'admin de le désactiver aussi chez Whop. Sans conséquence si les codes promo ne sont pas en base.
+// Liaison avec Whop. Ces deux fonctions ne lèvent jamais : un souci chez Whop ne défait pas ce qui est enregistré ici, il
+// est signalé à l'admin, qui peut réessayer avec « Créer chez Whop ». state : created, exists, reactivated (code prêt chez
+// Whop) ; disabled, already, absent (code retiré de chez Whop) ; manual (clé API Whop absente) ; error (voir kind).
+async function whopSync({ id, code, pct }) {
+  if (!whopPromoReady()) return { state: "manual" };
+  try {
+    const r = await ensurePromo({ code, pct });
+    if (id) { try { await dbRpc("basketlog_admin_promo_whop", { p_id: id, p_ok: true }); } catch { /* le bouton « Créer chez Whop » adopte le code déjà créé */ } }
+    return { state: r.state };
+  } catch (e) {
+    return { state: "error", kind: e?.kind || "network", problems: e?.problems, deactivated: e?.deactivated, detail: e?.detail };
+  }
+}
+async function whopRetire(code) {
+  if (!whopPromoReady()) return { state: "manual" };
+  try {
+    return await disablePromo(code);
+  } catch (e) {
+    return { state: "error", kind: e?.kind || "network", detail: e?.detail };
+  }
+}
+
+// Phrase pour l'admin quand la liaison avec Whop n'a pas abouti, dans la langue de l'écran.
+function whopMessage(t, w, code) {
+  const c = code ? ` ${code}` : "";
+  const why = describeProblems(w.problems, t) || w.detail || "";
+  switch (w.kind) {
+    case "nokey":
+      return t("La clé API de Whop n'est pas configurée sur le site : crée le code à la main (guide ci-dessous).", "Whop's API key isn't set up on the site: create the code by hand (guide below).", "La clave API de Whop no está configurada en el sitio: crea el código a mano (guía de abajo).");
+    case "scope":
+      return t(
+        "Whop a refusé : la clé API du site n'a pas la permission de gérer les codes promo. Sur la page des clés API de Whop, ajoute à la clé « promo_code:create », « promo_code:update » et « promo_code:basic:read » (ou donne-lui le rôle Admin), puis clique sur « Créer chez Whop ».",
+        "Whop refused: the site's API key isn't allowed to manage promo codes. On Whop's API keys page, give the key “promo_code:create”, “promo_code:update” and “promo_code:basic:read” (or the Admin role), then click “Create in Whop”.",
+        "Whop lo ha rechazado: la clave API del sitio no tiene permiso para gestionar códigos promocionales. En la página de claves API de Whop, añade a la clave «promo_code:create», «promo_code:update» y «promo_code:basic:read» (o el rol de administrador) y pulsa «Crear en Whop»."
+      );
+    case "differs":
+      return t(
+        `Le code${c} existe déjà chez Whop avec d'autres réglages (${why}). Whop ne permet pas de les modifier : choisis un autre nom de code ici, ou supprime celui de Whop puis clique sur « Créer chez Whop ».`,
+        `The code${c} already exists in Whop with other settings (${why}). Whop doesn't allow editing them: pick another code name here, or delete the one in Whop and then click “Create in Whop”.`,
+        `El código${c} ya existe en Whop con otros ajustes (${why}). Whop no permite modificarlos: elige otro nombre de código aquí, o elimina el de Whop y pulsa «Crear en Whop».`
+      );
+    case "conflict":
+      return t(`Whop refuse de créer le code${c} (il existe déjà ou son nom est réservé) : choisis un autre nom de code.`, `Whop refuses to create the code${c} (it already exists or its name is reserved): pick another code name.`, `Whop se niega a crear el código${c} (ya existe o su nombre está reservado): elige otro nombre de código.`);
+    case "invalid":
+      return t(`Whop a refusé ce code ou cette remise${why ? ` (${why})` : ""} : choisis-en un autre.`, `Whop refused this code or discount${why ? ` (${why})` : ""}: pick another one.`, `Whop ha rechazado este código o descuento${why ? ` (${why})` : ""}: elige otro.`);
+    case "mismatch":
+      return w.deactivated
+        ? t(`Whop a enregistré autre chose que prévu (${why}) : par sécurité, le code${c} a été désactivé chez Whop. Aucun client ne peut l'utiliser.`, `Whop saved something other than expected (${why}): as a safety measure, the code${c} was deactivated in Whop. No customer can use it.`, `Whop ha guardado algo distinto de lo previsto (${why}): por seguridad, el código${c} se ha desactivado en Whop. Ningún cliente puede usarlo.`)
+        : t(`Whop a enregistré autre chose que prévu (${why}) et le code${c} n'a pas pu être désactivé : désactive-le tout de suite chez Whop.`, `Whop saved something other than expected (${why}) and the code${c} couldn't be deactivated: deactivate it in Whop right away.`, `Whop ha guardado algo distinto de lo previsto (${why}) y el código${c} no se ha podido desactivar: desactívalo en Whop ahora mismo.`);
+    default:
+      return t("Whop ne répond pas pour le moment : réessaie dans un instant avec « Créer chez Whop ».", "Whop isn't responding right now: try again in a moment with “Create in Whop”.", "Whop no responde por el momento: vuelve a intentarlo en un instante con «Crear en Whop».");
+  }
+}
+
+// Supprime le code d'un créateur qui disparaît (accès retiré, invitation annulée) et le désactive chez Whop.
+// Renvoie ce qui a été supprimé, avec pour chaque code le résultat chez Whop (`whop`). Sans conséquence si les codes
+// promo ne sont pas en base.
+async function retireAll(rows) {
+  if (!whopPromoReady()) return rows;
+  const out = [];
+  for (const row of rows) out.push({ ...row, whop: await whopRetire(row.code) });
+  return out;
+}
 async function closePromo(args) {
   try {
     const r = await dbRpc("basketlog_admin_promo_off", args);
-    return Array.isArray(r?.supprimes) ? r.supprimes : [];
+    return await retireAll(Array.isArray(r?.supprimes) ? r.supprimes : []);
   } catch {
     return [];
   }
@@ -66,6 +128,10 @@ export async function POST(req) {
     taken: () => t("Ce code existe déjà : choisis-en un autre.", "That code already exists: pick another one.", "Ese código ya existe: elige otro."),
     off: () => t("Les codes promo ne sont pas encore activés dans la base de données (script supabase/codes-promo.sql à lancer une fois).", "Promo codes aren't enabled in the database yet (run the supabase/codes-promo.sql script once).", "Los códigos promocionales aún no están activados en la base de datos (hay que ejecutar una vez el script supabase/codes-promo.sql)."),
   };
+
+  // Résultat chez Whop pour l'écran : en cas d'échec, la phrase est déjà dans la langue de l'écran.
+  const shown = (w, code) => (w?.state === "error" ? { ...w, message: whopMessage(t, w, code) } : w);
+  const shownAll = (rows) => rows.map((r) => (r.whop ? { ...r, whop: shown(r.whop, r.code) } : r));
 
   const s = decodeSession(req.cookies.get(COOKIE)?.value);
   if (!s?.uid) return err(t("Connecte-toi avec ton compte admin.", "Log in with your admin account.", "Inicia sesión con tu cuenta de administrador."), 401);
@@ -129,9 +195,10 @@ export async function POST(req) {
         extra = { code: res?.code || null };
         // Le lien est créé quoi qu'il arrive : un souci avec le code promo est signalé à côté, sans bloquer.
         if (pct != null && res?.code) {
+          let created = null;
           try {
-            extra.promo = wanted ? await setPromo({ inv: res.code, nom: note, pct, code: wanted }) : await proposePromo({ inv: res.code, nom: note, pct });
-            if (!extra.promo) {
+            created = wanted ? await setPromo({ inv: res.code, nom: note, pct, code: wanted }) : await proposePromo({ inv: res.code, nom: note, pct });
+            if (!created) {
               extra.promoError = wanted
                 ? t(`Le lien est créé, mais le code ${wanted} vient d'être pris : choisis-en un autre dans la liste ci-dessous.`, `The link is created, but the code ${wanted} was just taken: pick another one in the list below.`, `El enlace está creado, pero el código ${wanted} acaba de ser ocupado: elige otro en la lista de abajo.`)
                 : t("Le lien est créé, mais aucun code promo libre n'a été trouvé : ajoute-en un dans la liste ci-dessous.", "The link is created, but no free promo code was found: add one in the list below.", "El enlace está creado, pero no se ha encontrado ningún código promocional libre: añade uno en la lista de abajo.");
@@ -141,13 +208,19 @@ export async function POST(req) {
               ? msg.off()
               : t("Le lien est créé, mais le code promo n'a pas pu l'être : ajoute-le dans la liste ci-dessous.", "The link is created, but the promo code couldn't be: add it in the list below.", "El enlace está creado, pero no se ha podido crear el código promocional: añádelo en la lista de abajo.");
           }
+          if (created) {
+            const { id, ...pub } = created;
+            extra.promo = pub;
+            // Le code est aussi créé chez Whop (si la clé API le permet) pour que le client puisse l'utiliser tout de suite.
+            if (whopPromoReady()) extra.whop = shown(await whopSync({ id, code: pub.code, pct: pub.pct }), pub.code);
+          }
         }
         break;
       }
       case "annuler_invitation": {
         if (!CODE.test(String(body.code || ""))) return err(t("Invitation introuvable.", "Invitation not found.", "Invitación no encontrada."));
         await dbRpc("basketlog_admin_annuler", { p_code: body.code });
-        extra = { supprimes: await closePromo({ p_uid: null, p_inv_code: body.code }) };
+        extra = { supprimes: shownAll(await closePromo({ p_uid: null, p_inv_code: body.code })) };
         break;
       }
       case "retirer_acces": {
@@ -156,10 +229,10 @@ export async function POST(req) {
         if (uid === s.uid) return err(t("Tu ne peux pas retirer ton propre accès admin.", "You can't remove your own admin access.", "No puedes retirar tu propio acceso de administrador."));
         const res = await dbRpc("basketlog_admin_retirer", { p_uid: uid });
         if (res?.reason === "dernier_admin") return err(t("Il faut garder au moins un admin.", "At least one admin must remain.", "Debe quedar al menos un administrador."));
-        extra = { supprimes: res?.ok ? await closePromo({ p_uid: uid, p_inv_code: null }) : [] };
+        extra = { supprimes: res?.ok ? shownAll(await closePromo({ p_uid: uid, p_inv_code: null })) : [] };
         break;
       }
-      // Code promo d'un créateur : création ou modification (code et remise).
+      // Code promo d'un créateur : création ou modification (code et remise), répercutée chez Whop.
       case "promo_definir": {
         const target = promoTarget(body);
         if (!target) return err(t("Créateur introuvable.", "Creator not found.", "Creador no encontrado."));
@@ -171,19 +244,40 @@ export async function POST(req) {
         const res = await dbRpc("basketlog_admin_promo_set", { p_uid: target.uid, p_inv_code: target.inv, p_code: code, p_pct: pct, p_nom: nom || null });
         if (res?.reason === "code_pris") return err(msg.taken(), 409);
         extra = { ancien: res?.ancien || null }; // ancien code, s'il vient d'être remplacé
+        if (res?.ok && res.id && whopPromoReady()) {
+          // Whop ne permet pas de modifier un code : l'ancien est désactivé, le nouveau est créé. Même nom avec une autre
+          // remise : l'ancien d'abord (le nom est pris tant qu'il est actif) ; autre nom : le nouveau d'abord.
+          const old = res.ancien;
+          const sameName = !!old && old.code === code;
+          let oldWhop = null;
+          if (old && sameName) oldWhop = await whopRetire(old.code);
+          const w = await whopSync({ id: res.id, code, pct });
+          if (old && !sameName) oldWhop = await whopRetire(old.code);
+          extra.whop = shown(w, code);
+          if (old) extra.ancien = { ...old, whop: shown(oldWhop, old.code) };
+        }
         break;
       }
-      // « Ce code existe chez Whop » : simple repère pour l'admin, rien n'est envoyé à Whop.
+      // « Ce code existe chez Whop » : simple repère pour l'admin (liaison automatique indisponible), rien n'est envoyé à Whop.
       case "promo_whop": {
         if (!UUID.test(String(body.id || ""))) return err(t("Code promo introuvable.", "Promo code not found.", "Código promocional no encontrado."));
         await dbRpc("basketlog_admin_promo_whop", { p_id: body.id, p_ok: body.ok === true });
+        break;
+      }
+      // « Créer chez Whop » : crée le code là-bas, ou vérifie qu'il y existe avec la bonne remise (puis le note comme prêt).
+      case "promo_sync": {
+        if (!UUID.test(String(body.id || ""))) return err(t("Code promo introuvable.", "Promo code not found.", "Código promocional no encontrado."));
+        const list = await dbRpc("basketlog_admin_promos");
+        const p = Array.isArray(list) ? list.find((x) => x.id === body.id) : null;
+        if (!p) return err(t("Code promo introuvable.", "Promo code not found.", "Código promocional no encontrado."), 404);
+        extra = { promo: { code: p.code, pct: p.pct }, whop: shown(await whopSync({ id: p.id, code: p.code, pct: p.pct }), p.code) };
         break;
       }
       case "promo_supprimer": {
         const target = promoTarget(body);
         if (!target) return err(t("Créateur introuvable.", "Creator not found.", "Creador no encontrado."));
         const res = await dbRpc("basketlog_admin_promo_off", { p_uid: target.uid, p_inv_code: target.inv });
-        extra = { supprimes: Array.isArray(res?.supprimes) ? res.supprimes : [] };
+        extra = { supprimes: shownAll(await retireAll(Array.isArray(res?.supprimes) ? res.supprimes : [])) };
         break;
       }
       case "lister":
