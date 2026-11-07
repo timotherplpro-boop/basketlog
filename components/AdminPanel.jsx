@@ -1,8 +1,13 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { money, price } from "../lib/pricing";
-import { LANGS, LANG_NAMES, fmtDate, mk } from "../lib/i18n";
+import { LANGS, LANG_NAMES, fmtDate, mk, pctOf } from "../lib/i18n";
+import { CODE_RE, PROMO_DEFAULT, PROMO_MAX, PROMO_MIN, cleanPct, suggestCode } from "../lib/promo";
 import { useL } from "./LangProvider";
+
+// Tableau de bord Whop de Basketlog et sa page des codes promo (où chaque code de créateur doit aussi être créé).
+const WHOP_DASH = "https://whop.com/dashboard/biz_pE2L6siofBGnW6/";
+const WHOP_PROMO = `${WHOP_DASH}promo/`;
 
 const day = (L, iso) => fmtDate(L, iso, { day: "numeric", month: "long", year: "numeric" });
 const stamp = (L, iso) => fmtDate(L, iso, { day: "numeric", month: "short", hour: L.en ? "numeric" : "2-digit", minute: "2-digit" });
@@ -56,6 +61,94 @@ const Check = ({ ok, children }) => (
   <li className={ok ? "ok" : "ko"}><span aria-hidden>{ok ? "✓" : "✕"}</span>{children}</li>
 );
 
+// Code promo d'un créateur : code, remise, état chez Whop, et création ou modification sur place.
+// target : { uid } pour un compte, { inv } pour une invitation pas encore activée ; name : nom du créateur (propose le code).
+function PromoLine({ L, target, name, promo, busy, confirm, twoStep, copied, onCopy, onSave, onWhop, onRemove }) {
+  const t = L.t;
+  const [open, setOpen] = useState(false);
+  const [pct, setPct] = useState(String(PROMO_DEFAULT));
+  const [code, setCode] = useState("");
+  const [problem, setProblem] = useState("");
+
+  function edit() {
+    const p = promo?.pct ?? PROMO_DEFAULT;
+    setPct(String(p));
+    setCode(promo?.code || suggestCode(name, p));
+    setProblem("");
+    setOpen(true);
+  }
+  // Tant que le code suit la remise (NOM20), il suit aussi ses changements (NOM15) ; un code retouché à la main reste tel quel.
+  function changePct(v) {
+    const follows = code === suggestCode(name, pct);
+    setPct(v);
+    const n = cleanPct(v);
+    if (follows && n) { const s = suggestCode(name, n); if (s) setCode(s); }
+  }
+  async function submit(e) {
+    e.preventDefault();
+    setProblem("");
+    const j = await onSave({ ...target, nom: name, code, pct: cleanPct(pct) });
+    if (j?.ok) setOpen(false);
+    else if (j?.error) setProblem(j.error);
+  }
+
+  if (open) {
+    const changed = !!promo && (code !== promo.code || cleanPct(pct) !== promo.pct);
+    return (
+      <div className="adm-promo">
+        <form className="adm-promo-form" onSubmit={submit}>
+          <label><span>{t("Code (celui que le client saisit)", "Code (what the customer types)", "Código (el que escribe el cliente)")}</span>
+            <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 24))} maxLength={24} autoComplete="off" autoCapitalize="characters" spellCheck={false} required />
+          </label>
+          <label><span>{t("Remise pour le client", "Customer discount", "Descuento para el cliente")}</span>
+            <span className="adm-pct">
+              <input type="number" inputMode="numeric" min={PROMO_MIN} max={PROMO_MAX} step="1" value={pct} onChange={(e) => changePct(e.target.value)} required />
+              <b aria-hidden>%</b>
+            </span>
+          </label>
+          <button type="submit" className="adm-btn primary" disabled={!!busy || !CODE_RE.test(code) || cleanPct(pct) == null}>{t("Enregistrer", "Save", "Guardar")}</button>
+          <button type="button" className="adm-btn" onClick={() => setOpen(false)}>{t("Fermer", "Close", "Cerrar")}</button>
+        </form>
+        {changed && promo.whop_ok && (
+          <p className="adm-help">{t("Le code actuel existe chez Whop : un nouveau code ou une autre remise est à refaire là-bas, et l'ancien code à désactiver.", "The current code exists in Whop: a new code or a different discount has to be redone there, and the old code deactivated.", "El código actual existe en Whop: un código nuevo o un descuento distinto hay que rehacerlo allí, y desactivar el código anterior.")}</p>
+        )}
+        {problem && <p className="adm-err" role="alert">{problem}</p>}
+      </div>
+    );
+  }
+
+  if (!promo) {
+    return (
+      <div className="adm-promo">
+        <span className="adm-promo-main">{t("Aucun code promo", "No promo code", "Sin código promocional")}</span>
+        <button type="button" className="adm-btn" disabled={!!busy} onClick={edit}>{t("Ajouter un code promo", "Add a promo code", "Añadir un código promocional")}</button>
+      </div>
+    );
+  }
+
+  const delKey = `pd-${promo.id}`;
+  return (
+    <div className="adm-promo">
+      <span className="adm-promo-main">
+        <span>{t("Code promo", "Promo code", "Código promocional")}</span>
+        <code className="adm-code">{promo.code}</code>
+        <b>−{pctOf(promo.pct / 100, L)}</b>
+        <span className={`adm-tag ${promo.whop_ok ? "ok" : "wait"}`}>{promo.whop_ok ? t("Créé chez Whop", "Created in Whop", "Creado en Whop") : t("À créer chez Whop", "To create in Whop", "Por crear en Whop")}</span>
+      </span>
+      <span className="adm-actions">
+        <button type="button" className="adm-btn" onClick={() => onCopy(promo.code, `pc-${promo.id}`)}>{copied === `pc-${promo.id}` ? t("Copié", "Copied", "Copiado") : t("Copier le code", "Copy code", "Copiar el código")}</button>
+        <button type="button" className="adm-btn" disabled={!!busy} onClick={edit}>{t("Modifier", "Edit", "Editar")}</button>
+        <button type="button" className="adm-btn" disabled={!!busy} onClick={() => onWhop(promo.id, !promo.whop_ok)}>
+          {promo.whop_ok ? t("Marquer comme non créé", "Mark as not created", "Marcar como no creado") : t("Marquer comme créé chez Whop", "Mark as created in Whop", "Marcar como creado en Whop")}
+        </button>
+        <button type="button" className={`adm-btn danger ${confirm === delKey ? "armed" : ""}`} disabled={!!busy} onClick={() => twoStep(delKey, () => onRemove(target))}>
+          {confirm === delKey ? t("Confirmer la suppression", "Confirm deletion", "Confirmar la eliminación") : t("Supprimer le code", "Delete code", "Eliminar el código")}
+        </button>
+      </span>
+    </div>
+  );
+}
+
 // Espace admin : avis à relire (publier, retirer, supprimer), formules et aperçu client, comptes créateurs et admins,
 // liens d'invitation (dans la langue du créateur), état du back-office. Disponible en français, anglais et espagnol.
 export default function AdminPanel({ initial, me, preview = null, health = null }) {
@@ -69,6 +162,13 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
   const [link, setLink] = useState("");
   const [copied, setCopied] = useState("");
   const [linkLang, setLinkLang] = useState(L.lang); // langue des liens d'invitation (celle du créateur)
+  const [linkPromo, setLinkPromo] = useState(null); // code promo créé avec le dernier lien
+  const [notice, setNotice] = useState(null); // rappel après une action sur un code promo
+  const [inviteNote, setInviteNote] = useState("");
+  const [inviteRole, setInviteRole] = useState("createur");
+  const [invitePct, setInvitePct] = useState(String(PROMO_DEFAULT)); // remise du code promo du prochain créateur invité
+  const noticeRef = useRef(null);
+  const promosOn = !!data?.promosOk; // faux tant que supabase/codes-promo.sql n'a pas été lancé
 
   useEffect(() => {
     if (!confirm) return;
@@ -76,19 +176,31 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
     return () => clearTimeout(timer);
   }, [confirm]);
 
+  useEffect(() => {
+    if (notice) noticeRef.current?.scrollIntoView?.({ block: "nearest" }); // le rappel s'affiche près des listes : on le garde à l'écran
+  }, [notice]);
+
   const generic = () => t("Une erreur est survenue.", "Something went wrong.", "Se ha producido un error.");
   const offline = () => t("Connexion impossible, réessaie.", "Couldn't connect, please try again.", "No se ha podido conectar, inténtalo de nuevo.");
 
-  async function act(action, payload = {}, key = action) {
+  // inline : l'erreur est rendue à l'appelant (formulaire d'un code promo) au lieu de s'afficher en haut de page.
+  async function act(action, payload = {}, key = action, inline = false) {
     setBusy(key);
     setError("");
+    setNotice(null);
     try {
       const res = await fetch("/api/admin", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, lang: L.lang, ...payload }) });
       const j = await res.json().catch(() => ({}));
-      if (!j.ok) { setError(j.error || generic()); return null; }
+      if (!j.ok) {
+        const message = j.error || generic();
+        if (inline) return { ok: false, error: message };
+        setError(message);
+        return null;
+      }
       setData(j.data);
       return j;
     } catch {
+      if (inline) return { ok: false, error: offline() };
       setError(offline());
       return null;
     } finally {
@@ -101,14 +213,41 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
 
   async function invite(e) {
     e.preventDefault();
-    const f = new FormData(e.currentTarget);
-    const j = await act("inviter", { note: f.get("note"), role: f.get("role") }, "inviter");
+    const withPct = promosOn && inviteRole === "createur" && invitePct.trim() !== "";
+    const j = await act("inviter", { note: inviteNote, role: inviteRole, ...(withPct ? { pct: invitePct } : {}) }, "inviter");
     if (j?.code) {
       const url = inviteUrl(j.code, linkLang);
       setLink(url);
-      e.target.reset?.();
+      setLinkPromo(j.promo || null);
+      if (j.promoError) setNotice({ kind: "text", text: j.promoError });
+      setInviteNote("");
       if (await copyText(url)) setCopied("new");
     }
+  }
+
+  // Rappel à l'écran quand un code qui existe chez Whop disparaît ici (supprimé ou remplacé) : il faut le désactiver là-bas.
+  const remind = (kind, codes) => { if (codes?.length) setNotice({ kind, codes }); };
+
+  async function cancelInvite(code) {
+    const j = await act("annuler_invitation", { code }, `a-${code}`);
+    remind("removed", j?.supprimes);
+  }
+  async function removeAccess(uid) {
+    const j = await act("retirer_acces", { uid }, `x-${uid}`);
+    remind("removed", j?.supprimes);
+  }
+  // Crée ou modifie le code d'un créateur ; renvoie { ok, error } au formulaire.
+  async function savePromo(args) {
+    const j = await act("promo_definir", args, "promo", true);
+    if (j?.ok && j.ancien?.whop_ok) remind("replaced", [j.ancien]);
+    return j;
+  }
+  async function markWhop(id, ok) {
+    await act("promo_whop", { id, ok }, `pw-${id}`);
+  }
+  async function removePromo(target) {
+    const j = await act("promo_supprimer", target, "promo");
+    remind("removed", j?.supprimes);
   }
 
   async function copy(text, key) {
@@ -151,6 +290,9 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
       lifetime: t("Abonné Lifetime", "Lifetime subscriber", "Suscriptor Lifetime"),
     }[a.formule] || t("Compte vérifié", "Verified account", "Cuenta verificada"))
     : t("Sans compte", "No account", "Sin cuenta"));
+  const promoProps = { L, busy, confirm, twoStep, copied, onCopy: copy, onSave: savePromo, onWhop: markWhop, onRemove: removePromo };
+  const codeList = (codes) => codes.map((c) => `${c.code} (−${pctOf(c.pct / 100, L)})`).join(", ");
+  const whopLink = <a className="adm-link-out" href={WHOP_PROMO} target="_blank" rel="noopener noreferrer">{t("Codes promo Whop", "Whop promo codes", "Códigos promocionales de Whop")} ↗</a>;
 
   return (
     <>
@@ -248,14 +390,22 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
             "Crea un enlace y envíaselo a tu creador. Inicia sesión (o crea su cuenta gratuita) y luego activa su acceso: ve toda la aplicación, como un suscriptor Lifetime, sin pagar. Un creador no puede revisar opiniones ni dejar ninguna. Cada enlace solo sirve una vez y caduca a los 30 días."
           )}
         </p>
-        <form className="adm-invite" onSubmit={invite}>
-          <label><span>{t("Nom du créateur", "Creator name", "Nombre del creador")}</span><input name="note" maxLength={80} placeholder={t("Ex : @tipoff_off", "E.g. @tipoff_off", "Ej.: @tipoff_off")} autoComplete="off" /></label>
+        <form className={`adm-invite ${promosOn ? "with-pct" : ""}`} onSubmit={invite}>
+          <label><span>{t("Nom du créateur", "Creator name", "Nombre del creador")}</span><input name="note" value={inviteNote} onChange={(e) => setInviteNote(e.target.value)} maxLength={80} placeholder={t("Ex : @tipoff_off", "E.g. @tipoff_off", "Ej.: @tipoff_off")} autoComplete="off" /></label>
           <label><span>{t("Accès", "Access", "Acceso")}</span>
-            <select name="role" defaultValue="createur">
+            <select name="role" value={inviteRole} onChange={(e) => setInviteRole(e.target.value)}>
               <option value="createur">{t("Créateur : toute l'application", "Creator: the whole app", "Creador: toda la aplicación")}</option>
               <option value="admin">{t("Admin : application, avis et invitations", "Admin: app, reviews and invitations", "Administrador: aplicación, opiniones e invitaciones")}</option>
             </select>
           </label>
+          {promosOn && (
+            <label><span>{t("Remise du code promo", "Promo code discount", "Descuento del código")}</span>
+              <span className="adm-pct">
+                <input name="pct" type="number" inputMode="numeric" min={PROMO_MIN} max={PROMO_MAX} step="1" value={inviteRole === "createur" ? invitePct : ""} onChange={(e) => setInvitePct(e.target.value)} disabled={inviteRole !== "createur"} placeholder={inviteRole === "createur" ? String(PROMO_DEFAULT) : "–"} />
+                <b aria-hidden>%</b>
+              </span>
+            </label>
+          )}
           <label><span>{t("Langue du lien", "Link language", "Idioma del enlace")}</span>
             <select value={linkLang} onChange={(e) => setLinkLang(e.target.value)}>
               {LANGS.map((l) => <option key={l} value={l}>{LANG_NAMES[l]}</option>)}
@@ -264,11 +414,74 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
           <button type="submit" className="adm-btn primary" disabled={!!busy}>{busy === "inviter" ? t("Création…", "Creating…", "Creando…") : t("Créer le lien", "Create link", "Crear el enlace")}</button>
         </form>
         <p className="adm-help">{t("La page d'invitation s'ouvre dans la langue choisie : prends celle de ton créateur (français, anglais ou espagnol).", "The invitation page opens in the chosen language: pick your creator's (French, English or Spanish).", "La página de invitación se abre en el idioma elegido: elige el de tu creador (francés, inglés o español).")}</p>
+        {promosOn ? (
+          <p className="adm-help">
+            {t(
+              "Chaque créateur a aussi un code promo : tu choisis la remise (en %) que ses clients obtiennent en le saisissant au paiement. Le code est proposé à partir de son nom et reste modifiable dans la liste ci-dessous ; laisse la remise vide pour ne pas en créer. Pour fonctionner à l'achat, il doit aussi exister chez Whop.",
+              "Every creator also gets a promo code: you choose the discount (in %) their customers get by entering it at checkout. The code is suggested from their name and can still be edited in the list below; leave the discount empty to skip it. To work at purchase, it must also exist in Whop.",
+              "Cada creador tiene además un código promocional: tú eliges el descuento (en %) que obtienen sus clientes al introducirlo en el pago. El código se propone a partir de su nombre y se puede modificar en la lista de abajo; deja el descuento vacío para no crear ninguno. Para que funcione al comprar, también tiene que existir en Whop."
+            )}
+          </p>
+        ) : (
+          <p className="adm-notice">
+            {t(
+              "Codes promo indisponibles pour l'instant : le script supabase/codes-promo.sql n'a pas encore été lancé dans Supabase (ou la base ne répond pas). Les créateurs et les liens fonctionnent normalement en attendant.",
+              "Promo codes aren't available right now: the supabase/codes-promo.sql script hasn't been run in Supabase yet (or the database isn't responding). Creators and links work normally in the meantime.",
+              "Los códigos promocionales no están disponibles por ahora: el script supabase/codes-promo.sql aún no se ha ejecutado en Supabase (o la base de datos no responde). Mientras tanto, los creadores y los enlaces funcionan con normalidad."
+            )}{" "}
+            <a className="adm-link-out" href="https://supabase.com/dashboard" target="_blank" rel="noopener noreferrer">Supabase ↗</a>
+          </p>
+        )}
         {link && (
           <div className="adm-link">
             <code>{link}</code>
             <button type="button" className="adm-btn" onClick={() => copy(link, "new")}>{copied === "new" ? t("Copié", "Copied", "Copiado") : t("Copier", "Copy", "Copiar")}</button>
           </div>
+        )}
+        {link && linkPromo && (
+          <p className="adm-help">
+            {t("Code promo créé", "Promo code created", "Código promocional creado")}{colon}<code className="adm-code">{linkPromo.code}</code> (−{pctOf(linkPromo.pct / 100, L)}){" "}
+            {t("— à créer aussi chez Whop (guide ci-dessous).", "— also create it in Whop (guide below).", "— créalo también en Whop (guía de abajo).")}
+          </p>
+        )}
+
+        {notice && (
+          <p className="adm-notice" role="status" ref={noticeRef}>
+            {notice.kind === "text" && notice.text}
+            {notice.kind === "replaced" && (
+              <>
+                {t("L'ancien code", "The old code", "El código anterior")} <b>{codeList(notice.codes)}</b>{" "}
+                {t("existe chez Whop : désactive-le là-bas et crée le nouveau code.", "exists in Whop: deactivate it there and create the new code.", "existe en Whop: desactívalo allí y crea el nuevo código.")}{" "}{whopLink}
+              </>
+            )}
+            {notice.kind === "removed" && (
+              <>
+                {notice.codes.length > 1 ? t("Codes promo supprimés", "Promo codes deleted", "Códigos promocionales eliminados") : t("Code promo supprimé", "Promo code deleted", "Código promocional eliminado")}{colon}<b>{codeList(notice.codes)}</b>.
+                {notice.codes.some((c) => c.whop_ok) && (
+                  <>
+                    {" "}
+                    {notice.codes.length > 1
+                      ? t("Ils existent encore chez Whop : désactive-les aussi là-bas.", "They still exist in Whop: deactivate them there too.", "Siguen existiendo en Whop: desactívalos también allí.")
+                      : t("Il existe encore chez Whop : désactive-le aussi là-bas.", "It still exists in Whop: deactivate it there too.", "Sigue existiendo en Whop: desactívalo también allí.")}{" "}{whopLink}
+                  </>
+                )}
+              </>
+            )}
+          </p>
+        )}
+
+        {promosOn && (
+          <details className="adm-guide">
+            <summary>{t("Comment créer le code chez Whop", "How to create the code in Whop", "Cómo crear el código en Whop")}</summary>
+            <ol>
+              <li>{t("Ouvre la page des codes promo de Whop", "Open the Whop promo codes page", "Abre la página de códigos promocionales de Whop")} {whopLink}{t(", puis clique sur « Créer un code promo ».", ", then click “Create promo code”.", ", y pulsa «Crear código promocional».")}</li>
+              <li>{t("Saisis exactement le même code que dans la liste (bouton « Copier le code ») et la même remise en %.", "Enter exactly the same code as in the list (“Copy code” button) and the same discount in %.", "Escribe exactamente el mismo código que en la lista (botón «Copiar el código») y el mismo descuento en %.")}</li>
+              <li>{t("Choisis la durée de la réduction et les utilisateurs éligibles ; laisse décochées la date d'expiration et la limite d'utilisations, sauf si tu veux en fixer une.", "Choose the discount duration and eligible users; leave the expiry date and maximum uses boxes unticked unless you want to set one.", "Elige la duración del descuento y los usuarios elegibles; deja sin marcar la fecha de caducidad y el límite de usos, salvo que quieras fijar uno.")}</li>
+              <li>{t("Facultatif : le champ « Affilié » rattache le code à un affilié Whop.", "Optional: the “Affiliate” field links the code to a Whop affiliate.", "Opcional: el campo «Afiliado» vincula el código a un afiliado de Whop.")}</li>
+              <li>{t("Reviens ici et clique sur « Marquer comme créé chez Whop » pour t'en souvenir.", "Come back here and click “Mark as created in Whop” so you remember it's done.", "Vuelve aquí y pulsa «Marcar como creado en Whop» para recordar que está hecho.")}</li>
+            </ol>
+            <p>{t("Changer le code ou la remise ici ne change rien chez Whop : crée le nouveau code là-bas et désactive l'ancien.", "Changing the code or the discount here changes nothing in Whop: create the new code there and deactivate the old one.", "Cambiar el código o el descuento aquí no cambia nada en Whop: crea allí el código nuevo y desactiva el anterior.")}</p>
+          </details>
         )}
 
         {data.invitations.length > 0 && (
@@ -280,8 +493,9 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
                   <span><b>{i.note || t("Sans nom", "No name", "Sin nombre")}</b> · {roleName(i.role)} · {t("expire le", "expires on", "caduca el")} {day(L, i.expire_le)}</span>
                   <span className="adm-actions">
                     <button type="button" className="adm-btn" onClick={() => copy(inviteUrl(i.code, linkLang), i.code)}>{copied === i.code ? t("Copié", "Copied", "Copiado") : `${t("Copier le lien", "Copy link", "Copiar el enlace")} (${linkLang.toUpperCase()})`}</button>
-                    <button type="button" className="adm-btn danger" disabled={!!busy} onClick={() => act("annuler_invitation", { code: i.code }, `a-${i.code}`)}>{t("Annuler", "Cancel", "Cancelar")}</button>
+                    <button type="button" className="adm-btn danger" disabled={!!busy} onClick={() => cancelInvite(i.code)}>{t("Annuler", "Cancel", "Cancelar")}</button>
                   </span>
+                  {promosOn && i.role === "createur" && <PromoLine {...promoProps} target={{ inv: i.code }} name={i.note || ""} promo={i.promo} />}
                 </li>
               ))}
             </ul>
@@ -296,13 +510,39 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
               {r.uid === me ? (
                 <span className="adm-tag ok">{t("Toi", "You", "Tú")}</span>
               ) : (
-                <button type="button" className={`adm-btn danger ${confirm === `x-${r.uid}` ? "armed" : ""}`} disabled={!!busy} onClick={() => twoStep(`x-${r.uid}`, () => act("retirer_acces", { uid: r.uid }, `x-${r.uid}`))}>
+                <button type="button" className={`adm-btn danger ${confirm === `x-${r.uid}` ? "armed" : ""}`} disabled={!!busy} onClick={() => twoStep(`x-${r.uid}`, () => removeAccess(r.uid))}>
                   {confirm === `x-${r.uid}` ? t("Confirmer", "Confirm", "Confirmar") : t("Retirer l'accès", "Remove access", "Retirar el acceso")}
                 </button>
               )}
+              {promosOn && r.role === "createur" && <PromoLine {...promoProps} target={{ uid: r.uid }} name={r.note || r.nom || ""} promo={r.promo} />}
             </li>
           ))}
         </ul>
+
+        {promosOn && data.orphelins?.length > 0 && (
+          <>
+            <h3>{t("Codes promo sans créateur", "Promo codes without a creator", "Códigos promocionales sin creador")}</h3>
+            <p className="adm-help">{t("Ces codes ne sont plus reliés à un créateur (lien expiré, par exemple). Supprime-les ici, et désactive-les chez Whop s'ils y existent.", "These codes are no longer linked to a creator (an expired link, for example). Delete them here, and deactivate them in Whop if they exist there.", "Estos códigos ya no están vinculados a ningún creador (un enlace caducado, por ejemplo). Elimínalos aquí y desactívalos en Whop si existen allí.")}</p>
+            <ul className="adm-rows">
+              {data.orphelins.map((o) => {
+                const key = `po-${o.id}`;
+                return (
+                  <li key={o.id}>
+                    <span className="adm-promo-main">
+                      <code className="adm-code">{o.code}</code>
+                      <b>−{pctOf(o.pct / 100, L)}</b>
+                      {o.nom && <span>{o.nom}</span>}
+                      <span className={`adm-tag ${o.whop_ok ? "ok" : "wait"}`}>{o.whop_ok ? t("Créé chez Whop", "Created in Whop", "Creado en Whop") : t("À créer chez Whop", "To create in Whop", "Por crear en Whop")}</span>
+                    </span>
+                    <button type="button" className={`adm-btn danger ${confirm === key ? "armed" : ""}`} disabled={!!busy} onClick={() => twoStep(key, () => removePromo(o.inv_code ? { inv: o.inv_code } : { uid: o.uid }))}>
+                      {confirm === key ? t("Confirmer la suppression", "Confirm deletion", "Confirmar la eliminación") : t("Supprimer le code", "Delete code", "Eliminar el código")}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
       </section>
 
       {health && (
@@ -317,10 +557,11 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
                 : t("Vérification d'abonnement chez Whop : pas de réponse", "Subscription check with Whop: no response", "Comprobación de suscripción en Whop: sin respuesta")}
             </Check>
             <Check ok={health.db}>{t("Base de données (avis, analyses, accès) joignable", "Database (reviews, analyses, access) reachable", "Base de datos (opiniones, análisis, accesos) accesible")}</Check>
+            <Check ok={promosOn}>{t("Codes promo des créateurs activés dans la base de données", "Creator promo codes enabled in the database", "Códigos promocionales de los creadores activados en la base de datos")}</Check>
             <li className="na"><span aria-hidden>–</span>{t("IA", "AI", "IA")}{colon}{health.ai ?t("branchée", "connected", "conectada") : t("désactivée volontairement, jusqu'aux premiers revenus", "deliberately disabled until the first revenue", "desactivada a propósito hasta los primeros ingresos")}</li>
           </ul>
           <p className="adm-help">
-            {t("Clients, paiements et virements", "Customers, payments and payouts", "Clientes, pagos y transferencias")}{colon}<a className="adm-link-out" href="https://whop.com/dashboard/biz_pE2L6siofBGnW6/" target="_blank" rel="noopener noreferrer">{t("tableau de bord Whop", "Whop dashboard", "panel de Whop")} ↗</a>
+            {t("Clients, paiements et virements", "Customers, payments and payouts", "Clientes, pagos y transferencias")}{colon}<a className="adm-link-out" href={WHOP_DASH} target="_blank" rel="noopener noreferrer">{t("tableau de bord Whop", "Whop dashboard", "panel de Whop")} ↗</a>
           </p>
         </section>
       )}

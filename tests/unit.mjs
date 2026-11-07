@@ -2,6 +2,7 @@
 // Usage : node tests/unit.mjs  (lancé aussi par tests/smoke.mjs)
 import { pathToFileURL } from "node:url";
 import { chunkText, detectLang, localizeReviews, translateRaw } from "../lib/translate.js";
+import { CODE_RE, cleanCode, cleanPct, mergePromos, randomChars, suggestCode } from "../lib/promo.js";
 
 export async function unit() {
   let passed = 0, failed = 0;
@@ -72,6 +73,38 @@ export async function unit() {
   const slow = await localizeReviews([fr, es, fr, es, fr, es], "en", async (t, f, to) => { await new Promise((r) => setTimeout(r, 40)); return fake(t, f, to); }, { budgetMs: 50, parallel: 1 });
   eq("temps limité : les avis restants gardent leur version d'origine", slow.some((r) => r.translated) && slow.some((r) => !r.translated), true);
   eq("langue inconnue : liste inchangée", await localizeReviews([fr], "de", fake), [fr]);
+
+  // --- Codes promo des créateurs (lib/promo.js)
+  console.log("Codes promo des créateurs");
+  eq("code : accents, espaces et symboles retirés", cleanCode("@La Nuit NBA !"), "LANUITNBA");
+  eq("code : accents français", cleanCode("Élodie Ça-Va"), "ELODIECAVA");
+  eq("code : 24 caractères au plus", cleanCode("a".repeat(40)).length, 24);
+  eq("code : valeur vide", [cleanCode(null), cleanCode(undefined), cleanCode("")], ["", "", ""]);
+  eq("format de code : valides", ["TIM20", "NBA2026", "ABC", "A".repeat(24)].map((c) => CODE_RE.test(c)), [true, true, true, true]);
+  eq("format de code : refusés", ["AB", "TIM 20", "tim20", "TIM-20", "É20", "A".repeat(25), ""].map((c) => CODE_RE.test(c)), [false, false, false, false, false, false, false]);
+  eq("remise : entier de 1 à 90 accepté sous toutes ses formes", [1, 20, 90, "20", "20 %", "20,0", " 15 ", "20 %"].map(cleanPct), [1, 20, 90, 20, 20, 20, 15, 20]);
+  eq("remise : refusée hors de 1 à 90 ou non entière", [0, 91, -5, 12.5, "12,5", "", null, undefined, "abc", NaN, 100].map(cleanPct), [null, null, null, null, null, null, null, null, null, null, null]);
+  eq("code proposé : nom + remise", suggestCode("@lanuitnba", 20), "LANUITNBA20");
+  eq("code proposé : nom trop long raccourci (24 au plus)", suggestCode("a".repeat(30), 15), `${"A".repeat(22)}15`);
+  eq("code proposé : remise invalide, nom seul", suggestCode("Tipoff", "abc"), "TIPOFF");
+  eq("code proposé : nom trop court, rien sans hasard", suggestCode("Al", 20), "");
+  eq("code proposé : nom trop court, code tiré au hasard", suggestCode("Al", 20, () => "XXXX"), "BLXXXX20");
+  eq("code proposé : toujours un code valide", ["@lanuitnba", "Élodie", "a".repeat(40), "Al", "@@"].every((n) => CODE_RE.test(suggestCode(n, 20, randomChars))), true);
+  eq("hasard : 6 caractères sans 0, O, 1, I", /^[A-HJ-NP-Z2-9]{6}$/.test(randomChars(6)), true);
+  eq("hasard : deux tirages différents", randomChars(12) !== randomChars(12), true);
+  const roles = [{ uid: "u1", role: "createur" }, { uid: "u2", role: "admin" }];
+  const invitations = [{ code: "a".repeat(20), role: "createur" }];
+  const promos = [
+    { id: "p1", code: "ONE20", pct: 20, uid: "u1", inv_code: "b".repeat(20) },
+    { id: "p2", code: "TWO15", pct: 15, uid: null, inv_code: "a".repeat(20) },
+    { id: "p3", code: "OLD10", pct: 10, uid: null, inv_code: "c".repeat(20) },
+  ];
+  const merged = mergePromos({ roles, invitations }, promos);
+  eq("promos : le compte retrouve son code, l'admin n'en a pas", merged.roles.map((r) => r.promo?.code ?? null), ["ONE20", null]);
+  eq("promos : l'invitation retrouve son code", merged.invitations[0].promo?.code, "TWO15");
+  eq("promos : un code sans créateur est isolé", merged.orphelins.map((p) => p.code), ["OLD10"]);
+  eq("promos : sans codes, tout reste affichable", [mergePromos({ roles, invitations }, []).roles.map((r) => r.promo), mergePromos({ roles, invitations }, []).orphelins], [[null, null], []]);
+  eq("promos : sans arguments", mergePromos(), { roles: [], invitations: [], orphelins: [] });
 
   return { passed, failed };
 }
