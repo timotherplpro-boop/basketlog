@@ -27,7 +27,7 @@ export default async function EuroLeaguePage() {
   const L = await getL();
   const { list, cur, season } = await elUpcoming(10);
   recordPronosSoon("EL", list.map((x) => x.a));
-  const games = list.map(({ g, a }) => ({ id: g.id, date: g.date, state: a.game.state, live: g.live, home: g.home, away: g.away, pHome: a.pHome }));
+  const games = list.map(({ g, a }) => ({ id: g.id, date: g.date, state: a.game.state, live: g.live, home: g.home, away: g.away, pHome: a.pHome, confidence: a.confidence }));
   const table = elStandings(cur);
   const year = Number(season.slice(1));
 

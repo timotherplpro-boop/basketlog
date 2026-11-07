@@ -2,6 +2,8 @@
 """Vidéos TikTok / Reels Basketlog à partir des matchs NBA du jour.
 
 Usage : python3 video/make.py --day jour.json --out sortie/ [--formats choc,favori,serre,programme] [--check]
+Quand le plus gros favori de la nuit est en confiance « Très élevée » (88 % et plus), la vidéo « favori » devient « sur » :
+elle passe en premier et montre le bilan réel de ce niveau (champ sureRecord du fichier du jour).
 Le fichier du jour vient de https://basketlog-app.com/api/videos?d=AAAAMMJJ (voir README.md).
 """
 import argparse
@@ -74,7 +76,7 @@ def parse(g):
                 b2b.add(name)
     out = {"raw": g, "id": g["id"], "d": g.get("d"), "time": (g.get("tag") or "").split("·")[-1].strip(),
            "venue": (g.get("venue") or "").split("·")[0].strip(), "conf": g.get("conf") or "", "pA": pA, "pH": pH,
-           "projA": projA, "projH": projH}
+           "projA": projA, "projH": projH, "sure": bool(g.get("sure"))}
     for side, short in (("a", shortA), ("h", shortH)):
         tm = g["away" if side == "a" else "home"]
         absent = []
@@ -237,6 +239,38 @@ def fmt_favori(g, day):
     return v, f"Le plus gros favori de la nuit en NBA : {les(F['short'])} à {pf} % contre {les(D['short'])}. Favori solide ou match piège ?"
 
 
+def fmt_sur(g, day, rec=None):
+    """Confiance très élevée (favori à 88 % et plus) : le pronostic le plus sûr de la nuit, puis le bilan réel de ce niveau."""
+    v = Video(); fs = fav_side(g); F = g[fs]; D = g["h" if fs == "a" else "a"]; pf = max(g["pA"], g["pH"])
+    s = {"type": "hook", "kind": "title", "chip": "NBA · Cette nuit", "b1": "Confiance", "b2": "très élevée", "sub": "selon le modèle <em>Basketlog</em>"}
+    rel, _ = v.add(s, ["Le pronostic le plus sûr de la nuit en NBA ?", f"Confiance très élevée pour le modèle {BRAND}."], lead=0.1, tail=0.25)
+    s["subAt"] = rel[1] - 0.05
+    c1 = (0, f"<em>{F['abbr']}</em> vs {D['abbr']}", f"{g['time']} · {g['venue']}", f"{spoken(F['abbr'])} contre {spoken(D['abbr'])}, cette nuit.")
+    pool = facts(g, fs) + [x for x in facts(g, "h" if fs == "a" else "a") if x[0] >= 6]
+    c2 = sorted(pool, key=lambda x: -x[0])[0]
+    s = {"type": "phone", "page": "match"}
+    rel, durs = v.add(s, [c1[3], c2[3]], lead=0.3, tail=0.25, min_dur=4.2)
+    s["caps"] = hero_caps(c1, c2, rel, durs, s["t1"] - s["t0"], "home" if fs == "h" else "away", "home" if c2 in facts(g, "h") else "away")
+    s = {"type": "verdict", "chip": "Le favori du modèle", "team": F["short"], "pct": pf,
+         "bar": {"a": {"abbr": g["a"]["abbr"], "p": g["pA"]}, "h": {"abbr": g["h"]["abbr"], "p": g["pH"]}},
+         "score": {"la": F["abbr"], "a": g["projH"] if fs == "h" else g["projA"], "b": g["projA"] if fs == "h" else g["projH"], "lb": D["abbr"]}, "conf": "très élevée"}
+    rel, durs = v.add(s, [f"Le modèle donne {spoken(F['abbr'])} {agree(F['abbr'], 'gagnant', 'gagnants')} à {fr_num(pf)} pour cent.",
+                          f"Score projeté : {fr_num(s['score']['a'])}, {fr_num(s['score']['b'])}."], lead=0.25, tail=0.3)
+    s.update(chipAt=0.1, teamAt=rel[0] + 0.25, countA=rel[0] + durs[0] * 0.45, countB=rel[0] + durs[0] * 0.92, scoreAt=rel[1] - 0.05, confAt=rel[1] + durs[1] + 0.1)
+    tail = ""
+    if rec and rec.get("n", 0) >= 20:
+        # Bilan réel de ce niveau (le même que la carte « Confiance très élevée » de basketlog-app.com/app/bilan)
+        ok, n = int(rec["ok"]), int(rec["n"]); rate = round(100 * ok / n)
+        s = {"type": "twist", "chip": "Le bilan du modèle", "line1": f"{ok} sur {n}", "pct": rate,
+             "line2": f"de pronostics justes en confiance très élevée<br>NBA · bilan recalculé depuis {rec.get('since') or 'la saison dernière'}"}
+        rel, durs = v.add(s, ["Et à ce niveau de confiance ?", f"Le modèle a vu juste {fr_num(ok)} fois sur {fr_num(n)} depuis la saison dernière."], lead=0.25, tail=0.45)
+        s.update(chipAt=max(0.1, rel[0] - 0.1), bigAt=max(0.2, rel[1] - 0.95))
+        tail = f" À ce niveau de confiance, le modèle a vu juste {ok} fois sur {n} depuis la saison dernière ({rate} %)."
+    cta(v, "Toute l'analyse<br>est sur <em>Basketlog</em>", "Favori solide ou match piège ?", "Dis-le en commentaire",
+        "Favori solide ou match piège ? Dis-le en commentaire.", f"Toute l'analyse est sur {BRAND}, va voir.")
+    return v, f"Confiance très élevée cette nuit en NBA : le modèle Basketlog donne {les(F['short'])} à {pf} % contre {les(D['short'])}.{tail} Favori solide ou match piège ?"
+
+
 def fmt_serre(g, day):
     v = Video(); A, H = g["a"], g["h"]
     s = {"type": "hook", "kind": "title", "chip": "NBA · Cette nuit", "b1": "Le match", "b2": "le plus serré", "sub": "selon le modèle <em>Basketlog</em>"}
@@ -270,12 +304,16 @@ def fmt_programme(games, day):
     F = fav[fav_side(fav)]
     step = 0.16; cards_at = 0.45; lead = cards_at + step * len(cards) + 0.35
     s = {"type": "program", "chip": "Heures de Paris", "title": "Les favoris", "cards": cards, "cardsAt": cards_at, "cardStep": step}
-    rel, durs = v.add(s, [f"Le plus gros favori : {spoken(F['abbr'])}, à {fr_num(max(fav['pA'], fav['pH']))} pour cent.",
+    first = "En confiance très élevée" if fav["sure"] else "Le plus gros favori"
+    rel, durs = v.add(s, [f"{first} : {spoken(F['abbr'])}, à {fr_num(max(fav['pA'], fav['pH']))} pour cent.",
                           f"Le plus serré : {spoken(close['a']['abbr'])} contre {spoken(close['h']['abbr'])}."], lead=lead, tail=0.5)
-    s["marks"] = [{"id": fav["id"], "at": rel[0], "label": "Plus gros favori"}, {"id": close["id"], "at": rel[1], "label": "Le plus serré"}]
+    shown = {c["id"] for c in cards}
+    sure = [x["id"] for x in games if x["sure"] and x["id"] in shown] if fav["sure"] else []
+    s["marks"] = [{"id": i, "at": rel[0], "label": "Confiance très élevée"} for i in sure] or [{"id": fav["id"], "at": rel[0], "label": "Plus gros favori"}]
+    s["marks"].append({"id": close["id"], "at": rel[1], "label": "Le plus serré"})
     cta(v, "Toutes les analyses<br>sont sur <em>Basketlog</em>", "Ton pronostic pour cette nuit ?", "Dis-le en commentaire",
         "Et toi, ton pronostic pour cette nuit ?", f"Toutes les analyses sont sur {BRAND}, va voir.")
-    return v, f"{n} matchs NBA cette nuit : les favoris du modèle Basketlog. Le plus gros favori : {les(F['short'])} ({max(fav['pA'], fav['pH'])} %). Ton pronostic ?"
+    return v, f"{n} matchs NBA cette nuit : les favoris du modèle Basketlog. {first} : {les(F['short'])} ({max(fav['pA'], fav['pH'])} %). Ton pronostic ?"
 
 
 def cues_for(segs):
@@ -465,23 +503,28 @@ def main():
     excl = set(filter(None, a.exclude.split(",")))
     pool = [x for x in games if x["id"] not in excl and (len(games) < 3 or x["id"] not in (fav["id"], close["id"]))] or games
     choc = max(pool, key=interest)
+    rec = day.get("sureRecord")  # bilan réel du niveau « Très élevée » (NBA), calculé par le site
     plan = []
     for i, f in enumerate([f for f in a.formats.split(",") if f]):
         if f == "choc":
             plan.append((f, choc))
-        elif f == "favori" and len(games) >= 2:
-            plan.append((f, fav))
+        elif f in ("favori", "sur") and len(games) >= 2 and not any(x[0] in ("favori", "sur") for x in plan):
+            if fav["sure"]:
+                plan.append(("sur", fav))
+            elif f == "favori":
+                plan.append((f, fav))
         elif f == "serre" and len(games) >= 3 and close["id"] != fav["id"]:
             plan.append((f, close))
         elif f == "programme" and len(games) >= 3:
             plan.append((f, None))
+    plan.sort(key=lambda x: x[0] != "sur")  # confiance très élevée : la vidéo à poster en premier
     summary = []
     for k, (f, g) in enumerate(plan, 1):
         if f == "programme":
             v, caption = fmt_programme(games, day)
             tag = f"{k}-programme"
         else:
-            v, caption = {"choc": fmt_choc, "favori": fmt_favori, "serre": fmt_serre}[f](g, day)
+            v, caption = fmt_sur(g, day, rec) if f == "sur" else {"choc": fmt_choc, "favori": fmt_favori, "serre": fmt_serre}[f](g, day)
             tag = f"{k}-{f}-{g['a']['abbr']}-{g['h']['abbr']}"
         print(f"{tag} : {v.t:.1f} s", flush=True)
         if a.check:

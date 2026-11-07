@@ -12,6 +12,8 @@ import StickyStandings from "../components/StickyStandings";
 import RevealObserver from "../components/RevealObserver";
 import Faq from "../components/Faq";
 import ReviewCards from "../components/ReviewCards";
+import SureSection from "../components/SureSection";
+import { surePicks, sureRecordSoon } from "../lib/sure";
 import { getReviews } from "../lib/reviews";
 import { memberCount } from "../lib/members";
 import { MEMBERS_MIN, plusFloor, memberStep } from "../lib/proof";
@@ -95,8 +97,10 @@ function BallButton({ href, children }) {
 export default async function Home() {
   const L = await getL();
   const cur = await getCurrency(L); // prix en euros dans la zone euro, en dollars ailleurs
-  const [up, acc, std, reviews, elGames, stats, members] = await Promise.all([upcomingAnalyses(7), recentAccuracy(7), conferenceStandings(), getReviews(30), getELGames(), pickStats(), memberCount()]);
+  const [up, acc, std, reviews, elGames, stats, members, sureRec] = await Promise.all([upcomingAnalyses(7), recentAccuracy(7), conferenceStandings(), getReviews(30), getELGames(), pickStats(), memberCount(), sureRecordSoon()]);
   const pre = up.filter((g) => !g.live);
+  // Confiance très élevée (favori à 88 % et plus) : NBA et EuroLeague des 7 prochains jours, mis en avant sous le hero.
+  const sure = await surePicks(up, { el: true });
 
   // Téléphone : les Lakers (ou l'équipe qui joue le plus cette semaine)
   const count = {};
@@ -113,8 +117,17 @@ export default async function Home() {
   const byEdge = [...pre].sort((a, b) => Math.abs(b.pHome - 0.5) - Math.abs(a.pHome - 0.5));
   const notifs = byEdge.slice(0, 2);
 
-  // Démo géante : le match le plus déséquilibré
-  const big = byEdge[0];
+  // Démo géante : le match le plus déséquilibré, sauf s'il est déjà mis en avant dans « Confiance très élevée ».
+  const sureKeys = new Set(sure.map((p) => p.key));
+  const big = byEdge.find((g) => !sureKeys.has(`nba-${g.id}`)) || byEdge[0];
+  // Aucun match à ce niveau : on montre le favori le plus net, avec sa vraie confiance.
+  const top = byEdge[0];
+  const sureFallback = !sure.length && top ? {
+    favShort: (top.pHome >= 0.5 ? top.home : top.away).short,
+    pf: Math.max(top.pHome, 1 - top.pHome),
+    conf: top.confidence,
+    href: `/app/match/${top.id}?d=${top.d}`,
+  } : null;
   const nameFor = (t) => t.abbr.toUpperCase();
 
   const today = nbaToday();
@@ -266,6 +279,9 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* ================= CONFIANCE TRÈS ÉLEVÉE ================= */}
+      <SureSection picks={sure} record={sureRec} fallback={sureFallback} today={today} L={L} />
 
       {/* ================= DÉMO SCORE ================= */}
       {big && (

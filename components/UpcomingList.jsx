@@ -5,7 +5,7 @@ const day = (iso, L) => fmtDate(L, iso, { weekday: "long", day: "numeric", month
 const parts = (iso, L) => [fmtDate(L, iso, { day: "2-digit", month: "2-digit" }), fmtTime(L, iso)];
 
 // Liste des matchs façon "Prochains matchs", regroupés par jour (heure de Paris).
-export default function UpcomingList({ games, title, grouped = true, href = (g) => `/app/match/${g.id}?d=${g.d}`, L = mk("fr") }) {
+export default function UpcomingList({ games, title, grouped = true, href = (g) => `/app/match/${g.id}?d=${g.d}`, L = mk("fr"), className = "", children = null }) {
   if (title === undefined) title = L.t("Prochains matchs", "Upcoming games", "Próximos partidos");
   if (!games.length) return <div className="empty">{L.t("Aucun match au programme.", "No games scheduled.", "No hay partidos programados.")}</div>;
   const groups = [];
@@ -17,7 +17,7 @@ export default function UpcomingList({ games, title, grouped = true, href = (g) 
   }
   let n = 0;
   return (
-    <div className="panel up-list">
+    <div className={`panel up-list${className ? ` ${className}` : ""}`}>
       {title && <h3>{title}</h3>}
       {groups.map((gr) => (
         <div key={gr.k || "all"}>
@@ -26,8 +26,9 @@ export default function UpcomingList({ games, title, grouped = true, href = (g) 
             const [d, h] = parts(g.date, L);
             const favHome = g.pHome >= 0.5;
             const done = g.state === "post" && g.home.score != null;
+            const sure = !done && !g.postponed && g.confidence === "Très élevée"; // mis en avant (orange)
             return (
-              <Link key={g.id} href={L.href(href(g))} className="up-row" style={{ animationDelay: `${Math.min(n++, 12) * 50}ms` }}>
+              <Link key={g.id} href={L.href(href(g))} className={`up-row${sure ? " sure" : ""}`} title={sure ? L.t("Confiance très élevée : favori à 88 % et plus", "Very high confidence: favorite at 88%+", "Confianza muy alta: favorito al 88 % o más") : undefined} style={{ animationDelay: `${Math.min(n++, 12) * 50}ms` }}>
                 <div className="when">{d}<b>{g.live ? <span className="live">LIVE</span> : g.postponed === "canceled" ? L.t("ANNULÉ", "CANCELED", "CANCELADO") : g.postponed ? L.t("REPORTÉ", "POSTPONED", "APLAZADO") : done ? L.t("FIN", "FINAL", "FINAL") : h}</b></div>
                 <div className="m">
                   <span className="t">
@@ -48,6 +49,7 @@ export default function UpcomingList({ games, title, grouped = true, href = (g) 
           })}
         </div>
       ))}
+      {children}
     </div>
   );
 }

@@ -71,7 +71,7 @@ export default async function MatchsPage({ searchParams }) {
   const { analyses } = await analyzeDay(date);
   recordPronosSoon("NBA", analyses); // pronostic d'avant-match enregistré pour le bilan réel
   const games = analyses
-    .map((a) => ({ id: a.game.id, d: date, date: a.game.date, state: a.game.state, postponed: a.game.postponed || null, live: a.game.state === "in", home: a.game.home, away: a.game.away, pHome: a.pHome }))
+    .map((a) => ({ id: a.game.id, d: date, date: a.game.date, state: a.game.state, postponed: a.game.postponed || null, live: a.game.state === "in", home: a.game.home, away: a.game.away, pHome: a.pHome, confidence: a.confidence }))
     .sort((x, y) => new Date(x.date) - new Date(y.date));
 
   return (

@@ -98,7 +98,7 @@ export default async function AnalyseBasketPage() {
   const nba = (nbaAll || []).slice(0, 12);
   const elGames = (el.list || [])
     .slice(0, 10)
-    .map(({ g, a }) => ({ id: g.id, date: g.date, state: a.game.state, live: g.live, home: g.home, away: g.away, pHome: a.pHome }));
+    .map(({ g, a }) => ({ id: g.id, date: g.date, state: a.game.state, live: g.live, home: g.home, away: g.away, pHome: a.pHome, confidence: a.confidence }));
   const s = summarize(picks || []);
   const faq = faqOf(L);
   const url = `${SITE}${L.href(PATH)}`;

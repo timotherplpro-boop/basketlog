@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { analyzeDay, nbaRecentForm } from "../../../lib/data";
+import { sureRecord } from "../../../lib/history";
 import { nbaToday, shiftDate, isValidDate } from "../../../lib/espn";
 import { dayLong } from "../../../lib/seo";
 import { mk } from "../../../lib/i18n";
@@ -13,6 +14,8 @@ export const maxDuration = 30;
 // Données des vidéos TikTok / Reels du jour (dossier video/ du dépôt) : uniquement ce que montre la partie gratuite
 // de chaque fiche match (probabilités, score projeté, forme, résumé, scénario n° 1, confiance), plus les absents.
 // Les mêmes fonctions que la fiche match produisent les textes, pour que la vidéo montre exactement le site.
+// « sure » : match en confiance « Très élevée » (favori à 88 % et plus) ; « sureRecord » : bilan réel de ce niveau en NBA
+// (saison passée + saison en cours, comme la carte « Confiance très élevée » de /app/bilan), montré dans la vidéo « sur ».
 const pct = (p) => `${Math.round(p * 100)} %`;
 const vd = (l) => `${l.filter((x) => x.res === "W").length}-${l.filter((x) => x.res !== "W").length}`;
 const dec1 = (x) => x.toFixed(1).replace(".", ",");
@@ -22,6 +25,8 @@ export async function GET(req) {
   const today = nbaToday();
   const d = isValidDate(sp.get("d")) ? sp.get("d") : today;
   const L = mk("fr");
+  // Bilan du niveau « Très élevée » : en cache la plupart du temps ; s'il tarde, la vidéo se fait sans lui.
+  const recP = Promise.race([sureRecord().catch(() => null), new Promise((r) => setTimeout(() => r(null), 8000))]);
   let day;
   try {
     day = await analyzeDay(d);
@@ -55,6 +60,7 @@ export async function GET(req) {
       resume: briefSummary(a, "NBA", L),
       scenario1: scenarioOne(a, "NBA", L),
       conf: confText(conf, L), confW: conf === "Très élevée" ? "96%" : conf === "Élevée" ? "88%" : conf === "Moyenne" ? "62%" : "34%",
+      sure: conf === "Très élevée",
       injuries: [inj(aw, g.away), inj(h, g.home)],
     };
   });
@@ -68,8 +74,10 @@ export async function GET(req) {
     };
   });
   const label = d === today ? "de ce soir" : d === shiftDate(today, 1) ? "de demain" : `du ${dayLong(`${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6)}T12:00:00Z`, L)}`;
+  const rec = (await recP)?.nba;
+  const sureRec = rec ? { n: rec.n, ok: rec.ok, since: `${rec.since - 1}-${String(rec.since).slice(2)}` } : null;
   return NextResponse.json(
-    { d, generatedAt: new Date().toISOString(), head: `Matchs NBA ${label}`, headSub: `${list.length} matchs NBA · heures de Paris`, rows, games },
+    { d, generatedAt: new Date().toISOString(), head: `Matchs NBA ${label}`, headSub: `${list.length} matchs NBA · heures de Paris`, rows, games, sureRecord: sureRec },
     { headers: { "Cache-Control": "no-store" } }
   );
 }

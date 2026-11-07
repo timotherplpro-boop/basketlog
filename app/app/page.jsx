@@ -1,4 +1,7 @@
+import Link from "next/link";
 import { upcomingAnalyses, resolveDuel } from "../../lib/data";
+import { sureRecordSoon, RECORD_MIN, VERY_HIGH } from "../../lib/sure";
+import { pctOf } from "../../lib/i18n";
 import { TEAMS, teamById } from "../../lib/teams";
 import DuelForm from "../../components/DuelForm";
 import UpcomingList from "../../components/UpcomingList";
@@ -37,6 +40,10 @@ export default async function AnalysePage({ searchParams }) {
     .filter((g) => !home || g.home.id === home.id || g.away.id === home.id)
     .slice(0, 14)
     .map(({ a, ...g }) => ({ ...g, state: g.live ? "in" : "pre" }));
+  // Confiance très élevée (favori à 88 % et plus) des 7 prochains jours, rappelée en tête avec le bilan réel de ce niveau.
+  const sure = home ? [] : up.filter((g) => !g.live && g.confidence === VERY_HIGH).map(({ a, ...g }) => ({ ...g, state: "pre" }));
+  const rec = sure.length ? (await sureRecordSoon())?.nba : null;
+  const seasonLabel = (y) => `${y - 1}-${String(y).slice(2)}`;
 
   return (
     <main className="app-page">
@@ -57,7 +64,22 @@ export default async function AnalysePage({ searchParams }) {
           )}</p>
         </div>
       ) : (
-        <UpcomingList games={list} L={L} title={home ? `${L.t("Prochains matchs", "Upcoming games", "Próximos partidos")} · ${home.short}` : L.t("Prochains matchs", "Upcoming games", "Próximos partidos")} />
+        <>
+          {sure.length > 0 && (
+            <UpcomingList games={sure} L={L} className="sure-panel" title={<><span className="dot" />{L.t("Confiance très élevée", "Very high confidence", "Confianza muy alta")}</>}>
+              <p className="su-note">
+                {rec && rec.n >= RECORD_MIN
+                  ? L.t(
+                    `Favoris à 88 % et plus. À ce niveau : ${rec.ok} pronostics justes sur ${rec.n} en NBA depuis la saison ${seasonLabel(rec.since)} (${pctOf(rec.ok / rec.n, L)}). `,
+                    `Favorites at 88%+. At this level: ${rec.ok} of ${rec.n} NBA picks right since the ${seasonLabel(rec.since)} season (${pctOf(rec.ok / rec.n, L)}). `,
+                    `Favoritos al 88 % o más. En este nivel: ${rec.ok} pronósticos acertados de ${rec.n} en la NBA desde la temporada ${seasonLabel(rec.since)} (${pctOf(rec.ok / rec.n, L)}). `)
+                  : L.t("Favoris à 88 % et plus. ", "Favorites at 88%+. ", "Favoritos al 88 % o más. ")}
+                <Link href={L.href("/app/bilan")}>{L.t("Voir le bilan", "See the track record", "Ver el balance")}</Link>
+              </p>
+            </UpcomingList>
+          )}
+          <UpcomingList games={list} L={L} title={home ? `${L.t("Prochains matchs", "Upcoming games", "Próximos partidos")} · ${home.short}` : L.t("Prochains matchs", "Upcoming games", "Próximos partidos")} />
+        </>
       )}
     </main>
   );
