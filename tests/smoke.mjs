@@ -66,6 +66,10 @@ async function protectedRoutes() {
     const a2 = await get("/app/admin", { cookie: session("lifetime") });
     a2.status === 404 ? ok("espace admin caché aux abonnés") : ko("espace admin caché aux abonnés", `HTTP ${a2.status}`);
   }
+  const stats = await get("/app/admin/stats");
+  stats.status === 404 ? ok("statistiques admin cachées aux visiteurs") : ko("statistiques admin cachées aux visiteurs", `HTTP ${stats.status}`);
+  const beacon = await get("/api/stats", { method: "POST", body: { e: "visite", s: "direct", l: "fr" } });
+  beacon.status === 204 ? ok("compteur du parcours : réponse vide") : ko("compteur du parcours : réponse vide", `HTTP ${beacon.status}`);
   const api = await get("/api/admin", { method: "POST", body: { action: "avis_publier", id: "x" } });
   [401, 403, 404].includes(api.status) ? ok("API admin refusée sans session") : ko("API admin refusée sans session", `HTTP ${api.status}`);
   const avis = await get("/api/avis", { method: "POST", body: { prenom: "Test", note: 5, texte: "Test automatique, ne pas publier.", elapsed: 10000 } });
