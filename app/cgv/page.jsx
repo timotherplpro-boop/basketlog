@@ -4,6 +4,10 @@ import { LEGAL } from "../../lib/legal";
 import { pageMeta } from "../../lib/seo";
 import { getL } from "../../lib/lang-server";
 import { aiReady } from "../../lib/pro";
+import { price } from "../../lib/pricing";
+
+// Langue des montants (format des nombres et des symboles) : prix tirés de lib/pricing.js, comme sur la page des formules.
+const FR = {}, EN = { en: true }, ES = { es: true };
 
 export async function generateMetadata() {
   const L = await getL();
@@ -15,9 +19,9 @@ export async function generateMetadata() {
 
 // Contenu des formules (comme Visifoot). Les questions à l'IA ne figurent que si l'IA est configurée.
 const OFFRES = (ai) => [
-  ["Starter", "10 € par mois (11,99 $ hors zone euro)", "1 analyse réduite par jour : probabilités exactes, score projeté et stats clés du match", "Abonnement mensuel, renouvelé automatiquement chaque mois"],
-  ["Pro", "19 € par mois (21,99 $ hors zone euro)", `Analyses complètes illimitées, actualités en temps réel${ai ? ", 1 question personnelle par jour à l'IA" : ""}`, "Abonnement mensuel, renouvelé automatiquement chaque mois"],
-  ["Lifetime", "99 € une seule fois (109 $ hors zone euro)", `Analyses complètes illimitées, comme Pro${ai ? ", questions personnelles à l'IA illimitées dans la limite d'un usage raisonnable (50 par jour)" : ""}`, "Paiement unique, sans renouvellement, pour toute la durée d'exploitation du service"],
+  ["Starter", `${price("starter", "EUR", FR)} par mois (${price("starter", "USD", FR)} hors zone euro)`, "1 analyse réduite par jour : probabilités exactes, score projeté et stats clés du match", "Abonnement mensuel, renouvelé automatiquement chaque mois"],
+  ["Pro", `${price("pro", "EUR", FR)} par mois (${price("pro", "USD", FR)} hors zone euro)`, `Analyses complètes illimitées, actualités en temps réel${ai ? ", 1 question personnelle par jour à l'IA" : ""}`, "Abonnement mensuel, renouvelé automatiquement chaque mois"],
+  ["Lifetime", `${price("lifetime", "EUR", FR)} une seule fois (${price("lifetime", "USD", FR)} hors zone euro)`, `Analyses complètes illimitées, comme Pro${ai ? ", questions personnelles à l'IA illimitées dans la limite d'un usage raisonnable (50 par jour)" : ""}`, "Paiement unique, sans renouvellement, pour toute la durée d'exploitation du service"],
 ];
 
 function CGVFr() {
@@ -103,9 +107,9 @@ function CGVFr() {
 }
 
 const OFFERS_EN = (ai) => [
-  ["Starter", "€10 per month ($11.99 outside the euro area)", "1 reduced analysis per day: exact probabilities, projected score and key stats for the game", "Monthly subscription, renewed automatically every month"],
-  ["Pro", "€19 per month ($21.99 outside the euro area)", `Unlimited full analyses, real-time news${ai ? ", 1 personal question a day to the AI" : ""}`, "Monthly subscription, renewed automatically every month"],
-  ["Lifetime", "€99 one-time ($109 outside the euro area)", `Unlimited full analyses, same as Pro${ai ? ", unlimited personal questions to the AI within fair use (50 per day)" : ""}`, "One-time payment, no renewal, for as long as the service is operated"],
+  ["Starter", `${price("starter", "EUR", EN)} per month (${price("starter", "USD", EN)} outside the euro area)`, "1 reduced analysis per day: exact probabilities, projected score and key stats for the game", "Monthly subscription, renewed automatically every month"],
+  ["Pro", `${price("pro", "EUR", EN)} per month (${price("pro", "USD", EN)} outside the euro area)`, `Unlimited full analyses, real-time news${ai ? ", 1 personal question a day to the AI" : ""}`, "Monthly subscription, renewed automatically every month"],
+  ["Lifetime", `${price("lifetime", "EUR", EN)} one-time (${price("lifetime", "USD", EN)} outside the euro area)`, `Unlimited full analyses, same as Pro${ai ? ", unlimited personal questions to the AI within fair use (50 per day)" : ""}`, "One-time payment, no renewal, for as long as the service is operated"],
 ];
 
 function CGVEn({ L }) {
@@ -192,9 +196,9 @@ function CGVEn({ L }) {
 }
 
 const OFFERS_ES = (ai) => [
-  ["Starter", "10 € al mes (11,99 $ fuera de la zona euro)", "1 análisis reducido al día: probabilidades exactas, marcador proyectado y estadísticas clave del partido", "Suscripción mensual, renovada automáticamente cada mes"],
-  ["Pro", "19 € al mes (21,99 $ fuera de la zona euro)", `Análisis completos ilimitados, noticias en tiempo real${ai ? ", 1 pregunta personal al día a la IA" : ""}`, "Suscripción mensual, renovada automáticamente cada mes"],
-  ["Lifetime", "99 € en un solo pago (109 $ fuera de la zona euro)", `Análisis completos ilimitados, como Pro${ai ? ", preguntas personales a la IA ilimitadas dentro de un uso razonable (50 al día)" : ""}`, "Pago único, sin renovación, mientras se preste el servicio"],
+  ["Starter", `${price("starter", "EUR", ES)} al mes (${price("starter", "USD", ES)} fuera de la zona euro)`, "1 análisis reducido al día: probabilidades exactas, marcador proyectado y estadísticas clave del partido", "Suscripción mensual, renovada automáticamente cada mes"],
+  ["Pro", `${price("pro", "EUR", ES)} al mes (${price("pro", "USD", ES)} fuera de la zona euro)`, `Análisis completos ilimitados, noticias en tiempo real${ai ? ", 1 pregunta personal al día a la IA" : ""}`, "Suscripción mensual, renovada automáticamente cada mes"],
+  ["Lifetime", `${price("lifetime", "EUR", ES)} en un solo pago (${price("lifetime", "USD", ES)} fuera de la zona euro)`, `Análisis completos ilimitados, como Pro${ai ? ", preguntas personales a la IA ilimitadas dentro de un uso razonable (50 al día)" : ""}`, "Pago único, sin renovación, mientras se preste el servicio"],
 ];
 
 function CGVEs({ L }) {

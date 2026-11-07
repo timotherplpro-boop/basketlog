@@ -10,10 +10,10 @@ export async function generateMetadata() {
   const L = await getL();
   return pageMeta({
     // Résultats de recherche : euros pour les pages française et espagnole, dollars pour la page anglaise.
-    title: L.t("Basketlog Pro : analyses NBA dès 10 €/mois", "Basketlog Pro: NBA analyses from $11.99/month", "Basketlog Pro: análisis NBA desde 10 €/mes"),
+    title: L.t(`Basketlog Pro : analyses NBA dès ${price("starter", "EUR", L)}/mois`, `Basketlog Pro: NBA analyses from ${price("starter", "USD", L)}/month`, `Basketlog Pro: análisis NBA desde ${price("starter", "EUR", L)}/mes`),
     description: L.t(
-      "Starter 10 €/mois, Pro 19 €/mois ou Lifetime 99 € une seule fois : débloque les analyses des matchs NBA et EuroLeague. Paiement sécurisé par Whop.",
-      "Starter $11.99/month, Pro $21.99/month or Lifetime $109 one-time: unlock NBA and EuroLeague game analyses. Secure payment by Whop.", "Starter 10 €/mes, Pro 19 €/mes o Lifetime 99 € en un solo pago: desbloquea los análisis de los partidos de la NBA y la Euroliga. Pago seguro con Whop."
+      `Starter ${price("starter", "EUR", L)}/mois, Pro ${price("pro", "EUR", L)}/mois ou Lifetime ${price("lifetime", "EUR", L)} une seule fois : débloque les analyses des matchs NBA et EuroLeague. Paiement sécurisé par Whop.`,
+      `Starter ${price("starter", "USD", L)}/month, Pro ${price("pro", "USD", L)}/month or Lifetime ${price("lifetime", "USD", L)} one-time: unlock NBA and EuroLeague game analyses. Secure payment by Whop.`, `Starter ${price("starter", "EUR", L)}/mes, Pro ${price("pro", "EUR", L)}/mes o Lifetime ${price("lifetime", "EUR", L)} en un solo pago: desbloquea los análisis de los partidos de la NBA y la Euroliga. Pago seguro con Whop.`
     ),
     path: "/pro",
     L,

@@ -1,5 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
+import { price } from "../lib/pricing";
+
+const FR = {}; // montants au format français (lib/pricing.js)
 
 const DAY = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", day: "numeric", month: "long", year: "numeric" });
 const STAMP = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
@@ -16,9 +19,9 @@ async function copyText(text) {
 const FORMULES = [
   { id: null, name: "Visiteur", price: "Gratuit, sans compte", lines: ["Probabilités de victoire et chiffres clés de chaque match", "Aperçu de chaque analyse : forme récente, résumé rapide, scénario n°1, confiance du modèle", "Classements, fiches équipes et bilan du modèle"] },
   { id: "compte", name: "Compte gratuit", price: "0 €", lines: ["Tout ce que voit un visiteur", "Aucune analyse complète (0 par jour), comme Visifoot", "Compte Whop : e-mail, Google ou Apple"] },
-  { id: "starter", name: "Starter", price: "10 € par mois · 11,99 $ hors zone euro", lines: ["1 analyse par jour", "Analyse réduite : probabilités exactes et stats clés", "Sans engagement, résiliable depuis Whop"] },
-  { id: "pro", name: "Pro", price: "19 € par mois · 21,99 $ hors zone euro", lines: ["Analyses complètes illimitées", "Scénarios probables détaillés et analyse statistique", "Actualités en temps réel", "Sans engagement, résiliable depuis Whop"] },
-  { id: "lifetime", name: "Lifetime", price: "99 € une seule fois · 109 $ hors zone euro", lines: ["Tout ce qu'offre Pro, à vie", "Plus aucun paiement mensuel", "Priorité sur les nouveautés"] },
+  { id: "starter", name: "Starter", price: `${price("starter", "EUR", FR)} par mois · ${price("starter", "USD", FR)} hors zone euro`, lines: ["1 analyse par jour", "Analyse réduite : probabilités exactes et stats clés", "Sans engagement, résiliable depuis Whop"] },
+  { id: "pro", name: "Pro", price: `${price("pro", "EUR", FR)} par mois · ${price("pro", "USD", FR)} hors zone euro`, lines: ["Analyses complètes illimitées", "Scénarios probables détaillés et analyse statistique", "Actualités en temps réel", "Sans engagement, résiliable depuis Whop"] },
+  { id: "lifetime", name: "Lifetime", price: `${price("lifetime", "EUR", FR)} une seule fois · ${price("lifetime", "USD", FR)} hors zone euro`, lines: ["Tout ce qu'offre Pro, à vie", "Plus aucun paiement mensuel", "Priorité sur les nouveautés"] },
 ];
 
 const Check = ({ ok, children }) => (
