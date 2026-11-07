@@ -27,7 +27,7 @@ export default async function AvisPage() {
       <h1 className="t-80">{L.t("Les avis Basketlog", "Basketlog reviews", "Las opiniones de Basketlog")}</h1>
       <p className="lead" style={{ marginTop: 24 }}>
         {count
-          ? L.t(`${count} avis · note moyenne ${avg.toFixed(1).replace(".", ",")}/5`, `${count} review${count > 1 ? "s" : ""} · average rating ${avg.toFixed(1)}/5`, `${count} opinión${count > 1 ? "es" : ""} · nota media ${avg.toFixed(1).replace(".", ",")}/5`)
+          ? L.t(`${count} avis · note moyenne ${avg.toFixed(1).replace(".", ",")}/5`, `${count} review${count > 1 ? "s" : ""} · average rating ${avg.toFixed(1)}/5`, `${count} ${count > 1 ? "opiniones" : "opinión"} · nota media ${avg.toFixed(1).replace(".", ",")}/5`)
           : L.t("Aucun avis publié pour l'instant.", "No reviews published yet.", "Todavía no hay opiniones publicadas.")}
       </p>
       <ReviewCards reviews={list} max={200} more={false} L={L} />

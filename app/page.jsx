@@ -321,7 +321,7 @@ export default async function Home() {
             ? L.t(
               <>{reviews.count} avis · note moyenne {reviews.avg.toFixed(1).replace(".", ",")}/5. Publiés tels quels, après simple relecture ; les avis d&apos;abonnés portent la mention « Abonné vérifié ».</>,
               <>{reviews.count} review{reviews.count > 1 ? "s" : ""} · average rating {reviews.avg.toFixed(1)}/5. Published as is, after a simple check; reviews from subscribers carry a “Verified subscriber” label.</>,
-              <>{reviews.count} opinión{reviews.count > 1 ? "es" : ""} · nota media {reviews.avg.toFixed(1).replace(".", ",")}/5. Publicadas tal cual, tras una simple revisión; las de suscriptores llevan la mención «Suscriptor verificado».</>
+              <>{reviews.count} {reviews.count > 1 ? "opiniones" : "opinión"} · nota media {reviews.avg.toFixed(1).replace(".", ",")}/5. Publicadas tal cual, tras una simple revisión; las de suscriptores llevan la mención «Suscriptor verificado».</>
             )
             : L.t("Les avis de nos abonnés, publiés tels quels après relecture.", "Reviews from our subscribers, published as is after a check.", "Las opiniones de nuestros suscriptores, publicadas tal cual tras una revisión.")}
         </p>
