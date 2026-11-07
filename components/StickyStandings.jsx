@@ -34,7 +34,7 @@ export default function StickyStandings({ east, west }) {
     <div className="std-row">
       <span className="rk">{i + 1}</span>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={t.logo} alt="" loading="lazy" />
+      <img src={t.logo} alt={t.name} loading="lazy" />
       <div><b>{t.name}</b><small>{L.t(
         t.gp ? `${t.gp} match${t.gp > 1 ? "s" : ""} joué${t.gp > 1 ? "s" : ""}` : `Saison passée : ${t.prev || "–"}`,
         t.gp ? `${t.gp} game${t.gp > 1 ? "s" : ""} played` : `Last season: ${t.prev || "–"}`,

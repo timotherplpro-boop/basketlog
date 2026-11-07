@@ -154,33 +154,37 @@ export default async function Home() {
     : L.t(`+${num(analysed)} matchs NBA analysés`, `+${num(analysed)} NBA games analyzed`, `+${num(analysed)} partidos NBA analizados`);
   const hero = HERO[L.lang];
   const cards = pre.slice(0, 12);
-  const elCrests = [...new Map(elGames.flatMap((g) => [g.home, g.away]).filter((c) => c.logo).map((c) => [c.id, c.logo])).values()];
-  const LOGOS = TEAMS.map((t) => t.logo);
+  // Logos avec le nom de l'équipe en texte alternatif (lu par les moteurs de recherche et les lecteurs d'écran).
+  const elCrests = [...new Map(elGames.flatMap((g) => [g.home, g.away]).filter((c) => c.logo).map((c) => [c.id, { src: c.logo, name: c.name || c.short || c.abbr || "EuroLeague" }])).values()];
+  const LOGOS = TEAMS.map((t) => ({ src: t.logo, name: t.name }));
   const MIX = LOGOS.flatMap((l, i) => (elCrests[i] ? [l, elCrests[i]] : [l]));
   const nTeams = 30 + elCrests.length;
 
   const faqEs = [
-    { q: "1. ¿Basketlog es gratis?", a: `Las probabilidades de victoria de todos los partidos son gratis, sin registro, y cada análisis muestra gratis la forma reciente, un resumen rápido, el escenario n.º 1 y la confianza del modelo. El análisis completo (argumentación del modelo, todos los escenarios, estadísticas comparadas, jugadores, parte médico, noticias en tiempo real) está incluido en Pro a ${price("pro", cur, L)}/mes (ilimitado) o Lifetime a ${price("lifetime", cur, L)} en un solo pago; Starter a ${price("starter", cur, L)}/mes da 1 análisis reducido al día (probabilidades exactas y estadísticas clave). Todo está en la página Pro (/es/pro).` },
-    { q: "2. ¿Cómo funcionan los análisis?", a: "El modelo parte del nivel real de cada equipo (diferencia de puntos, ataque, defensa, temporada pasada) y luego añade la ventaja de jugar en casa, el cansancio de los back-to-back y las bajas. El margen esperado se convierte en probabilidad de victoria y en escenarios. Todos los detalles están en la página Metodología (/es/methode)." },
-    { q: "3. ¿Se puede apostar en Basketlog?", a: "No. Basketlog es una herramienta de análisis para entender mejor los partidos. Aquí no se aceptan apuestas y ninguna probabilidad es una garantía." },
-    { q: "4. ¿Qué competiciones están cubiertas?", a: "La NBA (las 30 franquicias, con estadísticas de tiro, jugadores clave, forma reciente y enfrentamientos) y la Euroliga (los 20 clubes, con probabilidades, forma y clasificación). Más adelante llegarán otras ligas." },
-    { q: "5. ¿Las opiniones que se muestran son reales?", a: "Sí. Solo los suscriptores Starter, Pro y Lifetime pueden dar su opinión (una por cuenta, con el botón «Dar mi opinión»): sus opiniones llevan la mención «Suscriptor verificado». Las opiniones sin esta mención se enviaron cuando el formulario estaba abierto a todos. Cada opinión se publica tal cual tras una simple revisión antispam. No escribimos ninguna nosotros." },
-    { q: "6. ¿Cuál es el porcentaje de acierto de Basketlog?", a: "Todo es público en la página Balance (/es/app/bilan): cada pronóstico se compara con el resultado final, partido a partido, con el detalle por nivel de confianza. El modelo se recalcula solo con los resultados conocidos antes de cada partido, sin hacer trampa con el futuro. Los datos proceden de las fuentes oficiales de la NBA y la Euroliga, actualizadas continuamente." },
+    { q: "1. ¿Qué es Basketlog?", a: "Basketlog (en una sola palabra) es un sitio de análisis de baloncesto: para cada partido de la NBA y la Euroliga, da las probabilidades de victoria, el marcador proyectado y los factores clave (nivel de los equipos, forma, bajas, cansancio), calculados por un modelo estadístico. El sitio es basketlog-app.com y la app se instala desde el navegador." },
+    { q: "2. ¿Basketlog es gratis?", a: `Las probabilidades de victoria de todos los partidos son gratis, sin registro, y cada análisis muestra gratis la forma reciente, un resumen rápido, el escenario n.º 1 y la confianza del modelo. El análisis completo (argumentación del modelo, todos los escenarios, estadísticas comparadas, jugadores, parte médico, noticias en tiempo real) está incluido en Pro a ${price("pro", cur, L)}/mes (ilimitado) o Lifetime a ${price("lifetime", cur, L)} en un solo pago; Starter a ${price("starter", cur, L)}/mes da 1 análisis reducido al día (probabilidades exactas y estadísticas clave). Todo está en la página Pro (/es/pro).` },
+    { q: "3. ¿Cómo funcionan los análisis?", a: "El modelo parte del nivel real de cada equipo (diferencia de puntos, ataque, defensa, temporada pasada) y luego añade la ventaja de jugar en casa, el cansancio de los back-to-back y las bajas. El margen esperado se convierte en probabilidad de victoria y en escenarios. Todos los detalles están en la página Metodología (/es/methode)." },
+    { q: "4. ¿Se puede apostar en Basketlog?", a: "No. Basketlog es una herramienta de análisis para entender mejor los partidos. Aquí no se aceptan apuestas y ninguna probabilidad es una garantía." },
+    { q: "5. ¿Qué competiciones están cubiertas?", a: "La NBA (las 30 franquicias, con estadísticas de tiro, jugadores clave, forma reciente y enfrentamientos) y la Euroliga (los 20 clubes, con probabilidades, forma y clasificación). Más adelante llegarán otras ligas." },
+    { q: "6. ¿Las opiniones que se muestran son reales?", a: "Sí. Solo los suscriptores Starter, Pro y Lifetime pueden dar su opinión (una por cuenta, con el botón «Dar mi opinión»): sus opiniones llevan la mención «Suscriptor verificado». Las opiniones sin esta mención se enviaron cuando el formulario estaba abierto a todos. Cada opinión se publica tal cual tras una simple revisión antispam. No escribimos ninguna nosotros." },
+    { q: "7. ¿Cuál es el porcentaje de acierto de Basketlog?", a: "Todo es público en la página Balance (/es/app/bilan): cada pronóstico se compara con el resultado final, partido a partido, con el detalle por nivel de confianza. El modelo se recalcula solo con los resultados conocidos antes de cada partido, sin hacer trampa con el futuro. Los datos proceden de las fuentes oficiales de la NBA y la Euroliga, actualizadas continuamente." },
   ];
   const faq = L.es ? faqEs : L.en ? [
-    { q: "1. Is Basketlog free?", a: `Win probabilities for every game are free, no sign-up needed, and every analysis shows recent form, a quick summary, the #1 scenario and the model's confidence for free. The full analysis (the model's reasoning, every scenario, stat comparison, players, injury report, real-time news) comes with Pro at ${price("pro", cur, L)}/month (unlimited) or Lifetime at ${price("lifetime", cur, L)} one-time; Starter at ${price("starter", cur, L)}/month gives 1 reduced analysis per day (exact probabilities and key stats). Everything is on the Pro page (/en/pro).` },
-    { q: "2. How do the analyses work?", a: "The model starts from each team's real strength (point differential, offense, defense, last season), then adds home-court advantage, back-to-back fatigue and injuries. The expected margin is converted into a win probability and scenarios. All the details are on the Methodology page (/en/methode)." },
-    { q: "3. Can I bet on Basketlog?", a: "No. Basketlog is an analysis tool to understand games better. No bets are taken here and no probability is a guarantee." },
-    { q: "4. Which competitions are covered?", a: "The NBA (all 30 franchises, with shooting stats, key players, recent form and head-to-head) and the EuroLeague (all 20 clubs, with probabilities, form and standings). More leagues will follow." },
-    { q: "5. Are the reviews real?", a: "Yes. Only Starter, Pro and Lifetime subscribers can leave a review (one per account, through the “Leave a review” button): their reviews carry a “Verified subscriber” label. Reviews without this label were posted when the form was open to everyone. Every review is published as is after a simple anti-spam check. We don't write any ourselves." },
-    { q: "6. What is Basketlog's track record?", a: "Everything is public on the Track record page (/en/app/bilan): every prediction is compared with the final score, game by game, with a breakdown by confidence level. The model is recalculated using only results known before each game, without peeking at the future. Data comes from the official NBA and EuroLeague feeds, updated continuously." },
+    { q: "1. What is Basketlog?", a: "Basketlog (one word) is a basketball analysis website: for every NBA and EuroLeague game, it gives win probabilities, the projected score and the key factors (team strength, form, injuries, fatigue), computed by a statistical model. The site is basketlog-app.com, and the app installs from your browser." },
+    { q: "2. Is Basketlog free?", a: `Win probabilities for every game are free, no sign-up needed, and every analysis shows recent form, a quick summary, the #1 scenario and the model's confidence for free. The full analysis (the model's reasoning, every scenario, stat comparison, players, injury report, real-time news) comes with Pro at ${price("pro", cur, L)}/month (unlimited) or Lifetime at ${price("lifetime", cur, L)} one-time; Starter at ${price("starter", cur, L)}/month gives 1 reduced analysis per day (exact probabilities and key stats). Everything is on the Pro page (/en/pro).` },
+    { q: "3. How do the analyses work?", a: "The model starts from each team's real strength (point differential, offense, defense, last season), then adds home-court advantage, back-to-back fatigue and injuries. The expected margin is converted into a win probability and scenarios. All the details are on the Methodology page (/en/methode)." },
+    { q: "4. Can I bet on Basketlog?", a: "No. Basketlog is an analysis tool to understand games better. No bets are taken here and no probability is a guarantee." },
+    { q: "5. Which competitions are covered?", a: "The NBA (all 30 franchises, with shooting stats, key players, recent form and head-to-head) and the EuroLeague (all 20 clubs, with probabilities, form and standings). More leagues will follow." },
+    { q: "6. Are the reviews real?", a: "Yes. Only Starter, Pro and Lifetime subscribers can leave a review (one per account, through the “Leave a review” button): their reviews carry a “Verified subscriber” label. Reviews without this label were posted when the form was open to everyone. Every review is published as is after a simple anti-spam check. We don't write any ourselves." },
+    { q: "7. What is Basketlog's track record?", a: "Everything is public on the Track record page (/en/app/bilan): every prediction is compared with the final score, game by game, with a breakdown by confidence level. The model is recalculated using only results known before each game, without peeking at the future. Data comes from the official NBA and EuroLeague feeds, updated continuously." },
   ] : [
-    { q: "1. Basketlog est-il gratuit ?", a: `Les probabilités de victoire de tous les matchs sont gratuites, sans inscription, et chaque analyse montre gratuitement la forme récente, un résumé rapide, le scénario n° 1 et la confiance du modèle. L'analyse complète (argumentation du modèle, tous les scénarios, stats comparées, joueurs, infirmerie, actualités en temps réel) est incluse dans Pro à ${price("pro", cur, L)}/mois (illimité) ou Lifetime à ${price("lifetime", cur, L)} une seule fois ; Starter à ${price("starter", cur, L)}/mois donne 1 analyse réduite par jour (probabilités exactes et stats clés). Tout est sur la page Pro (/pro).` },
-    { q: "2. Comment fonctionnent les analyses ?", a: "Le modèle part du niveau réel de chaque équipe (écart de points, attaque, défense, saison passée), puis ajoute l'avantage du terrain, la fatigue des back-to-back et les absences. La marge attendue est convertie en probabilité de victoire et en scénarios. Tout le détail est sur la page Méthode (/methode)." },
-    { q: "3. Est-ce que Basketlog permet de parier ?", a: "Non. Basketlog est un outil d'analyse pour mieux comprendre les matchs. Aucune prise de pari ne se fait ici et aucune probabilité n'est une garantie." },
-    { q: "4. Quelles compétitions sont couvertes ?", a: "La NBA (les 30 franchises, avec stats de tirs, joueurs clés, forme récente et confrontations) et l'EuroLeague (les 20 clubs, avec probabilités, forme et classement). D'autres championnats arriveront ensuite." },
-    { q: "5. Les avis affichés sont-ils réels ?", a: "Oui. Seuls les abonnés Starter, Pro et Lifetime peuvent donner un avis (un par compte, via le bouton « Donner mon avis ») : leurs avis portent la mention « Abonné vérifié ». Les avis sans cette mention ont été déposés quand le formulaire était ouvert à tous. Chaque avis est publié tel quel après une simple relecture anti-spam. Nous n'en écrivons aucun nous-mêmes." },
-    { q: "6. Quel est le taux de réussite de Basketlog ?", a: "Tout est public sur la page Bilan (/app/bilan) : chaque pronostic est comparé au score final, match par match, avec le détail par niveau de confiance. Le modèle y est recalculé uniquement avec les résultats connus avant chaque match, sans tricher avec le futur. Les données viennent des flux officiels NBA et EuroLeague, mis à jour en continu." },
+    { q: "1. Qu'est-ce que Basketlog ?", a: "Basketlog (en un seul mot) est un site d'analyse basket : pour chaque match de NBA et d'EuroLeague, il donne les probabilités de victoire, le score projeté et les facteurs clés (niveau des équipes, forme, absences, fatigue), calculés par un modèle statistique. Le site est basketlog-app.com, et l'appli s'installe depuis le navigateur." },
+    { q: "2. Basketlog est-il gratuit ?", a: `Les probabilités de victoire de tous les matchs sont gratuites, sans inscription, et chaque analyse montre gratuitement la forme récente, un résumé rapide, le scénario n° 1 et la confiance du modèle. L'analyse complète (argumentation du modèle, tous les scénarios, stats comparées, joueurs, infirmerie, actualités en temps réel) est incluse dans Pro à ${price("pro", cur, L)}/mois (illimité) ou Lifetime à ${price("lifetime", cur, L)} une seule fois ; Starter à ${price("starter", cur, L)}/mois donne 1 analyse réduite par jour (probabilités exactes et stats clés). Tout est sur la page Pro (/pro).` },
+    { q: "3. Comment fonctionnent les analyses ?", a: "Le modèle part du niveau réel de chaque équipe (écart de points, attaque, défense, saison passée), puis ajoute l'avantage du terrain, la fatigue des back-to-back et les absences. La marge attendue est convertie en probabilité de victoire et en scénarios. Tout le détail est sur la page Méthode (/methode)." },
+    { q: "4. Est-ce que Basketlog permet de parier ?", a: "Non. Basketlog est un outil d'analyse pour mieux comprendre les matchs. Aucune prise de pari ne se fait ici et aucune probabilité n'est une garantie." },
+    { q: "5. Quelles compétitions sont couvertes ?", a: "La NBA (les 30 franchises, avec stats de tirs, joueurs clés, forme récente et confrontations) et l'EuroLeague (les 20 clubs, avec probabilités, forme et classement). D'autres championnats arriveront ensuite." },
+    { q: "6. Les avis affichés sont-ils réels ?", a: "Oui. Seuls les abonnés Starter, Pro et Lifetime peuvent donner un avis (un par compte, via le bouton « Donner mon avis ») : leurs avis portent la mention « Abonné vérifié ». Les avis sans cette mention ont été déposés quand le formulaire était ouvert à tous. Chaque avis est publié tel quel après une simple relecture anti-spam. Nous n'en écrivons aucun nous-mêmes." },
+    { q: "7. Quel est le taux de réussite de Basketlog ?", a: "Tout est public sur la page Bilan (/app/bilan) : chaque pronostic est comparé au score final, match par match, avec le détail par niveau de confiance. Le modèle y est recalculé uniquement avec les résultats connus avant chaque match, sans tricher avec le futur. Les données viennent des flux officiels NBA et EuroLeague, mis à jour en continu." },
   ];
 
   return (
@@ -243,10 +247,10 @@ export default async function Home() {
         </div>
 
         <div className="stage">
-          <div className="flogo f1"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(teamById("2").logo, 360)} alt="" /></div></div>
-          <div className="flogo f2"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(teamById("9").logo, 360)} alt="" /></div></div>
-          <div className="flogo f3"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(teamById("18").logo, 360)} alt="" /></div></div>
-          <div className="flogo f4"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(teamById("4").logo, 360)} alt="" /></div></div>
+          <div className="flogo f1"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(teamById("2").logo, 360)} alt={teamById("2").name} /></div></div>
+          <div className="flogo f2"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(teamById("9").logo, 360)} alt={teamById("9").name} /></div></div>
+          <div className="flogo f3"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(teamById("18").logo, 360)} alt={teamById("18").name} /></div></div>
+          <div className="flogo f4"><div className="float">{/* eslint-disable-next-line @next/next/no-img-element */}<img src={sized(teamById("4").logo, 360)} alt={teamById("4").name} /></div></div>
           <div className="phone-in"><PhoneHero team={{ id: heroTeam.id, name: heroTeam.name, logo: heroTeam.logo }} rivals={rivals} rows={rows.map(({ a, ...r }) => r)} /></div>
           {notifs.map((g, i) => {
             const fav = g.pHome >= 0.5 ? g.home : g.away;
@@ -275,7 +279,7 @@ export default async function Home() {
         <div className="marquee reveal" style={{ "--d": "150ms" }}>
           <div className="marquee-track">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            {[...MIX, ...MIX].map((l, i) => <img key={i} src={l} alt="" loading="lazy" />)}
+            {[...MIX, ...MIX].map((l, i) => <img key={i} src={l.src} alt={l.name} loading="lazy" />)}
           </div>
         </div>
       </section>
@@ -313,7 +317,7 @@ export default async function Home() {
           {reviews.list.length
             ? reviews.list.slice(0, 5).map((r) => <span key={r.id} className="initial" style={{ background: avatarColor(r.prenom) }}>{r.prenom.charAt(0).toUpperCase()}</span>)
             : /* eslint-disable-next-line @next/next/no-img-element */
-              ["13", "2", "9", "25", "18"].map((id) => <img key={id} src={teamById(id).logo} alt="" />)}
+              ["13", "2", "9", "25", "18"].map((id) => <img key={id} src={teamById(id).logo} alt={teamById(id).name} />)}
         </div>
         <h2 className="t-80 reveal">{L.t("Ce que pensent les utilisateurs de Basketlog", "What Basketlog users think", "Lo que piensan los usuarios de Basketlog")}</h2>
         <p className="lead reveal" style={{ "--d": "120ms" }}>
@@ -335,10 +339,10 @@ export default async function Home() {
                   <div className="ah"><span className="logo"><span className="ball" />Basketlog</span><span>{shortDay(g.date, L)}</span></div>
                   <div className="at">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <div><img src={g.away.logo} alt="" /><b>{g.away.abbr}</b></div>
+                    <div><img src={g.away.logo} alt={g.away.name} /><b>{g.away.abbr}</b></div>
                     <em>@</em>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <div><img src={g.home.logo} alt="" /><b>{g.home.abbr}</b></div>
+                    <div><img src={g.home.logo} alt={g.home.name} /><b>{g.home.abbr}</b></div>
                   </div>
                   <div className="ap">{pct(Math.max(g.pHome, 1 - g.pHome))}{L.en ? "%" : "\u202f%"}<small>{L.t(`victoire ${(g.pHome >= 0.5 ? g.home : g.away).short}`, `${(g.pHome >= 0.5 ? g.home : g.away).short} win`, `victoria ${(g.pHome >= 0.5 ? g.home : g.away).short}`)}</small></div>
                   <div className="abar"><i style={{ width: `${(1 - g.pHome) * 100}%` }} /></div>
@@ -372,7 +376,7 @@ export default async function Home() {
         <div className="marquee">
           <div className="marquee-track" style={{ animationDirection: "reverse", animationDuration: "65s" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            {[...LOGOS.slice().reverse(), ...LOGOS.slice().reverse()].map((l, i) => <img key={i} src={l} alt="" loading="lazy" />)}
+            {[...LOGOS.slice().reverse(), ...LOGOS.slice().reverse()].map((l, i) => <img key={i} src={l.src} alt={l.name} loading="lazy" />)}
           </div>
         </div>
       </section>
