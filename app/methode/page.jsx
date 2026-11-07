@@ -73,7 +73,7 @@ export default async function MethodePage() {
 
       <div className="card block">
         <h2>2. La ventaja de jugar en casa</h2>
-        <p className="narr">Jugar en casa vale unos 2,3 puntos en la NBA actual (y 3,2 puntos en la Euroliga, donde los pabellones pesan más). Ese valor se suma al equipo local.</p>
+        <p className="narr">Jugar en casa vale unos 2,3 puntos en la NBA actual (y 4 puntos en la Euroliga, donde los pabellones pesan más). Ese valor se suma al equipo local.</p>
       </div>
 
       <div className="card block">
@@ -83,15 +83,16 @@ export default async function MethodePage() {
 
       <div className="card block">
         <h2>4. Las bajas</h2>
-        <p className="narr">El parte médico se revisa antes de cada partido. Cada baja se pondera según la producción del jugador, más allá de lo que aportaría un suplente: una estrella de 25 puntos por partido resta unos 5 puntos a su equipo, un titular de 14 puntos unos 2,5 puntos y un suplente casi nada. Un jugador en duda cuenta un 40&nbsp;%, y el efecto total tiene un tope de 9 puntos para no sobrerreaccionar. Un jugador que lleva mucho tiempo de baja no se cuenta dos veces: su ausencia ya se refleja en los resultados del equipo esta temporada. Las bajas solo se tienen en cuenta para los próximos partidos.</p>
+        <p className="narr">El parte médico se revisa antes de cada partido. Cada baja se pondera según la producción del jugador, más allá de lo que aportaría un suplente: una estrella de 25 puntos por partido resta unos 3 puntos a su equipo, un titular de 14 puntos alrededor de 1,5 puntos y un suplente casi nada. Un jugador en duda cuenta un 40&nbsp;%, y el efecto total tiene un tope de 5 puntos para no sobrerreaccionar. Estos pesos se ajustaron sobre once temporadas, comparando con los jugadores que realmente se perdieron cada partido. Un jugador que lleva mucho tiempo de baja no se cuenta dos veces: su ausencia ya se refleja en los resultados del equipo esta temporada. Las bajas solo se tienen en cuenta para los próximos partidos.</p>
       </div>
 
       <div className="card block">
         <h2>5. De la diferencia a la probabilidad</h2>
         <p className="narr">
-          La diferencia esperada nunca se cumple exactamente: en la NBA, el resultado final se aleja de ella una docena de puntos de media. Por eso el modelo usa una distribución normal centrada en la diferencia esperada, con una desviación típica de 12,5 puntos.
+          La diferencia esperada nunca se cumple exactamente: en la NBA, el resultado final se aleja de ella una docena de puntos de media. Por eso el modelo usa una distribución normal centrada en la diferencia esperada, con una desviación típica de 12,3 puntos.
           De ahí obtiene la probabilidad de victoria de cada equipo y la de cada diferencia posible: partido igualado (5 puntos o menos), victoria por 6 a 9 puntos o victoria amplia (10 puntos o más).
           El marcador proyectado combina el ataque de cada equipo con la defensa de su rival.
+          El nivel de confianza sigue la probabilidad del favorito: «Muy alta» a partir del 88&nbsp;%. En once temporadas de la NBA recalculadas, esos favoritos ganaron el 91&nbsp;% de sus partidos, con altibajos de una temporada a otra. Son escasos: unos 3 partidos de cada 100.
         </p>
       </div>
 
@@ -137,7 +138,7 @@ export default async function MethodePage() {
 
       <div className="card block">
         <h2>2. Home-court advantage</h2>
-        <p className="narr">Playing at home is worth about 2.3 points in today&apos;s NBA (and 3.2 points in the EuroLeague, where arenas matter more). This value is added to the home team.</p>
+        <p className="narr">Playing at home is worth about 2.3 points in today&apos;s NBA (and 4 points in the EuroLeague, where arenas matter more). This value is added to the home team.</p>
       </div>
 
       <div className="card block">
@@ -147,15 +148,16 @@ export default async function MethodePage() {
 
       <div className="card block">
         <h2>4. Injuries</h2>
-        <p className="narr">The injury report is checked before every game. Each missing player is weighted by his production beyond what a replacement would bring: a star scoring 25 points a game takes about 5 points away from his team, a 14-point starter about 2.5 points and a bench player almost nothing. A questionable player counts for 40%, and the total effect is capped at 9 points to avoid overreacting. A player who has been out for a long time isn&apos;t counted twice: his absence already shows in the team&apos;s results this season. Injuries are only factored in for upcoming games.</p>
+        <p className="narr">The injury report is checked before every game. Each missing player is weighted by his production beyond what a replacement would bring: a star scoring 25 points a game takes about 3 points away from his team, a 14-point starter about 1.5 points and a bench player almost nothing. A questionable player counts for 40%, and the total effect is capped at 5 points to avoid overreacting. These weights were fitted on eleven seasons, against the players who actually missed each game. A player who has been out for a long time isn&apos;t counted twice: his absence already shows in the team&apos;s results this season. Injuries are only factored in for upcoming games.</p>
       </div>
 
       <div className="card block">
         <h2>5. From margin to probability</h2>
         <p className="narr">
-          The expected margin is never spot on: in the NBA, the final score misses it by about a dozen points on average. So the model uses a normal distribution centered on the expected margin, with a standard deviation of 12.5 points.
+          The expected margin is never spot on: in the NBA, the final score misses it by about a dozen points on average. So the model uses a normal distribution centered on the expected margin, with a standard deviation of 12.3 points.
           From it, the model derives each team&apos;s win probability and the chances of every possible margin: a close game (5 points or fewer), a 6-to-9-point win or a blowout (10 points or more).
           The projected score combines each team&apos;s offense with its opponent&apos;s defense.
+          The confidence level follows the favorite&apos;s probability: “Very high” from 88%. Over eleven recalculated NBA seasons, these favorites won 91% of their games, with ups and downs from one season to the next. They are rare: about 3 games in 100.
         </p>
       </div>
 
@@ -201,7 +203,7 @@ export default async function MethodePage() {
 
       <div className="card block">
         <h2>2. L&apos;avantage du terrain</h2>
-        <p className="narr">Jouer à domicile vaut environ 2,3 points en NBA aujourd&apos;hui (et 3,2 points en EuroLeague, où les salles pèsent davantage). Cette valeur est ajoutée à l&apos;équipe qui reçoit.</p>
+        <p className="narr">Jouer à domicile vaut environ 2,3 points en NBA aujourd&apos;hui (et 4 points en EuroLeague, où les salles pèsent davantage). Cette valeur est ajoutée à l&apos;équipe qui reçoit.</p>
       </div>
 
       <div className="card block">
@@ -211,15 +213,16 @@ export default async function MethodePage() {
 
       <div className="card block">
         <h2>4. Les absences</h2>
-        <p className="narr">La liste des joueurs blessés est relue avant chaque match. Chaque absent est pesé selon sa production, au-delà de ce qu&apos;apporterait un remplaçant : une star à 25 points par match retire environ 5 points à son équipe, un titulaire à 14 points environ 2,5 points et un remplaçant presque rien. Un joueur incertain compte pour 40&nbsp;%, et l&apos;effet total est plafonné à 9 points pour ne pas surréagir. Un joueur absent depuis longtemps n&apos;est pas compté deux fois : son absence se voit déjà dans les résultats de l&apos;équipe cette saison. Les absences ne sont prises en compte que pour les matchs à venir.</p>
+        <p className="narr">La liste des joueurs blessés est relue avant chaque match. Chaque absent est pesé selon sa production, au-delà de ce qu&apos;apporterait un remplaçant : une star à 25 points par match retire environ 3 points à son équipe, un titulaire à 14 points environ 1,5 point et un remplaçant presque rien. Un joueur incertain compte pour 40&nbsp;%, et l&apos;effet total est plafonné à 5 points pour ne pas surréagir. Ces poids ont été réglés sur onze saisons, en comparant avec les joueurs réellement absents à chaque match. Un joueur absent depuis longtemps n&apos;est pas compté deux fois : son absence se voit déjà dans les résultats de l&apos;équipe cette saison. Les absences ne sont prises en compte que pour les matchs à venir.</p>
       </div>
 
       <div className="card block">
         <h2>5. De l&apos;écart à la probabilité</h2>
         <p className="narr">
-          L&apos;écart attendu ne tombe jamais pile : en NBA, le score final s&apos;en éloigne en moyenne d&apos;une douzaine de points. Le modèle utilise donc une loi normale centrée sur l&apos;écart attendu, avec un écart-type de 12,5 points.
+          L&apos;écart attendu ne tombe jamais pile : en NBA, le score final s&apos;en éloigne en moyenne d&apos;une douzaine de points. Le modèle utilise donc une loi normale centrée sur l&apos;écart attendu, avec un écart-type de 12,3 points.
           Il en tire la probabilité de victoire de chaque équipe et les chances de chaque écart possible : match serré (5 points d&apos;écart ou moins), victoire de 6 à 9 points ou large victoire (10 points ou plus).
           Le score projeté combine l&apos;attaque de chaque équipe et la défense de son adversaire.
+          Le niveau de confiance suit la probabilité du favori : « Très élevée » à partir de 88&nbsp;%. Sur onze saisons de NBA recalculées, ces favoris ont gagné 91&nbsp;% de leurs matchs, avec des écarts d&apos;une saison à l&apos;autre. Ils sont rares : environ 3 matchs sur 100.
         </p>
       </div>
 

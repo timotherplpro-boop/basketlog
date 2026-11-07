@@ -43,7 +43,7 @@ export function GameCard({ a, date, L = mk("fr") }) {
     <Link href={L.href(`/app/match/${g.id}?d=${date}`)} className="card game">
       <div className="game-top">
         <StatusTag game={g} L={L} />
-        {Math.max(a.pHome, a.pAway) > 0.72 ? <span className="tag hot">{L.t("Favori net", "Clear favorite", "Favorito claro")}</span> : Math.abs(a.pHome - 0.5) < 0.06 ? <span className="tag hot">{L.t("Indécis", "Toss-up", "Igualado")}</span> : <span>{L.t(`Confiance ${a.confidence.toLowerCase()}`, `${confText(a.confidence, L)} confidence`, `Confianza ${confText(a.confidence, L).toLowerCase()}`)}</span>}
+        {a.confidence === "Très élevée" ? <span className="tag hot">{L.t("Confiance très élevée", "Very high confidence", "Confianza muy alta")}</span> : Math.max(a.pHome, a.pAway) > 0.72 ? <span className="tag hot">{L.t("Favori net", "Clear favorite", "Favorito claro")}</span> : Math.abs(a.pHome - 0.5) < 0.06 ? <span className="tag hot">{L.t("Indécis", "Toss-up", "Igualado")}</span> : <span>{L.t(`Confiance ${a.confidence.toLowerCase()}`, `${confText(a.confidence, L)} confidence`, `Confianza ${confText(a.confidence, L).toLowerCase()}`)}</span>}
       </div>
       {[g.away, g.home].map((t, i) => {
         const p = i === 0 ? a.pAway : a.pHome;

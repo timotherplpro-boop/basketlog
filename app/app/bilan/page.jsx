@@ -63,8 +63,7 @@ export default async function BilanPage({ searchParams }) {
   const list = picks || [];
   const s = summarize(list);
   const week = summarize(lastDays(list, 7));
-  const strongL = list.filter((p) => Math.max(p.pHome, 1 - p.pHome) >= 0.7);
-  const strong = { n: strongL.length, ok: strongL.filter((p) => p.ok).length };
+  const strong = s.sure; // favoris à 88 % et plus (confiance « Très élevée »)
   const href = (p) => L.href(view === "el" || p.league === "EL" ? `/app/euroleague/match/${p.id}` : `/app/match/${p.id}?d=${p.d}`);
 
   // Derniers résultats, groupés par jour (plus récents d'abord).
@@ -116,7 +115,7 @@ export default async function BilanPage({ searchParams }) {
           <div className="kpis kpis8">
             <div className="card kpi bl-hero"><span>{L.t("Bons pronostics", "Correct predictions", "Pronósticos acertados")}</span><strong>{pct(s.pct)}</strong><small>{L.t(`${s.ok} sur ${s.n} matchs`, `${s.ok} of ${s.n} games`, `${s.ok} de ${s.n} partidos`)}</small></div>
             <div className="card kpi"><span>{L.t("7 derniers jours", "Last 7 days", "Últimos 7 días")}</span><strong>{week.n ? pct(week.pct) : "–"}</strong><small>{week.n ? of(week.ok, week.n) : L.t("pas de match", "no games", "sin partidos")}</small></div>
-            <div className="card kpi"><span>{L.t("Favoris à 70 % et plus", "Favorites at 70%+", "Favoritos al 70 % o más")}</span><strong>{strong.n ? pct(strong.ok / strong.n) : "–"}</strong><small>{strong.n ? of(strong.ok, strong.n) : L.t("aucun pour l'instant", "none yet", "ninguno por ahora")}</small></div>
+            <div className="card kpi"><span>{L.t("Confiance très élevée", "Very high confidence", "Confianza muy alta")}</span><strong>{strong.n ? pct(strong.ok / strong.n) : "–"}</strong><small>{strong.n ? L.t(`${strong.ok} sur ${strong.n} · favoris à 88 % et plus`, `${strong.ok} of ${strong.n} · favorites at 88%+`, `${strong.ok} de ${strong.n} · favoritos al 88 % o más`) : L.t("aucun favori à 88 % et plus pour l'instant", "no favorite at 88%+ yet", "ningún favorito al 88 % o más por ahora")}</small></div>
             <div className="card kpi"><span>{L.t("Erreur moyenne sur l'écart", "Average margin error", "Error medio en la diferencia")}</span><strong>{s.mae != null ? (L.en ? `${s.mae.toFixed(1)} pts` : `${s.mae.toFixed(1).replace(".", ",")} pts`) : "–"}</strong><small>{L.t("score projeté vs réel", "projected vs actual score", "marcador proyectado vs. real")}</small></div>
           </div>
 

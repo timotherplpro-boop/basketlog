@@ -54,7 +54,7 @@ export async function GET(req) {
       chips: [{ abbr: g.home.abbr, name: g.home.name, chips: chips(fh), vd: vd(fh) }, { abbr: g.away.abbr, name: g.away.name, chips: chips(fa), vd: vd(fa) }],
       resume: briefSummary(a, "NBA", L),
       scenario1: scenarioOne(a, "NBA", L),
-      conf: confText(conf, L), confW: conf === "Élevée" ? "88%" : conf === "Moyenne" ? "62%" : "34%",
+      conf: confText(conf, L), confW: conf === "Très élevée" ? "96%" : conf === "Élevée" ? "88%" : conf === "Moyenne" ? "62%" : "34%",
       injuries: [inj(aw, g.away), inj(h, g.home)],
     };
   });

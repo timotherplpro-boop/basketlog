@@ -71,7 +71,7 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
     ask && ask.limit != null ? memberSession().then((m) => (m ? questionUsage(m.uid) : 0)) : 0,
   ]);
   const conf = a.confidence;
-  const confW = conf === "Élevée" ? 88 : conf === "Moyenne" ? 62 : 34;
+  const confW = conf === "Très élevée" ? 96 : conf === "Élevée" ? 88 : conf === "Moyenne" ? 62 : 34;
 
   // Part de l'analyse visible sans l'analyse complète (nombre de rubriques).
   const lockedCount = 4 + (isNBA ? (g.hypothetical ? 1 : 4) + 2 : 4);
