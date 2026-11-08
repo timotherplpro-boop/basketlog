@@ -7,8 +7,8 @@ import { accountLabel, creatorNames, noEndDate } from "../lib/accounts.js";
 import { DELETE_WORDS, buildPlans, cleanName, deleteConfirmed, normalizeMembership, planOf, renewing, tierOfProduct } from "../lib/account.js";
 import { CODE_RE, cleanCode, cleanPct, discounted, mergePromos, randomChars, suggestCode, withPromo } from "../lib/promo.js";
 import { asPct, checkPromo, describeProblem, describeProblems, promoMonths, whopPromoReady } from "../lib/whop-promo.js";
-import { BSKY_MAX, blueskyPost, elPick, graphemes, nbaPick, socialPosts, telegramText } from "../lib/social.js";
-import { socialConfig, socialStatus } from "../lib/social-send.js";
+import { BSKY_BIO_MAX, BSKY_MAX, BSKY_NAME_MAX, blueskyPost, blueskyProfile, elPick, graphemes, nbaPick, socialPosts, telegramText } from "../lib/social.js";
+import { blueskySetProfile, socialConfig, socialStatus } from "../lib/social-send.js";
 
 export async function unit() {
   let passed = 0, failed = 0;
@@ -253,6 +253,42 @@ export async function unit() {
   eq("Comptes : noms par défaut (@basketlog en français, basketlog.bsky.social) quand seuls les codes sont donnés", [socialConfig({ TELEGRAM_BOT_TOKEN: "x" }).telegram.chats, socialConfig({ BLUESKY_APP_PASSWORD: "y" }).bluesky.handle], [{ fr: "@basketlog" }, "basketlog.bsky.social"]);
   const socPub = JSON.stringify(socialStatus(cfgFull));
   eq("Comptes : l'état public ne montre aucun code d'accès", [socPub.includes("secret"), socPub.includes("@basketlog_es"), socPub.includes("basketlog.bsky.social")], [false, true, true]);
+
+  // --- Profil Bluesky : texte (lib/social.js) et écriture (lib/social-send.js, appels simulés)
+  const bp = blueskyProfile();
+  eq(`Profil Bluesky : nom (${BSKY_NAME_MAX}) et présentation (${BSKY_BIO_MAX}) dans les limites, en trois langues`, [bp.displayName, graphemes(bp.displayName) <= BSKY_NAME_MAX, graphemes(bp.description) <= BSKY_BIO_MAX, bp.description.split("\n").length], ["Basketlog", true, true, 4]);
+  eq("Profil Bluesky : adresse du site avec https:// (cliquable) et logo du site", [bp.description.endsWith("https://basketlog-app.com"), bp.avatarUrl], [true, "https://basketlog-app.com/icons/icon-512.png"]);
+  eq("Profil Bluesky : ni vocabulaire de paris, ni « IA »", /\b(paris|parier|mise|cotes?|bets?|betting|odds|apuestas?|cuotas?)\b/i.test(bp.description) || /\bIA\b/.test(bp.description), false);
+  const realFetch = globalThis.fetch;
+  const bsCalls = [];
+  const bsFake = ({ existing, image = true }) => async (url, opts = {}) => {
+    const u = String(url);
+    bsCalls.push({ u, body: typeof opts.body === "string" ? JSON.parse(opts.body) : null, auth: opts.headers?.authorization || null });
+    if (u.endsWith("/icons/icon-512.png")) return image ? new Response(new Uint8Array([137, 80, 78, 71]), { headers: { "content-type": "image/png" } }) : new Response("x", { status: 404 });
+    if (u.includes("/xrpc/com.atproto.repo.getRecord?")) return existing ? Response.json({ uri: "at://did:plc:t/app.bsky.actor.profile/self", cid: "bafyold", value: existing }) : Response.json({ error: "RecordNotFound", message: "Could not locate record" }, { status: 400 });
+    if (u.endsWith("/xrpc/com.atproto.repo.uploadBlob")) return Response.json({ blob: { $type: "blob", ref: { $link: "bafyimg" }, mimeType: "image/png", size: 4 } });
+    if (u.endsWith("/xrpc/com.atproto.repo.putRecord")) return Response.json({ uri: "at://did:plc:t/app.bsky.actor.profile/self", cid: "bafynew" });
+    return Response.json({ error: "Unexpected" }, { status: 500 });
+  };
+  const bsSess = { did: "did:plc:t", jwt: "jwt-test", pds: "https://pds.test" };
+  const bsPut = () => bsCalls.filter((c) => c.u.endsWith("putRecord")).at(-1)?.body;
+  try {
+    globalThis.fetch = bsFake({ existing: { $type: "app.bsky.actor.profile", displayName: "", banner: { $type: "blob", ref: { $link: "bafyban" } }, createdAt: "2026-11-08T10:00:00.000Z" } });
+    const r1 = await blueskySetProfile(bsSess, bp);
+    const p1 = bsPut();
+    eq("Profil Bluesky : nom, présentation et logo posés, bannière et date gardées, écriture conditionnée à la version lue", [r1.avatar, r1.created, p1.repo, p1.collection, p1.rkey, p1.swapRecord, p1.record.displayName, p1.record.description === bp.description, p1.record.avatar?.ref?.$link, p1.record.banner?.ref?.$link, p1.record.createdAt], [true, false, "did:plc:t", "app.bsky.actor.profile", "self", "bafyold", "Basketlog", true, "bafyimg", "bafyban", "2026-11-08T10:00:00.000Z"]);
+    eq("Profil Bluesky : écritures envoyées avec la session du compte", bsCalls.filter((c) => /uploadBlob|putRecord/.test(c.u)).every((c) => c.auth === "Bearer jwt-test"), true);
+    globalThis.fetch = bsFake({ existing: null, image: false });
+    const r2 = await blueskySetProfile(bsSess, bp);
+    const p2 = bsPut();
+    eq("Profil Bluesky : profil encore vide = créé ; logo injoignable = nom et présentation posés quand même", [r2.created, r2.avatar, !!r2.avatarError, "swapRecord" in p2, p2.record.displayName, "avatar" in p2.record, !!p2.record.createdAt], [true, false, true, false, "Basketlog", false, true]);
+    globalThis.fetch = async (url) => (String(url).includes("getRecord") ? Response.json({ error: "AuthRequired", message: "Bad token" }, { status: 401 }) : Response.json({}));
+    let r3 = null;
+    try { await blueskySetProfile(bsSess, bp); } catch (e) { r3 = e.message; }
+    eq("Profil Bluesky : refus de lecture (autre que profil absent) = rien n'est écrit, erreur sans code d'accès", [!!r3 && r3.includes("401"), !!r3 && r3.includes("jwt-test")], [true, false]);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
 
 
   // --- « Mon compte » : prénom, mot de confirmation, abonnements Whop (lib/account.js)
