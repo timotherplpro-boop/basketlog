@@ -16,10 +16,10 @@ function session(tier, extra = {}) {
   return `bl_pro=${data}.${crypto.createHmac("sha256", SECRET).update(data).digest("base64url")}`;
 }
 
-async function get(path, { cookie, method = "GET", body } = {}) {
+async function get(path, { cookie, method = "GET", body, ua = "basketlog-tests" } = {}) {
   const res = await fetch(BASE + path, {
     method, redirect: "manual",
-    headers: { ...(cookie ? { cookie } : {}), ...(body ? { "content-type": "application/json" } : {}), "user-agent": "basketlog-tests" },
+    headers: { ...(cookie ? { cookie } : {}), ...(body ? { "content-type": "application/json" } : {}), "user-agent": ua },
     body: body ? JSON.stringify(body) : undefined,
   });
   return { status: res.status, text: await res.text() };
@@ -76,6 +76,23 @@ async function protectedRoutes() {
   if (SECRET) {
     const s2 = await get("/api/cron/social", { cookie: session("lifetime") });
     s2.status === 401 ? ok("publication automatique refusée aux abonnés") : ko("publication automatique refusée aux abonnés", `HTTP ${s2.status}`);
+  }
+  // Profil Bluesky : jamais par la tâche planifiée ni un abonné, aperçu seulement pour un admin (aucune écriture ici).
+  const prof = await get("/api/cron/social?profile=1&dry=1");
+  prof.status === 401 ? ok("profil Bluesky refusé sans accès") : ko("profil Bluesky refusé sans accès", `HTTP ${prof.status}`);
+  if (!process.env.CRON_SECRET) {
+    const profCron = await get("/api/cron/social?profile=1&dry=1", { ua: "vercel-cron/1.0" });
+    profCron.status === 401 ? ok("profil Bluesky refusé à la tâche planifiée") : ko("profil Bluesky refusé à la tâche planifiée", `HTTP ${profCron.status}`);
+  }
+  if (SECRET) {
+    const profSub = await get("/api/cron/social?profile=1&dry=1", { cookie: session("lifetime") });
+    profSub.status === 401 ? ok("profil Bluesky refusé aux abonnés") : ko("profil Bluesky refusé aux abonnés", `HTTP ${profSub.status}`);
+    const profAdmin = await get("/api/cron/social?profile=1&dry=1", { cookie: session("lifetime", { role: "admin" }) });
+    let pa = null;
+    try { pa = JSON.parse(profAdmin.text); } catch {}
+    profAdmin.status === 200 && pa?.dry === true && pa.profile?.displayName === "Basketlog" && !/PASSWORD|jwt/i.test(profAdmin.text)
+      ? ok("profil Bluesky : aperçu pour un admin, rien d'écrit, aucun code d'accès")
+      : ko("profil Bluesky : aperçu pour un admin, rien d'écrit, aucun code d'accès", `HTTP ${profAdmin.status} ${profAdmin.text.slice(0, 120)}`);
   }
   const preview = await get("/api/social");
   let pv = null;

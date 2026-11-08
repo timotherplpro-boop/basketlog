@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { socialDay } from "../../../../lib/social-day";
-import { ogImageUrl } from "../../../../lib/social";
-import { socialConfig, socialStatus, sendTelegram, telegramCheck, blueskySession, blueskyThumb, sendBluesky, blueskyPostedSince } from "../../../../lib/social-send";
+import { blueskyProfile, ogImageUrl } from "../../../../lib/social";
+import { socialConfig, socialStatus, sendTelegram, telegramCheck, blueskySession, blueskyThumb, sendBluesky, blueskyPostedSince, blueskySetProfile } from "../../../../lib/social-send";
 import { COOKIE, currentSession } from "../../../../lib/pro";
 
 export const dynamic = "force-dynamic";
@@ -12,24 +12,44 @@ export const maxDuration = 60;
 // (/api/cron/pronos), avant les matchs EuroLeague et NBA du soir.
 // Tant que SOCIAL_ENABLED ne vaut pas 1, rien n'est publié : la réponse montre seulement les messages prévus.
 // ?dry=1 force l'aperçu ; ?check=1 vérifie les comptes (bot Telegram administrateur de la chaîne, connexion Bluesky)
-// sans rien publier. Accès : tâche planifiée de Vercel (avec CRON_SECRET s'il est défini) ou compte admin connecté.
+// sans rien publier. ?profile=1 pose le nom, la présentation et le logo du compte Bluesky (?profile=1&dry=1 : aperçu),
+// pour un compte admin connecté seulement. Accès : tâche planifiée de Vercel (avec CRON_SECRET s'il est défini)
+// ou compte admin connecté.
 let lastRun = 0;
 let lastDay = "";
 
-async function allowed(req) {
+// "cron", "admin" ou null.
+async function access(req) {
   const secret = process.env.CRON_SECRET;
-  if (secret && req.headers.get("authorization") === `Bearer ${secret}`) return true;
-  if (!secret && /vercel-cron/i.test(req.headers.get("user-agent") || "")) return true;
+  if (secret && req.headers.get("authorization") === `Bearer ${secret}`) return "cron";
   const { session } = await currentSession(req.cookies.get(COOKIE)?.value);
-  return session?.role === "admin";
+  if (session?.role === "admin") return "admin";
+  if (!secret && /vercel-cron/i.test(req.headers.get("user-agent") || "")) return "cron";
+  return null;
 }
 
 const json = (body, status = 200) => NextResponse.json(body, { status, headers: { "Cache-Control": "no-store" } });
 
 export async function GET(req) {
-  if (!(await allowed(req))) return json({ error: "interdit" }, 401);
+  const who = await access(req);
+  if (!who) return json({ error: "interdit" }, 401);
   const sp = new URL(req.url).searchParams;
   const cfg = socialConfig();
+  if (sp.get("profile") === "1") {
+    if (who !== "admin") return json({ error: "interdit" }, 401);
+    const profile = blueskyProfile();
+    if (sp.get("dry") === "1") return json({ ok: true, dry: true, profile });
+    if (!cfg.bluesky) return json({ ok: false, profile, skipped: "compte Bluesky non branché (BLUESKY_APP_PASSWORD manquant)" });
+    try {
+      const sess = await blueskySession(cfg.bluesky);
+      const res = await blueskySetProfile(sess, profile);
+      if (res.avatarError) console.warn(`[social] logo Bluesky : ${res.avatarError}`);
+      return json({ ok: true, handle: cfg.bluesky.handle, did: sess.did, profile, ...res, at: new Date().toISOString() });
+    } catch (e) {
+      console.warn(`[social] profil Bluesky : ${e.message}`);
+      return json({ ok: false, handle: cfg.bluesky.handle, profile, error: e.message });
+    }
+  }
   if (sp.get("check") === "1") {
     const check = { status: socialStatus(cfg), telegram: {}, bluesky: null };
     if (cfg.telegram) {
