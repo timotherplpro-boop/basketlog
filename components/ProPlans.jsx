@@ -18,13 +18,23 @@ const Icon = ({ name }) => {
 // Mêmes offres que Visifoot, ligne par ligne. Les questions personnelles à l'IA n'apparaissent que si l'IA est
 // configurée : on n'affiche jamais une fonction qui ne marche pas.
 // Prix dans la monnaie du visiteur (`cur` : EUR dans la zone euro, USD ailleurs), choisie côté serveur.
-// `pct` : remise d'un code promo de créateur appliqué sur la page ; le prix plein s'affiche alors barré (`old`).
-const PLANS = (L, ai, cur, pct = 0) => {
+// `promo` : code promo de créateur appliqué sur la page ({ pct, mois } : remise en % et nombre de paiements remisés, 0 = tous) ;
+// le prix plein s'affiche alors barré (`old`). Quand la remise ne couvre que les premiers paiements d'un abonnement, la carte
+// l'annonce comme telle (« 11,19 € le 1er mois », puis « puis 13,99 €/mois ») : jamais un prix remisé présenté comme définitif.
+const PLANS = (L, ai, cur, promo = null) => {
+  const pct = promo?.pct || 0;
+  const mois = promo?.mois ?? 0;
   const show = (id) => (pct ? money(discounted(PRICES[cur][id], pct), cur, L) : price(id, cur, L));
   const was = (id) => (pct ? price(id, cur, L) : null);
+  const limited = pct > 0 && mois >= 1;
+  const per = !limited ? L.t("/mois", "/month", "/mes")
+    : mois === 1 ? L.t("le 1er mois", "first month", "el primer mes")
+    : L.t(`/mois pendant ${mois} mois`, `/month for ${mois} months`, `/mes durante ${mois} meses`);
+  const sep = limited && mois === 1 ? " " : ""; // « 11,19 € le 1er mois » mais « 11,19 €/mois »
+  const then = (id) => (limited ? L.t(`puis ${price(id, cur, L)}/mois`, `then ${price(id, cur, L)}/month`, `luego ${price(id, cur, L)}/mes`) : null);
   return [
   {
-    id: "starter", name: "Starter", icon: "bolt", price: show("starter"), old: was("starter"), per: L.t("/mois", "/month", "/mes"), sub: ai ? L.t("Pour découvrir l'IA", "To discover the AI", "Para descubrir la IA") : L.t("Pour découvrir les analyses", "To try the analyses", "Para descubrir los análisis"), cta: L.t(`Débloquer - ${show("starter")}/mois`, `Unlock - ${show("starter")}/month`, `Desbloquear - ${show("starter")}/mes`),
+    id: "starter", name: "Starter", icon: "bolt", price: show("starter"), old: was("starter"), per, then: then("starter"), sub: ai ? L.t("Pour découvrir l'IA", "To discover the AI", "Para descubrir la IA") : L.t("Pour découvrir les analyses", "To try the analyses", "Para descubrir los análisis"), cta: `${L.t("Débloquer", "Unlock", "Desbloquear")} - ${show("starter")}${sep}${per}`,
     items: [
       ["ok", L.t("1 analyse par jour", "1 analysis per day", "1 análisis al día")],
       ["ok", L.t("Analyse réduite", "Reduced analysis", "Análisis reducido")],
@@ -34,7 +44,7 @@ const PLANS = (L, ai, cur, pct = 0) => {
     ].filter(Boolean),
   },
   {
-    id: "pro", name: "Pro", icon: "crown", price: show("pro"), old: was("pro"), per: L.t("/mois", "/month", "/mes"), sub: L.t("Pour les passionnés de basket", "For basketball fans", "Para los apasionados del baloncesto"), badge: L.t("Populaire", "Popular", "Popular"), cta: L.t(`Débloquer - ${show("pro")}/mois`, `Unlock - ${show("pro")}/month`, `Desbloquear - ${show("pro")}/mes`),
+    id: "pro", name: "Pro", icon: "crown", price: show("pro"), old: was("pro"), per, then: then("pro"), sub: L.t("Pour les passionnés de basket", "For basketball fans", "Para los apasionados del baloncesto"), badge: L.t("Populaire", "Popular", "Popular"), cta: `${L.t("Débloquer", "Unlock", "Desbloquear")} - ${show("pro")}${sep}${per}`,
     items: [
       ["ok", L.t("Analyses illimitées", "Unlimited analyses", "Análisis ilimitados")],
       ["ok", L.t("Analyse complète détaillée", "Detailed full analysis", "Análisis completo detallado")],
@@ -93,7 +103,9 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
       const res = await fetch(`/api/promo?code=${encodeURIComponent(code)}`, { cache: "no-store" });
       const j = await res.json().catch(() => ({}));
       if (j.ok && CODE_RE.test(j.code) && Number.isInteger(j.pct) && j.pct > 0 && j.pct < 100) {
-        setPromo({ code: j.code, pct: j.pct });
+        // mois : paiements remisés (1 : le premier seulement, 0 : tous). Inconnu : on annonce la remise la plus courte.
+        const mois = Number.isInteger(j.mois) && j.mois >= 0 && j.mois <= 36 ? j.mois : 1;
+        setPromo({ code: j.code, pct: j.pct, mois });
         setPromoInput(j.code);
         setPromoState("idle");
         track("Code promo", { etape: "appliqué", code: j.code, remise: j.pct });
@@ -141,9 +153,9 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
             <span className="pro-promo-tick" aria-hidden>✓</span>
             <span>
               {L.t(
-                `Code ${promo.code} appliqué : −${pctOf(promo.pct / 100, L)} sur ta formule.`,
-                `Code ${promo.code} applied: ${pctOf(promo.pct / 100, L)} off your plan.`,
-                `Código ${promo.code} aplicado: −${pctOf(promo.pct / 100, L)} en tu plan.`
+                `Code ${promo.code} appliqué : −${pctOf(promo.pct / 100, L)} ${promo.mois === 0 ? "sur ta formule" : promo.mois === 1 ? "sur ton premier paiement" : `sur tes ${promo.mois} premiers paiements`}.`,
+                `Code ${promo.code} applied: ${pctOf(promo.pct / 100, L)} off ${promo.mois === 0 ? "your plan" : promo.mois === 1 ? "your first payment" : `your first ${promo.mois} payments`}.`,
+                `Código ${promo.code} aplicado: −${pctOf(promo.pct / 100, L)} en ${promo.mois === 0 ? "tu plan" : promo.mois === 1 ? "tu primer pago" : `tus ${promo.mois} primeros pagos`}.`
               )}
               <small>{L.t("Les prix ci-dessous sont indicatifs : le montant exact s'affiche sur la page de paiement.", "Prices below are indicative: the exact amount is shown on the checkout page.", "Los precios de abajo son orientativos: el importe exacto se muestra en la página de pago.")}</small>
             </span>
@@ -185,7 +197,7 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
       </label>
       {nudge && !agree && <p className="pro-agree-hint" role="alert">{L.t("Coche la case ci-dessus pour continuer vers le paiement.", "Tick the box above to continue to checkout.", "Marca la casilla de arriba para continuar con el pago.")}</p>}
       <div className="plans">
-        {PLANS(L, ai, cur, promo?.pct || 0).map((p, i) => {
+        {PLANS(L, ai, cur, promo).map((p, i) => {
           const url = withPromo(checkout[p.id], promo?.code);
           return (
             <article key={p.id} className={`plan plan-${p.id} reveal-in`} style={{ animationDelay: `${i * 90}ms` }}>
@@ -195,6 +207,7 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
                 {p.old && <s className="plan-old"><span className="vh">{L.t("Prix sans le code : ", "Price without the code: ", "Precio sin el código: ")}</span>{p.old}</s>}
                 <b>{p.price}</b><span>{p.per}</span>
               </div>
+              {p.then && <div className="plan-then">{p.then}</div>}
               <div className="plan-sub">{p.sub}</div>
               <ul>{p.items.map(([kind, text, extra]) => (
                 <li key={text} className={`pi pi-${kind}`}>

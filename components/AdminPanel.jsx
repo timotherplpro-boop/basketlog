@@ -198,6 +198,10 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
   const noticeRef = useRef(null);
   const promosOn = !!data?.promosOk; // faux tant que supabase/codes-promo.sql n'a pas été lancé
   const auto = promosOn && !!data?.whopAuto; // vrai : le site crée lui-même les codes chez Whop (clé API présente)
+  // Durée de la remise annoncée sur la page Pro (1 : premier paiement seulement, par défaut ; 0 : à chaque paiement), à choisir telle quelle chez Whop en mode manuel.
+  const durationText = data?.whopMonths === 0 ? t("à chaque paiement", "every payment", "cada pago")
+    : data?.whopMonths > 1 ? t(`les ${data.whopMonths} premiers paiements`, `the first ${data.whopMonths} payments`, `los primeros ${data.whopMonths} pagos`)
+    : t("premier paiement seulement", "first payment only", "solo el primer pago");
   const suggestedCode = cleanPct(invitePct) ? suggestCode(inviteNote, invitePct) : ""; // « @lanuitnba » + 20 -> LANUITNBA20 (vide sans remise valide, ou si le nom est trop court)
   const shownCode = inviteCode ?? suggestedCode;
 
@@ -625,7 +629,7 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
             <ol>
               <li>{t("Ouvre la page des codes promo de Whop", "Open the Whop promo codes page", "Abre la página de códigos promocionales de Whop")} {whopLink}{t(", puis clique sur « Créer un code promo ».", ", then click “Create promo code”.", ", y pulsa «Crear código promocional».")}</li>
               <li>{t("Saisis exactement le même code que dans la liste (bouton « Copier le code ») et la même remise en %.", "Enter exactly the same code as in the list (“Copy code” button) and the same discount in %.", "Escribe exactamente el mismo código que en la lista (botón «Copiar el código») y el mismo descuento en %.")}</li>
-              <li>{t("Choisis la durée de la réduction et les utilisateurs éligibles ; laisse décochées la date d'expiration et la limite d'utilisations, sauf si tu veux en fixer une.", "Choose the discount duration and eligible users; leave the expiry date and maximum uses boxes unticked unless you want to set one.", "Elige la duración del descuento y los usuarios elegibles; deja sin marcar la fecha de caducidad y el límite de usos, salvo que quieras fijar uno.")}</li>
+              <li>{t(`Durée de la réduction : ${durationText}, c'est ce que la page Pro annonce aux clients. Laisse tous les utilisateurs éligibles et décochées la date d'expiration et la limite d'utilisations, sauf si tu veux en fixer une.`, `Discount duration: ${durationText}, which is what the Pro page tells customers. Leave all users eligible and the expiry date and maximum uses boxes unticked unless you want to set one.`, `Duración del descuento: ${durationText}, que es lo que la página Pro anuncia a los clientes. Deja elegibles a todos los usuarios y sin marcar la fecha de caducidad y el límite de usos, salvo que quieras fijar uno.`)}</li>
               <li>{t("Facultatif : le champ « Affilié » rattache le code à un affilié Whop.", "Optional: the “Affiliate” field links the code to a Whop affiliate.", "Opcional: el campo «Afiliado» vincula el código a un afiliado de Whop.")}</li>
               <li>{t("Reviens ici et clique sur « Marquer comme créé chez Whop » pour t'en souvenir.", "Come back here and click “Mark as created in Whop” so you remember it's done.", "Vuelve aquí y pulsa «Marcar como creado en Whop» para recordar que está hecho.")}</li>
             </ol>

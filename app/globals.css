@@ -868,6 +868,7 @@ a.team:hover .team-name { color: var(--peach); }
 .plan-price b { font-family: var(--title); font-weight: 400; font-size: 44px; color: var(--peach); line-height: 1; }
 .plan-price span { color: var(--muted); font-size: 15px; white-space: nowrap; }
 .plans { margin-top: 56px; }
+.plan-then { margin-top: 4px; font-size: 14px; color: var(--muted); } /* « puis 13,99 €/mois » sous un prix remisé limité aux premiers paiements */
 .plan-sub { margin-top: 6px; font-size: 14px; color: var(--muted); min-height: 20px; }
 .plan-pro .plan-sub { color: var(--orange-2); }
 .plan ul { list-style: none; padding: 0; margin: 22px 0 24px; display: grid; gap: 10px; flex: 1; }
@@ -983,7 +984,7 @@ a.team:hover .team-name { color: var(--peach); }
 .pro-promo-ok small { display: block; margin-top: 3px; color: var(--muted); font-size: 12.5px; }
 .pro-promo-tick { color: var(--green); font-weight: 700; }
 .pro-promo-x { margin-left: auto; flex-shrink: 0; background: none; border: 0; color: var(--muted); font: inherit; font-size: 13px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 2px 4px; }
-.plan-old { color: var(--dim); font-size: 18px; margin-right: 2px; }
+.plan-old { color: var(--dim); font-size: 18px; flex: 0 0 100%; } /* prix plein barré sur sa propre ligne : les trois cartes ont la même structure, quelle que soit la largeur ou la langue */
 @keyframes agreeShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 
 

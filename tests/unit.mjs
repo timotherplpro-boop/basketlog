@@ -141,6 +141,7 @@ export async function unit() {
   eq("écart : plusieurs à la fois, tous relevés", kinds(conform({ amount_off: 0.5, status: "inactive", new_users_only: true })), ["remise", "etat", "nouveaux"]);
   eq("durée : à chaque paiement attendu", [kinds(conform({ duration: "once" })), kinds(conform({ duration: "repeating", promo_duration_months: 3 })), kinds(conform({ duration: undefined }))], [["duree"], ["duree"], ["duree"]]);
   eq("durée : premier paiement seulement attendu (1)", [kinds(conform({ duration: "once" }), { months: 1 }), kinds(conform({ duration: "forever" }), { months: 1 })], [[], ["duree"]]);
+  eq("durée : un seul paiement écrit « repeating » sur 1 mois est accepté, sur 2 mois non", [kinds(conform({ duration: "repeating", promo_duration_months: 1 }), { months: 1 }), kinds(conform({ duration: "repeating", promo_duration_months: 2 }), { months: 1 })], [[], ["duree"]]);
   eq("durée : 3 premiers paiements attendus", [kinds(conform({ duration: "repeating", promo_duration_months: 3 }), { months: 3 }), kinds(conform({ duration: "repeating", promo_duration_months: 2 }), { months: 3 }), kinds(conform({ duration: "once" }), { months: 3 })], [[], ["paiements"], ["duree"]]);
   eq("réponse vide ou illisible : écart « vide »", [checkPromo(null, { code: "ZEBRA20", pct: 20 }), checkPromo(undefined, { code: "ZEBRA20", pct: 20 }), checkPromo("x", { code: "ZEBRA20", pct: 20 })], [[{ k: "vide" }], [{ k: "vide" }], [{ k: "vide" }]]);
   const tEn = (fr, e) => e, tEs = (fr, e, sp) => sp;
@@ -154,9 +155,9 @@ export async function unit() {
   const env = { key: process.env.WHOP_API_KEY, months: process.env.WHOP_PROMO_MONTHS };
   const setEnv = (name, v) => { if (v === undefined) delete process.env[name]; else process.env[name] = v; };
   const months = (v) => { setEnv("WHOP_PROMO_MONTHS", v); return promoMonths(); };
-  eq("durée de la remise (WHOP_PROMO_MONTHS) : à chaque paiement par défaut", [months(undefined), months(""), months("0")], [0, 0, 0]);
-  eq("durée de la remise : de 1 à 36 paiements", [months("1"), months("3"), months("12"), months("36")], [1, 3, 12, 36]);
-  eq("durée de la remise : valeur invalide = valeur par défaut", [months("37"), months("-1"), months("2.5"), months("abc"), months(" ")], [0, 0, 0, 0, 0]);
+  eq("durée de la remise (WHOP_PROMO_MONTHS) : premier paiement seulement par défaut", [months(undefined), months(""), months(" ")], [1, 1, 1]);
+  eq("durée de la remise : 0 = à chaque paiement, de 1 à 36 = nombre de paiements", [months("0"), months("1"), months("3"), months("12"), months("36"), months(" 3 ")], [0, 1, 3, 12, 36, 3]);
+  eq("durée de la remise : valeur invalide = valeur par défaut (premier paiement)", [months("37"), months("100"), months("-1"), months("2.5"), months("abc"), months("1e1"), months("0x10")], [1, 1, 1, 1, 1, 1, 1]);
   setEnv("WHOP_PROMO_MONTHS", env.months);
   setEnv("WHOP_API_KEY", undefined);
   const noKey = whopPromoReady();
