@@ -11,6 +11,10 @@ const nextConfig = {
   async headers() {
     return [{ source: "/sw.js", headers: [{ key: "Cache-Control", value: "no-cache, no-store, must-revalidate" }, { key: "Service-Worker-Allowed", value: "/" }] }];
   },
+  // Nom de domaine comme nom de compte Bluesky : identifiant du compte servi par app/api/atproto-did.
+  async rewrites() {
+    return [{ source: "/.well-known/atproto-did", destination: "/api/atproto-did" }];
+  },
   async redirects() {
     return [
       {
