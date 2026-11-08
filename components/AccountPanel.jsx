@@ -1,6 +1,7 @@
 "use client";
 // « Mon compte » : choisir son nom affiché, gérer son abonnement (résilier en fin de période, reprendre, moyen de paiement
-// et factures chez Whop) et supprimer son compte. Tout passe par /api/compte, qui agit sur le compte connecté uniquement.
+// et factures chez Whop) et supprimer son compte (membre ou créateur ; un admin ne se supprime pas ici). Tout passe par /api/compte,
+// qui agit sur le compte connecté uniquement.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -29,7 +30,7 @@ export default function AccountPanel() {
   const [confirmId, setConfirmId] = useState(null); // abonnement dont la résiliation attend sa confirmation
   const [delOpen, setDelOpen] = useState(false);
   const [word, setWord] = useState("");
-  const [gone, setGone] = useState(null); // compte supprimé : { stopped }
+  const [gone, setGone] = useState(null); // compte supprimé : { stopped, creator, codes }
   const touched = useRef(false); // le membre a commencé à écrire son nom : on ne l'écrase plus au rechargement
 
   const money = (p) => {
@@ -113,7 +114,7 @@ export default function AccountPanel() {
     setBusy("");
     if (!good) { setFail({ sec: "sup", msg: j?.error || generic }); await load(); return; }
     patchProStatus({ connected: false, uid: null, name: null, tier: "gratuit", role: null });
-    setGone({ stopped: j.stopped || 0 });
+    setGone({ stopped: j.stopped || 0, creator: !!j.creator, codes: Array.isArray(j.codes) ? j.codes : [] });
   }
 
   const orders = <a href={WHOP_ORDERS} target="_blank" rel="noopener noreferrer">{T("ta page de commandes Whop", "your Whop orders page", "tu página de pedidos de Whop")}</a>;
@@ -124,11 +125,20 @@ export default function AccountPanel() {
       <div className="acc">
         <section className="panel acc-sec acc-gone" aria-live="polite">
           <h2>{T("Ton compte a été supprimé", "Your account has been deleted", "Tu cuenta ha sido eliminada")}</h2>
-          <p>{T(
-            "Tes données Basketlog (historique d'analyses, questions, avis, nom affiché) sont effacées et tu es déconnecté.",
-            "Your Basketlog data (analysis history, questions, review, display name) has been erased and you are logged out.",
-            "Tus datos de Basketlog (historial de análisis, preguntas, opinión, nombre mostrado) se han borrado y has cerrado sesión."
-          )}</p>
+          <p>{gone.creator
+            ? T(
+              "Tes données Basketlog (historique d'analyses, questions, avis, nom affiché) sont effacées, ton accès créateur est retiré et tu es déconnecté.",
+              "Your Basketlog data (analysis history, questions, review, display name) has been erased, your creator access is removed and you are logged out.",
+              "Tus datos de Basketlog (historial de análisis, preguntas, opinión, nombre mostrado) se han borrado, tu acceso de creador se ha retirado y has cerrado sesión."
+            )
+            : T(
+              "Tes données Basketlog (historique d'analyses, questions, avis, nom affiché) sont effacées et tu es déconnecté.",
+              "Your Basketlog data (analysis history, questions, review, display name) has been erased and you are logged out.",
+              "Tus datos de Basketlog (historial de análisis, preguntas, opinión, nombre mostrado) se han borrado y has cerrado sesión."
+            )}</p>
+          {gone.codes?.length > 0 && <p>{gone.codes.length > 1
+            ? T(`Tes codes promo ${gone.codes.join(", ")} sont désactivés : ils ne fonctionnent plus.`, `Your promo codes ${gone.codes.join(", ")} are deactivated: they no longer work.`, `Tus códigos promocionales ${gone.codes.join(", ")} están desactivados: ya no funcionan.`)
+            : T(`Ton code promo ${gone.codes[0]} est désactivé : il ne fonctionne plus.`, `Your promo code ${gone.codes[0]} is deactivated: it no longer works.`, `Tu código promocional ${gone.codes[0]} está desactivado: ya no funciona.`)}</p>}
           {gone.stopped > 0 && <p>{gone.stopped > 1
             ? T(`${gone.stopped} abonnements sont arrêtés : plus aucun prélèvement, accès conservé jusqu'à la fin de la période déjà payée.`, `${gone.stopped} subscriptions are stopped: no further charges, access kept until the end of the period already paid.`, `${gone.stopped} suscripciones detenidas: sin más cobros, acceso conservado hasta el final del periodo ya pagado.`)
             : T("Ton abonnement est arrêté : plus aucun prélèvement, accès conservé jusqu'à la fin de la période déjà payée.", "Your subscription is stopped: no further charges, access kept until the end of the period already paid.", "Tu suscripción está detenida: sin más cobros, acceso conservado hasta el final del periodo ya pagado.")}</p>}
@@ -164,6 +174,9 @@ export default function AccountPanel() {
   }
 
   const { plans, can, role, preview } = data;
+  const isCreator = role === "createur";
+  const codes = Array.isArray(data.creator?.codes) ? data.creator.codes : []; // codes promo du créateur, désactivés chez Whop à la suppression
+  const codeText = (c) => `${c.code} (${T(`-${c.pct} %`, `-${c.pct}%`, `-${c.pct} %`)})`;
   const renewingCount = plans.filter((p) => p.canCancel).length;
   const hasLifetime = plans.some((p) => p.state === "lifetime");
   const typedName = nameIn.trim();
@@ -331,6 +344,15 @@ export default function AccountPanel() {
         <p>{T("Cette action est définitive. Voici ce qui se passe :", "This can't be undone. Here is what happens:", "Esta acción es definitiva. Esto es lo que ocurre:")}</p>
         <ul className="acc-list">
           <li>{T("Tes données Basketlog sont effacées : historique d'analyses, questions posées, avis publié et nom affiché.", "Your Basketlog data is erased: analysis history, questions asked, published review and display name.", "Tus datos de Basketlog se borran: historial de análisis, preguntas, opinión publicada y nombre mostrado.")}</li>
+          {isCreator && <li>{T("Ton accès créateur (accès complet à Basketlog) est retiré et ton lien d'invitation ne fonctionne plus.", "Your creator access (full access to Basketlog) is removed and your invitation link stops working.", "Tu acceso de creador (acceso completo a Basketlog) se retira y tu enlace de invitación deja de funcionar.")}</li>}
+          {isCreator && codes.length > 0 && <li>
+            {codes.length > 1 ? T("Tes codes promo ", "Your promo codes ", "Tus códigos promocionales ") : T("Ton code promo ", "Your promo code ", "Tu código promocional ")}
+            <b>{codes.map(codeText).join(", ")}</b>
+            {codes.length > 1
+              ? T(" sont désactivés chez Whop : ils ne fonctionneront plus pour personne.", " are deactivated at Whop: they will no longer work for anyone.", " se desactivan en Whop: ya no funcionarán para nadie.")
+              : T(" est désactivé chez Whop : il ne fonctionnera plus pour personne.", " is deactivated at Whop: it will no longer work for anyone.", " se desactiva en Whop: ya no funcionará para nadie.")}
+          </li>}
+          {isCreator && <li>{T(`Des commissions te sont encore dues ? Demande-les à ${CONTACT} avant de supprimer : ton code ne sera plus rattaché à ton nom dans nos statistiques.`, `Are you still owed any commissions? Ask for them at ${CONTACT} before deleting: your code will no longer be linked to your name in our statistics.`, `¿Te deben todavía alguna comisión? Pídela en ${CONTACT} antes de eliminar: tu código ya no estará vinculado a tu nombre en nuestras estadísticas.`)}</li>}
           {renewingCount > 0 && <li>{renewingCount > 1
             ? T("Tes abonnements en cours sont arrêtés : plus aucun prélèvement, et ton accès est conservé jusqu'à la fin de la période déjà payée.", "Your active subscriptions are stopped: no further charges, and you keep your access until the end of the period already paid.", "Tus suscripciones activas se detienen: sin más cobros, y conservas el acceso hasta el final del periodo ya pagado.")
             : T("Ton abonnement en cours est arrêté : plus aucun prélèvement, et ton accès est conservé jusqu'à la fin de la période déjà payée.", "Your active subscription is stopped: no further charges, and you keep your access until the end of the period already paid.", "Tu suscripción activa se detiene: sin más cobros, y conservas el acceso hasta el final del periodo ya pagado.")}</li>}
@@ -338,8 +360,8 @@ export default function AccountPanel() {
           <li>{T("Ton compte Whop (e-mail, moyens de paiement, factures) est géré par Whop et n'est pas supprimé ici. Pour le supprimer aussi : ", "Your Whop account (email, payment methods, invoices) is managed by Whop and isn't deleted here. To delete it too: ", "Tu cuenta de Whop (correo, medios de pago, facturas) la gestiona Whop y no se elimina aquí. Para eliminarla también: ")}<a href={WHOP_SETTINGS} target="_blank" rel="noopener noreferrer">{T("tes réglages Whop", "your Whop settings", "tus ajustes de Whop")}</a>.</li>
         </ul>
 
-        {role ? (
-          <p className="acc-note">{T(`Ton compte a un accès ${role === "admin" ? "admin" : "créateur"} : pour le supprimer, écris-nous à ${CONTACT}.`, `Your account has ${role === "admin" ? "admin" : "creator"} access: to delete it, write to us at ${CONTACT}.`, `Tu cuenta tiene acceso de ${role === "admin" ? "administrador" : "creador"}: para eliminarla, escríbenos a ${CONTACT}.`)}</p>
+        {role === "admin" ? (
+          <p className="acc-note">{T(`Ton compte a un accès admin : il ne se supprime pas d'ici. Écris-nous à ${CONTACT}, ou demande à un autre admin de te retirer l'accès depuis l'espace admin, puis reviens ici.`, `Your account has admin access: it can't be deleted from here. Write to us at ${CONTACT}, or ask another admin to remove your access from the admin area, then come back here.`, `Tu cuenta tiene acceso de administrador: no se elimina desde aquí. Escríbenos a ${CONTACT}, o pide a otro administrador que te retire el acceso desde el espacio de administración y vuelve aquí.`)}</p>
         ) : !can.delete ? (
           preview ? null : <p className="acc-note">{T(`La suppression en ligne sera disponible très bientôt. En attendant, écris-nous à ${CONTACT} et on s'en occupe.`, `Online deletion will be available very soon. Until then, write to us at ${CONTACT} and we'll take care of it.`, `La eliminación en línea estará disponible muy pronto. Mientras tanto, escríbenos a ${CONTACT} y nos ocupamos.`)}</p>
         ) : !delOpen ? (

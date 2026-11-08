@@ -4,7 +4,7 @@
 import { pathToFileURL } from "node:url";
 import { chunkText, detectLang, localizeReviews, translateRaw } from "../lib/translate.js";
 import { accountLabel, creatorNames, noEndDate } from "../lib/accounts.js";
-import { DELETE_WORDS, buildPlans, cleanName, deleteConfirmed, normalizeMembership, planOf, renewing, tierOfProduct } from "../lib/account.js";
+import { DELETE_WORDS, buildPlans, cleanName, creatorCodes, deleteConfirmed, normalizeMembership, planOf, renewing, tierOfProduct } from "../lib/account.js";
 import { CODE_RE, cleanCode, cleanPct, discounted, mergePromos, randomChars, suggestCode, withPromo } from "../lib/promo.js";
 import { asPct, checkPromo, describeProblem, describeProblems, promoMonths, whopPromoReady } from "../lib/whop-promo.js";
 import { BSKY_MAX, blueskyPost, elPick, graphemes, nbaPick, socialPosts, telegramText } from "../lib/social.js";
@@ -267,6 +267,13 @@ export async function unit() {
   eq("Prénom : caractères invisibles supprimés, contrôles remplacés par un espace", [cleanName("Té\u200bo").name, cleanName("Lé\u0000a").name, cleanName("A\u202eB").name], ["Téo", "Lé a", "A B"]);
   eq("Suppression : le mot de confirmation est accepté dans les trois langues, sans casse ni accents", ["SUPPRIMER", "supprimer", "  Supprimer ", "DELETE", "delete", "Eliminar", "ELIMINAR"].map(deleteConfirmed), [true, true, true, true, true, true, true]);
   eq("Suppression : tout autre texte est refusé", ["", " ", null, undefined, "oui", "SUPPRIME", "supprimé", "SUPPRIMER!", "SUPPRIMER MON COMPTE", "DELET"].map(deleteConfirmed), [false, false, false, false, false, false, false, false, false, false]);
+
+  // --- Codes promo d'un créateur (lecture de basketlog_createur_infos avant la suppression de son compte)
+  eq("Codes créateur : forme normale conservée, code mis en majuscules, remise entière", creatorCodes([{ code: "gonzo", pct: 20 }, { code: " LIEN15 ", pct: "15" }, { code: "AB1", pct: 90 }]), [{ code: "GONZO", pct: 20 }, { code: "LIEN15", pct: 15 }, { code: "AB1", pct: 90 }]);
+  eq("Codes créateur : un code n'apparaît qu'une fois (casse ignorée), dans l'ordre reçu", creatorCodes([{ code: "GONZO", pct: 20 }, { code: "gonzo", pct: 25 }, { code: "AUTRE", pct: 10 }]), [{ code: "GONZO", pct: 20 }, { code: "AUTRE", pct: 10 }]);
+  eq("Codes créateur : forme invalide ignorée (trop court, trop long, signes, vide, pas du texte)", creatorCodes([{ code: "AB", pct: 20 }, { code: "A".repeat(25), pct: 20 }, { code: "GON-ZO", pct: 20 }, { code: "GON ZO", pct: 20 }, { code: "", pct: 20 }, { code: 123456, pct: 20 }, { code: null, pct: 20 }, { pct: 20 }]), []);
+  eq("Codes créateur : 24 caractères acceptés, remise hors 1 à 90 ou non entière ignorée", creatorCodes([{ code: "A".repeat(24), pct: 1 }, { code: "ZERO", pct: 0 }, { code: "TROP", pct: 91 }, { code: "VIRGULE", pct: 12.5 }, { code: "TEXTE", pct: "beaucoup" }, { code: "NEG", pct: -5 }, { code: "VIDE" }]), [{ code: "A".repeat(24), pct: 1 }]);
+  eq("Codes créateur : n'importe quoi d'autre qu'une liste donne une liste vide, sans erreur ; les champs en trop sont retirés", [creatorCodes(null), creatorCodes(undefined), creatorCodes("GONZO"), creatorCodes({ code: "GONZO", pct: 20 }), creatorCodes([null, 5, "x", []]), creatorCodes([{ code: "GONZO", pct: 20, whop_ok: true, uid: "u1" }])], [[], [], [], [], [], [{ code: "GONZO", pct: 20 }]]);
   eq("Suppression : les trois mots", DELETE_WORDS, { fr: "SUPPRIMER", en: "DELETE", es: "ELIMINAR" });
 
   const IDS = { lifetime: "prod_L", pro: "prod_P", starter: "prod_S" };
