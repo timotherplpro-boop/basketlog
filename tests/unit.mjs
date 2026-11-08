@@ -3,7 +3,7 @@
 // Usage : node tests/unit.mjs  (lancé aussi par tests/smoke.mjs)
 import { pathToFileURL } from "node:url";
 import { chunkText, detectLang, localizeReviews, translateRaw } from "../lib/translate.js";
-import { accountLabel, creatorNames } from "../lib/accounts.js";
+import { accountLabel, creatorNames, noEndDate } from "../lib/accounts.js";
 import { DELETE_WORDS, buildPlans, cleanName, deleteConfirmed, normalizeMembership, planOf, renewing, tierOfProduct } from "../lib/account.js";
 import { CODE_RE, cleanCode, cleanPct, discounted, mergePromos, randomChars, suggestCode, withPromo } from "../lib/promo.js";
 import { asPct, checkPromo, describeProblem, describeProblems, promoMonths, whopPromoReady } from "../lib/whop-promo.js";
@@ -180,6 +180,13 @@ export async function unit() {
   eq("admin : l'ordre ne change pas (nom du compte, puis la note)", [accountLabel({ role: "admin", uid: "u0", nom: "Tim", note: "Propriétaire" }), accountLabel({ role: "admin", uid: "u2", nom: "marie_w", note: "Marie" })], [{ main: "Tim", sub: "Propriétaire", whop: false }, { main: "marie_w", sub: "Marie", whop: false }]);
   eq("admin : note identique au nom, ou absente : pas de doublon", [accountLabel({ role: "admin", nom: "Tim", note: "tim" }), accountLabel({ role: "admin", nom: "Tim", note: null })], [{ main: "Tim", sub: "", whop: false }, { main: "Tim", sub: "", whop: false }]);
   eq("ligne vide ou absente : rien d'affiché, sans erreur", [accountLabel(null), accountLabel(undefined), accountLabel({})], [{ main: "", sub: "", whop: false }, { main: "", sub: "", whop: false }, { main: "", sub: "", whop: false }]);
+  // Liens d'invitation sans date de fin (supabase/liens-sans-expiration.sql : date de fin repoussée de 100 ans).
+  const NOW_INV = Date.parse("2026-11-08T14:00:00Z");
+  eq("lien d'invitation : une date à 100 ans (ce que pose le script, avec ou sans fuseau) = sans date de fin", [noEndDate("2126-11-08T14:35:00.123456+00:00", NOW_INV), noEndDate("2126-11-08T14:35:00Z", NOW_INV), noEndDate("2126-11-08T15:35:00+01:00", NOW_INV)], [true, true, true]);
+  eq("lien d'invitation : une date proche (ancien lien à 30 jours, ou dans un an) garde sa date", [noEndDate("2026-12-08T14:00:00Z", NOW_INV), noEndDate("2027-11-08T14:00:00Z", NOW_INV), noEndDate("2026-11-08T14:00:00Z", NOW_INV)], [false, false, false]);
+  eq("lien d'invitation : seuil à 50 ans (49 ans = date affichée, 51 ans = sans date de fin)", [noEndDate("2075-11-08T14:00:00Z", NOW_INV), noEndDate("2077-11-08T14:00:00Z", NOW_INV)], [false, true]);
+  eq("lien d'invitation : date absente, vide ou illisible = pas « sans date de fin » (jamais d'affirmation à tort)", [noEndDate(null), noEndDate(undefined), noEndDate(""), noEndDate("pas une date"), noEndDate(42), noEndDate({})], [false, false, false, false, false, false]);
+  eq("lien d'invitation : sans heure donnée, l'heure actuelle sert de repère", [noEndDate(new Date(Date.now() + 100 * 365.25 * 864e5).toISOString()), noEndDate(new Date(Date.now() + 30 * 864e5).toISOString())], [true, false]);
   eq("statistiques : seuls les créateurs avec un nom saisi sont renommés", creatorNames([
     { uid: "u0", role: "admin", nom: "Tim", note: "Propriétaire" },
     { uid: "u1", role: "createur", nom: "matheosds", note: " Gonzopicks " },

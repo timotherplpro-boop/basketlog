@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { money, price } from "../lib/pricing";
 import { LANGS, LANG_NAMES, fmtDate, mk, pctOf } from "../lib/i18n";
-import { accountLabel } from "../lib/accounts";
+import { accountLabel, noEndDate } from "../lib/accounts";
 import { CODE_RE, PROMO_DEFAULT, PROMO_MAX, PROMO_MIN, cleanCode, cleanPct, suggestCode } from "../lib/promo";
 import { useL } from "./LangProvider";
 
@@ -482,9 +482,9 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
         <div className="adm-head"><h2 id="adm-acces">{t("Créateurs et admins", "Creators and admins", "Creadores y administradores")}</h2></div>
         <p className="adm-help">
           {t(
-            "Crée un lien et envoie-le à ton créateur. Il se connecte (ou crée son compte gratuit), puis active son accès : il voit toute l'application, comme un abonné Lifetime, sans payer. Un créateur ne peut ni relire les avis ni en laisser. Chaque lien ne sert qu'une fois et expire après 30 jours.",
-            "Create a link and send it to your creator. They log in (or create their free account), then activate their access: they see the whole app, like a Lifetime subscriber, without paying. A creator can neither moderate reviews nor leave any. Each link works only once and expires after 30 days.",
-            "Crea un enlace y envíaselo a tu creador. Inicia sesión (o crea su cuenta gratuita) y luego activa su acceso: ve toda la aplicación, como un suscriptor Lifetime, sin pagar. Un creador no puede revisar opiniones ni dejar ninguna. Cada enlace solo sirve una vez y caduca a los 30 días."
+            "Crée un lien et envoie-le à ton créateur. Il se connecte (ou crée son compte gratuit), puis active son accès : il voit toute l'application, comme un abonné Lifetime, sans payer. Un créateur ne peut ni relire les avis ni en laisser. Chaque lien ne sert qu'une fois et n'a pas de date de fin : il reste valable tant que le créateur ne l'a pas utilisé (tu peux l'annuler quand tu veux).",
+            "Create a link and send it to your creator. They log in (or create their free account), then activate their access: they see the whole app, like a Lifetime subscriber, without paying. A creator can neither moderate reviews nor leave any. Each link works only once and has no end date: it stays valid until the creator uses it (you can cancel it any time).",
+            "Crea un enlace y envíaselo a tu creador. Inicia sesión (o crea su cuenta gratuita) y luego activa su acceso: ve toda la aplicación, como un suscriptor Lifetime, sin pagar. Un creador no puede revisar opiniones ni dejar ninguna. Cada enlace solo sirve una vez y no tiene fecha de fin: sigue siendo válido hasta que el creador lo use (puedes cancelarlo cuando quieras)."
           )}
         </p>
         <form className={`adm-invite ${promosOn ? "with-pct" : ""}`} onSubmit={invite}>
@@ -650,7 +650,7 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
             <ul className="adm-rows">
               {data.invitations.map((i) => (
                 <li key={i.code}>
-                  <span><b>{i.note || t("Sans nom", "No name", "Sin nombre")}</b> · {roleName(i.role)} · {t("expire le", "expires on", "caduca el")} {day(L, i.expire_le)}</span>
+                  <span><b>{i.note || t("Sans nom", "No name", "Sin nombre")}</b> · {roleName(i.role)} · {noEndDate(i.expire_le) ? t("sans date de fin", "no end date", "sin fecha de fin") : `${t("expire le", "expires on", "caduca el")} ${day(L, i.expire_le)}`}</span>
                   <span className="adm-actions">
                     <button type="button" className="adm-btn" onClick={() => copy(inviteUrl(i.code, linkLang), i.code)}>{copied === i.code ? t("Copié", "Copied", "Copiado") : `${t("Copier le lien", "Copy link", "Copiar el enlace")} (${linkLang.toUpperCase()})`}</button>
                     <button type="button" className="adm-btn danger" disabled={!!busy} onClick={() => cancelInvite(i.code)}>{t("Annuler", "Cancel", "Cancelar")}</button>
