@@ -49,7 +49,12 @@ export default function SiteFooter({ L, compact = false }) {
           <Link href={L.href("/methode")}>{L.t("Méthode", "Methodology", "Metodología")}</Link>
           <Link href={L.href("/pro")}>Basketlog Pro</Link>
           <Link href={L.href("/avis")}>{L.t("Avis", "Reviews", "Opiniones")}</Link>
+          {/* Comptes officiels (mêmes adresses que sameAs dans app/layout.jsx) : liens visibles pour que Google
+              relie ces pages au nom « Basketlog » et les découvre depuis le site. */}
+          <a href="https://www.youtube.com/@basketlog" target="_blank" rel="me noopener">{L.t("Basketlog sur YouTube", "Basketlog on YouTube", "Basketlog en YouTube")}</a>
           <a href="https://www.tiktok.com/@basketlog" target="_blank" rel="me noopener">{L.t("Basketlog sur TikTok", "Basketlog on TikTok", "Basketlog en TikTok")}</a>
+          <a href="https://bsky.app/profile/basketlog.bsky.social" target="_blank" rel="me noopener">{L.t("Basketlog sur Bluesky", "Basketlog on Bluesky", "Basketlog en Bluesky")}</a>
+          <a href="https://t.me/basketlog" target="_blank" rel="me noopener">{L.t("Basketlog sur Telegram", "Basketlog on Telegram", "Basketlog en Telegram")}</a>
         </nav>
         {legal}
         <div>{notBetting}</div>
