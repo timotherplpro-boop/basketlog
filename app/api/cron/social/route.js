@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { socialDay } from "../../../../lib/social-day";
 import { ogImageUrl } from "../../../../lib/social";
-import { socialConfig, socialStatus, sendTelegram, blueskySession, blueskyThumb, sendBluesky, blueskyPostedSince } from "../../../../lib/social-send";
+import { socialConfig, socialStatus, sendTelegram, telegramCheck, blueskySession, blueskyThumb, sendBluesky, blueskyPostedSince } from "../../../../lib/social-send";
 import { COOKIE, currentSession } from "../../../../lib/pro";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +11,8 @@ export const maxDuration = 60;
 // à 15 h 20 UTC (16 h 20 à Paris, 10 h 20 à New York) : juste après l'enregistrement des pronostics de 15 h 07
 // (/api/cron/pronos), avant les matchs EuroLeague et NBA du soir.
 // Tant que SOCIAL_ENABLED ne vaut pas 1, rien n'est publié : la réponse montre seulement les messages prévus.
-// ?dry=1 force l'aperçu. Accès : tâche planifiée de Vercel (avec CRON_SECRET s'il est défini) ou compte admin connecté.
+// ?dry=1 force l'aperçu ; ?check=1 vérifie les comptes (bot Telegram administrateur de la chaîne, connexion Bluesky)
+// sans rien publier. Accès : tâche planifiée de Vercel (avec CRON_SECRET s'il est défini) ou compte admin connecté.
 let lastRun = 0;
 let lastDay = "";
 
@@ -29,6 +30,29 @@ export async function GET(req) {
   if (!(await allowed(req))) return json({ error: "interdit" }, 401);
   const sp = new URL(req.url).searchParams;
   const cfg = socialConfig();
+  if (sp.get("check") === "1") {
+    const check = { status: socialStatus(cfg), telegram: {}, bluesky: null };
+    if (cfg.telegram) {
+      for (const [lang, chat] of Object.entries(cfg.telegram.chats)) {
+        try {
+          check.telegram[lang] = { ok: true, ...(await telegramCheck(cfg.telegram.token, chat)) };
+        } catch (e) {
+          check.telegram[lang] = { ok: false, chat, error: e.message };
+        }
+      }
+    }
+    if (cfg.bluesky) {
+      try {
+        const s = await blueskySession(cfg.bluesky);
+        check.bluesky = { ok: true, handle: cfg.bluesky.handle, did: s.did };
+      } catch (e) {
+        check.bluesky = { ok: false, handle: cfg.bluesky.handle, error: e.message };
+      }
+    }
+    const tg = Object.values(check.telegram);
+    const ok = tg.every((t) => t.ok && t.admin && t.canPost) && (!check.bluesky || check.bluesky.ok) && (tg.length > 0 || !!check.bluesky);
+    return json({ ok, ...check, at: new Date().toISOString() });
+  }
   const day = await socialDay();
   const base = { d: day.d, status: socialStatus(cfg), games: day.picks.length, errors: day.errors };
   if (!day.picks.length) return json({ ok: !day.errors.length, ...base, skipped: "aucun match à venir aujourd'hui" });
