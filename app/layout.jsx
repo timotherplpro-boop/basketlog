@@ -57,7 +57,7 @@ const SITE_LD = [
     logo: { "@type": "ImageObject", url: `${SITE}/icons/icon-512.png`, width: 512, height: 512 },
     description: "Analyse basket et pronostics statistiques des matchs NBA et EuroLeague.",
     // Comptes officiels de la marque (leur bio renvoie vers le site) : aide Google à relier « Basketlog » au site.
-    sameAs: ["https://www.tiktok.com/@basketlog", "https://www.tiktok.com/@basketlogapp", "https://t.me/basketlog"],
+    sameAs: ["https://www.tiktok.com/@basketlog", "https://www.tiktok.com/@basketlogapp", "https://t.me/basketlog", "https://bsky.app/profile/basketlog.bsky.social"],
   },
   {
     "@context": "https://schema.org",
