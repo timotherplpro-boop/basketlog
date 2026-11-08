@@ -15,6 +15,7 @@ export async function generateMetadata() {
 const TRACEURS = [
   ["bl_consent", "Stockage local", "Mémoriser ton choix sur les cookies", "Nécessaire", "6 mois"],
   ["bl_pro", "Cookie", "Garder ta session d'abonné connectée (cookie signé, inaccessible aux scripts)", "Nécessaire", "60 jours"],
+  ["bl_switch", "Cookie", "Retenir un changement de formule en cours pendant que tu paies chez Whop (cookie signé, inaccessible aux scripts ; supprimé dès que le changement est terminé ou annulé)", "Nécessaire", "12 heures"],
   ["whop_state, whop_pkce", "Cookie", "Sécuriser la connexion avec Whop", "Nécessaire", "10 minutes"],
   ["bl_install_dismiss", "Stockage local", "Ne plus te proposer d'installer l'appli si tu as refermé la proposition", "Nécessaire", "30 jours"],
   ["bl_views", "Stockage de session", "Compter les pages vues pendant la visite, pour proposer l'appli au bon moment", "Nécessaire", "La visite"],
@@ -64,6 +65,7 @@ function CookiesFr() {
 const TRACKERS_EN = [
   ["bl_consent", "Local storage", "Remember your cookie choice", "Necessary", "6 months"],
   ["bl_pro", "Cookie", "Keep your account session logged in (signed cookie, not accessible to scripts)", "Necessary", "60 days"],
+  ["bl_switch", "Cookie", "Remember a plan change in progress while you pay on Whop (signed cookie, not accessible to scripts; deleted as soon as the change is completed or cancelled)", "Necessary", "12 hours"],
   ["whop_state, whop_pkce", "Cookie", "Secure the login with Whop", "Necessary", "10 minutes"],
   ["bl_install_dismiss", "Local storage", "Stop offering to install the app once you have closed the offer", "Necessary", "30 days"],
   ["bl_views", "Session storage", "Count pages viewed during the visit, to offer the app at the right time", "Necessary", "The visit"],
@@ -114,6 +116,7 @@ function CookiesEn({ L }) {
 const TRACKERS_ES = [
   ["bl_consent", "Almacenamiento local", "Recordar tu elección sobre las cookies", "Necesaria", "6 meses"],
   ["bl_pro", "Cookie", "Mantener abierta la sesión de tu cuenta (cookie firmada, inaccesible para los scripts)", "Necesaria", "60 días"],
+  ["bl_switch", "Cookie", "Recordar un cambio de plan en curso mientras pagas en Whop (cookie firmada, inaccesible para los scripts; se elimina en cuanto el cambio se completa o se cancela)", "Necesaria", "12 horas"],
   ["whop_state, whop_pkce", "Cookie", "Proteger el inicio de sesión con Whop", "Necesaria", "10 minutos"],
   ["bl_install_dismiss", "Almacenamiento local", "No volver a proponerte instalar la app si has cerrado la propuesta", "Necesaria", "30 días"],
   ["bl_views", "Almacenamiento de sesión", "Contar las páginas vistas durante la visita, para proponerte la app en el momento oportuno", "Necesaria", "La visita"],

@@ -1,7 +1,9 @@
 "use client";
-// « Mon compte » : choisir son nom affiché, gérer son abonnement (résilier en fin de période, reprendre, moyen de paiement
-// et factures chez Whop) et supprimer son compte (membre ou créateur ; un admin ne se supprime pas ici). Tout passe par /api/compte,
-// qui agit sur le compte connecté uniquement.
+// « Mon compte » : choisir son nom affiché, gérer son abonnement (passer à une formule supérieure en un clic, résilier en fin de
+// période, reprendre, moyen de paiement et factures chez Whop) et supprimer son compte (membre ou créateur ; un admin ne se supprime
+// pas ici). Tout passe par /api/compte, qui agit sur le compte connecté uniquement.
+// Changement de formule : le bouton envoie payer la nouvelle formule chez Whop ; au retour, la page vérifie le paiement et le serveur
+// arrête l'ancien abonnement EN FIN DE PÉRIODE, seulement une fois la nouvelle formule confirmée (voir app/api/compte/route.js).
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -9,6 +11,8 @@ import { useL } from "./LangProvider";
 import { DELETE_WORDS, NAME_MAX, deleteConfirmed } from "../lib/account";
 import { fmtDate } from "../lib/i18n";
 import { patchProStatus } from "../lib/useProStatus";
+import { track } from "../lib/analytics";
+import { switchDoneText } from "../lib/switch-text";
 
 // Page Whop où l'on retrouve ses commandes (repli quand le site ne peut pas lire ou modifier l'abonnement) et réglages du compte Whop.
 const WHOP_ORDERS = "https://whop.com/@me/settings/orders/";
@@ -16,6 +20,9 @@ const WHOP_SETTINGS = "https://whop.com/@me/settings/";
 const CONTACT = "contact@basketlog-app.com";
 
 const TIER = { starter: "Starter", pro: "Pro", lifetime: "Lifetime" };
+const WHOP_URL = /^https:\/\/([a-z0-9-]+\.)*whop\.com\//i; // on ne quitte le site que vers Whop
+const CHECK_TRIES = 6; // vérifications automatiques du paiement (une toutes les 4 s), puis le membre relance lui-même
+const CHECK_EVERY_MS = 4000;
 
 export default function AccountPanel() {
   const L = useL();
@@ -32,6 +39,13 @@ export default function AccountPanel() {
   const [word, setWord] = useState("");
   const [gone, setGone] = useState(null); // compte supprimé : { stopped, creator, codes }
   const touched = useRef(false); // le membre a commencé à écrire son nom : on ne l'écrase plus au rechargement
+  const [sw, setSw] = useState(null); // vérification d'un changement de formule : { phase: "checking" | "pending" | "error", msg }
+  const tries = useRef(0); // vérifications automatiques déjà faites
+  const timer = useRef(null);
+  const checking = useRef(false);
+  const autoStarted = useRef(false);
+  const [agree, setAgree] = useState(false); // CGV et CGU acceptées, accès immédiat demandé (nouvel achat)
+  const [nudge, setNudge] = useState(false); // rappel : la case n'est pas cochée
 
   const money = (p) => {
     if (!p) return "";
@@ -59,9 +73,9 @@ export default function AccountPanel() {
     try {
       const res = await fetch("/api/compte", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...payload, lang: L.lang }), cache: "no-store" });
       const j = await res.json().catch(() => null);
-      return { good: res.ok && !!j?.ok, j };
+      return { good: res.ok && !!j?.ok, j, status: res.status };
     } catch {
-      return { good: false, j: { error: T("Connexion impossible, réessaie.", "Couldn't connect, please try again.", "No se ha podido conectar, inténtalo de nuevo.") } };
+      return { good: false, status: 0, j: { error: T("Connexion impossible, réessaie.", "Couldn't connect, please try again.", "No se ha podido conectar, inténtalo de nuevo.") } };
     }
   }
   const generic = T("Une erreur est survenue.", "Something went wrong.", "Se ha producido un error.");
@@ -88,7 +102,7 @@ export default function AccountPanel() {
     // Le nouvel état de l'abonnement (relu chez Whop par le serveur) s'affiche tout de suite, avant la relecture complète ci-dessous.
     if (j.plan) {
       const { id: planId, state, canCancel, canResume, periodEnd } = j.plan;
-      setData((d) => (d ? { ...d, plans: d.plans.map((p) => (p.id === planId ? { ...p, state, canCancel, canResume, periodEnd, included: canCancel ? p.included : null, duplicate: canCancel ? p.duplicate : false } : p)) } : d));
+      setData((d) => (d ? { ...d, plans: d.plans.map((p) => (p.id === planId ? { ...p, state, canCancel, canResume, periodEnd, included: canCancel ? (p.included || p.covered || null) : null, covered: canCancel ? null : (p.included || p.covered || null), duplicate: canCancel ? p.duplicate : false } : p)) } : d));
     }
     const tier = TIER[j.plan?.tier] || "";
     if (action === "resilier") {
@@ -107,6 +121,84 @@ export default function AccountPanel() {
     }
     await load();
   }
+
+  // ---------- Changement de formule en un clic ----------
+  const pend = data?.switch?.pending || null; // changement demandé, pas encore terminé : { from, fromTier, tier, url, ready }
+
+  const doneMsg = (j) => switchDoneText(T, j, day(j.from?.periodEnd)); // message de fin (lib/switch-text.js)
+
+  // Clic sur « Passer à … » : le serveur prépare le paiement chez Whop (lien choisi côté serveur) et retient le changement ;
+  // on part payer. Rien n'est arrêté à ce stade.
+  async function startSwitch(p, o) {
+    if (!agree) { setNudge(true); document.getElementById(`acc-agree-${p.id}`)?.focus(); return; }
+    setBusy(`sw:${p.id}:${o.tier}`); setFail(null); setOk(null);
+    const { good, j } = await post({ action: "changer", id: p.id, cible: o.tier, accept: true });
+    if (!good || typeof j?.url !== "string" || !WHOP_URL.test(j.url)) {
+      setBusy(""); setFail({ sec: "abo", msg: j?.error || generic }); await load(); return;
+    }
+    track("Changement de formule", { etape: "paiement", de: p.tier, vers: o.tier });
+    window.location.assign(j.url);
+    setTimeout(() => setBusy(""), 10000); // la page de paiement ne s'est pas ouverte : on rend la main
+  }
+
+  // Vérifie le paiement chez Whop. Paiement confirmé : l'ancien abonnement est arrêté en fin de période (fait par le serveur).
+  // Pas encore confirmé : on réessaie quelques fois toutes seules, puis le membre relance avec « Vérifier mon paiement ».
+  async function finish({ manual = false } = {}) {
+    if (checking.current) return;
+    checking.current = true;
+    clearTimeout(timer.current);
+    if (manual) tries.current = 0;
+    setSw({ phase: "checking" });
+    const { good, j, status } = await post({ action: "finaliser" });
+    checking.current = false;
+    if (!good) {
+      if (status === 401) { await load(); return; }
+      setSw({ phase: "error", msg: j?.error || generic });
+      return;
+    }
+    if (j.state === "pending") {
+      tries.current += 1;
+      setSw({ phase: "pending" });
+      if (tries.current < CHECK_TRIES) timer.current = setTimeout(() => finish(), CHECK_EVERY_MS);
+      return;
+    }
+    tries.current = 0;
+    setSw(null);
+    if (j.state === "done") {
+      patchProStatus({ tier: j.tier, perDay: j.perDay }); // la barre latérale et les accès suivent tout de suite
+      router.refresh();
+      setOk({ sec: "abo", msg: doneMsg(j) });
+      track("Changement de formule", { etape: "terminé", de: j.from?.tier, vers: j.to?.tier });
+    }
+    await load();
+  }
+
+  async function abandon() {
+    clearTimeout(timer.current);
+    setBusy("sw-abandon"); setFail(null); setOk(null);
+    const { good, j } = await post({ action: "abandonner" });
+    setBusy("");
+    if (!good) { setFail({ sec: "abo", msg: j?.error || generic }); return; }
+    tries.current = 0;
+    setSw(null);
+    setOk({ sec: "abo", msg: T("Changement annulé : rien n'a été arrêté, ton abonnement continue normalement.", "Switch cancelled: nothing was stopped, your subscription carries on as usual.", "Cambio cancelado: no se ha detenido nada, tu suscripción continúa con normalidad.") });
+    await load();
+  }
+
+  // Un changement est en cours (on revient de la page de paiement) : vérification tout de suite, sans attendre un clic.
+  useEffect(() => {
+    if (!pend) { autoStarted.current = false; return; }
+    if (autoStarted.current) return;
+    autoStarted.current = true;
+    finish();
+  }, [pend?.from, pend?.tier]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => clearTimeout(timer.current), []);
+  // Bouton « Précédent » depuis la page de paiement : le navigateur peut rendre la page telle qu'on l'a quittée (bouton bloqué).
+  useEffect(() => {
+    const onShow = (e) => { if (e.persisted) { setBusy(""); load(); } };
+    window.addEventListener("pageshow", onShow);
+    return () => window.removeEventListener("pageshow", onShow);
+  }, [load]);
 
   async function removeAccount() {
     setBusy("supprimer"); setFail(null); setOk(null);
@@ -230,6 +322,39 @@ export default function AccountPanel() {
       <section className="panel acc-sec" aria-labelledby="acc-abo">
         <h2 id="acc-abo">{T("Mon abonnement", "My subscription", "Mi suscripción")}</h2>
         {section("abo")}
+        {pend && (
+          <div className="acc-pending" role="status" aria-live="polite">
+            <p><b>{T(`Changement vers ${TIER[pend.tier]} en cours`, `Switch to ${TIER[pend.tier]} in progress`, `Cambio a ${TIER[pend.tier]} en curso`)}</b></p>
+            <p>
+              {sw?.phase === "checking"
+                ? T("Vérification de ton paiement auprès de Whop…", "Checking your payment with Whop…", "Comprobando tu pago con Whop…")
+                : sw?.phase === "error"
+                  ? sw.msg
+                  : pend.ready
+                    ? T(
+                      `Ton paiement est confirmé. Il reste à arrêter ton ancien abonnement ${TIER[pend.fromTier]} à la fin de sa période.`,
+                      `Your payment is confirmed. Your previous ${TIER[pend.fromTier]} subscription still has to be stopped at the end of its period.`,
+                      `Tu pago está confirmado. Falta detener tu anterior suscripción ${TIER[pend.fromTier]} al final de su periodo.`
+                    )
+                    : T(
+                      `On attend la confirmation de ton paiement ${TIER[pend.tier]} par Whop. Dès qu'elle arrive, ton abonnement ${TIER[pend.fromTier]} est arrêté à la fin de sa période : rien n'est arrêté avant. Tu viens de payer ? La confirmation peut prendre quelques instants.`,
+                      `We're waiting for Whop to confirm your ${TIER[pend.tier]} payment. As soon as it arrives, your ${TIER[pend.fromTier]} subscription is stopped at the end of its period: nothing is stopped before then. Just paid? Confirmation can take a few moments.`,
+                      `Esperamos que Whop confirme tu pago ${TIER[pend.tier]}. En cuanto llegue, tu suscripción ${TIER[pend.fromTier]} se detiene al final de su periodo: no se detiene nada antes. ¿Acabas de pagar? La confirmación puede tardar unos instantes.`
+                    )}
+            </p>
+            <div className="acc-actions">
+              <button type="button" className="acc-btn primary" disabled={sw?.phase === "checking" || !!busy} onClick={() => finish({ manual: true })}>
+                {sw?.phase === "checking" ? "…" : pend.ready ? T("Terminer le changement", "Finish the switch", "Terminar el cambio") : T("Vérifier mon paiement", "Check my payment", "Comprobar mi pago")}
+              </button>
+              {!pend.ready && pend.url && WHOP_URL.test(pend.url) && (
+                <a className="acc-link" href={pend.url}>{T("Reprendre le paiement", "Resume the payment", "Reanudar el pago")} ↗</a>
+              )}
+              <button type="button" className="acc-link" disabled={!!busy || sw?.phase === "checking"} onClick={abandon}>
+                {busy === "sw-abandon" ? "…" : T("Annuler ce changement", "Cancel this switch", "Cancelar este cambio")}
+              </button>
+            </div>
+          </div>
+        )}
         {!data.whop ? (
           <>
             <p>{T("Ton abonnement ne peut pas être lu pour le moment.", "Your subscription can't be read right now.", "Tu suscripción no se puede leer por ahora.")}</p>
@@ -284,11 +409,49 @@ export default function AccountPanel() {
                     `Your ${TIER[p.included]} access already includes everything in ${name}. You can cancel this one so you don't pay twice.`,
                     `Tu acceso ${TIER[p.included]} ya incluye todo lo que contiene ${name}. Puedes cancelar esta suscripción para no pagar dos veces.`
                   )}</p>}
+                  {p.covered && p.canResume && <p className="acc-hint">{T(
+                    `Ton accès ${TIER[p.covered]} comprend déjà tout ce que contient ${name} : inutile de reprendre cet abonnement, tu paierais deux fois.`,
+                    `Your ${TIER[p.covered]} access already includes everything in ${name}: there is no need to resume this subscription, you would pay twice.`,
+                    `Tu acceso ${TIER[p.covered]} ya incluye todo lo que contiene ${name}: no hace falta reanudar esta suscripción, pagarías dos veces.`
+                  )}</p>}
                   {p.duplicate && <p className="acc-hint">{T(
                     `Tu as deux abonnements ${name} actifs. Tu peux en résilier un pour ne pas payer deux fois.`,
                     `You have two active ${name} subscriptions. You can cancel one so you don't pay twice.`,
                     `Tienes dos suscripciones ${name} activas. Puedes cancelar una para no pagar dos veces.`
                   )}</p>}
+
+                  {can.switch && !pend && p.up?.length > 0 && (
+                    <div className="acc-switch">
+                      <p className="acc-switch-title">{T("Changer de formule en un clic", "Switch plan in one click", "Cambiar de plan con un clic")}</p>
+                      <p className="acc-help">{T(
+                        `Tu paies la nouvelle formule sur la page sécurisée de Whop. Dès que ton paiement est confirmé, ton abonnement ${name} s'arrête automatiquement ${until ? `le ${until}` : "à la fin de sa période"} (tu le gardes jusque-là), puis plus aucun prélèvement pour lui. La période ${name} déjà payée n'est pas remboursée. Tant que ton paiement n'est pas confirmé, rien n'est arrêté.`,
+                        `You pay for the new plan on Whop's secure payment page. As soon as your payment is confirmed, your ${name} subscription stops automatically ${until ? `on ${until}` : "at the end of its period"} (you keep it until then), with no further charges for it. The ${name} period you've already paid for isn't refunded. Until your payment is confirmed, nothing is stopped.`,
+                        `Pagas el nuevo plan en la página de pago segura de Whop. En cuanto se confirme tu pago, tu suscripción ${name} se detiene automáticamente ${until ? `el ${until}` : "al final de su periodo"} (la conservas hasta entonces) y no habrá más cobros por ella. El periodo ${name} ya pagado no se reembolsa. Mientras tu pago no esté confirmado, no se detiene nada.`
+                      )}</p>
+                      <label className={`acc-agree ${nudge && !agree ? "nudge" : ""}`}>
+                        <input id={`acc-agree-${p.id}`} type="checkbox" checked={agree} disabled={!!busy} onChange={(e) => { setAgree(e.target.checked); setNudge(false); }} />
+                        {T(
+                          <span>J&apos;accepte les <Link href={L.href("/cgv")} target="_blank">CGV</Link> et les <Link href={L.href("/cgu")} target="_blank">CGU</Link>, et je demande l&apos;accès immédiat à mes analyses : je reconnais perdre mon droit de rétractation de 14 jours.</span>,
+                          <span>I accept the <Link href={L.href("/cgv")} target="_blank">Terms of Sale</Link> and <Link href={L.href("/cgu")} target="_blank">Terms of Use</Link>, and I request immediate access to my analyses: I acknowledge that I lose my 14-day right of withdrawal.</span>,
+                          <span>Acepto las <Link href={L.href("/cgv")} target="_blank">Condiciones de venta</Link> y las <Link href={L.href("/cgu")} target="_blank">Condiciones de uso</Link>, y pido el acceso inmediato a mis análisis: reconozco que pierdo mi derecho de desistimiento de 14 días.</span>
+                        )}
+                      </label>
+                      {nudge && !agree && <p className="acc-agree-hint" role="alert">{T("Coche la case ci-dessus pour continuer vers le paiement.", "Tick the box above to continue to checkout.", "Marca la casilla de arriba para continuar con el pago.")}</p>}
+                      <div className="acc-actions">
+                        {p.up.map((o) => {
+                          const cost = `${money({ amount: o.amount, currency: o.currency })}${o.tier === "lifetime" ? ` ${T("une seule fois", "one-time", "pago único")}` : ` ${T("par mois", "per month", "al mes")}`}`;
+                          const going = busy === `sw:${p.id}:${o.tier}`;
+                          return (
+                            <button key={o.tier} type="button" className={`acc-btn primary ${agree ? "" : "wait"}`} disabled={!!busy} aria-disabled={!agree} onClick={() => startSwitch(p, o)}>
+                              {going
+                                ? T("Ouverture du paiement…", "Opening checkout…", "Abriendo el pago…")
+                                : T(`Passer à ${TIER[o.tier]} · ${cost}`, `Switch to ${TIER[o.tier]} · ${cost}`, `Pasar a ${TIER[o.tier]} · ${cost}`)}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="acc-actions">
                     {p.canCancel && !asking && (
@@ -297,7 +460,7 @@ export default function AccountPanel() {
                       </button>
                     )}
                     {p.canResume && (
-                      <button type="button" className="acc-btn primary" disabled={!can.cancel || !!busy} onClick={() => act("reprendre", p.id)}>
+                      <button type="button" className={`acc-btn ${p.covered ? "" : "primary"}`} disabled={!can.cancel || !!busy} onClick={() => act("reprendre", p.id)}>
                         {working ? "…" : T("Reprendre l'abonnement", "Resume subscription", "Reanudar la suscripción")}
                       </button>
                     )}
@@ -327,9 +490,9 @@ export default function AccountPanel() {
                 </article>
               );
             })}
-            {renewingCount > 0 && !hasLifetime && (
+            {plans.some((p) => p.tier === "pro" && p.canCancel) && !hasLifetime && (
               <p className="acc-help">
-                {T("Pour changer de formule : prends la nouvelle depuis la page des formules, puis résilie l'ancienne ici pour ne pas payer deux fois.", "To switch plans: get the new one from the plans page, then cancel the old one here so you don't pay twice.", "Para cambiar de plan: contrata el nuevo desde la página de planes y cancela aquí el anterior para no pagar dos veces.")}{" "}
+                {T("Passer à une formule moins chère (Starter) : résilie ton abonnement Pro ci-dessus, tu gardes ton accès jusqu'à la fin de la période déjà payée, puis tu choisis Starter depuis la page des formules à cette date.", "Switching to a cheaper plan (Starter): cancel your Pro subscription above, you keep your access until the end of the period already paid, then pick Starter from the plans page at that date.", "Pasar a un plan más barato (Starter): cancela tu suscripción Pro de arriba, conservas el acceso hasta el final del periodo ya pagado y después eliges Starter desde la página de planes en esa fecha.")}{" "}
                 <Link href={L.href("/pro")}>{T("Voir les formules", "See the plans", "Ver los planes")}</Link>
               </p>
             )}

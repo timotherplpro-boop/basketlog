@@ -4,7 +4,8 @@
 import { pathToFileURL } from "node:url";
 import { chunkText, detectLang, localizeReviews, translateRaw } from "../lib/translate.js";
 import { accountLabel, creatorNames, noEndDate } from "../lib/accounts.js";
-import { DELETE_WORDS, buildPlans, cleanName, creatorCodes, deleteConfirmed, normalizeMembership, planOf, renewing, tierOfProduct } from "../lib/account.js";
+import { DELETE_WORDS, buildPlans, cleanName, creatorCodes, deleteConfirmed, normalizeMembership, planOf, renewing, switchStep, switchTargets, tierOfProduct } from "../lib/account.js";
+import { SWITCH_COOKIE, SWITCH_TARGETS, SWITCH_TTL_MS, makeIntent, readIntent, readToken, signToken } from "../lib/switch.js";
 import { CODE_RE, cleanCode, cleanPct, discounted, mergePromos, randomChars, suggestCode, withPromo } from "../lib/promo.js";
 import { asPct, checkPromo, describeProblem, describeProblems, promoMonths, whopPromoReady } from "../lib/whop-promo.js";
 import { BSKY_BIO_MAX, BSKY_MAX, BSKY_NAME_MAX, blueskyPost, blueskyProfile, elPick, graphemes, nbaPick, socialPosts, telegramText } from "../lib/social.js";
@@ -355,7 +356,83 @@ export async function unit() {
   eq("Plans : deux abonnements de la même formule = doublon signalé sur les deux", names(buildPlans([one("a", "pro"), one("b", "pro")], NOW)), ["pro:renewsx2", "pro:renewsx2"]);
   eq("Plans : un abonnement qui s'arrête n'est pas un doublon", names(buildPlans([one("a", "pro"), one("b", "pro", { cancel_at_period_end: true })], NOW)), ["pro:renews", "pro:ends"]);
   eq("Plans : liste vide ou sans formule Basketlog", [buildPlans([], NOW), buildPlans([norm({ product: { id: "prod_FREE" } })], NOW), buildPlans(null, NOW)], [[], [], []]);
+  // Un abonnement résilié mais encore valable, déjà compris dans une formule supérieure active (cas de l'ancien Starter juste après
+  // le passage à Pro) est signalé « covered » : l'écran déconseille de le reprendre (double paiement).
+  const cov = (list) => buildPlans(list, NOW).map((p) => `${p.tier}:${p.state}${p.covered ? `~${p.covered}` : ""}`);
+  eq("Plans : Starter résilié + Pro actif = Starter signalé comme déjà compris dans Pro", cov([one("a", "starter", { cancel_at_period_end: true }), one("b", "pro")]), ["pro:renews", "starter:ends~pro"]);
+  eq("Plans : Starter ou Pro résilié + Lifetime actif = signalé comme déjà compris dans Lifetime", cov([one("a", "starter", { cancel_at_period_end: true }), one("b", "pro", { cancel_at_period_end: true }), one("c", "lifetime")]), ["lifetime:lifetime", "pro:ends~lifetime", "starter:ends~lifetime"]);
+  eq("Plans : Pro résilié + Starter actif = rien à signaler (le Starter ne comprend pas le Pro)", cov([one("a", "pro", { cancel_at_period_end: true }), one("b", "starter")]), ["starter:renews", "pro:ends"]);
+  eq("Plans : tout est résilié, ou la formule supérieure a un paiement refusé = rien à signaler", [
+    cov([one("a", "starter", { cancel_at_period_end: true }), one("b", "pro", { cancel_at_period_end: true })]),
+    cov([one("a", "starter", { cancel_at_period_end: true }), one("b", "pro", { status: "past_due" })]),
+  ], [["pro:ends", "starter:ends"], ["pro:past_due", "starter:ends"]]);
+  eq("Plans : un abonnement annulé sans reprise possible n'est pas signalé ; la clé n'existe que s'il y a lieu", [
+    cov([one("a", "starter", { status: "canceled" }), one("b", "pro")]),
+    "covered" in buildPlans([one("a", "starter")], NOW)[0],
+    "covered" in buildPlans([one("a", "starter", { cancel_at_period_end: true })], NOW)[0],
+  ], [["pro:renews", "starter:ends"], false, false]);
   eq("Suppression du compte : seuls les abonnements qui se renouvelleraient sont à arrêter", renewing([one("a", "starter"), one("b", "pro", { cancel_at_period_end: true }), one("c", "lifetime"), one("d", "pro", { status: "past_due" }), one("e", "pro", { status: "expired" })], NOW).map((m) => m.id), ["a", "d"]);
+
+
+  // --- Changement de formule en un clic : quelles formules proposer, et quand l'ancien abonnement peut être arrêté
+  console.log("Changement de formule");
+  const targets = (list, id) => { const plans = buildPlans(list, NOW); return switchTargets(plans.find((p) => p.id === id), plans); };
+  eq("Changement : depuis Starter on propose Pro puis Lifetime", targets([one("a", "starter")], "a"), ["pro", "lifetime"]);
+  eq("Changement : depuis Pro on ne propose que Lifetime", targets([one("a", "pro")], "a"), ["lifetime"]);
+  eq("Changement : rien depuis un Lifetime ni depuis un paiement unique", [targets([one("a", "lifetime")], "a"), targets([one("a", "starter", { status: "completed" })], "a")], [[], []]);
+  eq("Changement : rien depuis un abonnement déjà résilié, ni dont le paiement a échoué", [targets([one("a", "starter", { cancel_at_period_end: true })], "a"), targets([one("a", "starter", { status: "past_due" })], "a")], [[], []]);
+  eq("Changement : une formule que le compte a déjà n'est pas reproposée, même résiliée mais encore active (on la reprend)", [
+    targets([one("a", "starter"), one("b", "pro", { cancel_at_period_end: true })], "a"),
+    targets([one("a", "starter"), one("b", "lifetime", { status: "completed" })], "a"),
+  ], [["lifetime"], []]);
+  eq("Changement : rien depuis un abonnement déjà compris dans une formule supérieure active (il suffit de le résilier)", [targets([one("a", "starter"), one("b", "pro")], "a"), targets([one("a", "pro"), one("b", "lifetime")], "a")], [[], []]);
+  eq("Changement : rien depuis un doublon (on résilie d'abord l'un des deux)", targets([one("a", "pro"), one("b", "pro")], "a"), []);
+  eq("Changement : on ne redescend jamais en un clic (Pro vers Starter n'est jamais proposé)", SWITCH_TARGETS.includes("starter"), false);
+  eq("Changement : plan absent ou liste absente = rien", [switchTargets(null, []), switchTargets(undefined, undefined)], [[], []]);
+
+  const step = (list, from) => { const r = switchStep(buildPlans(list, NOW), from); return `${r.step}${r.better ? `>${r.better.tier}` : ""}`; };
+  eq("Suite : l'ancien se renouvelle et rien ne le remplace encore = on attend le paiement", step([one("a", "starter")], "a"), "pending");
+  eq("Suite : la nouvelle formule (Pro, Lifetime) est active = l'ancien est à arrêter", [step([one("a", "starter"), one("b", "pro")], "a"), step([one("a", "starter"), one("c", "lifetime")], "a"), step([one("a", "pro"), one("c", "lifetime", { status: "completed" })], "a")], ["cancel>pro", "cancel>lifetime", "cancel>lifetime"]);
+  eq("Suite : la meilleure formule active est retenue", step([one("a", "starter"), one("b", "pro"), one("c", "lifetime")], "a"), "cancel>lifetime");
+  eq("Suite : la nouvelle formule payée une fois (état « payé ») compte aussi", step([one("a", "starter"), one("b", "pro", { status: "completed" })], "a"), "cancel>pro");
+  eq("Suite : une nouvelle formule dont le paiement échoue, ou déjà résiliée, ne remplace rien : on attend", [step([one("a", "starter"), one("b", "pro", { status: "past_due" })], "a"), step([one("a", "starter"), one("b", "pro", { cancel_at_period_end: true })], "a")], ["pending", "pending"]);
+  eq("Suite : une formule de rang égal ou inférieur ne remplace pas l'ancien", [step([one("a", "pro"), one("b", "starter")], "a"), step([one("a", "pro"), one("b", "pro", { cancel_at_period_end: true })], "a")], ["pending", "pending"]);
+  eq("Suite : l'ancien déjà résilié et la nouvelle en place = rien à faire", step([one("a", "starter", { cancel_at_period_end: true }), one("b", "pro")], "a"), "already>pro");
+  eq("Suite : l'ancien déjà résilié sans remplaçant, ou disparu, ou inconnu = le changement n'a plus d'objet", [step([one("a", "starter", { cancel_at_period_end: true })], "a"), step([one("b", "pro")], "a"), step([], "a"), switchStep(null, "a").step, step([one("a", "starter")], undefined)], ["moot", "moot", "moot", "moot", "moot"]);
+  eq("Suite : un abonnement qui ne se résilie pas (Lifetime, paiement unique) n'est jamais arrêté", [step([one("a", "lifetime"), one("b", "pro")], "a"), step([one("a", "starter", { status: "completed" }), one("b", "pro")], "a")], ["moot", "moot>pro"]);
+  eq("Suite : un paiement refusé sur l'ancien est arrêté aussi quand la nouvelle formule est en place", step([one("a", "starter", { status: "past_due" }), one("b", "pro")], "a"), "cancel>pro");
+
+  const KEY = "clé-de-test";
+  const T0 = Date.parse("2026-11-08T12:00:00Z");
+  const tok = makeIntent(KEY, { uid: "user_1", from: "mem_1", tier: "pro" }, T0);
+  eq("Jeton : valable pour son compte, avec l'abonnement et la formule visée", readIntent(KEY, tok, "user_1", T0 + 60e3), { from: "mem_1", tier: "pro", at: T0 });
+  eq("Jeton : refusé pour un autre compte, sans compte, ou avec une autre clé", [readIntent(KEY, tok, "user_2", T0), readIntent(KEY, tok, "", T0), readIntent(KEY, tok, null, T0), readIntent("autre-clé", tok, "user_1", T0)], [null, null, null, null]);
+  eq("Jeton : valable jusqu'à 12 h pile, refusé ensuite", [readIntent(KEY, tok, "user_1", T0 + SWITCH_TTL_MS)?.tier, readIntent(KEY, tok, "user_1", T0 + SWITCH_TTL_MS + 1)], ["pro", null]);
+  eq("Jeton : daté du futur (plus d'une minute) refusé, une minute d'écart d'horloge tolérée", [readIntent(KEY, tok, "user_1", T0 - 61e3), readIntent(KEY, tok, "user_1", T0 - 60e3)?.tier], [null, "pro"]);
+  const [data, sig] = tok.split(".");
+  const forged = Buffer.from(JSON.stringify({ u: "user_1", f: "mem_VICTIME", t: "pro", at: T0 })).toString("base64url");
+  eq("Jeton : contenu modifié, signature tronquée, vide ou mal formé = refusé", [readIntent(KEY, `${forged}.${sig}`, "user_1", T0), readIntent(KEY, `${data}.${sig.slice(0, -2)}`, "user_1", T0), readIntent(KEY, `${data}.`, "user_1", T0), readIntent(KEY, `.${sig}`, "user_1", T0), readIntent(KEY, `${data}.${sig}.x`, "user_1", T0), readIntent(KEY, data, "user_1", T0), readIntent(KEY, "", "user_1", T0), readIntent(KEY, null, "user_1", T0), readIntent(KEY, 42, "user_1", T0), readIntent(KEY, `${data}.${sig}`.padEnd(2000, "x"), "user_1", T0)], [null, null, null, null, null, null, null, null, null, null]);
+  eq("Jeton : une session (même clé, même forme, autre usage) ne passe jamais pour une intention, ni l'inverse", [
+    readIntent(KEY, signToken(KEY, "session", { u: "user_1", f: "mem_1", t: "pro", at: T0 }), "user_1", T0),
+    readToken(KEY, "session", tok),
+    readToken(KEY, "switch", signToken(KEY, "session", { u: "user_1" })),
+  ], [null, null, null]);
+  eq("Jeton : formule visée ou abonnement invalide à la lecture = refusé (même bien signé)", [
+    readIntent(KEY, signToken(KEY, "switch", { u: "user_1", f: "mem_1", t: "starter", at: T0 }), "user_1", T0),
+    readIntent(KEY, signToken(KEY, "switch", { u: "user_1", f: "mem_1", t: "gratuit", at: T0 }), "user_1", T0),
+    readIntent(KEY, signToken(KEY, "switch", { u: "user_1", f: "../x", t: "pro", at: T0 }), "user_1", T0),
+    readIntent(KEY, signToken(KEY, "switch", { u: "user_1", f: 12345, t: "pro", at: T0 }), "user_1", T0),
+    readIntent(KEY, signToken(KEY, "switch", { u: "user_1", f: "mem_1", t: "pro", at: "hier" }), "user_1", T0),
+    readIntent(KEY, signToken(KEY, "switch", ["user_1"]), "user_1", T0),
+    readIntent(KEY, signToken(KEY, "switch", null), "user_1", T0),
+  ], [null, null, null, null, null, null, null]);
+  eq("Jeton : fabrication refusée pour une formule, un abonnement ou un compte invalide ; Lifetime accepté", [
+    makeIntent(KEY, { uid: "user_1", from: "mem_1", tier: "starter" }, T0), makeIntent(KEY, { uid: "user_1", from: "mem 1", tier: "pro" }, T0), makeIntent(KEY, { uid: "user_1", from: "", tier: "pro" }, T0),
+    makeIntent(KEY, { uid: "", from: "mem_1", tier: "pro" }, T0), makeIntent(KEY, { uid: "user_1", from: 7, tier: "pro" }, T0), makeIntent("", { uid: "user_1", from: "mem_1", tier: "pro" }, T0),
+    typeof makeIntent(KEY, { uid: "user_1", from: "mem_1", tier: "lifetime" }, T0),
+  ], [null, null, null, null, null, null, "string"]);
+  eq("Jeton : sans clé de signature, rien ne se signe ni ne se lit", [signToken("", "switch", {}), readToken("", "switch", tok)], [null, null]);
+  eq("Jeton : cookie nommé bl_switch, 12 h", [SWITCH_COOKIE, SWITCH_TTL_MS], ["bl_switch", 43200000]);
 
   return { passed, failed };
 }

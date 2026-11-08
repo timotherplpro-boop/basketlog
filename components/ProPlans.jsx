@@ -7,6 +7,7 @@ import { useL } from "./LangProvider";
 import { price, money, PRICES } from "../lib/pricing";
 import { pctOf } from "../lib/i18n";
 import { CODE_RE, cleanCode, discounted, withPromo } from "../lib/promo";
+import SwitchWatch from "./SwitchWatch";
 
 const Icon = ({ name }) => {
   const p = { fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
@@ -83,7 +84,7 @@ const NOTICES = {
   config: ["warn", "Le paiement n'est pas encore activé sur Basketlog. Reviens très bientôt.", "Payments aren't enabled on Basketlog yet. Please come back soon.", "El pago todavía no está activado en Basketlog. Vuelve muy pronto."],
 };
 
-export default function ProPlans({ checkout, loginReady, notice, ai = false, cur = "EUR" }) {
+export default function ProPlans({ checkout, loginReady, notice, ai = false, cur = "EUR", switching = false }) {
   const L = useL();
   const pro = useProStatus();
   const [agree, setAgree] = useState(false);
@@ -147,6 +148,7 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
   return (
     <>
       {n && <div className={`pro-notice ${n[0]}`} role="status">{L.t(n[1], n[2], n[3])}</div>}
+      {switching && <SwitchWatch />}
       <div className="pro-promo">
         {promo ? (
           <div className="pro-promo-ok" role="status">
@@ -251,7 +253,7 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
         ) : null}
         <p className="pro-secure">{L.t("Tu peux arrêter ton abonnement à tout moment. Toutes nos analyses sont fournies à titre informatif uniquement.", "You can cancel your subscription anytime. All our analyses are provided for information only.", "Puedes cancelar tu suscripción en cualquier momento. Todos nuestros análisis se ofrecen solo a título informativo.")}</p>
         {pro?.connected && (current === "starter" || current === "pro") && (
-          <p className="pro-secure">{L.t("Pour changer de formule : prends la nouvelle, puis résilie l'ancienne depuis", "To switch plans: get the new one, then cancel the old one from", "Para cambiar de plan: contrata el nuevo y cancela el anterior desde")} <Link href={L.href("/app/compte")}>{L.t("Mon compte", "My account", "Mi cuenta")}</Link>.</p>
+          <p className="pro-secure">{L.t("Déjà abonné ? Passe à une formule supérieure en un clic depuis", "Already subscribed? Switch to a higher plan in one click from", "¿Ya estás suscrito? Pasa a un plan superior con un clic desde")} <Link href={L.href("/app/compte")}>{L.t("Mon compte", "My account", "Mi cuenta")}</Link>{L.t(" : ton abonnement actuel s'arrête tout seul à la fin de sa période.", ": your current subscription stops by itself at the end of its period.", ": tu suscripción actual se detiene sola al final de su periodo.")}</p>
         )}
         <p className="pro-secure">{L.t("Une question sur nos offres ?", "A question about our plans?", "¿Una pregunta sobre nuestros planes?")} <a href="mailto:contact@basketlog-app.com">contact@basketlog-app.com</a></p>
       </div>

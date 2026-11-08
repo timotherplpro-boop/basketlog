@@ -846,6 +846,9 @@ a.team:hover .team-name { color: var(--peach); }
 .pro-notice { max-width: 760px; margin: 28px auto 0; padding: 14px 18px; border-radius: 14px; font-size: 15px; text-align: center; }
 .pro-notice.good { background: rgba(74,222,128,.1); border: 1px solid rgba(74,222,128,.4); color: #bbf7d0; }
 .pro-notice.warn { background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.4); color: #fde68a; }
+.pro-switch a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.pro-switch .acc-link { color: inherit; padding: 0; font-size: inherit; }
+.pro-switch-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 18px; margin-top: 8px; }
 .plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 44px; align-items: stretch; }
 .plan { position: relative; display: flex; flex-direction: column; background: #0d1322; border: 1px solid rgba(255,255,255,.08); border-radius: 24px; padding: 28px 24px 24px; }
 .plan-pro { border-color: rgba(255,122,26,.65); background: linear-gradient(170deg, rgba(255,122,26,.15), #0d1322 55%); box-shadow: 0 30px 80px -40px rgba(255,122,26,.6); }
@@ -1537,6 +1540,18 @@ body:has(.mmenu.open) .install-banner { display: none; }
 .acc-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 14px; }
 .acc-confirm { margin-top: 14px; padding: 14px 16px; border-radius: 14px; background: rgba(225,29,72,.07); border: 1px solid rgba(225,29,72,.35); }
 .acc-confirm > p:first-child { margin-top: 0; }
+/* Changement de formule en un clic : encadré sous l'abonnement, bandeau d'attente du paiement */
+.acc-switch { margin-top: 14px; padding: 14px 16px; border-radius: 14px; background: rgba(255,122,26,.07); border: 1px solid rgba(255,122,26,.3); }
+.acc-sec .acc-switch-title { margin: 0; font-weight: 700; }
+.acc-switch .acc-actions { margin-top: 10px; }
+.acc-switch .acc-help { margin-top: 10px; }
+.acc-agree { display: flex; align-items: flex-start; gap: 10px; margin-top: 12px; font-size: 14px; line-height: 1.5; color: rgba(255,255,255,.88); cursor: pointer; }
+.acc-agree input { flex: none; width: 18px; height: 18px; margin-top: 2px; accent-color: var(--orange); }
+.acc-agree.nudge { color: #fda4af; }
+.acc-sec .acc-agree-hint { margin: 8px 0 0; color: #fda4af; font-size: 14px; }
+.acc-btn.wait { opacity: .6; }
+.acc-pending { margin: 14px 0 0; padding: 14px 16px; border-radius: 14px; background: rgba(255,122,26,.09); border: 1px solid rgba(255,122,26,.4); }
+.acc-sec .acc-pending > p:first-child { margin-top: 0; }
 .acc-danger { border-color: rgba(225,29,72,.3); }
 .acc-list { margin: 10px 0 18px; padding-left: 20px; color: var(--muted); line-height: 1.55; }
 .acc-list li { margin: 6px 0; }
