@@ -37,7 +37,7 @@ export async function generateMetadata() {
     title,
     applicationName: "Basketlog",
     formatDetection: { telephone: false },
-    twitter: { card: "summary_large_image" },
+    twitter: { card: "summary_large_image", site: "@Basketlog" },
     description,
     openGraph: { title, description, type: "website", locale: L.og, siteName: "Basketlog" },
   };
@@ -57,7 +57,7 @@ const SITE_LD = [
     logo: { "@type": "ImageObject", url: `${SITE}/icons/icon-512.png`, width: 512, height: 512 },
     description: "Analyse basket et pronostics statistiques des matchs NBA et EuroLeague.",
     // Comptes officiels de la marque (leur bio renvoie vers le site) : aide Google à relier « Basketlog » au site.
-    sameAs: ["https://www.tiktok.com/@basketlog", "https://www.tiktok.com/@basketlogapp", "https://t.me/basketlog", "https://bsky.app/profile/basketlog.bsky.social"],
+    sameAs: ["https://x.com/Basketlog", "https://www.youtube.com/@basketlog", "https://www.tiktok.com/@basketlog", "https://www.tiktok.com/@basketlogapp", "https://t.me/basketlog", "https://bsky.app/profile/basketlog.bsky.social"],
   },
   {
     "@context": "https://schema.org",
