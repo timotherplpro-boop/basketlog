@@ -77,26 +77,34 @@ export async function GET(req) {
       sent.push({ channel: "bluesky", ok: false, error: e.message });
     }
   }
-  if (cfg.telegram) {
-    for (const [lang, chat] of Object.entries(cfg.telegram.chats)) {
+  // Telegram et Bluesky en parallèle (chacun dans l'ordre de ses langues), pour tenir dans le temps de la fonction.
+  const telegramJob = async () => {
+    const out = [];
+    for (const [lang, chat] of Object.entries(cfg.telegram?.chats || {})) {
       const p = day.posts[lang];
       try {
-        sent.push({ channel: "telegram", lang, chat, ok: true, id: await sendTelegram(cfg.telegram.token, chat, p.telegram, p.telegramPreview) });
+        out.push({ channel: "telegram", lang, chat, ok: true, id: await sendTelegram(cfg.telegram.token, chat, p.telegram, p.telegramPreview) });
       } catch (e) {
-        sent.push({ channel: "telegram", lang, chat, ok: false, error: e.message });
+        out.push({ channel: "telegram", lang, chat, ok: false, error: e.message });
       }
     }
-  }
-  if (sess) {
+    return out;
+  };
+  const blueskyJob = async () => {
+    const out = [];
+    if (!sess) return out;
     for (const lang of cfg.bluesky.langs) {
       try {
         const thumb = await blueskyThumb(sess, ogImageUrl(lang));
-        sent.push({ channel: "bluesky", lang, ok: true, uri: await sendBluesky(sess, day.posts[lang].bluesky, thumb) });
+        out.push({ channel: "bluesky", lang, ok: true, uri: await sendBluesky(sess, day.posts[lang].bluesky, thumb) });
       } catch (e) {
-        sent.push({ channel: "bluesky", lang, ok: false, error: e.message });
+        out.push({ channel: "bluesky", lang, ok: false, error: e.message });
       }
     }
-  }
+    return out;
+  };
+  const [tgSent, bsSent] = await Promise.all([telegramJob(), blueskyJob()]);
+  sent.push(...tgSent, ...bsSent);
   if (sent.some((s) => s.ok)) lastDay = day.d;
   for (const s of sent.filter((x) => !x.ok)) console.warn(`[social] ${s.channel}${s.lang ? ` ${s.lang}` : ""} : ${s.error}`);
   return json({ ok: sent.length > 0 && sent.every((s) => s.ok), ...base, sent, at: new Date().toISOString() });
