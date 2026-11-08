@@ -36,7 +36,7 @@ function CGUFr() {
       </Sec>
 
       <Sec n={4} title="Compte gratuit et compte abonné">
-        <p>Le site est accessible sans inscription. Le compte gratuit se crée avec un compte Whop (par e-mail, Google ou Apple) et donne accès à l&apos;espace membre ; il ne comprend pas d&apos;analyse complète. Les abonnés se connectent avec le compte Whop utilisé lors du paiement. Nous ne recevons jamais ton mot de passe : seulement ton identifiant Whop, ton nom d&apos;utilisateur et la formule à laquelle tu as accès. Tu peux supprimer ton compte gratuit à tout moment en nous écrivant.</p>
+        <p>Le site est accessible sans inscription. Le compte gratuit se crée avec un compte Whop (par e-mail, Google ou Apple) et donne accès à l&apos;espace membre ; il ne comprend pas d&apos;analyse complète. Les abonnés se connectent avec le compte Whop utilisé lors du paiement. Nous ne recevons jamais ton mot de passe : seulement ton identifiant Whop, ton nom d&apos;utilisateur et la formule à laquelle tu as accès. Tu peux supprimer ton compte à tout moment depuis la page <Link href="/app/compte">Mon compte</Link> (tes données Basketlog sont alors effacées et tes abonnements en cours arrêtés) ou en nous écrivant. Ton compte Whop reste géré par Whop.</p>
         <p>Ton accès est personnel. Il est interdit de le partager, de le revendre ou de le prêter. Tu es responsable de la sécurité de ton compte Whop.</p>
       </Sec>
 
@@ -108,7 +108,7 @@ function CGUEn({ L }) {
       </Sec>
 
       <Sec n={4} title="Free account and subscriber account">
-        <p>The website can be used without signing up. The free account is created with a Whop account (by email, Google or Apple) and gives access to the member area; it does not include full analyses. Subscribers log in with the Whop account used for payment. We never receive your password: only your Whop ID, your username and the plan you have access to. You can delete your free account at any time by emailing us.</p>
+        <p>The website can be used without signing up. The free account is created with a Whop account (by email, Google or Apple) and gives access to the member area; it does not include full analyses. Subscribers log in with the Whop account used for payment. We never receive your password: only your Whop ID, your username and the plan you have access to. You can delete your account at any time from the <Link href={L.href("/app/compte")}>My account</Link> page (your Basketlog data is then erased and your active subscriptions are stopped) or by emailing us. Your Whop account remains managed by Whop.</p>
         <p>Your access is personal. Sharing, reselling or lending it is prohibited. You are responsible for the security of your Whop account.</p>
       </Sec>
 
@@ -180,7 +180,7 @@ function CGUEs({ L }) {
       </Sec>
 
       <Sec n={4} title="Cuenta gratis y cuenta de suscriptor">
-        <p>El sitio se puede usar sin registrarse. La cuenta gratis se crea con una cuenta de Whop (por correo electrónico, Google o Apple) y da acceso al área de miembros; no incluye análisis completos. Los suscriptores inician sesión con la cuenta de Whop que usaron para pagar. Nunca recibimos tu contraseña: solo tu identificador de Whop, tu nombre de usuario y el plan al que tienes acceso. Puedes eliminar tu cuenta gratis en cualquier momento escribiéndonos.</p>
+        <p>El sitio se puede usar sin registrarse. La cuenta gratis se crea con una cuenta de Whop (por correo electrónico, Google o Apple) y da acceso al área de miembros; no incluye análisis completos. Los suscriptores inician sesión con la cuenta de Whop que usaron para pagar. Nunca recibimos tu contraseña: solo tu identificador de Whop, tu nombre de usuario y el plan al que tienes acceso. Puedes eliminar tu cuenta en cualquier momento desde la página <Link href={L.href("/app/compte")}>Mi cuenta</Link> (tus datos de Basketlog se borran y tus suscripciones activas se detienen) o escribiéndonos. Tu cuenta de Whop sigue gestionada por Whop.</p>
         <p>Tu acceso es personal. Está prohibido compartirlo, revenderlo o prestarlo. Eres responsable de la seguridad de tu cuenta de Whop.</p>
       </Sec>
 

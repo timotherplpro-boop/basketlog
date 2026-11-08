@@ -228,9 +228,9 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
       </div>
       <p className="pro-legal">
         {L.t(
-          <>Starter et Pro sont sans engagement : tu arrêtes quand tu veux depuis ton compte Whop, et tu gardes l&apos;accès jusqu&apos;à la fin du mois payé. Une période commencée n&apos;est pas remboursée. Réservé aux 18 ans et plus. </>,
-          <>Starter and Pro have no commitment: cancel anytime from your Whop account and keep access until the end of the paid month. A started period is not refunded. For adults 18 and over. </>,
-          <>Starter y Pro no tienen permanencia: cancelas cuando quieras desde tu cuenta de Whop y mantienes el acceso hasta el final del mes pagado. Un periodo empezado no se reembolsa. Solo para mayores de 18 años. </>
+          <>Starter et Pro sont sans engagement : tu arrêtes quand tu veux depuis la page Mon compte de ce site, et tu gardes l&apos;accès jusqu&apos;à la fin du mois payé. Une période commencée n&apos;est pas remboursée. Réservé aux 18 ans et plus. </>,
+          <>Starter and Pro have no commitment: cancel anytime from the My account page on this site and keep access until the end of the paid month. A started period is not refunded. For adults 18 and over. </>,
+          <>Starter y Pro no tienen permanencia: cancelas cuando quieras desde la página Mi cuenta de este sitio y mantienes el acceso hasta el final del mes pagado. Un periodo empezado no se reembolsa. Solo para mayores de 18 años. </>
         )}
         <Link href={L.href("/cgv")}>{L.t("Conditions générales de vente", "Terms of Sale", "Condiciones generales de venta")}</Link>
       </p>
@@ -240,7 +240,7 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
           <p>
             {L.t("Connecté avec Whop", "Logged in with Whop", "Conectado con Whop")}{pro.name ? <> {L.t("en tant que", "as", "como")} <b>{pro.name}</b></> : ""} · {L.t("formule", "plan", "plan")} <b>{TIER_LABEL[current] || current}</b>
             {(current === "compte" || current === "starter") && <>{" · "}<a href={`/api/whop/login?next=${encodeURIComponent(L.href("/pro"))}`} className="pro-login" onClick={() => track("Connexion Whop", { etape: "actualiser", source: "page_pro" })}>{L.t("Tu viens de t'abonner ? Actualiser mon accès", "Just subscribed? Refresh my access", "¿Te acabas de suscribir? Actualizar mi acceso")}</a></>}
-            {" · "}<a href="https://whop.com/@me/settings/orders/" target="_blank" rel="noopener">{L.t("Gérer mon abonnement", "Manage my subscription", "Gestionar mi suscripción")}</a>
+            {" · "}<Link href={L.href("/app/compte")}>{L.t("Gérer mon abonnement", "Manage my subscription", "Gestionar mi suscripción")}</Link>
             {" · "}<a href={`/api/pro/logout?next=${encodeURIComponent(L.href("/pro"))}`}>{L.t("Se déconnecter", "Log out", "Cerrar sesión")}</a>
           </p>
         ) : loginReady ? (
@@ -250,6 +250,9 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
           </p>
         ) : null}
         <p className="pro-secure">{L.t("Tu peux arrêter ton abonnement à tout moment. Toutes nos analyses sont fournies à titre informatif uniquement.", "You can cancel your subscription anytime. All our analyses are provided for information only.", "Puedes cancelar tu suscripción en cualquier momento. Todos nuestros análisis se ofrecen solo a título informativo.")}</p>
+        {pro?.connected && (current === "starter" || current === "pro") && (
+          <p className="pro-secure">{L.t("Pour changer de formule : prends la nouvelle, puis résilie l'ancienne depuis", "To switch plans: get the new one, then cancel the old one from", "Para cambiar de plan: contrata el nuevo y cancela el anterior desde")} <Link href={L.href("/app/compte")}>{L.t("Mon compte", "My account", "Mi cuenta")}</Link>.</p>
+        )}
         <p className="pro-secure">{L.t("Une question sur nos offres ?", "A question about our plans?", "¿Una pregunta sobre nuestros planes?")} <a href="mailto:contact@basketlog-app.com">contact@basketlog-app.com</a></p>
       </div>
     </>

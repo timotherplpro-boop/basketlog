@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
-import { COOKIE, PREVIEW_TIERS, cookieOptions, decodeSession, encodeSession, resolveAccess } from "../../../lib/pro";
+import { COOKIE, PREVIEW_TIERS, cookieOptions, decodeSession, displayName, encodeSession, resolveAccess } from "../../../lib/pro";
 import { adminData, dbRpc, getRole } from "../../../lib/roles";
 import { LANGS, mk } from "../../../lib/i18n";
 import { CODE_RE, cleanPct, randomChars, suggestCode } from "../../../lib/promo";
@@ -152,7 +152,7 @@ export async function POST(req) {
     } else {
       let a;
       try { a = await resolveAccess(s.uid, { ...s, role: "admin" }); } catch { a = { tier: "lifetime", paid: s.paid ?? "compte", role: "admin", nom: null, v: s.v }; }
-      next = { ...s, tier: a.tier, paid: a.paid, role: a.role, name: a.nom || s.name, v: a.v, checked: Date.now() };
+      next = { ...s, tier: a.tier, paid: a.paid, role: a.role, name: displayName(a, s), v: a.v, checked: Date.now() };
       delete next.preview;
       delete next.admin;
     }

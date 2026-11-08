@@ -97,6 +97,7 @@ function ConfidentialiteFr() {
           <li>retirer ton consentement à la mesure d&apos;audience, à tout moment, avec le lien « Gérer mes cookies » en bas de chaque page ;</li>
           <li>définir des directives sur le sort de tes données après ton décès.</li>
         </ul>
+        <p>Depuis la page <Link href="/app/compte">Mon compte</Link>, tu peux aussi choisir ton nom affiché et supprimer ton compte toi-même : tes données Basketlog (historique d&apos;analyses, questions, avis, nom affiché) sont alors effacées immédiatement. Les données gérées par Whop (e-mail, moyens de paiement, factures) se suppriment depuis <a href="https://whop.com/@me/settings/" rel="noopener" target="_blank">tes réglages Whop</a>.</p>
         <p>Écris-nous à <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. Nous répondons sous un mois au plus. Tu peux aussi introduire une réclamation auprès de la CNIL : <a href="https://www.cnil.fr" rel="noopener" target="_blank">cnil.fr</a>.</p>
       </Sec>
 
@@ -188,6 +189,7 @@ function ConfidentialiteEn({ L }) {
           <li>withdraw your consent to audience measurement at any time, with the “Manage cookies” link at the bottom of every page;</li>
           <li>set instructions for what happens to your data after your death.</li>
         </ul>
+        <p>From the <Link href={L.href("/app/compte")}>My account</Link> page you can also choose your display name and delete your account yourself: your Basketlog data (analysis history, questions, review, display name) is then erased immediately. The data managed by Whop (email, payment methods, invoices) is deleted from <a href="https://whop.com/@me/settings/" rel="noopener" target="_blank">your Whop settings</a>.</p>
         <p>Email us at <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. We reply within one month at most. You can also lodge a complaint with the French data protection authority (CNIL): <a href="https://www.cnil.fr" rel="noopener" target="_blank">cnil.fr</a>, or with the authority of your country.</p>
       </Sec>
 
@@ -279,6 +281,7 @@ function ConfidentialiteEs({ L }) {
           <li>retirar tu consentimiento a la medición de audiencia en cualquier momento, con el enlace «Gestionar cookies» al pie de cada página;</li>
           <li>dar instrucciones sobre el destino de tus datos después de tu fallecimiento.</li>
         </ul>
+        <p>Desde la página <Link href={L.href("/app/compte")}>Mi cuenta</Link> también puedes elegir tu nombre mostrado y eliminar tu cuenta tú mismo: tus datos de Basketlog (historial de análisis, preguntas, opinión, nombre mostrado) se borran entonces de inmediato. Los datos que gestiona Whop (correo, medios de pago, facturas) se eliminan desde <a href="https://whop.com/@me/settings/" rel="noopener" target="_blank">tus ajustes de Whop</a>.</p>
         <p>Escríbenos a <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. Respondemos en el plazo máximo de un mes. También puedes presentar una reclamación ante la autoridad francesa de protección de datos (CNIL): <a href="https://www.cnil.fr" rel="noopener" target="_blank">cnil.fr</a>, o ante la de tu país (en España, la AEPD: <a href="https://www.aepd.es" rel="noopener" target="_blank">aepd.es</a>).</p>
       </Sec>
 

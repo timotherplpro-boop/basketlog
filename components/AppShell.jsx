@@ -19,6 +19,7 @@ const I = {
   user: <><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></>,
   logout: <><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="M16 17l5-5-5-5" /><path d="M21 12H9" /></>,
   mail: <><rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></>,
+  sliders: <><path d="M21 4h-7" /><path d="M10 4H3" /><path d="M21 12h-9" /><path d="M8 12H3" /><path d="M21 20h-5" /><path d="M12 20H3" /><path d="M14 2v4" /><path d="M8 10v4" /><path d="M16 18v4" /></>,
   globe: <><circle cx="12" cy="12" r="10" /><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /><path d="M2 12h20" /></>,
 };
 const Icon = ({ name }) => (
@@ -123,6 +124,7 @@ export default function AppShell({ session, ai = false, children }) {
             <Icon name="user" />
             <div><b>{name || L.t("Mon compte", "My account", "Mi cuenta")}</b><small>{plan}</small></div>
           </div>
+          <Link href={L.href("/app/compte")} className={`sb-link ${p.startsWith("/app/compte") ? "on" : ""}`} aria-current={p.startsWith("/app/compte") ? "page" : undefined}><Icon name="sliders" />{L.t("Mon compte et abonnement", "My account and subscription", "Mi cuenta y suscripción")}</Link>
           <a href={`/api/pro/logout?next=${encodeURIComponent(L.href("/"))}`} className="sb-link big"><Icon name="logout" />{L.t("Déconnexion", "Log out", "Cerrar sesión")}</a>
           <a href="mailto:contact@basketlog-app.com" className="sb-link"><Icon name="mail" />Support</a>
           <div className="sb-link sb-lang"><Icon name="globe" /><span aria-hidden>{FLAG[L.lang]}</span><LangSelect className="plain" /></div>

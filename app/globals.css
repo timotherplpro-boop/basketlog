@@ -1497,3 +1497,53 @@ body:has(.mmenu.open) .install-banner { display: none; }
   .st-split { grid-template-columns: 1fr; }
   .st-asof { margin-left: 0; width: 100%; }
 }
+
+/* ---------- Mon compte (components/AccountPanel.jsx) ---------- */
+.acc { text-align: left; }
+.acc-sec h2 { margin: 0 0 6px; font-family: var(--head); font-weight: 800; font-size: 21px; letter-spacing: -.01em; }
+.acc-sec p { margin: 10px 0 0; line-height: 1.55; }
+.acc-sec a { color: var(--orange-2); text-decoration: underline; text-underline-offset: 3px; }
+.acc-sec a.btn-solid { color: #fff; text-decoration: none; }
+.acc-help { color: var(--muted); font-size: 14.5px; line-height: 1.55; }
+.acc-note { padding: 12px 16px; border-radius: 12px; background: rgba(255,255,255,.04); border: 1px solid var(--line-2); color: var(--muted); font-size: 14.5px; }
+.acc-form { margin-top: 14px; }
+.acc-form label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.acc-form small { display: block; margin-top: 8px; }
+.acc-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.acc-row input { flex: 1 1 220px; min-width: 0; height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,.14); background: #070c19; color: #fff; font: 400 15px var(--body); }
+.acc-row input:focus-visible { outline: 2px solid var(--orange); outline-offset: 1px; }
+.acc-row input:disabled { opacity: .5; }
+.acc-btn { height: 44px; padding: 0 18px; border-radius: 10px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.04); color: #fff; font: 600 14px var(--body); cursor: pointer; transition: background .2s, filter .2s; }
+.acc-btn:hover:not(:disabled) { background: rgba(255,255,255,.1); }
+.acc-btn:disabled { opacity: .5; cursor: default; }
+.acc-btn:focus-visible, .acc-link:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+.acc-btn.primary { background: linear-gradient(90deg, #d4560c, var(--orange) 60%, var(--orange-2)); border-color: transparent; }
+.acc-btn.primary:hover:not(:disabled) { filter: brightness(1.08); background: linear-gradient(90deg, #d4560c, var(--orange) 60%, var(--orange-2)); }
+.acc-btn.danger { color: #fda4af; border-color: rgba(225,29,72,.4); }
+.acc-btn.danger.armed { background: #e11d48; color: #fff; border-color: #e11d48; }
+.acc-btn.danger.armed:hover:not(:disabled) { background: #f43f5e; }
+.acc-link { display: inline-block; padding: 8px 0; border: 0; background: none; color: var(--orange-2); font: 500 14.5px var(--body); text-align: left; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.acc-link.strong { font-weight: 700; }
+.acc-link:disabled { opacity: .5; cursor: default; }
+.acc-plans { margin-top: 6px; }
+.acc-plan { margin-top: 14px; padding: 16px 18px; border-radius: 16px; border: 1px solid var(--line-2); background: #070c19; }
+.acc-plan[data-state="ends"] { border-color: rgba(255,122,26,.35); }
+.acc-plan[data-state="past_due"] { border-color: rgba(225,29,72,.45); }
+.acc-plan-top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.acc-plan-top h3 { margin: 0; font-family: var(--head); font-weight: 800; font-size: 19px; }
+.acc-price { margin-left: auto; font-family: var(--mono); font-size: 14px; color: var(--muted); }
+.acc-plan-line { color: rgba(255,255,255,.88); }
+.acc-hint { padding: 10px 14px; border-radius: 12px; background: rgba(255,122,26,.09); border: 1px solid rgba(255,122,26,.35); color: #fed7aa; font-size: 14.5px; }
+.acc-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 14px; }
+.acc-confirm { margin-top: 14px; padding: 14px 16px; border-radius: 14px; background: rgba(225,29,72,.07); border: 1px solid rgba(225,29,72,.35); }
+.acc-confirm > p:first-child { margin-top: 0; }
+.acc-danger { border-color: rgba(225,29,72,.3); }
+.acc-list { margin: 10px 0 18px; padding-left: 20px; color: var(--muted); line-height: 1.55; }
+.acc-list li { margin: 6px 0; }
+.acc-gone .acc-home { margin-top: 20px; }
+.acc .adm-err, .acc .adm-notice { margin: 14px 0 0; }
+@media (max-width: 520px) {
+  .acc-row .acc-btn, .acc-actions .acc-btn { width: 100%; }
+  .acc-price { margin-left: 0; width: 100%; }
+}
+.sb-link.on { color: var(--orange-2); }

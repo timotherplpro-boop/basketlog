@@ -12,6 +12,8 @@ export default function SiteFooter({ L, compact = false }) {
   const legal = (
     <nav className="foot-links foot-legal" aria-label={L.t("Informations légales", "Legal information", "Información legal")}>
       {LEGAL_PAGES.map(([href, label]) => <Link key={href} href={L.href(href)}>{L.t(label, LEGAL_EN[href], LEGAL_ES[href])}</Link>)}
+      {/* Fonction de résiliation visible de toutes les pages (résiliation en ligne), qui mène à « Mon compte ». */}
+      <Link href={L.href("/app/compte")}>{L.t("Résilier mon abonnement", "Cancel my subscription", "Cancelar mi suscripción")}</Link>
       <CookieSettingsButton />
       {!compact && <InstallButton source="pied_de_page" />}
       {!compact && <LangSwitch />}

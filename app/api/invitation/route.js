@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { COOKIE, cookieOptions, decodeSession, encodeSession, resolveAccess } from "../../../lib/pro";
+import { COOKIE, cookieOptions, decodeSession, displayName, encodeSession, resolveAccess } from "../../../lib/pro";
 import { dbRpc } from "../../../lib/roles";
 
 export const dynamic = "force-dynamic";
@@ -31,7 +31,7 @@ export async function POST(req) {
   let a;
   try { a = await resolveAccess(s.uid, { ...s, role: r.role }); } catch { a = { tier: "lifetime", paid: s.paid ?? s.tier ?? "compte", role: r.role, nom: null, v: s.v }; }
   const res = NextResponse.json({ ok: true, role: a.role }, { headers: { "Cache-Control": "no-store" } });
-  const value = encodeSession({ ...s, tier: a.tier, paid: a.paid, role: a.role, name: a.nom || s.name, v: a.v, checked: Date.now() });
+  const value = encodeSession({ ...s, tier: a.tier, paid: a.paid, role: a.role, name: displayName(a, s), v: a.v, checked: Date.now() });
   if (value) res.cookies.set(COOKIE, value, cookieOptions);
   return res;
 }

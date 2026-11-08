@@ -43,7 +43,9 @@ export async function GET(req) {
     if (!uid) return fail("connexion");
 
     const { tier, paid, role, nom, v } = await resolveAccess(uid); // formule Whop, ou accès complet d'un admin ou créateur
-    const value = encodeSession({ uid, name: nom || info.preferred_username || info.name || "", tier, paid, role, v, checked: Date.now() });
+    // wname : nom du compte Whop, gardé à part pour y revenir si le membre efface le prénom qu'il a choisi dans « Mon compte ».
+    const wname = info.preferred_username || info.name || "";
+    const value = encodeSession({ uid, name: nom || wname, wname, tier, paid, role, v, checked: Date.now() });
     if (!value) return fail("config");
     // Retour sur la page d'origine (ex. la fiche match), sinon l'espace membre.
     const next = safeNext(req.cookies.get(NEXT_COOKIE)?.value);

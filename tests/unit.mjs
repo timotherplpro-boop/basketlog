@@ -4,6 +4,7 @@
 import { pathToFileURL } from "node:url";
 import { chunkText, detectLang, localizeReviews, translateRaw } from "../lib/translate.js";
 import { accountLabel, creatorNames } from "../lib/accounts.js";
+import { DELETE_WORDS, buildPlans, cleanName, deleteConfirmed, normalizeMembership, planOf, renewing, tierOfProduct } from "../lib/account.js";
 import { CODE_RE, cleanCode, cleanPct, discounted, mergePromos, randomChars, suggestCode, withPromo } from "../lib/promo.js";
 import { asPct, checkPromo, describeProblem, describeProblems, promoMonths, whopPromoReady } from "../lib/whop-promo.js";
 import { BSKY_MAX, blueskyPost, elPick, graphemes, nbaPick, socialPosts, telegramText } from "../lib/social.js";
@@ -245,6 +246,64 @@ export async function unit() {
   eq("Comptes : noms par défaut (@basketlog en français, basketlog.bsky.social) quand seuls les codes sont donnés", [socialConfig({ TELEGRAM_BOT_TOKEN: "x" }).telegram.chats, socialConfig({ BLUESKY_APP_PASSWORD: "y" }).bluesky.handle], [{ fr: "@basketlog" }, "basketlog.bsky.social"]);
   const socPub = JSON.stringify(socialStatus(cfgFull));
   eq("Comptes : l'état public ne montre aucun code d'accès", [socPub.includes("secret"), socPub.includes("@basketlog_es"), socPub.includes("basketlog.bsky.social")], [false, true, true]);
+
+
+  // --- « Mon compte » : prénom, mot de confirmation, abonnements Whop (lib/account.js)
+  console.log("Mon compte");
+  eq("Prénom : un prénom simple passe", cleanName("Léa"), { ok: true, name: "Léa" });
+  eq("Prénom : espaces, tabulations et retours nettoyés", cleanName("  Léa \t  Dupont \n"), { ok: true, name: "Léa Dupont" });
+  eq("Prénom : vide = revenir au nom Whop", [cleanName("   "), cleanName(null), cleanName(undefined)], [{ ok: true, name: "" }, { ok: true, name: "" }, { ok: true, name: "" }]);
+  eq("Prénom : un seul caractère refusé", cleanName("L"), { ok: false, reason: "court" });
+  eq("Prénom : 40 caractères passent, 41 refusés", [cleanName("x".repeat(40)).ok, cleanName("x".repeat(41))], [true, { ok: false, reason: "long" }]);
+  eq("Prénom : balises et adresses web refusées", ["<b>Tim</b>", "https://pirate.example", "www.pirate.fr", "voir http:x", "a://b"].map((x) => cleanName(x).reason), ["invalide", "invalide", "invalide", "invalide", "invalide"]);
+  eq("Prénom : émojis et signes courants acceptés (2 émojis = 2 caractères)", [cleanName("Gonzo_picks 🏀").ok, cleanName("🏀🏀").ok, cleanName("Jean-Pierre O'Neil").ok], [true, true, true]);
+  eq("Prénom : caractères invisibles supprimés, contrôles remplacés par un espace", [cleanName("Té\u200bo").name, cleanName("Lé\u0000a").name, cleanName("A\u202eB").name], ["Téo", "Lé a", "A B"]);
+  eq("Suppression : le mot de confirmation est accepté dans les trois langues, sans casse ni accents", ["SUPPRIMER", "supprimer", "  Supprimer ", "DELETE", "delete", "Eliminar", "ELIMINAR"].map(deleteConfirmed), [true, true, true, true, true, true, true]);
+  eq("Suppression : tout autre texte est refusé", ["", " ", null, undefined, "oui", "SUPPRIME", "supprimé", "SUPPRIMER!", "SUPPRIMER MON COMPTE", "DELET"].map(deleteConfirmed), [false, false, false, false, false, false, false, false, false, false]);
+  eq("Suppression : les trois mots", DELETE_WORDS, { fr: "SUPPRIMER", en: "DELETE", es: "ELIMINAR" });
+
+  const IDS = { lifetime: "prod_L", pro: "prod_P", starter: "prod_S" };
+  const raw = (o = {}) => ({
+    id: "mem_1", status: "active", cancel_at_period_end: false, current_period_end: "2099-12-08T10:00:00Z", billing_period_days: 30,
+    product: { id: "prod_P", title: "Basketlog Pro" }, user_id: "user_1", renewal_price: { amount: "29.99", currency: "EUR" },
+    manage_url: "https://whop.com/@me/settings/orders/mem_1", ...o,
+  });
+  const norm = (o) => normalizeMembership(raw(o), IDS);
+  eq("Formule d'un produit Whop (Lifetime, Pro, Starter, inconnu, vide, variables absentes)", [tierOfProduct("prod_L", IDS), tierOfProduct("prod_P", IDS), tierOfProduct("prod_S", IDS), tierOfProduct("prod_X", IDS), tierOfProduct(null, IDS), tierOfProduct("prod_P", {}), tierOfProduct(undefined, { pro: undefined })], ["lifetime", "pro", "starter", null, null, null, null]);
+  eq("Abonnement Whop : lecture complète", norm(), { id: "mem_1", uid: "user_1", status: "active", productId: "prod_P", title: "Basketlog Pro", tier: "pro", cancelAtPeriodEnd: false, periodEnd: "2099-12-08T10:00:00Z", periodDays: 30, renewal: { amount: 29.99, currency: "eur" }, manageUrl: "https://whop.com/@me/settings/orders/mem_1" });
+  eq("Abonnement Whop : acheteur lu dans « user.id » comme dans « user_id », produit lu dans « product_id »", [norm({ user_id: undefined, user: { id: "user_2" } }).uid, norm({ product: undefined, product_id: "prod_S" }).tier], ["user_2", "starter"]);
+  eq("Abonnement Whop : sans acheteur, uid vide (jamais pris pour celui d'un autre)", norm({ user_id: undefined }).uid, null);
+  eq("Abonnement Whop : seuls les liens https whop.com sont gardés", ["https://evil.example/x", "javascript:alert(1)", "http://whop.com/x", "https://whop.com.evil.example/x", "https://sub.whop.com/x", 42, null].map((u) => norm({ manage_url: u }).manageUrl), [null, null, null, null, "https://sub.whop.com/x", null, null]);
+  eq("Abonnement Whop : prix absent ou invalide = pas de prix, fiche sans identifiant = rejetée", [norm({ renewal_price: null }).renewal, norm({ renewal_price: { amount: "abc" } }).renewal, normalizeMembership({}, IDS), normalizeMembership(null, IDS)], [null, null, null, null]);
+  eq("Abonnement Whop : date de fin prise sur expires_at à défaut de la période", norm({ current_period_end: null, expires_at: "2099-01-01T00:00:00Z" }).periodEnd, "2099-01-01T00:00:00Z");
+
+  const NOW = Date.parse("2026-11-08T12:00:00Z");
+  const st = (o) => planOf(norm(o), NOW);
+  eq("État : abonnement actif = se renouvelle, résiliable", [st({}).state, st({}).canCancel, st({}).canResume], ["renews", true, false]);
+  eq("État : période d'essai = se renouvelle", st({ status: "trialing" }).state, "renews");
+  eq("État : paiement refusé = à régler, toujours résiliable", [st({ status: "past_due" }).state, st({ status: "past_due" }).canCancel], ["past_due", true]);
+  eq("État : résilié en fin de période = actif jusqu'à la date, reprise possible", [st({ cancel_at_period_end: true }).state, st({ cancel_at_period_end: true }).canCancel, st({ cancel_at_period_end: true }).canResume], ["ends", false, true]);
+  eq("État : anciens noms « canceling » / « expiring »", [st({ status: "canceling", cancel_at_period_end: true }).canResume, st({ status: "expiring" }).state, st({ status: "expiring" }).canResume], [true, "ends", false]);
+  eq("État : annulé mais encore dans la période payée = actif jusqu'à la date, sans reprise", [st({ status: "canceled" }).state, st({ status: "canceled" }).canResume], ["ends", false]);
+  eq("État : annulé ou expiré et terminé = rien à afficher", [st({ status: "canceled", current_period_end: "2026-10-01T00:00:00Z" }), st({ status: "expired" }), st({ status: "unresolved" })], [null, null, null]);
+  eq("État : produit d'un autre vendeur ou compte gratuit = rien à afficher", st({ product: { id: "prod_FREE" } }), null);
+  eq("État : Lifetime = à vie, jamais résiliable", [st({ product: { id: "prod_L" } }).state, st({ product: { id: "prod_L" } }).canCancel, st({ product: { id: "prod_L" }, status: "completed" }).state, st({ product: { id: "prod_L" }, status: "expired" })], ["lifetime", false, "lifetime", null]);
+  eq("État : Starter payé en une fois = payé, sans action", [st({ product: { id: "prod_S" }, status: "completed" }).state, st({ product: { id: "prod_S" }, status: "completed" }).canCancel], ["paid", false]);
+
+  const one = (id, tier, o = {}) => norm({ id, product: { id: IDS[tier], title: tier }, ...o });
+  const names = (list) => list.map((p) => `${p.tier}:${p.state}${p.included ? `>${p.included}` : ""}${p.duplicate ? "x2" : ""}`);
+  eq("Plans : Lifetime d'abord, puis actifs par formule, puis résiliés ; Starter et Pro déjà compris dans Lifetime signalés",
+    names(buildPlans([one("a", "starter"), one("b", "pro", { cancel_at_period_end: true }), one("c", "lifetime"), one("d", "pro")], NOW)),
+    ["lifetime:lifetime", "pro:renews>lifetime", "starter:renews>lifetime", "pro:ends"]);
+  eq("Plans : Starter compris dans un Pro actif", names(buildPlans([one("a", "starter"), one("b", "pro")], NOW)), ["pro:renews", "starter:renews>pro"]);
+  eq("Plans : un Pro qui s'arrête ou dont le paiement échoue ne « comprend » pas le Starter", [
+    names(buildPlans([one("a", "starter"), one("b", "pro", { cancel_at_period_end: true })], NOW)),
+    names(buildPlans([one("a", "starter"), one("b", "pro", { status: "past_due" })], NOW)),
+  ], [["starter:renews", "pro:ends"], ["pro:past_due", "starter:renews"]]);
+  eq("Plans : deux abonnements de la même formule = doublon signalé sur les deux", names(buildPlans([one("a", "pro"), one("b", "pro")], NOW)), ["pro:renewsx2", "pro:renewsx2"]);
+  eq("Plans : un abonnement qui s'arrête n'est pas un doublon", names(buildPlans([one("a", "pro"), one("b", "pro", { cancel_at_period_end: true })], NOW)), ["pro:renews", "pro:ends"]);
+  eq("Plans : liste vide ou sans formule Basketlog", [buildPlans([], NOW), buildPlans([norm({ product: { id: "prod_FREE" } })], NOW), buildPlans(null, NOW)], [[], [], []]);
+  eq("Suppression du compte : seuls les abonnements qui se renouvelleraient sont à arrêter", renewing([one("a", "starter"), one("b", "pro", { cancel_at_period_end: true }), one("c", "lifetime"), one("d", "pro", { status: "past_due" }), one("e", "pro", { status: "expired" })], NOW).map((m) => m.id), ["a", "d"]);
 
   return { passed, failed };
 }

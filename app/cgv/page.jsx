@@ -58,7 +58,7 @@ function CGVFr() {
 
       <Sec n={5} title="Renouvellement et résiliation">
         <p>Les abonnements Starter et Pro sont sans engagement. Ils se renouvellent automatiquement chaque mois, à la date anniversaire de l&apos;achat, jusqu&apos;à leur résiliation.</p>
-        <p>Tu peux résilier à tout moment, en quelques clics, depuis ton compte Whop (<a href={LEGAL.paiement.commandes} rel="noopener" target="_blank">whop.com, rubrique Commandes</a>), ou en nous écrivant à <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. Pense à résilier au moins 24 heures avant la date de renouvellement. La résiliation prend effet à la fin de la période déjà payée : tu gardes l&apos;accès jusqu&apos;à cette date et aucun nouveau paiement n&apos;est prélevé. Une période commencée n&apos;est pas remboursée, ni en totalité ni au prorata.</p>
+        <p>Tu peux résilier à tout moment, en quelques clics, depuis la page <Link href="/app/compte">Mon compte</Link> de ce site (bouton « Résilier l&apos;abonnement », avec une confirmation avant validation), depuis ton compte Whop (<a href={LEGAL.paiement.commandes} rel="noopener" target="_blank">whop.com, rubrique Commandes</a>), ou en nous écrivant à <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. Pense à résilier au moins 24 heures avant la date de renouvellement. La résiliation prend effet à la fin de la période déjà payée : tu gardes l&apos;accès jusqu&apos;à cette date et aucun nouveau paiement n&apos;est prélevé. Une période commencée n&apos;est pas remboursée, ni en totalité ni au prorata.</p>
         <p>La formule Lifetime est un paiement unique : il n&apos;y a rien à résilier.</p>
       </Sec>
 
@@ -147,7 +147,7 @@ function CGVEn({ L }) {
 
       <Sec n={5} title="Renewal and cancellation">
         <p>Starter and Pro subscriptions have no commitment. They renew automatically every month, on the anniversary date of the purchase, until cancelled.</p>
-        <p>You can cancel at any time, in a few clicks, from your Whop account (<a href={LEGAL.paiement.commandes} rel="noopener" target="_blank">whop.com, Orders section</a>), or by emailing us at <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. Remember to cancel at least 24 hours before the renewal date. Cancellation takes effect at the end of the period already paid: you keep access until that date and no new payment is taken. A started period is not refunded, either in full or pro rata.</p>
+        <p>You can cancel at any time, in a few clicks, from the <Link href={L.href("/app/compte")}>My account</Link> page of this site (“Cancel subscription” button, with a confirmation before it takes effect), from your Whop account (<a href={LEGAL.paiement.commandes} rel="noopener" target="_blank">whop.com, Orders section</a>), or by emailing us at <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. Remember to cancel at least 24 hours before the renewal date. Cancellation takes effect at the end of the period already paid: you keep access until that date and no new payment is taken. A started period is not refunded, either in full or pro rata.</p>
         <p>The Lifetime plan is a one-time payment: there is nothing to cancel.</p>
       </Sec>
 
@@ -236,7 +236,7 @@ function CGVEs({ L }) {
 
       <Sec n={5} title="Renovación y cancelación">
         <p>Las suscripciones Starter y Pro no tienen permanencia. Se renuevan automáticamente cada mes, en la fecha de aniversario de la compra, hasta que se cancelan.</p>
-        <p>Puedes cancelar en cualquier momento, en unos clics, desde tu cuenta de Whop (<a href={LEGAL.paiement.commandes} rel="noopener" target="_blank">whop.com, apartado Pedidos</a>), o escribiéndonos a <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. Acuérdate de cancelar al menos 24 horas antes de la fecha de renovación. La cancelación surte efecto al final del periodo ya pagado: mantienes el acceso hasta esa fecha y no se cobra ningún pago nuevo. Un periodo empezado no se reembolsa, ni total ni proporcionalmente.</p>
+        <p>Puedes cancelar en cualquier momento, en unos clics, desde la página <Link href={L.href("/app/compte")}>Mi cuenta</Link> de este sitio (botón «Cancelar la suscripción», con una confirmación antes de que surta efecto), desde tu cuenta de Whop (<a href={LEGAL.paiement.commandes} rel="noopener" target="_blank">whop.com, apartado Pedidos</a>), o escribiéndonos a <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. Acuérdate de cancelar al menos 24 horas antes de la fecha de renovación. La cancelación surte efecto al final del periodo ya pagado: mantienes el acceso hasta esa fecha y no se cobra ningún pago nuevo. Un periodo empezado no se reembolsa, ni total ni proporcionalmente.</p>
         <p>El plan Lifetime es un pago único: no hay nada que cancelar.</p>
       </Sec>
 
