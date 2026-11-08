@@ -221,7 +221,8 @@ export async function unit() {
   eq("Comptes : rien de branché sans variables, publication coupée", [socNone.enabled, socNone.telegram, socNone.bluesky], [false, null, null]);
   const cfgFull = socialConfig({ SOCIAL_ENABLED: " 1 ", TELEGRAM_BOT_TOKEN: "123:secret-telegram", TELEGRAM_CHAT_FR: "@basketlog", TELEGRAM_CHAT_ES: " @basketlog_es ", BLUESKY_HANDLE: "@basketlog.bsky.social", BLUESKY_APP_PASSWORD: "abcd-efgh-secret", BLUESKY_LANGS: "fr, de ,es" });
   eq("Comptes : chaînes par langue, nom Bluesky sans @, langues inconnues ignorées", [cfgFull.enabled, cfgFull.telegram.chats, cfgFull.bluesky.handle, cfgFull.bluesky.langs], [true, { fr: "@basketlog", es: "@basketlog_es" }, "basketlog.bsky.social", ["fr", "es"]]);
-  eq("Comptes : Telegram sans chaîne ou Bluesky sans mot de passe = non branché", [socialConfig({ TELEGRAM_BOT_TOKEN: "x" }).telegram, socialConfig({ BLUESKY_HANDLE: "a" }).bluesky], [null, null]);
+  eq("Comptes : sans code d'accès = non branché (Telegram sans code, Bluesky sans mot de passe)", [socialConfig({ TELEGRAM_CHAT_FR: "@x" }).telegram, socialConfig({ BLUESKY_HANDLE: "a" }).bluesky], [null, null]);
+  eq("Comptes : noms par défaut (@basketlog en français, basketlog.bsky.social) quand seuls les codes sont donnés", [socialConfig({ TELEGRAM_BOT_TOKEN: "x" }).telegram.chats, socialConfig({ BLUESKY_APP_PASSWORD: "y" }).bluesky.handle], [{ fr: "@basketlog" }, "basketlog.bsky.social"]);
   const socPub = JSON.stringify(socialStatus(cfgFull));
   eq("Comptes : l'état public ne montre aucun code d'accès", [socPub.includes("secret"), socPub.includes("@basketlog_es"), socPub.includes("basketlog.bsky.social")], [false, true, true]);
 
