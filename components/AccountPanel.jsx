@@ -224,10 +224,14 @@ export default function AccountPanel() {
             <div className="acc-actions"><button type="button" className="acc-btn" onClick={() => { setData(null); load(); }}>{T("Réessayer", "Try again", "Reintentar")}</button></div>
           </>
         ) : plans.length === 0 ? (
-          <>
-            <p>{T("Tu es sur le compte gratuit : aucun abonnement à gérer.", "You're on the free account: no subscription to manage.", "Estás en la cuenta gratuita: no hay ninguna suscripción que gestionar.")}</p>
-            <Link href={L.href("/pro")} className="btn-solid acc-home">{T("Voir les formules", "See the plans", "Ver los planes")}</Link>
-          </>
+          role ? (
+            <p>{T(`Ton accès complet est lié à ton compte ${role === "admin" ? "admin" : "créateur"} : tu n'as aucun abonnement à gérer.`, `Your full access comes with your ${role === "admin" ? "admin" : "creator"} account: you have no subscription to manage.`, `Tu acceso completo viene de tu cuenta de ${role === "admin" ? "administrador" : "creador"}: no tienes ninguna suscripción que gestionar.`)}</p>
+          ) : (
+            <>
+              <p>{T("Tu es sur le compte gratuit : aucun abonnement à gérer.", "You're on the free account: no subscription to manage.", "Estás en la cuenta gratuita: no hay ninguna suscripción que gestionar.")}</p>
+              <Link href={L.href("/pro")} className="btn-solid acc-home">{T("Voir les formules", "See the plans", "Ver los planes")}</Link>
+            </>
+          )
         ) : (
           <div className="acc-plans">
             {plans.map((p) => {
