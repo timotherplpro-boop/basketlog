@@ -176,7 +176,7 @@ export default function AdminStats({ st }) {
               <tbody>
                 {st.subs.map((x) => (
                   <tr key={x.id} className={x.live ? "" : "off"}>
-                    <td>{x.name}{x.role && <span className="adm-tag ok st-tag">{x.role === "admin" ? "Toi / admin" : "Créateur"}</span>}</td>
+                    <td>{x.name}{x.handle && <small> · compte Whop {x.handle}</small>}{x.role && <span className="adm-tag ok st-tag">{x.role === "admin" ? "Toi / admin" : "Créateur"}</span>}</td>
                     <td>{PLAN[x.plan] || x.plan}</td>
                     <td>{dy(x.created)}</td>
                     <td>{x.state}{x.until ? <small> · fin le {dy(x.until)}</small> : null}{x.reason ? <small> · raison : {x.reason}</small> : null}</td>

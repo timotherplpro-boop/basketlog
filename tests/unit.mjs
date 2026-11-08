@@ -3,6 +3,7 @@
 // Usage : node tests/unit.mjs  (lancé aussi par tests/smoke.mjs)
 import { pathToFileURL } from "node:url";
 import { chunkText, detectLang, localizeReviews, translateRaw } from "../lib/translate.js";
+import { accountLabel, creatorNames } from "../lib/accounts.js";
 import { CODE_RE, cleanCode, cleanPct, discounted, mergePromos, randomChars, suggestCode, withPromo } from "../lib/promo.js";
 import { asPct, checkPromo, describeProblem, describeProblems, promoMonths, whopPromoReady } from "../lib/whop-promo.js";
 
@@ -165,6 +166,25 @@ export async function unit() {
   const withKey = whopPromoReady();
   setEnv("WHOP_API_KEY", env.key);
   eq("liaison Whop : active seulement si la clé API est présente", [noKey, withKey], [false, true]);
+
+  // --- Nom d'un compte dans l'admin et les statistiques (lib/accounts.js)
+  console.log("Noms des comptes");
+  eq("créateur : le nom saisi à l'invitation passe devant le nom du compte Whop", accountLabel({ role: "createur", uid: "u1", nom: "matheosds", note: "Gonzopicks" }), { main: "Gonzopicks", sub: "matheosds", whop: true });
+  eq("créateur : même nom (casse, espaces, accents ignorés) : pas de doublon", [accountLabel({ role: "createur", nom: "gonzopicks", note: "GONZOPICKS" }), accountLabel({ role: "createur", nom: "Gonzo Picks", note: "gonzopicks" }), accountLabel({ role: "createur", nom: "Élodie", note: "elodie" })], [{ main: "GONZOPICKS", sub: "", whop: true }, { main: "gonzopicks", sub: "", whop: true }, { main: "elodie", sub: "", whop: true }]);
+  eq("créateur sans nom saisi : le nom du compte Whop, puis rien", [accountLabel({ role: "createur", uid: "u1", nom: "matheosds", note: null }), accountLabel({ role: "createur", uid: "u1", nom: "matheosds", note: "  " }), accountLabel({ role: "createur", uid: "u1", nom: "matheosds" })], [{ main: "matheosds", sub: "", whop: false }, { main: "matheosds", sub: "", whop: false }, { main: "matheosds", sub: "", whop: false }]);
+  eq("créateur sans nom du tout : l'identifiant du compte", accountLabel({ role: "createur", uid: "user_abc", nom: null, note: null }), { main: "user_abc", sub: "", whop: false });
+  eq("créateur sans nom de compte Whop : le nom saisi seul", accountLabel({ role: "createur", uid: "u1", nom: null, note: "Gonzopicks" }), { main: "Gonzopicks", sub: "", whop: true });
+  eq("admin : l'ordre ne change pas (nom du compte, puis la note)", [accountLabel({ role: "admin", uid: "u0", nom: "Tim", note: "Propriétaire" }), accountLabel({ role: "admin", uid: "u2", nom: "marie_w", note: "Marie" })], [{ main: "Tim", sub: "Propriétaire", whop: false }, { main: "marie_w", sub: "Marie", whop: false }]);
+  eq("admin : note identique au nom, ou absente : pas de doublon", [accountLabel({ role: "admin", nom: "Tim", note: "tim" }), accountLabel({ role: "admin", nom: "Tim", note: null })], [{ main: "Tim", sub: "", whop: false }, { main: "Tim", sub: "", whop: false }]);
+  eq("ligne vide ou absente : rien d'affiché, sans erreur", [accountLabel(null), accountLabel(undefined), accountLabel({})], [{ main: "", sub: "", whop: false }, { main: "", sub: "", whop: false }, { main: "", sub: "", whop: false }]);
+  eq("statistiques : seuls les créateurs avec un nom saisi sont renommés", creatorNames([
+    { uid: "u0", role: "admin", nom: "Tim", note: "Propriétaire" },
+    { uid: "u1", role: "createur", nom: "matheosds", note: " Gonzopicks " },
+    { uid: "u2", role: "createur", nom: "autre", note: "" },
+    { uid: "u3", role: "createur", nom: "x", note: null },
+    null,
+  ]), { u1: "Gonzopicks" });
+  eq("statistiques : sans rôles, rien", [creatorNames(), creatorNames([])], [{}, {}]);
 
   return { passed, failed };
 }

@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { money, price } from "../lib/pricing";
 import { LANGS, LANG_NAMES, fmtDate, mk, pctOf } from "../lib/i18n";
+import { accountLabel } from "../lib/accounts";
 import { CODE_RE, PROMO_DEFAULT, PROMO_MAX, PROMO_MIN, cleanCode, cleanPct, suggestCode } from "../lib/promo";
 import { useL } from "./LangProvider";
 
@@ -69,7 +70,7 @@ const Check = ({ ok, children }) => (
 // Code promo d'un créateur : code, remise, état chez Whop, et création ou modification sur place.
 // target : { uid } pour un compte, { inv } pour une invitation pas encore activée ; name : nom du créateur (propose le code).
 // auto : le site crée lui-même les codes chez Whop (clé API présente) ; sinon l'admin les crée à la main et les marque.
-function PromoLine({ L, target, name, promo, auto, linkLang, busy, confirm, twoStep, copied, onCopy, onSave, onSync, onWhop, onRemove }) {
+function PromoLine({ L, target, name, promo, auto, terms, linkLang, busy, confirm, twoStep, copied, onCopy, onSave, onSync, onWhop, onRemove }) {
   const t = L.t;
   const [open, setOpen] = useState(false);
   const [pct, setPct] = useState(String(PROMO_DEFAULT));
@@ -170,6 +171,7 @@ function PromoLine({ L, target, name, promo, auto, linkLang, busy, confirm, twoS
           {confirm === delKey ? t("Confirmer la suppression", "Confirm deletion", "Confirmar la eliminación") : t("Supprimer le code", "Delete code", "Eliminar el código")}
         </button>
       </span>
+      {terms && promo.whop_ok && <p className="adm-help" data-promo-terms>{terms}</p>}
     </div>
   );
 }
@@ -202,6 +204,11 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
   const durationText = data?.whopMonths === 0 ? t("à chaque paiement", "every payment", "cada pago")
     : data?.whopMonths > 1 ? t(`les ${data.whopMonths} premiers paiements`, `the first ${data.whopMonths} payments`, `los primeros ${data.whopMonths} pagos`)
     : t("premier paiement seulement", "first payment only", "solo el primer pago");
+  // Phrase sous chaque code créé chez Whop : le code n'a pas de date de fin (c'est vérifié chez Whop), seule la remise est limitée, client par client.
+  const promoTerms = !auto ? null
+    : data.whopMonths === 0 ? t("Le code n'a pas de date de fin : il reste utilisable tant que tu ne le supprimes pas. La remise s'applique à chaque paiement du client.", "The code has no end date: it stays usable until you delete it. The discount applies to each of the customer's payments.", "El código no tiene fecha de fin: sigue siendo válido hasta que lo elimines. El descuento se aplica a cada pago del cliente.")
+    : data.whopMonths > 1 ? t(`Le code n'a pas de date de fin : il reste utilisable tant que tu ne le supprimes pas. La remise s'applique aux ${data.whopMonths} premiers paiements du client.`, `The code has no end date: it stays usable until you delete it. The discount applies to the customer's first ${data.whopMonths} payments.`, `El código no tiene fecha de fin: sigue siendo válido hasta que lo elimines. El descuento se aplica a los primeros ${data.whopMonths} pagos del cliente.`)
+    : t("Le code n'a pas de date de fin : il reste utilisable tant que tu ne le supprimes pas. Chaque client n'a la remise que sur son premier paiement.", "The code has no end date: it stays usable until you delete it. Each customer only gets the discount on their first payment.", "El código no tiene fecha de fin: sigue siendo válido hasta que lo elimines. Cada cliente solo recibe el descuento en su primer pago.");
   const suggestedCode = cleanPct(invitePct) ? suggestCode(inviteNote, invitePct) : ""; // « @lanuitnba » + 20 -> LANUITNBA20 (vide sans remise valide, ou si le nom est trop court)
   const shownCode = inviteCode ?? suggestedCode;
 
@@ -379,7 +386,7 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
       lifetime: t("Abonné Lifetime", "Lifetime subscriber", "Suscriptor Lifetime"),
     }[a.formule] || t("Compte vérifié", "Verified account", "Cuenta verificada"))
     : t("Sans compte", "No account", "Sin cuenta"));
-  const promoProps = { L, auto, linkLang, busy, confirm, twoStep, copied, onCopy: copy, onSave: savePromo, onSync: syncPromo, onWhop: markWhop, onRemove: removePromo };
+  const promoProps = { L, auto, terms: promoTerms, linkLang, busy, confirm, twoStep, copied, onCopy: copy, onSave: savePromo, onSync: syncPromo, onWhop: markWhop, onRemove: removePromo };
   const codeList = (codes) => codes.map((c) => `${c.code} (−${pctOf(c.pct / 100, L)})`).join(", ");
   const whopLink = <a className="adm-link-out" href={WHOP_PROMO} target="_blank" rel="noopener noreferrer">{t("Codes promo Whop", "Whop promo codes", "Códigos promocionales de Whop")} ↗</a>;
   const keysLink = <a className="adm-link-out" href={WHOP_KEYS} target="_blank" rel="noopener noreferrer">{t("Clés API Whop", "Whop API keys", "Claves API de Whop")} ↗</a>;
@@ -657,19 +664,23 @@ export default function AdminPanel({ initial, me, preview = null, health = null 
 
         <h3>{t("Comptes avec accès", "Accounts with access", "Cuentas con acceso")}</h3>
         <ul className="adm-rows">
-          {data.roles.map((r) => (
-            <li key={r.uid}>
-              <span><b>{r.nom || r.uid}</b>{r.note ? ` · ${r.note}` : ""} · {roleName(r.role)} · {t("depuis le", "since", "desde el")} {day(L, r.ajoute_le)}</span>
-              {r.uid === me ? (
-                <span className="adm-tag ok">{t("Toi", "You", "Tú")}</span>
-              ) : (
-                <button type="button" className={`adm-btn danger ${confirm === `x-${r.uid}` ? "armed" : ""}`} disabled={!!busy} onClick={() => twoStep(`x-${r.uid}`, () => removeAccess(r.uid))}>
-                  {confirm === `x-${r.uid}` ? t("Confirmer", "Confirm", "Confirmar") : t("Retirer l'accès", "Remove access", "Retirar el acceso")}
-                </button>
-              )}
-              {promosOn && r.role === "createur" && <PromoLine {...promoProps} target={{ uid: r.uid }} name={r.note || r.nom || ""} promo={r.promo} />}
-            </li>
-          ))}
+          {data.roles.map((r) => {
+            // Créateur : le nom saisi à l'invitation (« Gonzopicks ») d'abord, le nom du compte Whop (« matheosds ») à côté.
+            const who = accountLabel(r);
+            return (
+              <li key={r.uid}>
+                <span><b>{who.main}</b>{who.sub ? ` · ${who.whop ? `${t("compte Whop", "Whop account", "cuenta de Whop")} ` : ""}${who.sub}` : ""} · {roleName(r.role)} · {t("depuis le", "since", "desde el")} {day(L, r.ajoute_le)}</span>
+                {r.uid === me ? (
+                  <span className="adm-tag ok">{t("Toi", "You", "Tú")}</span>
+                ) : (
+                  <button type="button" className={`adm-btn danger ${confirm === `x-${r.uid}` ? "armed" : ""}`} disabled={!!busy} onClick={() => twoStep(`x-${r.uid}`, () => removeAccess(r.uid))}>
+                    {confirm === `x-${r.uid}` ? t("Confirmer", "Confirm", "Confirmar") : t("Retirer l'accès", "Remove access", "Retirar el acceso")}
+                  </button>
+                )}
+                {promosOn && r.role === "createur" && <PromoLine {...promoProps} target={{ uid: r.uid }} name={r.note || r.nom || ""} promo={r.promo} />}
+              </li>
+            );
+          })}
         </ul>
 
         {promosOn && data.orphelins?.length > 0 && (
