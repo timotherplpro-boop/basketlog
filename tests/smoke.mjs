@@ -71,6 +71,20 @@ async function protectedRoutes() {
   stats.status === 404 ? ok("statistiques admin cachées aux visiteurs") : ko("statistiques admin cachées aux visiteurs", `HTTP ${stats.status}`);
   const beacon = await get("/api/stats", { method: "POST", body: { e: "visite", s: "direct", l: "fr" } });
   beacon.status === 204 ? ok("compteur du parcours : réponse vide") : ko("compteur du parcours : réponse vide", `HTTP ${beacon.status}`);
+  const social = await get("/api/cron/social");
+  social.status === 401 ? ok("publication automatique refusée sans accès") : ko("publication automatique refusée sans accès", `HTTP ${social.status}`);
+  if (SECRET) {
+    const s2 = await get("/api/cron/social", { cookie: session("lifetime") });
+    s2.status === 401 ? ok("publication automatique refusée aux abonnés") : ko("publication automatique refusée aux abonnés", `HTTP ${s2.status}`);
+  }
+  const preview = await get("/api/social");
+  let pv = null;
+  try { pv = JSON.parse(preview.text); } catch {}
+  preview.status === 200 && pv && "posts" in pv && pv.status && pv.status.enabled === false && !/TOKEN|PASSWORD/i.test(preview.text)
+    ? ok("aperçu des publications : public, rien d'activé, aucun code d'accès")
+    : ko("aperçu des publications : public, rien d'activé, aucun code d'accès", `HTTP ${preview.status} ${preview.text.slice(0, 120)}`);
+  const did = await get("/.well-known/atproto-did");
+  did.status === 404 ? ok("identifiant Bluesky du domaine : absent tant qu'il n'est pas configuré") : ko("identifiant Bluesky du domaine : absent tant qu'il n'est pas configuré", `HTTP ${did.status}`);
   const api = await get("/api/admin", { method: "POST", body: { action: "avis_publier", id: "x" } });
   [401, 403, 404].includes(api.status) ? ok("API admin refusée sans session") : ko("API admin refusée sans session", `HTTP ${api.status}`);
   const sync = await get("/api/admin", { method: "POST", body: { action: "promo_sync", id: "00000000-0000-0000-0000-000000000000" } });

@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/pronos-soir",
       "schedule": "7 22 * * *"
+    },
+    {
+      "path": "/api/cron/social",
+      "schedule": "20 15 * * *"
     }
   ]
 }

@@ -5,6 +5,8 @@ import { pathToFileURL } from "node:url";
 import { chunkText, detectLang, localizeReviews, translateRaw } from "../lib/translate.js";
 import { CODE_RE, cleanCode, cleanPct, discounted, mergePromos, randomChars, suggestCode, withPromo } from "../lib/promo.js";
 import { asPct, checkPromo, describeProblem, describeProblems, promoMonths, whopPromoReady } from "../lib/whop-promo.js";
+import { BSKY_MAX, blueskyPost, elPick, graphemes, nbaPick, socialPosts, telegramText } from "../lib/social.js";
+import { socialConfig, socialStatus } from "../lib/social-send.js";
 
 export async function unit() {
   let passed = 0, failed = 0;
@@ -165,6 +167,63 @@ export async function unit() {
   const withKey = whopPromoReady();
   setEnv("WHOP_API_KEY", env.key);
   eq("liaison Whop : active seulement si la clé API est présente", [noKey, withKey], [false, true]);
+
+  // --- Publications automatiques du jour (Telegram, Bluesky)
+  console.log("Publications automatiques");
+  const SD = "20261108";
+  const socPicks = [
+    { league: "NBA", href: `/app/match/1?d=${SD}`, date: "2026-11-09T00:00:00Z", away: "Jazz", home: "Timberwolves", pHome: 0.9, conf: "Très élevée" },
+    { league: "NBA", href: `/app/match/2?d=${SD}`, date: "2026-11-08T20:30:00Z", away: "76ers", home: "Bulls", pHome: 0.27, conf: "Élevée" },
+    { league: "NBA", href: `/app/match/3?d=${SD}`, date: "2026-11-08T23:00:00Z", away: "Lakers", home: "Pistons", pHome: 0.66, conf: "Moyenne" },
+    { league: "EL", href: "/app/euroleague/match/77", date: "2026-11-08T19:30:00Z", away: "Real Madrid", home: "Monaco & Co", pHome: 0.42, conf: "Moyenne" },
+  ];
+  const socRec = { n: 55, ok: 47, since: 2026 };
+  const tgFr = telegramText(socPicks, "fr", { d: SD, record: socRec });
+  const tgEn = telegramText(socPicks, "en", { d: SD, record: socRec });
+  const tgEs = telegramText(socPicks, "es", { d: SD, record: socRec });
+  eq("Telegram FR : marque, titre et jour", [tgFr.startsWith("🏀 <b>Basketlog · Pronostics NBA et EuroLeague de ce soir</b>"), tgFr.includes("dimanche 8 novembre · heures de Paris")], [true, true]);
+  eq("Telegram : confiance très élevée avant les autres matchs", tgFr.indexOf("Confiance très élevée") < tgFr.indexOf("Timberwolves") && tgFr.indexOf("Timberwolves") < tgFr.indexOf("Les autres matchs"), true);
+  eq("Telegram FR : lien de la fiche et favori avec sa probabilité", [tgFr.includes('href="https://basketlog-app.com/app/match/1?d=20261108"'), tgFr.includes("<b>Timberwolves 90 %</b>"), tgFr.includes("<b>76ers 73 %</b>")], [true, true, true]);
+  eq("Telegram : caractères spéciaux échappés (HTML)", [tgFr.includes("Monaco &amp; Co"), tgFr.includes("Monaco & Co")], [true, false]);
+  eq("Telegram EN : liens /en, « vs », pourcentage collé", [tgEn.includes("https://basketlog-app.com/en/app/match/1?d=20261108"), tgEn.includes("Jazz vs Timberwolves"), tgEn.includes("<b>Timberwolves 90%</b>"), tgEn.includes("Sunday, November 8 · times in ET")], [true, true, true, true]);
+  eq("Telegram ES : liens /es, Euroliga, jour sans virgule", [tgEs.includes("https://basketlog-app.com/es/app/euroleague/match/77"), tgEs.includes("Euroliga · "), tgEs.includes("Confianza muy alta"), tgEs.includes("domingo 8 de noviembre")], [true, true, true, true]);
+  eq("Telegram : bilan recalculé cité (55 matchs, depuis 2025-26), avec son lien", [tgFr.includes("Bilan recalculé</a> depuis 2025-26") && tgFr.includes("47 matchs sur 55"), tgEn.includes("47 of 55 games"), tgEs.includes("47 de 55 partidos")], [true, true, true]);
+  eq("Telegram : bilan absent sous 20 matchs ou inconnu", [telegramText(socPicks, "fr", { d: SD, record: { n: 12, ok: 11, since: 2026 } }).includes("📊"), telegramText(socPicks, "fr", { d: SD }).includes("📊")], [false, false]);
+  eq("Telegram : sans match à confiance très élevée, une seule liste « Les matchs »", (() => { const t = telegramText(socPicks.slice(1), "fr", { d: SD }); return [t.includes("🔒"), t.includes("<b>Les matchs</b>")]; })(), [false, true]);
+
+  const socMany = Array.from({ length: 15 }, (_, i) => ({ league: "NBA", href: `/app/match/${100 + i}?d=${SD}`, date: `2026-11-09T0${i % 4}:00:00Z`, away: `Visiteurs${i}`, home: `Trailblazers${i}`, pHome: 0.5 + (i % 9) / 20, conf: i < 2 ? "Très élevée" : "Moyenne" }));
+  const socAll = [socialPosts(socPicks, { d: SD, record: socRec }), socialPosts(socMany, { d: SD, record: socRec })];
+  const socBsky = socAll.flatMap((p) => Object.values(p).map((x) => x.bluesky));
+  eq(`Bluesky : ${BSKY_MAX} graphèmes au plus, même avec 15 matchs`, socBsky.every((b) => graphemes(b.text) <= BSKY_MAX), true);
+  eq("Telegram : moins de 4 096 caractères avec 15 matchs", socAll.every((p) => Object.values(p).every((x) => x.telegram.length < 4096)), true);
+  const socDec = new TextDecoder();
+  const socFacet = (b, f) => socDec.decode(new TextEncoder().encode(b.text).slice(f.index.byteStart, f.index.byteEnd));
+  eq("Bluesky : le lien et les mots-dièse tombent pile sur leur texte (positions en octets)", socBsky.every((b) => b.facets.length >= 2 && b.facets.every((f) => {
+    const feat = f.features[0];
+    return feat.$type.endsWith("#link") ? socFacet(b, f) === feat.uri.replace(/^https?:\/\//, "") : socFacet(b, f) === `#${feat.tag}`;
+  })), true);
+  const socB0 = socialPosts(socPicks, { d: SD }).es.bluesky;
+  eq("Bluesky ES : langue, lien de la page du jour, #NBA et #EuroLeague", [socB0.langs, socB0.url, socB0.text.includes("#NBA #EuroLeague"), socB0.text.split("\n")[1]], [["es"], "https://basketlog-app.com/es/app/matchs", true, "🔒 Timberwolves 90 % vs Jazz"]);
+  const socElOnly = blueskyPost([socPicks[3]], "fr", { d: SD });
+  eq("Bluesky : soirée EuroLeague seule = lien vers la page EuroLeague, #EuroLeague seul", [socElOnly.url, socElOnly.text.includes("#NBA"), socElOnly.text.includes("#EuroLeague")], ["https://basketlog-app.com/app/euroleague", false, true]);
+  const socTexts = socAll.flatMap((p) => Object.values(p).flatMap((x) => [x.telegram, x.bluesky.text]));
+  eq("Publications : aucun vocabulaire de paris", socTexts.some((t) => /\b(paris|parier|pariez|mise|cotes?)\b/.test(t) || /\b(bets?|betting|odds|wager)\b/i.test(t) || /\b(apuestas?|cuotas?)\b/i.test(t)), false);
+  eq("Publications : jamais le mot « IA »", socTexts.some((t) => /\bIA\b/.test(t)), false);
+  eq("Fiches au format commun (NBA : nom court ou complet ; EuroLeague)", [
+    nbaPick({ game: { id: 5, date: "2026-11-08T20:30:00Z", home: { short: "Bulls", name: "Chicago Bulls" }, away: { name: "Philadelphia 76ers" } }, pHome: 0.3, confidence: "Élevée" }, SD),
+    elPick({ g: { id: 9, date: "2026-11-08T19:30:00Z", home: { name: "AS Monaco", short: "Monaco" }, away: { name: "Real Madrid" } }, a: { pHome: 0.42, confidence: "Moyenne" } }),
+  ], [
+    { league: "NBA", href: "/app/match/5?d=20261108", date: "2026-11-08T20:30:00Z", home: "Bulls", away: "Philadelphia 76ers", pHome: 0.3, conf: "Élevée" },
+    { league: "EL", href: "/app/euroleague/match/9", date: "2026-11-08T19:30:00Z", home: "Monaco", away: "Real Madrid", pHome: 0.42, conf: "Moyenne" },
+  ]);
+
+  const socNone = socialConfig({});
+  eq("Comptes : rien de branché sans variables, publication coupée", [socNone.enabled, socNone.telegram, socNone.bluesky], [false, null, null]);
+  const cfgFull = socialConfig({ SOCIAL_ENABLED: " 1 ", TELEGRAM_BOT_TOKEN: "123:secret-telegram", TELEGRAM_CHAT_FR: "@basketlog", TELEGRAM_CHAT_ES: " @basketlog_es ", BLUESKY_HANDLE: "@basketlog.bsky.social", BLUESKY_APP_PASSWORD: "abcd-efgh-secret", BLUESKY_LANGS: "fr, de ,es" });
+  eq("Comptes : chaînes par langue, nom Bluesky sans @, langues inconnues ignorées", [cfgFull.enabled, cfgFull.telegram.chats, cfgFull.bluesky.handle, cfgFull.bluesky.langs], [true, { fr: "@basketlog", es: "@basketlog_es" }, "basketlog.bsky.social", ["fr", "es"]]);
+  eq("Comptes : Telegram sans chaîne ou Bluesky sans mot de passe = non branché", [socialConfig({ TELEGRAM_BOT_TOKEN: "x" }).telegram, socialConfig({ BLUESKY_HANDLE: "a" }).bluesky], [null, null]);
+  const socPub = JSON.stringify(socialStatus(cfgFull));
+  eq("Comptes : l'état public ne montre aucun code d'accès", [socPub.includes("secret"), socPub.includes("@basketlog_es"), socPub.includes("basketlog.bsky.social")], [false, true, true]);
 
   return { passed, failed };
 }
