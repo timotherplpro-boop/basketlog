@@ -102,7 +102,7 @@ export async function GET(req) {
       const mail = await memberEmail(me.uid);
       out.whop = { ok: true, email: maskEmail(mail) };
     } catch (e) {
-      out.whop = { ok: false, kind: e?.kind || "?", error: note(e) };
+      out.whop = { ok: false, kind: e?.kind || "?", error: note(e), ...(e?.detail ? { detail: e.detail } : {}) };
     }
     const r = resend();
     if (!r) {
