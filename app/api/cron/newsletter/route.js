@@ -102,7 +102,7 @@ export async function GET(req) {
       const who = await sessionEmail(me.session);
       out.whop = { ok: true, email: maskEmail(who.email), source: who.account ? "compte Basketlog" : "Whop" };
     } catch (e) {
-      out.whop = { ok: false, kind: e?.kind || "?", error: note(e) };
+      out.whop = { ok: false, kind: e?.kind || "?", error: note(e), ...(e?.detail ? { detail: e.detail } : {}) };
     }
     const r = resend();
     if (!r) {

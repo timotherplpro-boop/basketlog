@@ -313,14 +313,35 @@ export async function newsletterTests({ ok, ko, eq }) {
 
   // --- Adresse du membre chez Whop
   {
-    const rows = (list) => ({ ok: true, status: 200, json: async () => ({ data: list }) });
-    let seen = null;
-    const f = (list, status = 200) => async (url, init) => { seen = { url: String(url), auth: init?.headers?.Authorization }; return status === 200 ? rows(list) : { ok: false, status, json: async () => ({}) }; };
-    const good = [{ user: { id: "user_AAA", email: " Tim@Gmail.com " } }];
-    eq("Whop : adresse du membre en minuscules, filtrée par compte et par entreprise", [await memberEmail("user_AAA", { fetch: f(good), key: "k" }), seen.url.includes("user_id=user_AAA"), seen.url.includes("account_id=biz_"), seen.auth], ["tim@gmail.com", true, true, "Bearer k"]);
-    eq("Whop : la fiche d'un autre compte n'est jamais prise, même renvoyée par erreur", await memberEmail("user_AAA", { fetch: f([{ user: { id: "user_BBB", email: "autre@x.fr" } }, ...good]), key: "k" }), "tim@gmail.com");
+    const rows = (list, page_info) => ({ ok: true, status: 200, json: async () => ({ data: list, ...(page_info ? { page_info } : {}) }) });
+    let seen = null, calls = 0;
+    const f = (list, status = 200) => async (url, init) => { calls++; seen = { url: String(url), auth: init?.headers?.Authorization }; return status === 200 ? rows(list) : { ok: false, status, json: async () => ({}) }; };
+    // Whop range l'adresse dans la fiche du membre (GET /members, champ email), pas dans l'abonnement ni dans l'objet user
+    const good = [{ id: "mber_1", user: { id: "user_AAA", username: "tim" }, email: " Tim@Gmail.com " }];
+    eq("Whop : adresse lue dans la fiche membre, en minuscules, filtrée par compte et par entreprise, en un seul appel", [await memberEmail("user_AAA", { fetch: f(good), key: "k" }), new URL(seen.url).pathname, seen.url.includes("user_ids=user_AAA"), seen.url.includes("account_id=biz_"), seen.auth, calls], ["tim@gmail.com", "/api/v1/members", true, true, "Bearer k", 1]);
+    eq("Whop : la fiche d'un autre compte n'est jamais prise, même renvoyée par erreur", await memberEmail("user_AAA", { fetch: f([{ user: { id: "user_BBB" }, email: "autre@x.fr" }, ...good]), key: "k" }), "tim@gmail.com");
+    {
+      // Filtre ignoré par Whop (page pleine de fiches d'autres comptes) : les pages suivantes sont lues jusqu'à la fiche du compte
+      let n = 0;
+      const pages = [rows([{ user: { id: "user_BBB" }, email: "b@x.fr" }], { has_next_page: true, end_cursor: "c1" }), rows(good, { has_next_page: false })];
+      const g = async () => pages[n++];
+      eq("Whop : filtre ignoré = pages suivantes lues jusqu'à la fiche du compte, jamais l'adresse d'un autre", [await memberEmail("user_AAA", { fetch: g, key: "k" }), n], ["tim@gmail.com", 2]);
+    }
     const kind = async (fn) => { try { await fn(); return "aucune erreur"; } catch (e) { return e instanceof WhopEmailError ? e.kind : `autre : ${e.message}`; } };
-    eq("Whop : pas d'adresse pour ce compte, ou seulement celle d'un autre = « noemail »", [await kind(() => memberEmail("user_AAA", { fetch: f([]), key: "k" })), await kind(() => memberEmail("user_AAA", { fetch: f([{ user: { id: "user_BBB", email: "autre@x.fr" } }]), key: "k" })), await kind(() => memberEmail("user_AAA", { fetch: f([{ user: { id: "user_AAA", email: "pas-une-adresse" } }]), key: "k" }))], ["noemail", "noemail", "noemail"]);
+    const detail = async (fn) => { try { await fn(); return null; } catch (e) { return e instanceof WhopEmailError ? e.detail || null : null; } };
+    const none = [
+      f([]), // aucune fiche membre
+      f([{ user: { id: "user_BBB" }, email: "autre@x.fr" }]), // seulement la fiche d'un autre compte
+      f([{ user: { id: "user_AAA" }, email: null }]), // fiche sans adresse (permission member:email:read manquante)
+      f([{ user: { id: "user_AAA" }, email: "pas-une-adresse" }]), // adresse illisible
+    ];
+    eq("Whop : pas de fiche, fiche d'un autre, email vide ou illisible = « noemail »", await Promise.all(none.map((g) => kind(() => memberEmail("user_AAA", { fetch: g, key: "k" })))), ["noemail", "noemail", "noemail", "noemail"]);
+    eq("Whop : le détail du contrôle dit ce qui manque, sans aucune adresse", await Promise.all(none.map((g) => detail(() => memberEmail("user_AAA", { fetch: g, key: "k" })))), [
+      { matched: false, emailField: "absent", rows: 0 },
+      { matched: false, emailField: "absent", rows: 1 },
+      { matched: true, emailField: "null", rows: 1 },
+      { matched: true, emailField: "invalide", rows: 1 },
+    ]);
     eq("Whop : clé refusée = « scope », panne = « network », sans clé = « nokey »", [await kind(() => memberEmail("user_AAA", { fetch: f([], 403), key: "k" })), await kind(() => memberEmail("user_AAA", { fetch: f([], 500), key: "k" })), await kind(() => memberEmail("user_AAA", { fetch: async () => { throw new Error("réseau"); }, key: "k" })), await kind(() => memberEmail("user_AAA", { fetch: f(good), key: "" }))], ["scope", "network", "network", "nokey"]);
     eq("Whop : identifiant de compte invalide refusé avant tout appel", [await kind(() => memberEmail("../x?y=1", { fetch: f(good), key: "k" })), await kind(() => memberEmail("", { fetch: f(good), key: "k" }))], ["noemail", "noemail"]);
   }
