@@ -8,6 +8,7 @@ import { useL, useInitialPath } from "./LangProvider";
 import { useProStatus } from "../lib/useProStatus";
 import { stripLang } from "../lib/i18n";
 import LangSelect from "./LangSelect";
+import NewsletterInvite from "./NewsletterInvite";
 
 // Mêmes pictogrammes que Visifoot (jeu d'icônes Lucide, licence ISC).
 const I = {
@@ -131,7 +132,10 @@ export default function AppShell({ session, ai = false, children }) {
         </div>
       </aside>
 
-      <div className="shell-main">{children}</div>
+      <div className="shell-main">
+        <NewsletterInvite uid={pro?.uid || null} hidden={p.startsWith("/app/compte")} />
+        {children}
+      </div>
     </div>
   );
 }

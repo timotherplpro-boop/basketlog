@@ -38,6 +38,7 @@ function CGUFr() {
       <Sec n={4} title="Compte gratuit et compte abonné">
         <p>Le site est accessible sans inscription. Le compte gratuit se crée avec un compte Whop (par e-mail, Google ou Apple) et donne accès à l&apos;espace membre ; il ne comprend pas d&apos;analyse complète. Les abonnés se connectent avec le compte Whop utilisé lors du paiement. Nous ne recevons jamais ton mot de passe : seulement ton identifiant Whop, ton nom d&apos;utilisateur et la formule à laquelle tu as accès. Tu peux supprimer ton compte à tout moment depuis la page <Link href="/app/compte">Mon compte</Link> (tes données Basketlog sont alors effacées et tes abonnements en cours arrêtés) ou en nous écrivant. Ton compte Whop reste géré par Whop.</p>
         <p>Ton accès est personnel. Il est interdit de le partager, de le revendre ou de le prêter. Tu es responsable de la sécurité de ton compte Whop.</p>
+        <p>Depuis ton compte, tu peux demander à recevoir gratuitement la newsletter du dimanche (le bilan de la semaine et les matchs à suivre), par e-mail, à l&apos;adresse de ton compte Whop. Tu n&apos;es jamais inscrit sans l&apos;avoir demandé, et tu te désinscris à tout moment depuis <Link href="/app/compte">Mon compte</Link> ou avec le lien au bas de chaque e-mail. L&apos;avertissement sur les pronostics ci-dessus s&apos;y applique aussi. Détails dans la <Link href="/confidentialite">politique de confidentialité</Link>.</p>
       </Sec>
 
       <Sec n={5} title="Avis des utilisateurs">
@@ -110,6 +111,7 @@ function CGUEn({ L }) {
       <Sec n={4} title="Free account and subscriber account">
         <p>The website can be used without signing up. The free account is created with a Whop account (by email, Google or Apple) and gives access to the member area; it does not include full analyses. Subscribers log in with the Whop account used for payment. We never receive your password: only your Whop ID, your username and the plan you have access to. You can delete your account at any time from the <Link href={L.href("/app/compte")}>My account</Link> page (your Basketlog data is then erased and your active subscriptions are stopped) or by emailing us. Your Whop account remains managed by Whop.</p>
         <p>Your access is personal. Sharing, reselling or lending it is prohibited. You are responsible for the security of your Whop account.</p>
+        <p>From your account, you can ask to receive the Sunday newsletter (the week&apos;s record and the games to watch) by email, free of charge, at the address of your Whop account. You are never signed up without asking for it, and you can unsubscribe at any time from <Link href={L.href("/app/compte")}>My account</Link> or with the link at the bottom of every email. The disclaimer about predictions above applies to it too. Details in the <Link href={L.href("/confidentialite")}>privacy policy</Link>.</p>
       </Sec>
 
       <Sec n={5} title="User reviews">
@@ -182,6 +184,7 @@ function CGUEs({ L }) {
       <Sec n={4} title="Cuenta gratis y cuenta de suscriptor">
         <p>El sitio se puede usar sin registrarse. La cuenta gratis se crea con una cuenta de Whop (por correo electrónico, Google o Apple) y da acceso al área de miembros; no incluye análisis completos. Los suscriptores inician sesión con la cuenta de Whop que usaron para pagar. Nunca recibimos tu contraseña: solo tu identificador de Whop, tu nombre de usuario y el plan al que tienes acceso. Puedes eliminar tu cuenta en cualquier momento desde la página <Link href={L.href("/app/compte")}>Mi cuenta</Link> (tus datos de Basketlog se borran y tus suscripciones activas se detienen) o escribiéndonos. Tu cuenta de Whop sigue gestionada por Whop.</p>
         <p>Tu acceso es personal. Está prohibido compartirlo, revenderlo o prestarlo. Eres responsable de la seguridad de tu cuenta de Whop.</p>
+        <p>Desde tu cuenta, puedes pedir recibir gratis la newsletter del domingo (el balance de la semana y los partidos a seguir) por correo, en la dirección de tu cuenta de Whop. Nunca te suscribimos sin que lo pidas, y puedes darte de baja en cualquier momento desde <Link href={L.href("/app/compte")}>Mi cuenta</Link> o con el enlace al final de cada correo. La advertencia sobre los pronósticos anterior también se aplica. Detalles en la <Link href={L.href("/confidentialite")}>política de privacidad</Link>.</p>
       </Sec>
 
       <Sec n={5} title="Opiniones de los usuarios">

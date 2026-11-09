@@ -15,6 +15,14 @@
     {
       "path": "/api/cron/social",
       "schedule": "20 15 * * *"
+    },
+    {
+      "path": "/api/cron/newsletter",
+      "schedule": "11 12 * * 0"
+    },
+    {
+      "path": "/api/cron/newsletter?pass=2",
+      "schedule": "41 13 * * 0"
     }
   ]
 }

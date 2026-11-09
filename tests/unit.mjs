@@ -10,6 +10,7 @@ import { CODE_RE, cleanCode, cleanPct, discounted, mergePromos, randomChars, sug
 import { asPct, checkPromo, describeProblem, describeProblems, promoMonths, whopPromoReady } from "../lib/whop-promo.js";
 import { BSKY_BIO_MAX, BSKY_MAX, BSKY_NAME_MAX, blueskyPost, blueskyProfile, elPick, graphemes, nbaPick, socialPosts, telegramText } from "../lib/social.js";
 import { blueskySetProfile, socialConfig, socialStatus } from "../lib/social-send.js";
+import { newsletterTests } from "./newsletter.mjs";
 
 export async function unit() {
   let passed = 0, failed = 0;
@@ -433,6 +434,8 @@ export async function unit() {
   ], [null, null, null, null, null, null, "string"]);
   eq("Jeton : sans clé de signature, rien ne se signe ni ne se lit", [signToken("", "switch", {}), readToken("", "switch", tok)], [null, null]);
   eq("Jeton : cookie nommé bl_switch, 12 h", [SWITCH_COOKIE, SWITCH_TTL_MS], ["bl_switch", 43200000]);
+
+  await newsletterTests({ ok, ko, eq });
 
   return { passed, failed };
 }

@@ -8,6 +8,7 @@ import { mk } from "../../../lib/i18n";
 import { DELETE_WORDS, cleanName, creatorCodes, deleteConfirmed, renewing, switchStep, switchTargets } from "../../../lib/account";
 import { cancelMembership, listMemberships, listPlans, resumeMembership, whopAccountReady } from "../../../lib/whop-account";
 import { WhopPromoError, disablePromo } from "../../../lib/whop-promo";
+import { forgetNewsletter } from "../../../lib/newsletter-server";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -21,6 +22,7 @@ export const maxDuration = 30;
 // (jamais avant : l'accès déjà payé n'est jamais coupé). Sans paiement confirmé, rien n'est arrêté ; l'intention expire après 12 h.
 // Suppression : un membre efface ses données ; un créateur aussi, et en plus son accès, son lien d'invitation et son code promo
 // (désactivé chez Whop AVANT tout effacement : un code resté actif ne profiterait plus à personne) ; un admin ne se supprime pas ici.
+// Une fois les données effacées, l'adresse quitte aussi la liste de la newsletter du dimanche (lib/newsletter-server.js, sans jamais bloquer).
 // Le membre n'agit que sur son propre compte : l'identifiant vient du cookie signé, jamais de la requête, et chaque abonnement
 // est relu chez Whop pour vérifier qu'il lui appartient (lib/whop-account.js).
 
@@ -400,9 +402,12 @@ export async function POST(req) {
           console.warn(`[compte] code promo ${c.code} non désactivé après l'effacement : ${e?.kind || "?"} — ${String(e?.message || e).slice(0, 200)}`);
         }
       }
+      // 4) Newsletter du dimanche : l'adresse quitte la liste d'envoi (seulement après l'effacement, pour ne rien retirer si celui-ci a échoué).
+      // Ne bloque jamais la suppression ; si Resend ne répond pas, la page le dit au membre.
+      const newsletter = await forgetNewsletter(uid);
       revalidateTag("avis"); // l'avis du membre, s'il était publié, disparaît du site
-      console.log(`[compte] ${creator ? "compte créateur" : "compte"} supprimé : ${stopped} abonnement(s) arrêté(s)${creator ? `, ${off.size} code(s) promo désactivé(s)` : ""}, ${r.analyses ?? 0} analyse(s), ${r.questions ?? 0} question(s), ${r.avis ?? 0} avis`);
-      const res = json({ ok: true, stopped, ...(creator ? { creator: true, codes: [...off] } : {}) });
+      console.log(`[compte] ${creator ? "compte créateur" : "compte"} supprimé : ${stopped} abonnement(s) arrêté(s)${creator ? `, ${off.size} code(s) promo désactivé(s)` : ""}, ${r.analyses ?? 0} analyse(s), ${r.questions ?? 0} question(s), ${r.avis ?? 0} avis, newsletter ${newsletter}`);
+      const res = json({ ok: true, stopped, ...(newsletter === "removed" || newsletter === "failed" ? { newsletter } : {}), ...(creator ? { creator: true, codes: [...off] } : {}) });
       res.cookies.delete({ name: COOKIE, path: "/" });
       return res;
     }

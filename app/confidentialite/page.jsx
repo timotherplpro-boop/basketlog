@@ -34,6 +34,7 @@ const DONNEES = [
   ["Paiement", "Données de paiement et de facturation (traitées directement par Whop, jamais par Basketlog)", "Encaisser les paiements, établir les reçus", "Exécution du contrat, obligation légale", "10 ans pour les pièces comptables"],
   ["Avis (abonnés)", "Prénom, description facultative, note, texte de l'avis ; identifiant Whop et formule au moment de l'avis, jamais affichés", "Publier les avis des abonnés après relecture (un par compte), avec la mention « Abonné vérifié »", "Consentement", "Jusqu'à ta demande de suppression"],
   ["Accès créateur ou admin (sur invitation)", "Identifiant et nom d'utilisateur Whop, rôle, nom noté sur l'invitation, date d'activation", "Ouvrir l'accès complet offert aux créateurs partenaires et aux administrateurs", "Exécution du contrat", "Jusqu'au retrait de l'accès"],
+  ["Newsletter du dimanche (si tu la demandes)", "Adresse e-mail de ton compte Whop (lue chez Whop quand tu t'inscris), langue choisie, date et heure de ta demande ; aucun suivi d'ouverture ni de clic dans les e-mails", "T'envoyer la newsletter de la semaine chaque dimanche et garder la preuve de ton accord", "Consentement", "Jusqu'à ta désinscription ; ensuite l'adresse est conservée, marquée « désinscrit », pour ne plus t'écrire, jusqu'à la suppression de ton compte"],
   ["Contact", "Adresse e-mail et contenu de tes messages", "Répondre à tes demandes", "Intérêt légitime", "3 ans après le dernier échange"],
 ];
 
@@ -43,6 +44,7 @@ const PRESTATAIRES = [
   ["Whop, Inc. (États-Unis)", "Paiement, gestion des abonnements, connexion des abonnés"],
   ["Amplitude, Inc. (données dans l'UE)", "Mesure d'audience, uniquement avec ton accord"],
   ["Zoho Corporation (données dans l'UE)", "Messagerie de l'adresse de contact"],
+  ["Resend, Inc. (États-Unis)", "Envoi de la newsletter du dimanche, uniquement si tu la demandes (ton adresse e-mail y est conservée aux États-Unis)"],
   ["Anthropic, PBC (États-Unis)", "IA qui répond aux questions des abonnés et rédige l'argumentation des analyses", "ia"],
 ];
 
@@ -67,6 +69,7 @@ function ConfidentialiteFr() {
           </table>
         </div>
         <p>Les analyses complètes que tu lances avec ton compte sont enregistrées avec ton identifiant Whop, pour appliquer la limite du jour de ta formule sur tous tes appareils et t&apos;afficher ton historique. Si tu es abonné et que tu acceptes la mesure d&apos;audience, ton identifiant Whop et ta formule sont associés à tes statistiques d&apos;usage, pour savoir quelles fonctionnalités servent le plus.</p>
+        <p>La newsletter du dimanche n&apos;est envoyée qu&apos;à celles et ceux qui la demandent eux-mêmes, en cliquant sur « Je m&apos;inscris » ou « Recevoir la newsletter » dans leur compte : personne n&apos;est inscrit d&apos;office. Ton adresse e-mail reste chez Whop ; elle n&apos;est transmise à Resend qu&apos;à ce moment-là, avec la langue choisie et la date de ta demande.</p>
       </Sec>
 
       <Sec n={3} title="Paiement et comptes abonnés">
@@ -80,7 +83,7 @@ function ConfidentialiteFr() {
       </Sec>
 
       <Sec n={5} title="Transferts hors de l'Union européenne">
-        <p>Vercel et Whop sont établis aux États-Unis. Les transferts vers ces prestataires reposent sur les garanties prévues par le RGPD : décision d&apos;adéquation de la Commission européenne pour les entreprises certifiées au cadre de protection des données UE–États-Unis, ou clauses contractuelles types de la Commission européenne.</p>
+        <p>Vercel, Whop et Resend sont établis aux États-Unis. Les transferts vers ces prestataires reposent sur les garanties prévues par le RGPD : décision d&apos;adéquation de la Commission européenne pour les entreprises certifiées au cadre de protection des données UE–États-Unis, ou clauses contractuelles types de la Commission européenne.</p>
       </Sec>
 
       <Sec n={6} title="Sécurité">
@@ -95,9 +98,10 @@ function ConfidentialiteFr() {
           <li>t&apos;opposer à leur traitement ou en demander la limitation ;</li>
           <li>récupérer les données que tu nous as fournies dans un format lisible (portabilité) ;</li>
           <li>retirer ton consentement à la mesure d&apos;audience, à tout moment, avec le lien « Gérer mes cookies » en bas de chaque page ;</li>
+          <li>retirer ton consentement à la newsletter, à tout moment, depuis <Link href="/app/compte">Mon compte</Link> ou avec le lien « Se désinscrire » au bas de chaque e-mail ;</li>
           <li>définir des directives sur le sort de tes données après ton décès.</li>
         </ul>
-        <p>Depuis la page <Link href="/app/compte">Mon compte</Link>, tu peux aussi choisir ton nom affiché et supprimer ton compte toi-même : tes données Basketlog (historique d&apos;analyses, questions, avis, nom affiché) sont alors effacées immédiatement. Les données gérées par Whop (e-mail, moyens de paiement, factures) se suppriment depuis <a href="https://whop.com/@me/settings/" rel="noopener" target="_blank">tes réglages Whop</a>.</p>
+        <p>Depuis la page <Link href="/app/compte">Mon compte</Link>, tu peux aussi choisir ton nom affiché, t&apos;inscrire ou te désinscrire de la newsletter et supprimer ton compte toi-même : tes données Basketlog (historique d&apos;analyses, questions, avis, nom affiché) sont alors effacées immédiatement et ton adresse est retirée de la liste d&apos;envoi de la newsletter. Les données gérées par Whop (e-mail, moyens de paiement, factures) se suppriment depuis <a href="https://whop.com/@me/settings/" rel="noopener" target="_blank">tes réglages Whop</a>.</p>
         <p>Écris-nous à <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. Nous répondons sous un mois au plus. Tu peux aussi introduire une réclamation auprès de la CNIL : <a href="https://www.cnil.fr" rel="noopener" target="_blank">cnil.fr</a>.</p>
       </Sec>
 
@@ -125,6 +129,7 @@ const DATA_EN = [
   ["Payment", "Payment and billing data (processed directly by Whop, never by Basketlog)", "Collect payments, issue receipts", "Performance of the contract, legal obligation", "10 years for accounting records"],
   ["Reviews (subscribers)", "First name, optional description, rating, review text; Whop user ID and plan at the time of the review, never displayed", "Publish subscribers' reviews after they are checked (one per account), with a “Verified subscriber” label", "Consent", "Until you ask for removal"],
   ["Creator or admin access (by invitation)", "Whop user ID and username, role, name noted on the invitation, activation date", "Provide the free full access given to partner creators and administrators", "Performance of the contract", "Until the access is removed"],
+  ["Sunday newsletter (if you ask for it)", "Email address of your Whop account (read from Whop when you sign up), chosen language, date and time of your request; no open or click tracking in the emails", "Send you the weekly newsletter every Sunday and keep proof of your consent", "Consent", "Until you unsubscribe; the address is then kept, marked “unsubscribed”, so we don't write to you again, until your account is deleted"],
   ["Contact", "Email address and content of your messages", "Reply to your requests", "Legitimate interest", "3 years after the last exchange"],
 ];
 
@@ -134,6 +139,7 @@ const PROVIDERS_EN = [
   ["Whop, Inc. (United States)", "Payment, subscription management, subscriber login"],
   ["Amplitude, Inc. (data in the EU)", "Audience measurement, only with your consent"],
   ["Zoho Corporation (data in the EU)", "Email for the contact address"],
+  ["Resend, Inc. (United States)", "Sending the Sunday newsletter, only if you ask for it (your email address is stored there, in the United States)"],
   ["Anthropic, PBC (United States)", "AI that answers subscribers' questions and writes the analysis reasoning", "ia"],
 ];
 
@@ -159,6 +165,7 @@ function ConfidentialiteEn({ L }) {
           </table>
         </div>
         <p>The full analyses you run with your account are recorded with your Whop ID, to apply your plan&apos;s daily limit across all your devices and show your history. If you are a subscriber and accept audience measurement, your Whop ID and plan are linked to your usage statistics, so we know which features are used most.</p>
+        <p>The Sunday newsletter is only sent to people who ask for it themselves, by clicking “Sign me up” or “Receive the newsletter” in their account: nobody is signed up by default. Your email address stays with Whop; it is passed to Resend only at that moment, together with the chosen language and the date of your request.</p>
       </Sec>
 
       <Sec n={3} title="Payment and subscriber accounts">
@@ -172,7 +179,7 @@ function ConfidentialiteEn({ L }) {
       </Sec>
 
       <Sec n={5} title="Transfers outside the European Union">
-        <p>Vercel and Whop are based in the United States. Transfers to these providers rely on the safeguards provided by the GDPR: the European Commission&apos;s adequacy decision for companies certified under the EU–US Data Privacy Framework, or the European Commission&apos;s standard contractual clauses.</p>
+        <p>Vercel, Whop and Resend are based in the United States. Transfers to these providers rely on the safeguards provided by the GDPR: the European Commission&apos;s adequacy decision for companies certified under the EU–US Data Privacy Framework, or the European Commission&apos;s standard contractual clauses.</p>
       </Sec>
 
       <Sec n={6} title="Security">
@@ -187,9 +194,10 @@ function ConfidentialiteEn({ L }) {
           <li>object to its processing or ask for it to be restricted;</li>
           <li>get the data you provided to us in a readable format (portability);</li>
           <li>withdraw your consent to audience measurement at any time, with the “Manage cookies” link at the bottom of every page;</li>
+          <li>withdraw your consent to the newsletter at any time, from <Link href={L.href("/app/compte")}>My account</Link> or with the “Unsubscribe” link at the bottom of every email;</li>
           <li>set instructions for what happens to your data after your death.</li>
         </ul>
-        <p>From the <Link href={L.href("/app/compte")}>My account</Link> page you can also choose your display name and delete your account yourself: your Basketlog data (analysis history, questions, review, display name) is then erased immediately. The data managed by Whop (email, payment methods, invoices) is deleted from <a href="https://whop.com/@me/settings/" rel="noopener" target="_blank">your Whop settings</a>.</p>
+        <p>From the <Link href={L.href("/app/compte")}>My account</Link> page you can also choose your display name, sign up for or unsubscribe from the newsletter and delete your account yourself: your Basketlog data (analysis history, questions, review, display name) is then erased immediately and your address is removed from the newsletter mailing list. The data managed by Whop (email, payment methods, invoices) is deleted from <a href="https://whop.com/@me/settings/" rel="noopener" target="_blank">your Whop settings</a>.</p>
         <p>Email us at <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. We reply within one month at most. You can also lodge a complaint with the French data protection authority (CNIL): <a href="https://www.cnil.fr" rel="noopener" target="_blank">cnil.fr</a>, or with the authority of your country.</p>
       </Sec>
 
@@ -217,6 +225,7 @@ const DATA_ES = [
   ["Pago", "Datos de pago y de facturación (tratados directamente por Whop, nunca por Basketlog)", "Cobrar los pagos y emitir los recibos", "Ejecución del contrato, obligación legal", "10 años para los documentos contables"],
   ["Opiniones (suscriptores)", "Nombre, descripción opcional, nota y texto de la opinión; identificador de Whop y plan en el momento de la opinión, nunca se muestran", "Publicar las opiniones de los suscriptores tras revisarlas (una por cuenta), con la mención «Suscriptor verificado»", "Consentimiento", "Hasta que pidas su eliminación"],
   ["Acceso de creador o administrador (por invitación)", "Identificador y nombre de usuario de Whop, rol, nombre anotado en la invitación, fecha de activación", "Dar el acceso completo gratuito a los creadores colaboradores y a los administradores", "Ejecución del contrato", "Hasta que se retire el acceso"],
+  ["Newsletter del domingo (si la pides)", "Dirección de correo de tu cuenta de Whop (leída en Whop cuando te suscribes), idioma elegido, fecha y hora de tu solicitud; sin seguimiento de aperturas ni de clics en los correos", "Enviarte la newsletter semanal cada domingo y conservar la prueba de tu consentimiento", "Consentimiento", "Hasta que te des de baja; después la dirección se conserva, marcada como «dada de baja», para no volver a escribirte, hasta que se elimine tu cuenta"],
   ["Contacto", "Dirección de correo electrónico y contenido de tus mensajes", "Responder a tus solicitudes", "Interés legítimo", "3 años después del último intercambio"],
 ];
 
@@ -226,6 +235,7 @@ const PROVIDERS_ES = [
   ["Whop, Inc. (Estados Unidos)", "Pago, gestión de suscripciones, inicio de sesión de los suscriptores"],
   ["Amplitude, Inc. (datos en la UE)", "Medición de audiencia, solo con tu consentimiento"],
   ["Zoho Corporation (datos en la UE)", "Correo de la dirección de contacto"],
+  ["Resend, Inc. (Estados Unidos)", "Envío de la newsletter del domingo, solo si la pides (tu dirección de correo se conserva allí, en Estados Unidos)"],
   ["Anthropic, PBC (Estados Unidos)", "IA que responde a las preguntas de los suscriptores y redacta la argumentación de los análisis", "ia"],
 ];
 
@@ -251,6 +261,7 @@ function ConfidentialiteEs({ L }) {
           </table>
         </div>
         <p>Los análisis completos que realizas con tu cuenta se registran con tu identificador de Whop, para aplicar el límite diario de tu plan en todos tus dispositivos y mostrarte tu historial. Si eres suscriptor y aceptas la medición de audiencia, tu identificador de Whop y tu plan se asocian a tus estadísticas de uso, para saber qué funciones se usan más.</p>
+        <p>La newsletter del domingo solo se envía a quienes la piden ellos mismos, haciendo clic en «Quiero suscribirme» o «Recibir la newsletter» en su cuenta: nadie se suscribe de oficio. Tu dirección de correo se queda en Whop; solo se transmite a Resend en ese momento, junto con el idioma elegido y la fecha de tu solicitud.</p>
       </Sec>
 
       <Sec n={3} title="Pago y cuentas de suscriptor">
@@ -264,7 +275,7 @@ function ConfidentialiteEs({ L }) {
       </Sec>
 
       <Sec n={5} title="Transferencias fuera de la Unión Europea">
-        <p>Vercel y Whop están establecidos en Estados Unidos. Las transferencias a estos proveedores se basan en las garantías previstas por el RGPD: la decisión de adecuación de la Comisión Europea para las empresas certificadas en el Marco de Privacidad de Datos UE–EE. UU., o las cláusulas contractuales tipo de la Comisión Europea.</p>
+        <p>Vercel, Whop y Resend están establecidos en Estados Unidos. Las transferencias a estos proveedores se basan en las garantías previstas por el RGPD: la decisión de adecuación de la Comisión Europea para las empresas certificadas en el Marco de Privacidad de Datos UE–EE. UU., o las cláusulas contractuales tipo de la Comisión Europea.</p>
       </Sec>
 
       <Sec n={6} title="Seguridad">
@@ -279,9 +290,10 @@ function ConfidentialiteEs({ L }) {
           <li>oponerte a su tratamiento o pedir su limitación;</li>
           <li>recuperar los datos que nos facilitaste en un formato legible (portabilidad);</li>
           <li>retirar tu consentimiento a la medición de audiencia en cualquier momento, con el enlace «Gestionar cookies» al pie de cada página;</li>
+          <li>retirar tu consentimiento a la newsletter en cualquier momento, desde <Link href={L.href("/app/compte")}>Mi cuenta</Link> o con el enlace «Darme de baja» al final de cada correo;</li>
           <li>dar instrucciones sobre el destino de tus datos después de tu fallecimiento.</li>
         </ul>
-        <p>Desde la página <Link href={L.href("/app/compte")}>Mi cuenta</Link> también puedes elegir tu nombre mostrado y eliminar tu cuenta tú mismo: tus datos de Basketlog (historial de análisis, preguntas, opinión, nombre mostrado) se borran entonces de inmediato. Los datos que gestiona Whop (correo, medios de pago, facturas) se eliminan desde <a href="https://whop.com/@me/settings/" rel="noopener" target="_blank">tus ajustes de Whop</a>.</p>
+        <p>Desde la página <Link href={L.href("/app/compte")}>Mi cuenta</Link> también puedes elegir tu nombre mostrado, suscribirte o darte de baja de la newsletter y eliminar tu cuenta tú mismo: tus datos de Basketlog (historial de análisis, preguntas, opinión, nombre mostrado) se borran entonces de inmediato y tu dirección se retira de la lista de envío de la newsletter. Los datos que gestiona Whop (correo, medios de pago, facturas) se eliminan desde <a href="https://whop.com/@me/settings/" rel="noopener" target="_blank">tus ajustes de Whop</a>.</p>
         <p>Escríbenos a <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>. Respondemos en el plazo máximo de un mes. También puedes presentar una reclamación ante la autoridad francesa de protección de datos (CNIL): <a href="https://www.cnil.fr" rel="noopener" target="_blank">cnil.fr</a>, o ante la de tu país (en España, la AEPD: <a href="https://www.aepd.es" rel="noopener" target="_blank">aepd.es</a>).</p>
       </Sec>
 

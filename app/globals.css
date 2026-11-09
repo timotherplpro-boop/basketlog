@@ -1561,4 +1561,19 @@ body:has(.mmenu.open) .install-banner { display: none; }
   .acc-row .acc-btn, .acc-actions .acc-btn { width: 100%; }
   .acc-price { margin-left: 0; width: 100%; }
 }
+
+/* ---------- Newsletter du dimanche : carte d'invitation en haut de l'espace membre (components/NewsletterInvite.jsx) ---------- */
+.nl-invite { width: 100%; max-width: 760px; margin: 0 auto; padding: 16px 16px 0; text-align: left; }
+.nl-card { padding: 16px 18px; border-radius: 16px; border: 1px solid rgba(255,122,26,.35); background: linear-gradient(135deg, rgba(255,122,26,.11), rgba(255,122,26,.03)); }
+.nl-card.done { border-color: rgba(74,222,128,.4); background: rgba(74,222,128,.08); }
+.nl-card h2 { margin: 0; font-family: var(--head); font-weight: 800; font-size: 18px; letter-spacing: -.01em; }
+.nl-card p { margin: 8px 0 0; font-size: 14.5px; line-height: 1.55; color: rgba(255,255,255,.9); }
+.nl-card .nl-fine, .acc-sec .nl-fine { margin: 10px 0 0; font-size: 13px; line-height: 1.5; color: var(--muted); }
+.nl-card a, .acc-sec .nl-fine a { color: var(--orange-2); text-decoration: underline; text-underline-offset: 3px; }
+.nl-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 14px; }
+.nl-card p.nl-err { padding: 10px 14px; border-radius: 12px; background: rgba(225,29,72,.1); border: 1px solid rgba(225,29,72,.4); color: #fecdd3; font-size: 14px; }
+@media (max-width: 520px) {
+  .nl-invite { padding: 12px 12px 0; }
+  .nl-actions .acc-btn { width: 100%; }
+}
 .sb-link.on { color: var(--orange-2); }
