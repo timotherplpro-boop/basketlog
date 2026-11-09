@@ -134,6 +134,37 @@ async function protectedRoutes() {
   cron.status === 401 ? ok("tâche planifiée refusée aux inconnus") : ko("tâche planifiée refusée aux inconnus", `HTTP ${cron.status}`);
 }
 
+// Newsletter du dimanche : l'état et l'inscription demandent un compte, la préparation du mail et son envoi un compte admin.
+// Ici rien n'est écrit chez Resend et rien n'est programmé : aucune inscription, aucun envoi, aucun mail de test.
+async function newsletterRoutes() {
+  console.log("Newsletter");
+  const anon = await get("/api/compte/newsletter");
+  anon.status === 401 ? ok("newsletter : état refusé sans compte") : ko("newsletter : état refusé sans compte", `HTTP ${anon.status}`);
+  const anonPost = await get("/api/compte/newsletter", { method: "POST", body: { action: "abonner", lang: "fr" } });
+  [401, 403].includes(anonPost.status) ? ok("newsletter : inscription refusée sans compte") : ko("newsletter : inscription refusée sans compte", `HTTP ${anonPost.status}`);
+  const cron = await get("/api/cron/newsletter");
+  cron.status === 401 ? ok("newsletter : préparation de l'envoi refusée aux inconnus") : ko("newsletter : préparation de l'envoi refusée aux inconnus", `HTTP ${cron.status}`);
+  const preview = await get("/api/cron/newsletter?dry=1&format=html");
+  preview.status === 401 ? ok("newsletter : aperçu du mail refusé sans compte admin") : ko("newsletter : aperçu du mail refusé sans compte admin", `HTTP ${preview.status}`);
+  if (!SECRET) return;
+  const mine = await get("/api/compte/newsletter?lang=fr", { cookie: session("compte") });
+  let j = null;
+  try { j = JSON.parse(mine.text); } catch {}
+  mine.status === 200 && j?.ok === true && typeof j.available === "boolean" && !/re_[A-Za-z0-9]{8}|Bearer/.test(mine.text)
+    ? ok("newsletter : état pour un compte (fermée tant que la clé Resend et NEWSLETTER_ENABLED manquent), sans clé dans la réponse")
+    : ko("newsletter : état pour un compte", `HTTP ${mine.status} ${mine.text.slice(0, 120)}`);
+  for (const [name, path] of [["préparation de l'envoi", "/api/cron/newsletter"], ["mail de test", "/api/cron/newsletter?test=1"], ["diagnostic", "/api/cron/newsletter?diag=1"]]) {
+    const r = await get(path, { cookie: session("lifetime") });
+    r.status === 401 ? ok(`newsletter : ${name} refusé aux abonnés`) : ko(`newsletter : ${name} refusé aux abonnés`, `HTTP ${r.status}`);
+  }
+  const diag = await get("/api/cron/newsletter?diag=1", { cookie: session("lifetime", { role: "admin" }) });
+  let d = null;
+  try { d = JSON.parse(diag.text); } catch {}
+  diag.status === 200 && d?.diag === true && d.config && !/re_[A-Za-z0-9]{8}|Bearer/.test(diag.text)
+    ? ok("newsletter : diagnostic pour un admin (lecture seule), sans clé dans la réponse")
+    : ko("newsletter : diagnostic pour un admin", `HTTP ${diag.status} ${diag.text.slice(0, 120)}`);
+}
+
 // Codes promo des créateurs : champ sur /pro dans les trois langues, et vérification publique d'un code (/api/promo).
 // Sans base ou sans code connu, la réponse doit être un refus (« inconnu », ou « indisponible » en 503), jamais une remise.
 async function promoCodes() {
@@ -170,6 +201,7 @@ async function videosApi() {
 await pages();
 await access();
 await protectedRoutes();
+await newsletterRoutes();
 await promoCodes();
 await videosApi();
 { const u = await unit(); passed += u.passed; failed += u.failed; } // traduction des avis (sans serveur)

@@ -14,6 +14,7 @@ import { patchProStatus } from "../lib/useProStatus";
 import { track } from "../lib/analytics";
 import { switchDoneText } from "../lib/switch-text";
 import { openAuth } from "../lib/auth-client";
+import NewsletterSettings from "./NewsletterSettings";
 
 // Page Whop où l'on retrouve ses commandes (repli quand le site ne peut pas lire ou modifier l'abonnement) et réglages du compte Whop.
 const WHOP_ORDERS = "https://whop.com/@me/settings/orders/";
@@ -38,7 +39,7 @@ export default function AccountPanel() {
   const [confirmId, setConfirmId] = useState(null); // abonnement dont la résiliation attend sa confirmation
   const [delOpen, setDelOpen] = useState(false);
   const [word, setWord] = useState("");
-  const [gone, setGone] = useState(null); // compte supprimé : { stopped, creator, codes }
+  const [gone, setGone] = useState(null); // compte supprimé : { stopped, creator, codes, newsletter ("removed" | "failed" | "") }
   const touched = useRef(false); // le membre a commencé à écrire son nom : on ne l'écrase plus au rechargement
   const [sw, setSw] = useState(null); // vérification d'un changement de formule : { phase: "checking" | "pending" | "error", msg }
   const tries = useRef(0); // vérifications automatiques déjà faites
@@ -225,7 +226,7 @@ export default function AccountPanel() {
     setBusy("");
     if (!good) { setFail({ sec: "sup", msg: j?.error || generic }); await load(); return; }
     patchProStatus({ connected: false, uid: null, name: null, tier: "gratuit", role: null });
-    setGone({ stopped: j.stopped || 0, creator: !!j.creator, codes: Array.isArray(j.codes) ? j.codes : [], acct: !!data?.compte, whop: !!data?.compte?.whop });
+    setGone({ stopped: j.stopped || 0, creator: !!j.creator, codes: Array.isArray(j.codes) ? j.codes : [], acct: !!data?.compte, whop: !!data?.compte?.whop, newsletter: j.newsletter || "" });
   }
 
   const orders = <a href={WHOP_ORDERS} target="_blank" rel="noopener noreferrer">{T("ta page de commandes Whop", "your Whop orders page", "tu página de pedidos de Whop")}</a>;
@@ -254,6 +255,8 @@ export default function AccountPanel() {
             ? T(`${gone.stopped} abonnements sont arrêtés : plus aucun prélèvement, accès conservé jusqu'à la fin de la période déjà payée.`, `${gone.stopped} subscriptions are stopped: no further charges, access kept until the end of the period already paid.`, `${gone.stopped} suscripciones detenidas: sin más cobros, acceso conservado hasta el final del periodo ya pagado.`)
             : T("Ton abonnement est arrêté : plus aucun prélèvement, accès conservé jusqu'à la fin de la période déjà payée.", "Your subscription is stopped: no further charges, access kept until the end of the period already paid.", "Tu suscripción está detenida: sin más cobros, acceso conservado hasta el final del periodo ya pagado.")}</p>}
           {gone.acct && <p>{T("Ton compte Basketlog (adresse e-mail, mot de passe, connexion Google) est supprimé.", "Your Basketlog account (email address, password, Google sign-in) is deleted.", "Tu cuenta de Basketlog (correo, contraseña, inicio de sesión con Google) está eliminada.")}</p>}
+          {gone.newsletter === "removed" && <p>{T("Ton adresse est retirée de la liste de la newsletter du dimanche : tu ne la recevras plus.", "Your address is removed from the Sunday newsletter list: you won't receive it any more.", "Tu dirección se ha retirado de la lista de la newsletter del domingo: ya no la recibirás.")}</p>}
+          {gone.newsletter === "failed" && <p>{T(`Ton adresse n'a pas pu être retirée de la liste de la newsletter du dimanche pour le moment. Pour ne plus la recevoir, utilise le lien « Se désinscrire » au bas d'un de ses e-mails, ou écris-nous à ${CONTACT}.`, `Your address couldn't be removed from the Sunday newsletter list right now. To stop receiving it, use the “Unsubscribe” link at the bottom of one of its emails, or write to us at ${CONTACT}.`, `Por ahora no se ha podido retirar tu dirección de la lista de la newsletter del domingo. Para dejar de recibirla, usa el enlace «Darme de baja» al final de uno de sus correos, o escríbenos a ${CONTACT}.`)}</p>}
           {(!gone.acct || gone.whop) && <p className="acc-help">{T("Ton compte Whop (e-mail, moyens de paiement, factures) est géré par Whop : tu peux le supprimer depuis ", "Your Whop account (email, payment methods, invoices) is managed by Whop: you can delete it from ", "Tu cuenta de Whop (correo, medios de pago, facturas) la gestiona Whop: puedes eliminarla desde ")}<a href={WHOP_SETTINGS} target="_blank" rel="noopener noreferrer">{T("tes réglages Whop", "your Whop settings", "tus ajustes de Whop")}</a>.</p>}
           <a className="btn-solid acc-home" href={L.href("/")}>{T("Retour à l'accueil", "Back to the home page", "Volver al inicio")}</a>
         </section>
@@ -570,6 +573,9 @@ export default function AccountPanel() {
           </div>
         )}
       </section>
+
+      {/* ---------- Newsletter du dimanche (n'apparaît que lorsqu'elle est ouverte) ---------- */}
+      {!preview && <NewsletterSettings />}
 
       {/* ---------- Suppression ---------- */}
       <section className="panel acc-sec acc-danger" aria-labelledby="acc-sup">

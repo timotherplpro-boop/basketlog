@@ -14,6 +14,7 @@ import { MIN_PASSWORD, fakeVerify, hashPassword, passwordProblem, verifyPassword
 import { RESET_TOKEN_RE, accountIdOf, accountUid, clientIp, inAppBrowser, isAccountSession, limitKey, localName, maskEmail, newResetToken, normEmail, sameOrigin, tokenHash, whopUidOf } from "../lib/auth-utils.js";
 import { GoogleAuthError, exchangeCode, googleAuthUrl, readIdToken } from "../lib/google-auth.js";
 import { mailReady, resetEmail, sendMail } from "../lib/mail.js";
+import { newsletterTests } from "./newsletter.mjs";
 
 export async function unit() {
   let passed = 0, failed = 0;
@@ -549,6 +550,23 @@ export async function unit() {
   eq("E-mail : refus de Resend signalé", mailErr, "Resend 422");
   process.env.RESEND_API_KEY = savedMail.k || ""; process.env.MAIL_FROM = savedMail.f || "";
   }
+
+  {
+    // Newsletter et comptes Basketlog : l'adresse vient du compte (session signée ou fiche de la base), jamais de Whop.
+    const { sessionEmail } = await import("../lib/session-email.js");
+    const id = "8a5f0c1e-1111-4222-8333-944455556666";
+    const bl = { uid: `bl_${id}`, acct: 1, email: "Tim@Exemple.fr", v: 2 };
+    const noWhop = async () => { throw new Error("Whop ne doit pas être appelé pour un compte Basketlog"); };
+    eq("Newsletter : compte Basketlog, adresse du compte, pas encore prouvée", await sessionEmail(bl, { lookup: noWhop, fiche: async (x) => (x === id ? { email: "tim@exemple.fr", email_ok: false } : null) }), { email: "tim@exemple.fr", account: true, proven: false });
+    eq("Newsletter : compte Basketlog prouvé (Google ou lien reçu par e-mail)", (await sessionEmail(bl, { lookup: noWhop, fiche: async () => ({ email: "tim@exemple.fr", email_ok: true }) })).proven, true);
+    eq("Newsletter : sans fiche, l'adresse de la session signée (jamais prouvée par défaut)", await sessionEmail(bl, { lookup: noWhop }), { email: "tim@exemple.fr", account: true, proven: false });
+    let kind = null;
+    try { await sessionEmail(bl, { lookup: noWhop, fiche: async () => null }); } catch (e) { kind = e.kind; }
+    eq("Newsletter : compte supprimé entre-temps, aucune adresse", kind, "noemail");
+    eq("Newsletter : compte Whop, adresse lue chez Whop", await sessionEmail({ uid: "user_abc" }, { lookup: async (u) => `${u}@whop.test` }), { email: "user_abc@whop.test", account: false, proven: true });
+  }
+
+  await newsletterTests({ ok, ko, eq });
 
   return { passed, failed };
 }
