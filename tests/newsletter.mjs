@@ -2,7 +2,7 @@
 // français, anglais et espagnol, client Resend simulé (inscription, désinscription, suppression, diffusion, erreurs),
 // lecture de l'adresse chez Whop et retrait de la liste à la suppression d'un compte. Appelé par tests/unit.mjs.
 import {
-  BILAN_MIN, MAX_SHOWN, PLACEHOLDER, buildIssue, clearestFavorites, isoWeek, issueName, parisToUtc, runWindow, sundaySlot, weekBilan,
+  BILAN_MIN, MAX_SHOWN, PLACEHOLDER, afterSend, buildIssue, clearestFavorites, isoWeek, issueName, parisToUtc, runWindow, sundaySlot, weekBilan,
 } from "../lib/newsletter.js";
 import { CONSENT_PROP, ResendError, SEGMENT_NAME, createResend, isEmail, maskEmail, newsletterConfig, normEmail, topicName } from "../lib/resend.js";
 import { WhopEmailError, memberEmail } from "../lib/whop-email.js";
@@ -194,6 +194,28 @@ export async function newsletterTests({ ok, ko, eq }) {
     { id: "5", d: "20261117", date: "2026-11-17T21:00:00Z", home: null, away: team("H", "H"), pHome: 0.99 },
   ], 2);
   eq("Favoris les plus nets : les 2 plus nets, hors matchs en cours ou incomplets, classés par heure", clear.map((x) => x.href), ["/app/match/2?d=20261115", "/app/match/4?d=20261116"]);
+
+  // --- Envoi à 18 h : le mail est préparé à 13 h 11, un match déjà commencé à l'heure d'envoi sort de la liste
+  {
+    const at = "2026-11-15T17:00:00.000Z"; // dimanche 18 h à Paris
+    const pick = (id, date) => ({ league: "NBA", href: `/app/match/${id}?d=20261115`, date, home: team("A", `A${id}`), away: team("B", `B${id}`), pHome: 0.9 });
+    const ids = (list) => list.map((p) => p.href.match(/match\/(\d+)/)[1]);
+    const data = {
+      at, week: "2026-W46", bilan: sample.bilan, record: sample.record,
+      sure: [pick(1, "2026-11-15T12:30:00Z"), pick(2, at), pick(3, "2026-11-15T17:00:01Z"), pick(4, "2026-11-16T00:30:00Z"), pick(5, undefined), pick(6, "pas une date")],
+      favorites: [pick(7, "2026-11-15T16:00:00Z"), pick(8, "2026-11-15T20:00:00Z")],
+    };
+    const out = afterSend(data);
+    eq("Envoi 18 h : un match commencé avant l'heure d'envoi, ou à l'instant même, sort de la liste ; les suivants restent dans l'ordre", ids(out.sure), ["3", "4", "5", "6"]);
+    eq("Envoi 18 h : un match sans date lisible reste (on ne retire que ce qu'on sait être passé)", [ids(out.sure).includes("5"), ids(out.sure).includes("6")], [true, true]);
+    eq("Envoi 18 h : les favoris de repli sont filtrés de la même façon", ids(out.favorites), ["8"]);
+    eq("Envoi 18 h : le reste du contenu est intact et l'original n'est pas modifié", [out.bilan === data.bilan, out.record === data.record, out.week, out.at, data.sure.length, data.favorites.length], [true, true, "2026-W46", at, 6, 2]);
+    eq("Envoi 18 h : l'heure d'envoi peut être donnée à part (avant tous les matchs : rien de retiré ; après : seuls les matchs sans date restent)", [afterSend(data, "2026-11-15T10:00:00Z").sure.length, afterSend(data, "2026-11-16T12:00:00Z").sure.length], [6, 2]);
+    const noAt = { ...data, at: undefined };
+    eq("Envoi 18 h : sans heure d'envoi lisible, rien n'est retiré", [afterSend(noAt) === noAt, afterSend({ sure: data.sure }).sure.length, afterSend(data, "n'importe quoi").sure.length, afterSend().sure === undefined], [true, 6, 6, true]);
+    const early = buildIssue(afterSend({ ...sample, sure: [pick(9, "2026-11-15T12:30:00Z"), ...sample.sure] }), "fr");
+    eq("Envoi 18 h : l'objet compte les matchs restants, pas ceux déjà commencés", [early.subject, early.text.includes("A9")], ["Basketlog · 2 matchs à confiance très élevée cette semaine", false]);
+  }
 
   // --- Adresse e-mail : contrôle et masque
   eq("Adresse : validation et normalisation", [isEmail("tim@gmail.com"), isEmail("tim@gmail"), isEmail("a b@x.fr"), isEmail("<a@b.fr>"), isEmail(""), isEmail(null), normEmail("  Tim@Gmail.COM ")], [true, false, false, false, false, false, "tim@gmail.com"]);
@@ -399,6 +421,22 @@ export async function newsletterTests({ ok, ko, eq }) {
       await client.subscribe("tim@gmail.com", "fr");
       const r = await quiet(() => scheduleWeek(args(client, { data: { at: slot.iso, week: "2026-W46", bilan: null, sure: [], favorites: [], record: null } })));
       eq("Programmation : rien à dire cette semaine = pas de mail", [r[0].state, r[0].reason, st.broadcasts.length], ["ignorée", "rien à dire cette semaine", 0]);
+    }
+    {
+      // Le mail est préparé à 13 h 11 mais part à 18 h : un match qui commence entre les deux n'y figure pas.
+      const started = { league: "NBA", href: "/app/match/999?d=20261115", date: "2026-11-15T12:30:00Z", home: team("MIA", "Heat"), away: team("BOS", "Celtics"), pHome: 0.95 };
+      const { st, client } = mkClient();
+      await client.subscribe("tim@gmail.com", "fr");
+      const r = await quiet(() => scheduleWeek(args(client, { data: { ...sample, sure: [started, ...sample.sure] } })));
+      const b = st.broadcasts[0];
+      eq("Programmation : un match déjà commencé à 18 h n'est pas dans le mail programmé (ni la liste, ni l'objet) ; les matchs suivants y sont", [r[0].state, b.subject, b.html.includes("/app/match/999"), b.text.includes("Celtics"), b.html.includes("/app/match/401")], ["programmée", "Basketlog · 2 matchs à confiance très élevée cette semaine", false, false, true]);
+    }
+    {
+      const started = { league: "NBA", href: "/app/match/999?d=20261115", date: "2026-11-15T12:30:00Z", home: team("MIA", "Heat"), away: team("BOS", "Celtics"), pHome: 0.95 };
+      const { st, client } = mkClient();
+      await client.subscribe("tim@gmail.com", "fr");
+      const r = await quiet(() => scheduleWeek(args(client, { data: { at: slot.iso, week: "2026-W46", bilan: null, sure: [started], favorites: [], record: null } })));
+      eq("Programmation : tous les matchs déjà commencés à 18 h et pas de bilan = rien à dire, pas de mail", [r[0].state, r[0].reason, st.broadcasts.length], ["ignorée", "rien à dire cette semaine", 0]);
     }
   }
 
