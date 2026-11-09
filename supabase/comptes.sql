@@ -8,8 +8,9 @@
 --
 -- Ce que la base garde : l'adresse e-mail, l'empreinte du mot de passe (calculée par le site avec scrypt : le mot de
 -- passe lui-même n'est jamais envoyé ici), l'identifiant Google du compte s'il se connecte avec Google, le prénom donné
--- par Google, la langue, l'accord pour recevoir des e-mails, le compte Whop relié après paiement, les dates de création
--- et de dernière connexion. Les liens « mot de passe oublié » ne sont gardés que sous forme d'empreinte, 1 heure.
+-- par Google, la langue, le compte Whop relié après paiement, les dates de création et de dernière connexion.
+-- Les liens « mot de passe oublié » ne sont gardés que sous forme d'empreinte, 1 heure. La colonne « marketing » est
+-- réservée et reste à faux : l'accord pour la newsletter est gardé chez Resend, pas ici.
 -- Dans le reste de la base, un compte e-mail a pour identifiant « bl_ » suivi de son id (analyses, questions, avis,
 -- prénom choisi, rôle), comme un compte Whop a son identifiant Whop.
 --
@@ -25,7 +26,7 @@ create table if not exists public.basketlog_comptes (
   nom           text check (nom is null or char_length(nom) between 1 and 80),          -- prénom donné par Google
   whop_uid      text check (whop_uid is null or char_length(whop_uid) between 1 and 80), -- compte Whop relié (abonnement)
   langue        text check (langue is null or langue in ('fr', 'en', 'es')),
-  marketing     boolean not null default false,                                         -- accepte de recevoir des e-mails
+  marketing     boolean not null default false,                                         -- réservé (pas utilisé par le site)
   marketing_le  timestamptz,
   sv            int not null default 1,
   email_ok      boolean not null default false,
