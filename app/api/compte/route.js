@@ -9,7 +9,7 @@ import { DELETE_WORDS, cleanName, creatorCodes, deleteConfirmed, renewing, switc
 import { cancelMembership, listMemberships, listPlans, resumeMembership, whopAccountReady } from "../../../lib/whop-account";
 import { WhopPromoError, disablePromo } from "../../../lib/whop-promo";
 import { accountIdOf, isAccountSession, whopUidOf } from "../../../lib/auth-utils";
-import { changerMdp, compteParEmail, getCompte, reglerMarketing, supprimerCompteEmail } from "../../../lib/comptes";
+import { changerMdp, compteParEmail, getCompte, supprimerCompteEmail } from "../../../lib/comptes";
 import { MAX_PASSWORD, hashPassword, passwordProblem, verifyPassword } from "../../../lib/password";
 
 export const dynamic = "force-dynamic";
@@ -244,9 +244,9 @@ export async function GET(req) {
       plans: plansRes.plans.map((p) => ({ ...p, up: switchOn ? offers(p, plansRes.plans) : [] })),
       switch: { pending },
       creator: role === "createur" ? { codes: creator?.codes || [] } : null,
-      // Compte e-mail ou Google : adresse, moyens de connexion, accord pour les e-mails, compte Whop relié (null : compte Whop).
+      // Compte e-mail ou Google : adresse, moyens de connexion, compte Whop relié (null : compte Whop).
       compte: !acct ? null : compte === undefined ? { unreachable: true }
-        : compte ? { email: compte.email, google: !!compte.google, mdp: !!compte.mdp, marketing: !!compte.marketing, whop: !!compte.whop_uid } : null,
+        : compte ? { email: compte.email, google: !!compte.google, mdp: !!compte.mdp, whop: !!compte.whop_uid } : null,
       can: { rename: writable, cancel: !preview && plansRes.ok, switch: switchOn, delete: canDelete },
     },
     200,
@@ -321,18 +321,6 @@ export async function POST(req) {
       if (!r?.ok) return err(M.gone, 401);
       console.log("[compte] mot de passe changé depuis Mon compte");
       return json({ ok: true }, 200, encodeSession({ ...session, sv: r.sv }) || refreshed);
-    }
-
-    case "marketing": {
-      if (!acct) return err(M.notAccount, 400);
-      let r;
-      try {
-        r = await reglerMarketing(acctId, body.ok === true);
-      } catch {
-        return err(M.dbDown, 502);
-      }
-      if (!r?.ok) return err(M.gone, 401);
-      return json({ ok: true, marketing: !!r.marketing }, 200, refreshed);
     }
 
     case "resilier":

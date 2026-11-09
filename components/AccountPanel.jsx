@@ -112,24 +112,6 @@ export default function AccountPanel() {
     track("Mot de passe changé", { premier: first });
   }
 
-  async function saveMarketing(on) {
-    // La case suit tout de suite le clic ; elle revient en arrière si l'enregistrement échoue.
-    setBusy("marketing"); setFail(null); setOk(null);
-    setData((d) => (d?.compte ? { ...d, compte: { ...d.compte, marketing: on } } : d));
-    const { good, j } = await post({ action: "marketing", ok: on });
-    setBusy("");
-    if (!good) {
-      setData((d) => (d?.compte ? { ...d, compte: { ...d.compte, marketing: !on } } : d));
-      setFail({ sec: "cpt", msg: j?.error || generic });
-      return;
-    }
-    setData((d) => (d?.compte ? { ...d, compte: { ...d.compte, marketing: !!j.marketing } } : d));
-    setOk({ sec: "cpt", msg: j.marketing
-      ? T("C'est noté : tu recevras nos e-mails (analyses et offres). Tu peux arrêter quand tu veux.", "Got it: you'll receive our emails (analyses and offers). You can stop anytime.", "Anotado: recibirás nuestros correos (análisis y ofertas). Puedes dejarlo cuando quieras.")
-      : T("C'est noté : tu ne recevras plus nos e-mails d'analyses et d'offres.", "Got it: you won't receive our analysis and offer emails anymore.", "Anotado: ya no recibirás nuestros correos de análisis y ofertas.") });
-    track("E-mails Basketlog", { accord: !!j.marketing });
-  }
-
   async function act(action, id) {
     setBusy(`plan:${id}`); setFail(null); setOk(null);
     const { good, j } = await post({ action, id });
@@ -401,15 +383,6 @@ export default function AccountPanel() {
             </div>
             <label className="acc-check"><input type="checkbox" checked={pwShow} onChange={(e) => setPwShow(e.target.checked)} /> {T("Afficher les mots de passe", "Show passwords", "Mostrar las contraseñas")}</label>
           </form>
-
-          <label className="acc-check acc-mkt">
-            <input type="checkbox" checked={!!data.compte.marketing} disabled={!!busy || preview} onChange={(e) => saveMarketing(e.target.checked)} />
-            <span>{T(
-              "Recevoir par e-mail les analyses et les offres de Basketlog. Tu peux arrêter à tout moment, ici.",
-              "Receive Basketlog's analyses and offers by email. You can stop at any time, right here.",
-              "Recibir por correo los análisis y las ofertas de Basketlog. Puedes dejarlo en cualquier momento, aquí."
-            )}</span>
-          </label>
         </section>
       )}
 

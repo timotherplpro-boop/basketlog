@@ -88,7 +88,7 @@ export default function AdminStats({ st }) {
             <div className="st-kpis">
               <div className="st-kpi hero"><span>Comptes créés</span><strong>{n(st.comptes.total)}</strong><small>{n(st.comptes.periode)} sur {days} jours</small></div>
               <div className="st-kpi"><span>Avec Google</span><strong>{n(st.comptes.google)}</strong><small>{pct(st.comptes.google, st.comptes.total)} des comptes</small></div>
-              <div className="st-kpi"><span>Acceptent les e-mails</span><strong>{n(st.comptes.marketing)}</strong><small>{pct(st.comptes.marketing, st.comptes.total)} des comptes</small></div>
+              <div className="st-kpi"><span>Inscrits sur 7 jours</span><strong>{n(st.comptes.semaine)}</strong><small>nouveaux comptes</small></div>
               <div className="st-kpi"><span>Abonnement relié</span><strong>{n(st.comptes.relies)}</strong><small>compte Whop relié après paiement</small></div>
             </div>
             <AdminAccounts comptes={st.comptes} />
