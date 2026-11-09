@@ -39,9 +39,9 @@ export default function SignupWall({ target, mode = "page", children }) {
         <div className="gate-box ar-wall-box">
           <h3>{L.t("Crée ton compte gratuit pour voir l'analyse", "Create your free account to see the analysis", "Crea tu cuenta gratis para ver el análisis")}</h3>
           <p>{L.t(
-            "Inscription gratuite en quelques secondes, avec Google ou ton e-mail. Tu verras ensuite la forme des équipes, le résumé du match, le scénario le plus probable et la confiance du modèle.",
-            "Free sign-up in a few seconds, with Google or your email. You'll then see both teams' form, the game summary, the most likely scenario and the model's confidence.",
-            "Registro gratis en unos segundos, con Google o con tu correo. Después verás la forma de los equipos, el resumen del partido, el escenario más probable y la confianza del modelo."
+            "Inscription gratuite en quelques secondes. Tu verras ensuite la forme des équipes, le résumé du match, le scénario le plus probable et la confiance du modèle.",
+            "Free sign-up in a few seconds. You'll then see both teams' form, the game summary, the most likely scenario and the model's confidence.",
+            "Registro gratis en unos segundos. Después verás la forma de los equipos, el resumen del partido, el escenario más probable y la confianza del modelo."
           )}</p>
           <button type="button" className="btn-solid" onClick={open("inscription")} disabled={!ready}>{L.t("Créer mon compte gratuit", "Create my free account", "Crear mi cuenta gratis")}</button>
           <button type="button" className="gate-login" onClick={open("connexion")} disabled={!ready}>{L.t("Déjà un compte ? Se connecter", "Already have an account? Log in", "¿Ya tienes cuenta? Inicia sesión")}</button>
