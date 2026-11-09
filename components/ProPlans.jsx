@@ -8,6 +8,7 @@ import { price, money, PRICES } from "../lib/pricing";
 import { pctOf } from "../lib/i18n";
 import { CODE_RE, cleanCode, discounted, withPromo } from "../lib/promo";
 import SwitchWatch from "./SwitchWatch";
+import { openAuth } from "../lib/auth-client";
 
 const Icon = ({ name }) => {
   const p = { fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
@@ -82,6 +83,8 @@ const NOTICES = {
   abonnement: ["warn", "Connexion réussie, mais aucun abonnement Basketlog actif n'a été trouvé sur ce compte Whop. Utilise le même compte que pour ton paiement.", "You're logged in, but no active Basketlog subscription was found on this Whop account. Use the same account you paid with.", "Has iniciado sesión, pero no hemos encontrado ninguna suscripción activa de Basketlog en esta cuenta de Whop. Usa la misma cuenta con la que pagaste."],
   connexion: ["warn", "La connexion avec Whop n'a pas abouti. Réessaie dans un instant.", "Logging in with Whop didn't work. Please try again in a moment.", "No se ha podido iniciar sesión con Whop. Vuelve a intentarlo en un momento."],
   config: ["warn", "Le paiement n'est pas encore activé sur Basketlog. Reviens très bientôt.", "Payments aren't enabled on Basketlog yet. Please come back soon.", "El pago todavía no está activado en Basketlog. Vuelve muy pronto."],
+  whop_autre: ["warn", "Ce compte Whop est déjà relié à un autre compte Basketlog. Connecte-toi à Basketlog avec l'adresse e-mail de cet autre compte, ou écris-nous à contact@basketlog-app.com.", "This Whop account is already linked to another Basketlog account. Log in to Basketlog with that other account's email, or write to us at contact@basketlog-app.com.", "Esta cuenta de Whop ya está vinculada a otra cuenta de Basketlog. Inicia sesión en Basketlog con el correo de esa otra cuenta o escríbenos a contact@basketlog-app.com."],
+  lien: ["warn", "Impossible de relier ton compte Whop pour le moment. Réessaie dans un instant.", "We couldn't link your Whop account right now. Please try again in a moment.", "No hemos podido vincular tu cuenta de Whop por ahora. Inténtalo de nuevo en un instante."],
 };
 
 export default function ProPlans({ checkout, loginReady, notice, ai = false, cur = "EUR", switching = false }) {
@@ -127,8 +130,16 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
     } catch { /* adresse illisible : pas de code pré-rempli */ }
   }, [applyPromo]);
   // Avant le paiement : acceptation des CGV et demande d'accès immédiat (renonciation à la rétractation, art. L221-28 13°).
-  const buy = (id) => (e) => {
+  // Comme Visifoot, le compte vient avant le paiement : un visiteur sans compte crée d'abord son compte gratuit (fenêtre
+  // « Créer un compte »), puis part payer ; après le paiement, « Activer mon abonnement » relie son compte Whop.
+  const buy = (id, url) => (e) => {
     if (!agree) { e.preventDefault(); setNudge(true); document.getElementById("pro-agree")?.focus(); return; }
+    if (pro && !pro.connected) {
+      e.preventDefault();
+      openAuth({ mode: "inscription", source: "paiement", then: "paiement", checkout: url, plan: id });
+      return;
+    }
+    try { localStorage.setItem("bl_paiement", JSON.stringify({ plan: id, at: Date.now() })); } catch {}
     track("Clic abonnement", { formule: id, devise: cur, ...(promo ? { code_promo: promo.code } : {}) });
   };
   useEffect(() => {
@@ -137,6 +148,22 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
     if (notice === "ok") track("Abonnement activé", { formule: pro.tier });
     else if (notice) track("Connexion Whop", { etape: "erreur", raison: notice });
   }, [pro, notice]);
+  // Retour de « Continuer avec Google » après un clic sur une formule (?payer=pro) : le compte est prêt, on montre la formule
+  // choisie ; le visiteur coche la case des CGV et part payer.
+  const [payer, setPayer] = useState(null);
+  useEffect(() => {
+    try {
+      const u = new URL(window.location.href);
+      const p = u.searchParams.get("payer");
+      if (!p) return;
+      u.searchParams.delete("payer");
+      history.replaceState(null, "", u.pathname + (u.search || "") + u.hash);
+      if (["starter", "pro", "lifetime"].includes(p)) {
+        setPayer(p);
+        setTimeout(() => document.querySelector(`.plan-${p}`)?.scrollIntoView({ behavior: "smooth", block: "center" }), 300);
+      }
+    } catch { /* adresse illisible */ }
+  }, []);
   const current = pro?.tier || "gratuit";
   const TIER_LABEL = L.t(
     { gratuit: "Gratuit", compte: "Compte gratuit", starter: "Starter", pro: "Pro", lifetime: "Lifetime" },
@@ -147,7 +174,14 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
 
   return (
     <>
-      {n && <div className={`pro-notice ${n[0]}`} role="status">{L.t(n[1], n[2], n[3])}</div>}
+      {n && !payer && <div className={`pro-notice ${n[0]}`} role="status">{L.t(n[1], n[2], n[3])}</div>}
+      {payer && pro?.connected && (
+        <div className="pro-notice good" role="status">{L.t(
+          "Ton compte est prêt ! Coche la case ci-dessous, puis clique sur « Débloquer » pour payer ta formule.",
+          "Your account is ready! Tick the box below, then click “Unlock” to pay for your plan.",
+          "¡Tu cuenta está lista! Marca la casilla de abajo y haz clic en «Desbloquear» para pagar tu plan."
+        )}</div>
+      )}
       {switching && <SwitchWatch />}
       <div className="pro-promo">
         {promo ? (
@@ -202,7 +236,7 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
         {PLANS(L, ai, cur, promo).map((p, i) => {
           const url = withPromo(checkout[p.id], promo?.code);
           return (
-            <article key={p.id} className={`plan plan-${p.id} reveal-in`} style={{ animationDelay: `${i * 90}ms` }}>
+            <article key={p.id} className={`plan plan-${p.id} reveal-in${payer === p.id ? " plan-picked" : ""}`} style={{ animationDelay: `${i * 90}ms` }}>
               {p.badge && <span className="plan-badge">{p.id === "pro" ? "⭐⭐ " : "∞∞ "}{p.badge}</span>}
               <h3><span className="plan-ic"><Icon name={p.icon} /></span>{p.name}</h3>
               <div className="plan-price">
@@ -220,7 +254,7 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
               {pro?.connected && current === p.id ? (
                 <span className="plan-cta plan-current">{L.t("Ta formule actuelle", "Your current plan", "Tu plan actual")}</span>
               ) : url ? (
-                <a href={url} className={`plan-cta plan-buy ${agree ? "" : "plan-wait"}`} aria-disabled={!agree} onClick={buy(p.id)}>{p.cta}</a>
+                <a href={url} className={`plan-cta plan-buy ${agree ? "" : "plan-wait"}`} aria-disabled={!agree} onClick={buy(p.id, url)}>{p.cta}</a>
               ) : (
                 <span className="plan-cta plan-soon">{L.t("Bientôt disponible", "Coming soon", "Próximamente")}</span>
               )}
@@ -240,17 +274,24 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
       <div className="pro-account">
         {pro?.connected ? (
           <p>
-            {L.t("Connecté avec Whop", "Logged in with Whop", "Conectado con Whop")}{pro.name ? <> {L.t("en tant que", "as", "como")} <b>{pro.name}</b></> : ""} · {L.t("formule", "plan", "plan")} <b>{TIER_LABEL[current] || current}</b>
-            {(current === "compte" || current === "starter") && <>{" · "}<a href={`/api/whop/login?next=${encodeURIComponent(L.href("/pro"))}`} className="pro-login" onClick={() => track("Connexion Whop", { etape: "actualiser", source: "page_pro" })}>{L.t("Tu viens de t'abonner ? Actualiser mon accès", "Just subscribed? Refresh my access", "¿Te acabas de suscribir? Actualizar mi acceso")}</a></>}
+            {pro.acct ? L.t("Connecté", "Logged in", "Conectado") : L.t("Connecté avec Whop", "Logged in with Whop", "Conectado con Whop")}{pro.name ? <> {L.t("en tant que", "as", "como")} <b>{pro.name}</b></> : ""} · {L.t("formule", "plan", "plan")} <b>{TIER_LABEL[current] || current}</b>
+            {(current === "compte" || current === "starter") && <>{" · "}<a href={`/api/whop/login?next=${encodeURIComponent(L.href("/pro"))}`} className="pro-login" onClick={() => track("Connexion Whop", { etape: "actualiser", source: "page_pro" })}>{pro.acct ? L.t("Tu viens de payer ? Activer mon abonnement", "Just paid? Activate my subscription", "¿Acabas de pagar? Activar mi suscripción") : L.t("Tu viens de t'abonner ? Actualiser mon accès", "Just subscribed? Refresh my access", "¿Te acabas de suscribir? Actualizar mi acceso")}</a></>}
             {" · "}<Link href={L.href("/app/compte")}>{L.t("Gérer mon abonnement", "Manage my subscription", "Gestionar mi suscripción")}</Link>
             {" · "}<a href={`/api/pro/logout?next=${encodeURIComponent(L.href("/pro"))}`}>{L.t("Se déconnecter", "Log out", "Cerrar sesión")}</a>
           </p>
-        ) : loginReady ? (
+        ) : (
           <p>
-            {L.t("Pas encore de compte ?", "No account yet?", "¿Todavía no tienes cuenta?")} <a href={`/api/whop/signup?next=${encodeURIComponent(L.href("/app/matchs"))}`} className="pro-login" onClick={() => track("Clic créer un compte", { source: "page_pro" })}>{L.t("Créer mon compte gratuit", "Create my free account", "Crear mi cuenta gratis")}</a>
-            {" · "}{L.t("Déjà inscrit ?", "Already signed up?", "¿Ya estás registrado?")} <a href={`/api/whop/login?next=${encodeURIComponent(L.href("/pro"))}`} className="pro-login" onClick={() => track("Connexion Whop", { etape: "clic", source: "page_pro" })}>{L.t("Me connecter", "Log in", "Iniciar sesión")}</a>
+            {L.t("Pas encore de compte ?", "No account yet?", "¿Todavía no tienes cuenta?")} <button type="button" className="pro-login" onClick={() => openAuth({ mode: "inscription", source: "page_pro" })}>{L.t("Créer mon compte gratuit", "Create my free account", "Crear mi cuenta gratis")}</button>
+            {" · "}{L.t("Déjà inscrit ?", "Already signed up?", "¿Ya estás registrado?")} <button type="button" className="pro-login" onClick={() => openAuth({ mode: "connexion", source: "page_pro" })}>{L.t("Me connecter", "Log in", "Iniciar sesión")}</button>
           </p>
-        ) : null}
+        )}
+        {pro?.connected && pro.acct && (current === "compte" || current === "starter") && (
+          <p className="pro-secure">{L.t(
+            "Le paiement se fait sur la page sécurisée de Whop. Ensuite, reviens ici et clique sur « Activer mon abonnement » : tu te connectes à Whop avec le compte utilisé pour payer, et ta formule se débloque sur ton compte Basketlog.",
+            "Payment happens on Whop's secure page. Then come back here and click “Activate my subscription”: log in to Whop with the account you paid with, and your plan unlocks on your Basketlog account.",
+            "El pago se hace en la página segura de Whop. Después, vuelve aquí y haz clic en «Activar mi suscripción»: inicia sesión en Whop con la cuenta con la que pagaste y tu plan se desbloquea en tu cuenta de Basketlog."
+          )}</p>
+        )}
         <p className="pro-secure">{L.t("Tu peux arrêter ton abonnement à tout moment. Toutes nos analyses sont fournies à titre informatif uniquement.", "You can cancel your subscription anytime. All our analyses are provided for information only.", "Puedes cancelar tu suscripción en cualquier momento. Todos nuestros análisis se ofrecen solo a título informativo.")}</p>
         {pro?.connected && (current === "starter" || current === "pro") && (
           <p className="pro-secure">{L.t("Déjà abonné ? Passe à une formule supérieure en un clic depuis", "Already subscribed? Switch to a higher plan in one click from", "¿Ya estás suscrito? Pasa a un plan superior con un clic desde")} <Link href={L.href("/app/compte")}>{L.t("Mon compte", "My account", "Mi cuenta")}</Link>{L.t(" : ton abonnement actuel s'arrête tout seul à la fin de sa période.", ": your current subscription stops by itself at the end of its period.", ": tu suscripción actual se detiene sola al final de su periodo.")}</p>

@@ -10,7 +10,7 @@ import { SITE } from "../../../../lib/site";
 import { mk } from "../../../../lib/i18n";
 import { ISSUE_LANGS, buildIssue, clearestFavorites, runWindow, sundaySlot, weekBilan } from "../../../../lib/newsletter";
 import { maskEmail, newsletterConfig, resend } from "../../../../lib/resend";
-import { memberEmail } from "../../../../lib/whop-email";
+import { sessionEmail } from "../../../../lib/session-email";
 import { scheduleWeek } from "../../../../lib/newsletter-server";
 
 export const dynamic = "force-dynamic";
@@ -28,8 +28,8 @@ export const maxDuration = 60;
 // Paramètres (compte admin connecté, sauf mention) :
 //   ?dry=1                  aperçu sans rien programmer, même avant que Resend soit branché
 //   ?dry=1&lang=fr&format=html|text   le mail lui-même, à ouvrir dans le navigateur
-//   ?test=1[&lang=fr]       envoie le mail à l'adresse Whop de l'admin connecté (lui seul), précédé de [TEST]
-//   ?diag=1                 vérifie les branchements (adresse Whop lisible, domaine d'envoi, liste, sujets) sans rien envoyer
+//   ?test=1[&lang=fr]       envoie le mail à l'adresse de l'admin connecté (lui seul), précédé de [TEST]
+//   ?diag=1                 vérifie les branchements (adresse de l'admin lisible, domaine d'envoi, liste, sujets) sans rien envoyer
 // Accès : tâche planifiée de Vercel (avec CRON_SECRET s'il est défini) ou compte admin connecté.
 let lastRun = 0;
 
@@ -37,7 +37,7 @@ async function access(req) {
   const secret = process.env.CRON_SECRET;
   if (secret && req.headers.get("authorization") === `Bearer ${secret}`) return { who: "cron" };
   const { session } = await currentSession(req.cookies.get(COOKIE)?.value);
-  if (session?.role === "admin") return { who: "admin", uid: session.uid };
+  if (session?.role === "admin") return { who: "admin", uid: session.uid, session };
   if (!secret && /vercel-cron/i.test(req.headers.get("user-agent") || "")) return { who: "cron" };
   return null;
 }
@@ -99,8 +99,8 @@ export async function GET(req) {
     if (!admin) return json({ error: "interdit" }, 401);
     const out = { config: configView(cfg), slot: sundaySlot(), whop: null, resend: null };
     try {
-      const mail = await memberEmail(me.uid);
-      out.whop = { ok: true, email: maskEmail(mail) };
+      const who = await sessionEmail(me.session);
+      out.whop = { ok: true, email: maskEmail(who.email), source: who.account ? "compte Basketlog" : "Whop" };
     } catch (e) {
       out.whop = { ok: false, kind: e?.kind || "?", error: note(e), ...(e?.detail ? { detail: e.detail } : {}) };
     }
@@ -155,7 +155,7 @@ export async function GET(req) {
     });
   }
 
-  // ---------- Test : le mail à l'adresse Whop de l'admin connecté, rien d'autre ----------
+  // ---------- Test : le mail à l'adresse de l'admin connecté (compte Basketlog, ou Whop), rien d'autre ----------
   if (test) {
     if (!admin) return json({ error: "interdit" }, 401);
     const r = resend();
@@ -163,7 +163,7 @@ export async function GET(req) {
     const lang = langOf(sp.get("lang"));
     const issue = buildIssue({ ...data, unsubscribeUrl: `${SITE}${mk(lang).href("/app/compte")}` }, lang);
     try {
-      const to = await memberEmail(me.uid);
+      const to = (await sessionEmail(me.session)).email;
       const sent = await r.sendEmail({
         from: cfg.from, to, replyTo: cfg.replyTo, subject: `[TEST] ${issue.subject}`, html: issue.html, text: issue.text,
         idempotencyKey: `newsletter-test-${slot.week.label}-${lang}-${me.uid}-${Math.floor(now / 60000)}`,

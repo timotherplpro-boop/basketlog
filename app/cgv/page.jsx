@@ -53,7 +53,7 @@ function CGVFr() {
       </Sec>
 
       <Sec n={4} title="Accès au service">
-        <p>L&apos;accès est ouvert dès la confirmation du paiement : reviens sur la page Pro et clique sur « Me connecter avec Whop » avec le même compte Whop que pour le paiement. Ta formule est alors activée automatiquement sur Basketlog, sur tous tes appareils.</p>
+        <p>L&apos;accès est ouvert dès la confirmation du paiement : reviens sur Basketlog, connecté à ton compte Basketlog, et clique sur « Activer mon abonnement » ; tu te connectes alors à Whop avec le compte utilisé pour le paiement, qui est relié à ton compte Basketlog. Ta formule est activée automatiquement, sur tous tes appareils. Si tu t&apos;es abonné avant l&apos;ouverture des comptes Basketlog, connecte-toi simplement avec Whop.</p>
       </Sec>
 
       <Sec n={5} title="Renouvellement et résiliation">
@@ -143,7 +143,7 @@ function CGVEn({ L }) {
       </Sec>
 
       <Sec n={4} title="Access to the service">
-        <p>Access opens as soon as payment is confirmed: go back to the Pro page and log in with the same Whop account you paid with. Your plan is then activated automatically on Basketlog, on all your devices.</p>
+        <p>Access opens as soon as payment is confirmed: come back to Basketlog, logged in to your Basketlog account, and click “Activate my subscription”; you then log in to Whop with the account you paid with, which is linked to your Basketlog account. Your plan is activated automatically, on all your devices. If you subscribed before Basketlog accounts opened, simply log in with Whop.</p>
       </Sec>
 
       <Sec n={5} title="Renewal and cancellation">
@@ -233,7 +233,7 @@ function CGVEs({ L }) {
       </Sec>
 
       <Sec n={4} title="Acceso al servicio">
-        <p>El acceso se abre en cuanto se confirma el pago: vuelve a la página Pro e inicia sesión con la misma cuenta de Whop con la que pagaste. Tu plan se activa entonces automáticamente en Basketlog, en todos tus dispositivos.</p>
+        <p>El acceso se abre en cuanto se confirma el pago: vuelve a Basketlog con la sesión de tu cuenta de Basketlog iniciada y haz clic en «Activar mi suscripción»; entonces inicias sesión en Whop con la cuenta con la que pagaste, que queda vinculada a tu cuenta de Basketlog. Tu plan se activa automáticamente, en todos tus dispositivos. Si te suscribiste antes de que existieran las cuentas de Basketlog, simplemente inicia sesión con Whop.</p>
       </Sec>
 
       <Sec n={5} title="Renovación y cancelación">

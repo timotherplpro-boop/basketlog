@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AuthButton from "../../../components/AuthButton";
 import AppTabs from "../../../components/AppTabs";
 import HistoryList from "../../../components/HistoryList";
 import { pageMeta } from "../../../lib/seo";
@@ -21,7 +22,6 @@ export default async function HistoriquePage() {
   const L = await getL();
   const m = await memberSession();
   const list = m ? await getHistory(m.uid) : null;
-  const next = encodeURIComponent(L.href("/app/historique"));
 
   return (
     <main className="app-page">
@@ -36,7 +36,7 @@ export default async function HistoriquePage() {
           <b>{L.t("Connecte-toi pour retrouver tes analyses", "Log in to find your analyses", "Inicia sesión para encontrar tus análisis")}</b>
           <p>{L.t("Les analyses que tu lances avec Starter, Pro ou Lifetime s'affichent ici, sur tous tes appareils.", "The analyses you run with Starter, Pro or Lifetime show up here, on all your devices.", "Los análisis que lanzas con Starter, Pro o Lifetime aparecen aquí, en todos tus dispositivos.")}</p>
           <Link href={L.href("/pro")} className="btn-solid">{L.t("Voir les formules", "See the plans", "Ver los planes")}</Link>
-          <a href={`/api/whop/login?next=${next}`} className="comp-more">{L.t("Déjà abonné ? Se connecter", "Already subscribed? Log in", "¿Ya estás suscrito? Inicia sesión")} →</a>
+          <AuthButton mode="connexion" source="historique" next={L.href("/app/historique")} className="comp-more">{L.t("Déjà un compte ? Se connecter", "Already have an account? Log in", "¿Ya tienes cuenta? Inicia sesión")} →</AuthButton>
         </div>
       ) : list === null ? (
         <div className="panel hist-empty"><p>{L.t("Historique momentanément indisponible. Réessaie dans quelques minutes.", "History temporarily unavailable. Please try again in a few minutes.", "Historial no disponible por el momento. Vuelve a intentarlo en unos minutos.")}</p></div>

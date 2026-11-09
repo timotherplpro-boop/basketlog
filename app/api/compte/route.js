@@ -8,6 +8,9 @@ import { mk } from "../../../lib/i18n";
 import { DELETE_WORDS, cleanName, creatorCodes, deleteConfirmed, renewing, switchStep, switchTargets } from "../../../lib/account";
 import { cancelMembership, listMemberships, listPlans, resumeMembership, whopAccountReady } from "../../../lib/whop-account";
 import { WhopPromoError, disablePromo } from "../../../lib/whop-promo";
+import { accountIdOf, isAccountSession, whopUidOf } from "../../../lib/auth-utils";
+import { changerMdp, compteParEmail, getCompte, supprimerCompteEmail } from "../../../lib/comptes";
+import { MAX_PASSWORD, hashPassword, passwordProblem, verifyPassword } from "../../../lib/password";
 import { forgetNewsletter } from "../../../lib/newsletter-server";
 
 export const dynamic = "force-dynamic";
@@ -148,6 +151,12 @@ function messages(lang) {
     // Whop n'a pas pu désactiver le code promo du créateur : rien n'est effacé. stopped : abonnements déjà arrêtés avant.
     codeDown: (stopped = 0) => `${t("Whop ne répond pas pour désactiver ton code promo : rien n'a été supprimé. Réessaie dans un instant.", "Whop isn't responding to deactivate your promo code: nothing was removed. Please try again in a moment.", "Whop no responde para desactivar tu código promocional: no se ha borrado nada. Inténtalo de nuevo en un instante.")}${stopped ? ` ${stoppedNote(stopped)}` : ""}`,
     codeRefused: (stopped = 0) => `${t("Whop a refusé de désactiver ton code promo : rien n'a été supprimé. Écris-nous à contact@basketlog-app.com et on s'en occupe tout de suite.", "Whop refused to deactivate your promo code: nothing was removed. Write to us at contact@basketlog-app.com and we'll take care of it right away.", "Whop ha rechazado desactivar tu código promocional: no se ha borrado nada. Escríbenos a contact@basketlog-app.com y nos ocupamos enseguida.")}${stopped ? ` ${stoppedNote(stopped)}` : ""}`,
+    linkedRole: t("Ton compte est relié à un compte Whop qui a un accès admin ou créateur : écris-nous à contact@basketlog-app.com pour le supprimer.", "Your account is linked to a Whop account with admin or creator access: write to us at contact@basketlog-app.com to delete it.", "Tu cuenta está vinculada a una cuenta de Whop con acceso de administrador o de creador: escríbenos a contact@basketlog-app.com para eliminarla."),
+    pwWrong: t("Ton mot de passe actuel est incorrect.", "Your current password is incorrect.", "Tu contraseña actual es incorrecta."),
+    pwShort: t("Ton nouveau mot de passe doit faire au moins 6 caractères.", "Your new password must be at least 6 characters.", "Tu nueva contraseña debe tener al menos 6 caracteres."),
+    pwLong: t(`Ton nouveau mot de passe ne doit pas dépasser ${MAX_PASSWORD} caractères.`, `Your new password can't be longer than ${MAX_PASSWORD} characters.`, `Tu nueva contraseña no puede superar los ${MAX_PASSWORD} caracteres.`),
+    notAccount: t("Ton compte se connecte avec Whop : son mot de passe et ses e-mails se gèrent chez Whop.", "Your account logs in with Whop: its password and emails are managed on Whop.", "Tu cuenta inicia sesión con Whop: su contraseña y sus correos se gestionan en Whop."),
+    gone: t("Ce compte n'existe plus. Reconnecte-toi.", "This account no longer exists. Please log in again.", "Esta cuenta ya no existe. Vuelve a iniciar sesión."),
     badTarget: t("Formule inconnue.", "Unknown plan.", "Plan desconocido."),
     accept: t("Coche la case pour accepter les CGV et les CGU avant de continuer vers le paiement.", "Tick the box to accept the Terms of Sale and Terms of Use before continuing to payment.", "Marca la casilla para aceptar las Condiciones de venta y de uso antes de continuar con el pago."),
     cantSwitch: t("Ce changement n'est plus possible depuis cet abonnement. Recharge la page pour voir ton abonnement à jour.", "This change is no longer possible from this subscription. Reload the page to see your up-to-date subscription.", "Este cambio ya no es posible desde esta suscripción. Recarga la página para ver tu suscripción actualizada."),
@@ -183,18 +192,27 @@ function promoFail(M, e, { stopped = 0 } = {}) {
 export async function GET(req) {
   const lang = new URL(req.url).searchParams.get("lang");
   const M = messages(lang);
-  const { session, refreshed } = await currentSession(req.cookies.get(COOKIE)?.value);
-  if (!session?.uid) return err(M.login, 401);
+  const { session, refreshed, cleared } = await currentSession(req.cookies.get(COOKIE)?.value);
+  if (!session?.uid) {
+    const res = err(cleared ? M.gone : M.login, 401);
+    if (cleared) res.cookies.delete({ name: COOKIE, path: "/" });
+    return res;
+  }
   if (tooMany(session.uid, "lecture", MAX_READS)) return err(M.many, 429);
 
   const preview = !!session.preview;
   let role = session.role || (session.admin ? "admin" : null);
-  const [plansRes, prof, creator] = await Promise.all([
-    whopAccountReady()
-      ? listPlans(session.uid).then((plans) => ({ ok: true, plans }), (e) => { console.warn(`[compte] lecture des abonnements : ${e?.kind || "?"} — ${String(e?.message || e).slice(0, 200)}`); return { ok: false, plans: [] }; })
-      : { ok: false, plans: [] },
+  // Compte e-mail ou Google : ses abonnements sont ceux du compte Whop relié après le paiement (aucun relié : aucun abonnement).
+  const acct = isAccountSession(session);
+  const wid = whopUidOf(session);
+  const [plansRes, prof, creator, compte] = await Promise.all([
+    !wid ? { ok: true, plans: [] }
+      : whopAccountReady()
+        ? listPlans(wid).then((plans) => ({ ok: true, plans }), (e) => { console.warn(`[compte] lecture des abonnements : ${e?.kind || "?"} — ${String(e?.message || e).slice(0, 200)}`); return { ok: false, plans: [] }; })
+        : { ok: false, plans: [] },
     readProfile(session.uid),
     role === "createur" && !preview ? readCreator(session.uid) : null,
+    acct ? getCompte(accountIdOf(session.uid)).catch(() => undefined) : null,
   ]);
   // Un créateur dont l'accès vient d'être retiré (ou promu admin) : la base fait foi, pas le cookie.
   if (creator?.installed && !creator.unreachable && creator.role !== "createur") role = creator.role;
@@ -228,6 +246,9 @@ export async function GET(req) {
       plans: plansRes.plans.map((p) => ({ ...p, up: switchOn ? offers(p, plansRes.plans) : [] })),
       switch: { pending },
       creator: role === "createur" ? { codes: creator?.codes || [] } : null,
+      // Compte e-mail ou Google : adresse, moyens de connexion, compte Whop relié (null : compte Whop).
+      compte: !acct ? null : compte === undefined ? { unreachable: true }
+        : compte ? { email: compte.email, google: !!compte.google, mdp: !!compte.mdp, whop: !!compte.whop_uid } : null,
       can: { rename: writable, cancel: !preview && plansRes.ok, switch: switchOn, delete: canDelete },
     },
     200,
@@ -242,10 +263,18 @@ export async function POST(req) {
   const M = messages(body?.lang);
   if (!sameOrigin(req)) return err(M.refused, 403);
 
-  const { session, refreshed } = await currentSession(req.cookies.get(COOKIE)?.value);
-  if (!session?.uid) return err(M.login, 401);
+  const { session, refreshed, cleared } = await currentSession(req.cookies.get(COOKIE)?.value);
+  if (!session?.uid) {
+    const res = err(cleared ? M.gone : M.login, 401);
+    if (cleared) res.cookies.delete({ name: COOKIE, path: "/" });
+    return res;
+  }
   if (session.preview) return err(M.preview, 403);
   const uid = session.uid;
+  // Compte e-mail ou Google : les abonnements sont ceux du compte Whop relié (wid), les données Basketlog celles du compte (uid).
+  const acct = isAccountSession(session);
+  const acctId = acct ? accountIdOf(uid) : null;
+  const wid = whopUidOf(session);
   const check = body.action === "finaliser";
   if (tooMany(uid, check ? "verif" : "action", check ? MAX_FINALIZE : MAX_ACTIONS)) return err(M.many, 429);
 
@@ -270,12 +299,39 @@ export async function POST(req) {
       return json({ ok: true, name: { current: name, custom: c.name || null, whop: wname || null } }, 200, value || refreshed);
     }
 
+    case "mdp": {
+      // Compte e-mail ou Google : choisir ou changer son mot de passe. Les autres appareils sont déconnectés.
+      if (!acct) return err(M.notAccount, 400);
+      const pb = passwordProblem(body.nouveau);
+      if (pb) return err(pb === "court" ? M.pwShort : M.pwLong, 400, { field: "nouveau" });
+      let c;
+      try {
+        const fiche = await getCompte(acctId);
+        c = fiche ? await compteParEmail(fiche.email) : null;
+      } catch {
+        return err(M.dbDown, 502);
+      }
+      if (!c || c.id !== acctId) return err(M.gone, 401);
+      // Compte qui a déjà un mot de passe : l'actuel est demandé. Compte Google sans mot de passe : il en choisit un.
+      if (c.mdp && !(await verifyPassword(typeof body.actuel === "string" ? body.actuel : "", c.mdp))) return err(M.pwWrong, 400, { field: "actuel" });
+      let r;
+      try {
+        r = await changerMdp(acctId, await hashPassword(body.nouveau));
+      } catch {
+        return err(M.dbDown, 502);
+      }
+      if (!r?.ok) return err(M.gone, 401);
+      console.log("[compte] mot de passe changé depuis Mon compte");
+      return json({ ok: true }, 200, encodeSession({ ...session, sv: r.sv }) || refreshed);
+    }
+
     case "resilier":
     case "reprendre": {
       if (!whopAccountReady()) return err(M.whopNoKey, 503);
+      if (!wid) return err(M.notFound, 404);
       const resume = body.action === "reprendre";
       try {
-        const r = resume ? await resumeMembership(uid, body.id) : await cancelMembership(uid, body.id);
+        const r = resume ? await resumeMembership(wid, body.id) : await cancelMembership(wid, body.id);
         console.log(`[compte] ${resume ? "reprise" : "résiliation en fin de période"} : abonnement ${r.plan.id} (${r.plan.tier})${r.already ? ", déjà dans cet état" : ""}`);
         return json({ ok: true, already: r.already, plan: r.plan }, 200, refreshed);
       } catch (e) {
@@ -290,8 +346,9 @@ export async function POST(req) {
       // Nouvel achat : comme sur la page des formules, le membre accepte d'abord les CGV et les CGU et demande l'accès immédiat
       // (renonciation au délai de rétractation de 14 jours, art. L221-28 13° du Code de la consommation).
       if (body.accept !== true) return err(M.accept, 400);
+      if (!wid) return err(M.notFound, 404);
       let plans;
-      try { plans = await listPlans(uid); } catch (e) { return whopFail(M, e); }
+      try { plans = await listPlans(wid); } catch (e) { return whopFail(M, e); }
       const plan = plans.find((p) => p.id === body.id);
       if (!plan) return err(M.notFound, 404);
       if (!switchTargets(plan, plans).includes(body.cible)) return err(M.cantSwitch, 409);
@@ -307,10 +364,10 @@ export async function POST(req) {
       // période seulement si une formule supérieure est réellement active ; sinon on attend (state « pending »).
       const rawIntent = req.cookies.get(SWITCH_COOKIE)?.value;
       const intent = rawIntent === undefined ? null : switchIntent(rawIntent, uid);
-      if (!intent) return json({ ok: true, state: "none" }, 200, refreshed, rawIntent === undefined ? undefined : false);
+      if (!intent || !wid) return json({ ok: true, state: "none" }, 200, refreshed, rawIntent === undefined ? undefined : false);
       if (!whopAccountReady()) return err(M.whopNoKey, 503);
       let plans;
-      try { plans = await listPlans(uid); } catch (e) { return whopFail(M, e); }
+      try { plans = await listPlans(wid); } catch (e) { return whopFail(M, e); }
       const { step, old, better } = switchStep(plans, intent.from);
       if (step === "moot") return json({ ok: true, state: "none" }, 200, refreshed, false);
       if (step === "pending") return json({ ok: true, state: "pending", tier: intent.tier, from: old.tier }, 200, refreshed);
@@ -318,7 +375,7 @@ export async function POST(req) {
       let already = step === "already";
       if (step === "cancel") {
         try {
-          const r = await cancelMembership(uid, old.id);
+          const r = await cancelMembership(wid, old.id);
           ends = r.plan;
           already = r.already;
         } catch (e) {
@@ -349,23 +406,36 @@ export async function POST(req) {
       let role;
       try { role = await getRole(uid); } catch { return err(M.dbDown, 503); }
       if (role === "admin") return err(M.admin, 403);
+      // Compte e-mail relié à un compte Whop qui a lui-même un rôle (admin, créateur) : pas d'effacement d'ici.
+      if (acct && wid) {
+        let whopRole;
+        try { whopRole = await getRole(wid); } catch { return err(M.dbDown, 503); }
+        if (whopRole) return err(M.linkedRole, 403);
+      }
       // Avant de toucher à Whop : la base sait-elle effacer ? Sinon on s'arrête là, rien n'est modifié.
-      const [prof, creator] = await Promise.all([readProfile(uid), role === "createur" ? readCreator(uid) : null]);
-      if (!prof.installed || (creator && !creator.installed)) return err(M.notReady, 503);
-      if (prof.unreachable || creator?.unreachable) return err(M.dbDown, 503);
+      const [prof, creator, fiche] = await Promise.all([
+        readProfile(uid),
+        role === "createur" ? readCreator(uid) : null,
+        acct ? getCompte(acctId).then((c) => ({ ok: true, c }), (e) => ({ ok: false, notInstalled: profileNotInstalled(e) })) : null,
+      ]);
+      if (!prof.installed || (creator && !creator.installed) || fiche?.notInstalled) return err(M.notReady, 503);
+      if (prof.unreachable || creator?.unreachable || (fiche && !fiche.ok)) return err(M.dbDown, 503);
       if (creator && creator.role !== "createur") return creator.role === "admin" ? err(M.admin, 403) : err(M.roleChanged, 409);
-      if (!whopAccountReady()) return err(M.whopNoKey, 503);
+      if (wid && !whopAccountReady()) return err(M.whopNoKey, 503);
 
       // 1) Abonnements encore en cours : arrêtés en fin de période. Au moindre échec, on s'arrête sans rien effacer.
+      // Compte e-mail sans compte Whop relié : aucun abonnement possible, rien à arrêter.
       let stopped = 0;
-      try {
-        const mine = await listMemberships(uid);
-        for (const m of renewing(mine)) {
-          await cancelMembership(uid, m.id);
-          stopped++;
+      if (wid) {
+        try {
+          const mine = await listMemberships(wid);
+          for (const m of renewing(mine)) {
+            await cancelMembership(wid, m.id);
+            stopped++;
+          }
+        } catch (e) {
+          return whopFail(M, e, { stopped });
         }
-      } catch (e) {
-        return whopFail(M, e, { stopped });
       }
       // 2) Créateur : codes promo désactivés chez Whop AVANT d'effacer. Au moindre échec, on s'arrête sans rien effacer
       // (relancer reprend où on en était : un code déjà désactivé compte comme fait).
@@ -379,15 +449,23 @@ export async function POST(req) {
         }
       }
       // 3) Données Basketlog (pour un créateur : aussi son accès, son lien d'invitation et son code, en une seule opération).
+      // Compte e-mail : ses données puis le compte lui-même (adresse, mot de passe) ; un créateur passe d'abord par l'effacement
+      // créateur, puis le compte est supprimé. Un compte déjà supprimé (relance) compte comme fait.
       let r;
       try {
-        r = await dbRpc(creator ? "basketlog_createur_supprimer" : "basketlog_compte_supprimer", { p_uid: uid });
+        r = creator || !acct ? await dbRpc(creator ? "basketlog_createur_supprimer" : "basketlog_compte_supprimer", { p_uid: uid }) : null;
+        if (acct && (!r || r.ok)) {
+          const rc = await supprimerCompteEmail(acctId);
+          if (!rc?.ok && rc?.reason !== "introuvable") r = rc;
+          else if (!r) r = rc?.ok ? rc : { ok: true };
+        }
       } catch (e) {
         console.warn(`[compte] effacement : ${String(e?.message || e).slice(0, 200)}`);
         return err(M.half(stopped, off.size), 502, { stopped });
       }
       if (!r?.ok) {
         if (r?.reason === "admin") return err(M.admin, 403, { stopped });
+        if (r?.reason === "role_whop") return err(M.linkedRole, 403, { stopped });
         if (r?.reason === "role" || r?.reason === "pas_createur") return err(M.roleChanged, 409, { stopped });
         return err(M.half(stopped, off.size), 502, { stopped });
       }
@@ -403,8 +481,10 @@ export async function POST(req) {
         }
       }
       // 4) Newsletter du dimanche : l'adresse quitte la liste d'envoi (seulement après l'effacement, pour ne rien retirer si celui-ci a échoué).
-      // Ne bloque jamais la suppression ; si Resend ne répond pas, la page le dit au membre.
-      const newsletter = await forgetNewsletter(uid);
+      // Ne bloque jamais la suppression ; si Resend ne répond pas, la page le dit au membre. Compte Basketlog : son adresse, lue
+      // avant l'effacement ; compte Whop : l'adresse que Whop donne pour ce compte.
+      const acctEmail = acct ? fiche?.c?.email || session.email || null : null;
+      const newsletter = await forgetNewsletter(uid, acctEmail ? { lookup: async () => acctEmail } : {});
       revalidateTag("avis"); // l'avis du membre, s'il était publié, disparaît du site
       console.log(`[compte] ${creator ? "compte créateur" : "compte"} supprimé : ${stopped} abonnement(s) arrêté(s)${creator ? `, ${off.size} code(s) promo désactivé(s)` : ""}, ${r.analyses ?? 0} analyse(s), ${r.questions ?? 0} question(s), ${r.avis ?? 0} avis, newsletter ${newsletter}`);
       const res = json({ ok: true, stopped, ...(newsletter === "removed" || newsletter === "failed" ? { newsletter } : {}), ...(creator ? { creator: true, codes: [...off] } : {}) });

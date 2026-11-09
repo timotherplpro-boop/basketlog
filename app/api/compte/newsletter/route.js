@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { COOKIE, cookieOptions, currentSession } from "../../../../lib/pro";
 import { mk } from "../../../../lib/i18n";
 import { maskEmail, newsletterConfig, resend } from "../../../../lib/resend";
-import { WhopEmailError, memberEmail } from "../../../../lib/whop-email";
+import { WhopEmailError } from "../../../../lib/whop-email";
+import { sessionEmail } from "../../../../lib/session-email";
+import { getCompte } from "../../../../lib/comptes";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -10,7 +12,9 @@ export const maxDuration = 30;
 // Newsletter du dimanche, côté membre (« Mon compte » et carte d'invitation de l'espace membre) :
 //   GET  ?lang=fr                        l'état : { available, subscribed, blocked, email (masquée) }
 //   POST { action: "abonner" | "desabonner", lang }
-// L'adresse vient toujours de Whop pour le compte de la session (jamais de la requête) et n'est renvoyée que masquée.
+// L'adresse vient toujours du compte de la session, jamais de la requête (lib/session-email.js) : l'adresse du compte Basketlog,
+// ou celle que Whop donne pour un compte Whop. Elle n'est renvoyée que masquée. Un compte Basketlog dont l'adresse n'est pas
+// encore prouvée (inscription e-mail + mot de passe) ne peut pas encore s'inscrire : { problem: "verify" }.
 // Le consentement est enregistré chez Resend (lib/resend.js) : le membre est ajouté à la liste quand il clique, jamais avant.
 // Tant que NEWSLETTER_ENABLED ne vaut pas 1 (et sans clé Resend), tout reste fermé : { available: false }.
 
@@ -54,6 +58,7 @@ function messages(lang) {
     preview: t("Tu es en mode aperçu : quitte l'aperçu pour modifier ton compte.", "You're in preview mode: leave the preview to change your account.", "Estás en modo vista previa: sal de la vista previa para modificar tu cuenta."),
     notReady: t("La newsletter n'est pas encore ouverte.", "The newsletter isn't open yet.", "La newsletter todavía no está abierta."),
     noEmail: t("On n'arrive pas à lire ton adresse e-mail chez Whop pour le moment. Écris-nous à contact@basketlog-app.com et on s'en occupe.", "We can't read your email address at Whop right now. Write to us at contact@basketlog-app.com and we'll sort it out.", "No conseguimos leer tu correo en Whop por ahora. Escríbenos a contact@basketlog-app.com y lo solucionamos."),
+    verify: t("Pour recevoir la newsletter, ton adresse e-mail doit d'abord être confirmée : connecte-toi avec Google, ou demande un lien avec « Mot de passe oublié ? » dans la fenêtre de connexion.", "To receive the newsletter, your email address must be confirmed first: log in with Google, or ask for a link with “Forgot your password?” in the login window.", "Para recibir la newsletter, primero hay que confirmar tu correo: inicia sesión con Google o pide un enlace con «¿Has olvidado tu contraseña?» en la ventana de inicio de sesión."),
     down: t("Le service d'envoi ne répond pas pour le moment, réessaie dans un instant.", "The email service isn't responding right now, please try again in a moment.", "El servicio de correo no responde por ahora, inténtalo de nuevo en un instante."),
     blocked: t("Cette adresse s'est désinscrite de tous nos envois. Écris-nous à contact@basketlog-app.com pour la réactiver.", "This address has unsubscribed from all our emails. Write to us at contact@basketlog-app.com to turn it back on.", "Esta dirección se ha dado de baja de todos nuestros envíos. Escríbenos a contact@basketlog-app.com para reactivarla."),
     unconfirmed: t("Ta demande n'a pas pu être confirmée. Réessaie dans un instant.", "Your request couldn't be confirmed. Please try again in a moment.", "No se ha podido confirmar tu solicitud. Inténtalo de nuevo en un instante."),
@@ -63,7 +68,7 @@ function messages(lang) {
 
 // Réponse d'erreur pour un souci chez Whop ou Resend (le détail technique reste dans les journaux du serveur).
 function fail(M, e, extra = {}) {
-  console.warn(`[newsletter] ${e?.name === "WhopEmailError" ? "Whop" : "Resend"} : ${e?.kind || "?"} — ${String(e?.message || e).slice(0, 200)}`);
+  console.warn(`[newsletter] ${e?.name === "WhopEmailError" ? "adresse" : e?.kind ? "Resend" : "base"} : ${e?.kind || "?"} — ${String(e?.message || e).slice(0, 200)}`);
   switch (e?.kind) {
     case "noemail":
     case "scope":
@@ -94,10 +99,12 @@ export async function GET(req) {
 
   let email;
   try {
-    email = await memberEmail(session.uid);
+    const who = await sessionEmail(session, { fiche: getCompte });
+    if (who.account && !who.proven) return json({ ok: true, available: true, subscribed: null, problem: "verify", email: maskEmail(who.email) }, 200, refreshed);
+    email = who.email;
   } catch (e) {
     console.warn(`[newsletter] lecture de l'adresse : ${e?.kind || "?"} — ${String(e?.message || e).slice(0, 200)}`);
-    return json({ ok: true, available: true, subscribed: null, problem: e?.kind === "network" ? "down" : "email" }, 200, refreshed);
+    return json({ ok: true, available: true, subscribed: null, problem: e?.name === "WhopEmailError" && e.kind !== "network" ? "email" : "down" }, 200, refreshed);
   }
   try {
     const s = await resend().status(email, lang);
@@ -125,7 +132,10 @@ export async function POST(req) {
 
   let email;
   try {
-    email = await memberEmail(session.uid);
+    const who = await sessionEmail(session, { fiche: getCompte });
+    // Se désinscrire reste toujours possible ; s'inscrire demande une adresse prouvée pour un compte Basketlog.
+    if (who.account && !who.proven && body.action === "abonner") return err(M.verify, 403, { problem: "verify" });
+    email = who.email;
   } catch (e) {
     return fail(M, e);
   }

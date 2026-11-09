@@ -10,6 +10,10 @@ import { CODE_RE, cleanCode, cleanPct, discounted, mergePromos, randomChars, sug
 import { asPct, checkPromo, describeProblem, describeProblems, promoMonths, whopPromoReady } from "../lib/whop-promo.js";
 import { BSKY_BIO_MAX, BSKY_MAX, BSKY_NAME_MAX, blueskyPost, blueskyProfile, elPick, graphemes, nbaPick, socialPosts, telegramText } from "../lib/social.js";
 import { blueskySetProfile, socialConfig, socialStatus } from "../lib/social-send.js";
+import { MIN_PASSWORD, fakeVerify, hashPassword, passwordProblem, verifyPassword } from "../lib/password.js";
+import { RESET_TOKEN_RE, accountIdOf, accountUid, clientIp, inAppBrowser, isAccountSession, limitKey, localName, maskEmail, newResetToken, normEmail, sameOrigin, tokenHash, whopUidOf } from "../lib/auth-utils.js";
+import { GoogleAuthError, exchangeCode, googleAuthUrl, readIdToken } from "../lib/google-auth.js";
+import { mailReady, resetEmail, sendMail } from "../lib/mail.js";
 import { newsletterTests } from "./newsletter.mjs";
 
 export async function unit() {
@@ -434,6 +438,133 @@ export async function unit() {
   ], [null, null, null, null, null, null, "string"]);
   eq("Jeton : sans clé de signature, rien ne se signe ni ne se lit", [signToken("", "switch", {}), readToken("", "switch", tok)], [null, null]);
   eq("Jeton : cookie nommé bl_switch, 12 h", [SWITCH_COOKIE, SWITCH_TTL_MS], ["bl_switch", 43200000]);
+
+
+  {
+  // ---------- Comptes Basketlog (e-mail ou Google) ----------
+  console.log("Comptes Basketlog");
+  eq("Mot de passe : 6 caractères minimum, comme Visifoot", [MIN_PASSWORD, passwordProblem("abcde"), passwordProblem("abcdef"), passwordProblem(""), passwordProblem(null), passwordProblem("x".repeat(201))], [6, "court", null, "court", "court", "long"]);
+  const h1 = await hashPassword("Basket2026!");
+  eq("Mot de passe : empreinte scrypt, jamais le mot de passe", [/^s1\$32768\$8\$1\$[A-Za-z0-9_-]{22}\$[A-Za-z0-9_-]{43}$/.test(h1), h1.includes("Basket2026")], [true, false]);
+  eq("Mot de passe : deux empreintes du même mot de passe diffèrent (sel)", (await hashPassword("Basket2026!")) !== h1, true);
+  eq("Mot de passe : bon / mauvais / vide", [await verifyPassword("Basket2026!", h1), await verifyPassword("basket2026!", h1), await verifyPassword("", h1)], [true, false, false]);
+  const accent = await hashPassword("café-pass");
+  eq("Mot de passe : « é » composé ou décomposé = même mot de passe", await verifyPassword("café-pass", accent), true);
+  const hParts = h1.split("$");
+  eq("Mot de passe : empreinte abîmée ou réglages exagérés refusés sans calcul", [
+    await verifyPassword("Basket2026!", hParts.slice(0, 5).join("$")),
+    await verifyPassword("Basket2026!", ["s1", "1048576", "8", "1", hParts[4], hParts[5]].join("$")),
+    await verifyPassword("Basket2026!", ["s2", ...hParts.slice(1)].join("$")),
+    await verifyPassword("Basket2026!", null),
+    await verifyPassword("Basket2026!", `${h1.slice(0, -2)}AA`),
+  ], [false, false, false, false, false]);
+  eq("Mot de passe : faux calcul pour un compte inconnu", await fakeVerify("n'importe quoi"), false);
+
+  eq("E-mail : normalisé comme dans la base", [normEmail("  Tim@Exemple.FR "), normEmail("pas-une-adresse"), normEmail("a b@c.fr"), normEmail("a@b"), normEmail(42), normEmail(`${"x".repeat(250)}@a.fr`)], ["tim@exemple.fr", null, null, null, null, null]);
+  const acctId = "3f2a1c9e-8b7d-4e6f-9a1b-2c3d4e5f6a7b";
+  eq("Identifiant de compte : « bl_ » + id, rien d'autre", [accountUid(acctId), accountIdOf(`bl_${acctId}`), accountIdOf("user_abc"), accountIdOf("bl_pas-un-uuid"), accountIdOf(`bl_${acctId}x`), accountIdOf(null)], [`bl_${acctId}`, acctId, null, null, null, null]);
+  eq("Session de compte e-mail : reconnue, compte Whop relié", [
+    isAccountSession({ uid: `bl_${acctId}`, acct: 1 }), isAccountSession({ uid: `bl_${acctId}` }), isAccountSession({ uid: "user_abc", acct: 1 }), isAccountSession(null),
+    whopUidOf({ uid: `bl_${acctId}`, acct: 1, whop: "user_x" }), whopUidOf({ uid: `bl_${acctId}`, acct: 1 }), whopUidOf({ uid: "user_abc" }), whopUidOf(null),
+  ], [true, false, false, false, "user_x", null, "user_abc", null]);
+  eq("Nom par défaut : début de l'adresse, nettoyé", [localName("tim.dupont@gmail.com"), localName("<b>x</b>@a.fr"), localName(""), localName(`${"a".repeat(60)}@a.fr`).length], ["tim.dupont", "bx/b", "Membre", 40]);
+  eq("Adresse masquée", [maskEmail("tim@gmail.com"), maskEmail("t@x.fr"), maskEmail("pas-une-adresse")], ["t••@gmail.com", "t•@x.fr", ""]);
+  const rtok = newResetToken();
+  eq("Lien « mot de passe oublié » : jeton de 43 caractères, empreinte sha256", [RESET_TOKEN_RE.test(rtok), /^[0-9a-f]{64}$/.test(tokenHash(rtok)), tokenHash(rtok) === tokenHash(rtok), newResetToken() !== rtok, RESET_TOKEN_RE.test("court"), RESET_TOKEN_RE.test(`${rtok}=`)], [true, true, true, true, false, false]);
+  eq("Limite d'essais : clé stable, sans l'adresse en clair, différente selon la clé du serveur", [
+    limitKey("connexion", "tim@exemple.fr", "k1") === limitKey("connexion", "tim@exemple.fr", "k1"),
+    limitKey("connexion", "tim@exemple.fr", "k1").includes("tim"),
+    limitKey("connexion", "tim@exemple.fr", "k1") === limitKey("connexion", "tim@exemple.fr", "k2"),
+    limitKey("connexion", "tim@exemple.fr", "k1").length <= 120,
+  ], [true, false, false, true]);
+  const H = (o) => new Headers(o);
+  eq("Requêtes d'écriture : seulement depuis le site lui-même", [
+    sameOrigin(H({ host: "basketlog-app.com", origin: "https://basketlog-app.com" })),
+    sameOrigin(H({ host: "basketlog-app.com", origin: "https://pirate.com" })),
+    sameOrigin(H({ host: "basketlog-app.com", "sec-fetch-site": "cross-site" })),
+    sameOrigin(H({ host: "basketlog-app.com" })),
+    sameOrigin(H({ host: "basketlog-app.com", origin: "pas une adresse" })),
+  ], [true, false, false, true, false]);
+  eq("Adresse IP du visiteur (première de x-forwarded-for)", [clientIp(H({ "x-forwarded-for": "1.2.3.4, 10.0.0.1" })), clientIp(H({ "x-real-ip": "5.6.7.8" })), clientIp(H({}))], ["1.2.3.4", "5.6.7.8", "inconnue"]);
+  eq("Navigateur d'Instagram / TikTok repéré (Google y refuse la connexion)", [
+    inAppBrowser("Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 300.0.0.0"),
+    inAppBrowser("Mozilla/5.0 (Linux; Android 13; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/119.0 Mobile Safari/537.36 trill_310 musical_ly_2023"),
+    inAppBrowser("Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"),
+    inAppBrowser("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"),
+  ], [true, true, false, false]);
+
+  // Google : page « Choisis un compte » et jeton d'identité reçu de Google
+  const gu = new URL(googleAuthUrl({ redirectUri: "https://basketlog-app.com/api/auth/google/retour", state: "st", challenge: "ch", nonce: "no", lang: "es", clientId: "cid.apps.googleusercontent.com" }));
+  eq("Google : demande OAuth avec PKCE, compte au choix, langue", [gu.origin + gu.pathname, gu.searchParams.get("client_id"), gu.searchParams.get("scope"), gu.searchParams.get("code_challenge_method"), gu.searchParams.get("prompt"), gu.searchParams.get("hl"), gu.searchParams.get("response_type")], ["https://accounts.google.com/o/oauth2/v2/auth", "cid.apps.googleusercontent.com", "openid email profile", "S256", "select_account", "es", "code"]);
+  const b64 = (o) => Buffer.from(JSON.stringify(o)).toString("base64url");
+  const jwt = (p) => `${b64({ alg: "RS256" })}.${b64(p)}.signature`;
+  const NOW = Date.UTC(2026, 10, 9, 20);
+  const gBase = { iss: "https://accounts.google.com", aud: "cid", sub: "1234567890", email: "Lea@Gmail.com", email_verified: true, given_name: "Léa", exp: NOW / 1000 + 3600, nonce: "n1" };
+  eq("Google : identité lue (adresse en minuscules, prénom)", readIdToken(jwt(gBase), { clientId: "cid", nonce: "n1", now: NOW }), { sub: "1234567890", email: "lea@gmail.com", verified: true, name: "Léa" });
+  eq("Google : « email_verified » en texte accepté, sans prénom", readIdToken(jwt({ ...gBase, email_verified: "true", given_name: undefined, iss: "accounts.google.com" }), { clientId: "cid", now: NOW }), { sub: "1234567890", email: "lea@gmail.com", verified: true, name: null });
+  const kindOf = (fn) => { try { fn(); return "ok"; } catch (e) { return e instanceof GoogleAuthError ? e.kind : "autre"; } };
+  eq("Google : jeton refusé (autre site, émetteur, expiré, nonce, sans e-mail, mal formé)", [
+    kindOf(() => readIdToken(jwt({ ...gBase, aud: "autre" }), { clientId: "cid", now: NOW })),
+    kindOf(() => readIdToken(jwt({ ...gBase, iss: "https://pirate.com" }), { clientId: "cid", now: NOW })),
+    kindOf(() => readIdToken(jwt({ ...gBase, exp: NOW / 1000 - 3600 }), { clientId: "cid", now: NOW })),
+    kindOf(() => readIdToken(jwt(gBase), { clientId: "cid", nonce: "autre", now: NOW })),
+    kindOf(() => readIdToken(jwt({ ...gBase, email: undefined }), { clientId: "cid", now: NOW })),
+    kindOf(() => readIdToken("pas.un-jeton", { clientId: "cid", now: NOW })),
+    kindOf(() => readIdToken(jwt(gBase), { clientId: "", now: NOW })),
+  ], ["audience", "invalid", "invalid", "invalid", "invalid", "invalid", "audience"]);
+  const saved = { id: process.env.GOOGLE_CLIENT_ID, secret: process.env.GOOGLE_CLIENT_SECRET };
+  process.env.GOOGLE_CLIENT_ID = "cid"; process.env.GOOGLE_CLIENT_SECRET = "secret";
+  let sentBody = null;
+  const tokenOk = async (u, init) => { sentBody = new URLSearchParams(init.body); return new Response(JSON.stringify({ id_token: "a.b.c", access_token: "x" }), { status: 200 }); };
+  eq("Google : code échangé contre le jeton d'identité (avec PKCE et le secret du site)", await exchangeCode({ code: "4/0AbCdEfGhIjK", verifier: "v".repeat(43), redirectUri: "https://basketlog-app.com/api/auth/google/retour" }, { fetchImpl: tokenOk }), "a.b.c");
+  eq("Google : échange envoyé avec les bons champs", [sentBody.get("grant_type"), sentBody.get("client_id"), sentBody.get("client_secret"), sentBody.get("code_verifier").length], ["authorization_code", "cid", "secret", 43]);
+  const gKind = async (f, code = "4/0AbCdEfGhIjK") => { try { await exchangeCode({ code, verifier: "v", redirectUri: "r" }, { fetchImpl: f }); return "ok"; } catch (e) { return e instanceof GoogleAuthError ? e.kind : "autre"; } };
+  eq("Google : code refusé, Google en panne ou injoignable, code absent", [
+    await gKind(async () => new Response("{}", { status: 400 })),
+    await gKind(async () => new Response("{}", { status: 503 })),
+    await gKind(async () => { throw new Error("réseau"); }),
+    await gKind(async () => new Response(JSON.stringify({ access_token: "x" }), { status: 200 })),
+    await gKind(tokenOk, ""),
+  ], ["invalid", "down", "down", "invalid", "invalid"]);
+  process.env.GOOGLE_CLIENT_SECRET = "";
+  eq("Google : sans secret réglé, rien n'est tenté", await gKind(tokenOk), "config");
+  process.env.GOOGLE_CLIENT_ID = saved.id || ""; process.env.GOOGLE_CLIENT_SECRET = saved.secret || "";
+
+  // E-mail « mot de passe oublié »
+  const mFr = resetEmail({ lang: "fr", link: "https://basketlog-app.com/reinitialiser#abc", name: "Tim" });
+  const mEn = resetEmail({ lang: "en", link: "https://basketlog-app.com/en/reinitialiser#abc" });
+  const mEs = resetEmail({ lang: "es", link: "https://basketlog-app.com/es/reinitialiser#abc", name: "Léa" });
+  eq("E-mail : objet dans la langue du compte", [mFr.subject.startsWith("Ton lien"), mEn.subject.startsWith("Your link"), mEs.subject.startsWith("Tu enlace")], [true, true, true]);
+  eq("E-mail : lien présent (texte et HTML), durée annoncée", [mFr.text.includes("#abc") && mFr.html.includes("#abc"), mFr.text.includes("60 minutes"), mEn.html.includes("Hi,"), mEs.html.includes("Hola, Léa:")], [true, true, true, true]);
+  const xss = resetEmail({ lang: "fr", link: "https://basketlog-app.com/reinitialiser#a", name: "<script>alert(1)</script>" });
+  eq("E-mail : prénom échappé dans le HTML", [xss.html.includes("<script>"), xss.html.includes("&lt;script&gt;")], [false, true]);
+  const savedMail = { k: process.env.RESEND_API_KEY, f: process.env.MAIL_FROM };
+  process.env.RESEND_API_KEY = ""; process.env.MAIL_FROM = "";
+  eq("E-mail : sans réglages, envoi désactivé", mailReady(), false);
+  process.env.RESEND_API_KEY = "re_test"; process.env.MAIL_FROM = "Basketlog <compte@basketlog-app.com>";
+  let mailReq = null;
+  await sendMail({ to: "lea@gmail.com", ...mFr }, async (u, init) => { mailReq = { u, init: { ...init, body: JSON.parse(init.body) } }; return new Response(JSON.stringify({ id: "1" }), { status: 200 }); });
+  eq("E-mail : envoyé à Resend (destinataire, expéditeur, réponse vers le contact)", [mailReq.u, mailReq.init.headers.Authorization, mailReq.init.body.to, mailReq.init.body.from, mailReq.init.body.reply_to], ["https://api.resend.com/emails", "Bearer re_test", ["lea@gmail.com"], "Basketlog <compte@basketlog-app.com>", "contact@basketlog-app.com"]);
+  let mailErr = null;
+  try { await sendMail({ to: "x@y.fr", ...mFr }, async () => new Response("{}", { status: 422 })); } catch (e) { mailErr = e.message; }
+  eq("E-mail : refus de Resend signalé", mailErr, "Resend 422");
+  process.env.RESEND_API_KEY = savedMail.k || ""; process.env.MAIL_FROM = savedMail.f || "";
+  }
+
+  {
+    // Newsletter et comptes Basketlog : l'adresse vient du compte (session signée ou fiche de la base), jamais de Whop.
+    const { sessionEmail } = await import("../lib/session-email.js");
+    const id = "8a5f0c1e-1111-4222-8333-944455556666";
+    const bl = { uid: `bl_${id}`, acct: 1, email: "Tim@Exemple.fr", v: 2 };
+    const noWhop = async () => { throw new Error("Whop ne doit pas être appelé pour un compte Basketlog"); };
+    eq("Newsletter : compte Basketlog, adresse du compte, pas encore prouvée", await sessionEmail(bl, { lookup: noWhop, fiche: async (x) => (x === id ? { email: "tim@exemple.fr", email_ok: false } : null) }), { email: "tim@exemple.fr", account: true, proven: false });
+    eq("Newsletter : compte Basketlog prouvé (Google ou lien reçu par e-mail)", (await sessionEmail(bl, { lookup: noWhop, fiche: async () => ({ email: "tim@exemple.fr", email_ok: true }) })).proven, true);
+    eq("Newsletter : sans fiche, l'adresse de la session signée (jamais prouvée par défaut)", await sessionEmail(bl, { lookup: noWhop }), { email: "tim@exemple.fr", account: true, proven: false });
+    let kind = null;
+    try { await sessionEmail(bl, { lookup: noWhop, fiche: async () => null }); } catch (e) { kind = e.kind; }
+    eq("Newsletter : compte supprimé entre-temps, aucune adresse", kind, "noemail");
+    eq("Newsletter : compte Whop, adresse lue chez Whop", await sessionEmail({ uid: "user_abc" }, { lookup: async (u) => `${u}@whop.test` }), { email: "user_abc@whop.test", account: false, proven: true });
+  }
 
   await newsletterTests({ ok, ko, eq });
 

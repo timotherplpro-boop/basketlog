@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { useL } from "./LangProvider";
 import { track } from "../lib/analytics";
 import AnalysisProgress, { useAnalysisRun, pctLabel } from "./AnalysisProgress";
+import { useProStatus } from "../lib/useProStatus";
+import { openAuth } from "../lib/auth-client";
 
 const norm = (s) => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
@@ -70,6 +72,7 @@ export default function DuelForm({ teams, initialHome, initialAway }) {
   const [away, setAway] = useState(initialAway || null);
   const run = useAnalysisRun();
   const running = run.running;
+  const pro = useProStatus();
   useEffect(() => {
     if (running) document.querySelector(".panel.an-card")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [running]);
@@ -79,9 +82,16 @@ export default function DuelForm({ teams, initialHome, initialAway }) {
   const go = (e) => {
     e.preventDefault();
     if (!home || !away || run.running) return;
-    track("Analyse lancée", { source: "formulaire", domicile: home.abbr, exterieur: away.abbr });
     // Le résultat s'affiche sous le formulaire, comme sur Visifoot.
     const dest = `${L.href(`/app?home=${home.id}&away=${away.id}`)}#resultat`;
+    // Visiteur sans compte, comme chez Visifoot : « Analyser » ouvre la fenêtre « Créer un compte » ; une fois inscrit,
+    // il arrive directement sur le résultat de ce match.
+    if (pro && !pro.connected) {
+      track("Analyse lancée", { source: "formulaire", domicile: home.abbr, exterieur: away.abbr, formule: "visiteur" });
+      openAuth({ mode: "inscription", source: "formulaire", next: dest });
+      return;
+    }
+    track("Analyse lancée", { source: "formulaire", domicile: home.abbr, exterieur: away.abbr });
     run.start(
       () => fetch("/api/pro/analyse", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ home: home.id, away: away.id }) }).then((r) => r.json()),
       (r) => {

@@ -6,6 +6,7 @@ import { track } from "../lib/analytics";
 import { useL } from "./LangProvider";
 import LangSelect from "./LangSelect";
 import { InstallPlatforms } from "./InstallApp";
+import { openAuth } from "../lib/auth-client";
 
 // Double chevron plein, aux mêmes proportions que celui de Visifoot.
 const Chevrons = () => (
@@ -26,15 +27,21 @@ export default function Nav() {
   }, [open]);
 
   // Toujours « » CONNEXION », comme sur Visifoot : on arrive dans l'espace membre (barre latérale),
-  // directement si on est déjà connecté, sinon après la connexion Whop.
+  // directement si on est déjà connecté, sinon après la connexion (fenêtre « Se connecter » : Google ou e-mail).
   const connected = !!pro?.connected;
   const space = L.href("/app");
   const account = {
-    href: connected ? space : `/api/whop/login?next=${encodeURIComponent(space)}`,
+    href: connected ? space : `${space}?connexion=1`,
     label: L.t("Connexion", "Login", "Iniciar sesión"),
     title: connected ? L.t("Tu es connecté : ouvrir ton espace", "You're logged in: open your space", "Has iniciado sesión: abrir tu espacio") : undefined,
   };
-  const onAccount = () => !connected && track("Connexion Whop", { etape: "clic", source: "menu" });
+  const onAccount = (e) => {
+    if (connected) return;
+    e.preventDefault();
+    setOpen(false);
+    track("Clic connexion", { source: "menu" });
+    openAuth({ mode: "connexion", source: "menu", next: space });
+  };
   const menuLabel = open ? L.t("Fermer le menu", "Close menu", "Cerrar el menú") : L.t("Ouvrir le menu", "Open menu", "Abrir el menú");
 
   const links = [

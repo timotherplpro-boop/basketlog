@@ -29,7 +29,7 @@ const ERROR_PAGE = /Une erreur est survenue|Application error|Internal Server Er
 
 async function pages() {
   console.log("Pages");
-  for (const p of ["/", "/en", "/es", "/analyse-basket", "/en/analyse-basket", "/es/analyse-basket", "/pronostic-basket", "/en/pronostic-basket", "/es/pronostic-basket", "/app", "/app/matchs", "/app/bilan", "/app/bilan?l=pub", "/app/classement", "/app/euroleague", "/pro", "/en/pro", "/es/pro", "/pro?code=TESTAUTO", "/avis", "/en/avis", "/es/avis", "/methode", "/cgu", "/cgv", "/confidentialite", "/mentions-legales", "/cookies", "/sitemap.xml", "/robots.txt"]) {
+  for (const p of ["/", "/en", "/es", "/analyse-basket", "/en/analyse-basket", "/es/analyse-basket", "/pronostic-basket", "/en/pronostic-basket", "/es/pronostic-basket", "/app", "/app/matchs", "/app/bilan", "/app/bilan?l=pub", "/app/classement", "/app/euroleague", "/pro", "/en/pro", "/es/pro", "/pro?code=TESTAUTO", "/avis", "/en/avis", "/es/avis", "/methode", "/cgu", "/cgv", "/confidentialite", "/mentions-legales", "/cookies", "/reinitialiser", "/en/reinitialiser", "/es/reinitialiser", "/sitemap.xml", "/robots.txt"]) {
     const r = await get(p);
     if (r.status !== 200) ko(p, `HTTP ${r.status}`);
     else if (ERROR_PAGE.test(r.text)) ko(p, "page d'erreur affichée");
@@ -48,7 +48,9 @@ async function access() {
   const v = await get(url);
   if (v.status !== 200) return ko(`fiche ${url}`, `HTTP ${v.status}`);
   /Score projeté|Score final|Score en direct/.test(v.text) ? ok("fiche match affichée") : ko("fiche match affichée", "carte du match absente");
-  /n&#x27;as accès qu&#x27;à|n'as accès qu'à/.test(v.text) ? ok("visiteur : analyse verrouillée") : ko("visiteur : analyse verrouillée", "verrou absent");
+  // Visiteur sans compte, comme chez Visifoot : « Crée ton compte gratuit pour voir l'analyse » (analyse floutée), pas l'aperçu.
+  /Crée ton compte gratuit pour voir l(&#x27;|')analyse/.test(v.text) && /ar-wall/.test(v.text) ? ok("visiteur : inscription demandée avant l'analyse") : ko("visiteur : inscription demandée avant l'analyse", "mur d'inscription absent");
+  !/n&#x27;as accès qu&#x27;à|n'as accès qu'à/.test(v.text) ? ok("visiteur : pas de fenêtre de paiement avant l'inscription") : ko("visiteur : pas de fenêtre de paiement avant l'inscription", "verrou « 30 % » affiché à un visiteur");
   if (!SECRET) return skip("formules", "SESSION_SECRET absent");
   const free = await get(url, { cookie: session("compte") });
   /n&#x27;as accès qu&#x27;à|n'as accès qu'à/.test(free.text) ? ok("compte gratuit : analyse verrouillée") : ko("compte gratuit : analyse verrouillée", "verrou absent");
@@ -112,6 +114,22 @@ async function protectedRoutes() {
     const avis2 = await get("/api/avis", { method: "POST", cookie: session("compte"), body: { prenom: "Test", note: 5, texte: "Test automatique, ne pas publier.", elapsed: 10000 } });
     [401, 403, 503].includes(avis2.status) ? ok("avis refusé à un compte gratuit") : ko("avis refusé à un compte gratuit", `HTTP ${avis2.status}`);
   }
+  // Comptes Basketlog (e-mail, Google) : rien n'est créé ici, seulement des refus.
+  const crossSite = await fetch(BASE + "/api/auth", { method: "POST", headers: { "content-type": "application/json", origin: "https://exemple-pirate.com", "user-agent": "basketlog-tests" }, body: JSON.stringify({ action: "connexion", email: "x@exemple.com", mdp: "abcdef" }) });
+  crossSite.status === 403 ? ok("connexion refusée depuis un autre site") : ko("connexion refusée depuis un autre site", `HTTP ${crossSite.status}`);
+  const unknown = await get("/api/auth", { method: "POST", body: { action: "pirater" } });
+  [400, 503].includes(unknown.status) ? ok("action de compte inconnue refusée") : ko("action de compte inconnue refusée", `HTTP ${unknown.status}`);
+  const badMail = await get("/api/auth", { method: "POST", body: { action: "inscription", email: "pas-une-adresse", mdp: "abcdef" } });
+  [400, 503].includes(badMail.status) ? ok("inscription : adresse invalide refusée") : ko("inscription : adresse invalide refusée", `HTTP ${badMail.status}`);
+  const shortPw = await get("/api/auth", { method: "POST", body: { action: "inscription", email: "test-auto@exemple.com", mdp: "abc" } });
+  [400, 503].includes(shortPw.status) ? ok("inscription : mot de passe trop court refusé") : ko("inscription : mot de passe trop court refusé", `HTTP ${shortPw.status}`);
+  const wrong = await get("/api/auth", { method: "POST", body: { action: "connexion", email: "inconnu-test-auto@exemple.com", mdp: "mauvais-mot" } });
+  [401, 429, 503].includes(wrong.status) ? ok("connexion : compte inconnu refusé") : ko("connexion : compte inconnu refusé", `HTTP ${wrong.status}`);
+  const google = await get("/api/auth/google?next=/pro");
+  [302, 303, 307, 308].includes(google.status) ? ok("« Continuer avec Google » : redirection") : ko("« Continuer avec Google » : redirection", `HTTP ${google.status}`);
+  const gBack = await get("/api/auth/google/retour?code=faux-code-de-test&state=x");
+  [302, 303, 307, 308].includes(gBack.status) ? ok("retour de Google sans demande valable : refusé") : ko("retour de Google sans demande valable : refusé", `HTTP ${gBack.status}`);
+
   const cron = await get("/api/cron/pronos");
   cron.status === 401 ? ok("tâche planifiée refusée aux inconnus") : ko("tâche planifiée refusée aux inconnus", `HTTP ${cron.status}`);
 }

@@ -17,9 +17,9 @@ export function Consent({ email, lead }) {
   return (
     <p className="nl-fine">
       {T(
-        <>En cliquant sur « {lead} », j&apos;accepte de recevoir cette newsletter à l&apos;adresse de mon compte Whop{where}. Basketlog la transmet à Resend, son prestataire d&apos;envoi, uniquement pour cet usage. Je peux me désinscrire à tout moment. {policy}.</>,
-        <>By clicking “{lead}”, I agree to receive this newsletter at the address of my Whop account{where}. Basketlog passes it to Resend, its email delivery provider, for this sole purpose. I can unsubscribe at any time. {policy}.</>,
-        <>Al hacer clic en «{lead}», acepto recibir esta newsletter en la dirección de mi cuenta de Whop{where}. Basketlog la transmite a Resend, su proveedor de envío, únicamente para este fin. Puedo darme de baja en cualquier momento. {policy}.</>
+        <>En cliquant sur « {lead} », j&apos;accepte de recevoir cette newsletter à l&apos;adresse de mon compte{where}. Basketlog la transmet à Resend, son prestataire d&apos;envoi, uniquement pour cet usage. Je peux me désinscrire à tout moment. {policy}.</>,
+        <>By clicking “{lead}”, I agree to receive this newsletter at my account&apos;s email address{where}. Basketlog passes it to Resend, its email delivery provider, for this sole purpose. I can unsubscribe at any time. {policy}.</>,
+        <>Al hacer clic en «{lead}», acepto recibir esta newsletter en la dirección de mi cuenta{where}. Basketlog la transmite a Resend, su proveedor de envío, únicamente para este fin. Puedo darme de baja en cualquier momento. {policy}.</>
       )}
     </p>
   );
@@ -32,8 +32,16 @@ export function useNewsletterError(error) {
   return error === NETWORK ? t("Connexion impossible, réessaie.", "Couldn't connect, please try again.", "No se ha podido conectar, inténtalo de nuevo.") : error;
 }
 
-// Message quand l'état de la newsletter ne peut pas être lu (problem : "email" ou "down").
+// Message quand l'état de la newsletter ne peut pas être lu (problem : "email", "down") ou quand l'adresse d'un compte Basketlog
+// n'est pas encore prouvée (problem : "verify").
 export function problemText(T, problem) {
+  if (problem === "verify") {
+    return T(
+      "Pour recevoir la newsletter, ton adresse e-mail doit d'abord être confirmée : connecte-toi avec Google, ou demande un lien avec « Mot de passe oublié ? » dans la fenêtre de connexion.",
+      "To receive the newsletter, your email address must be confirmed first: log in with Google, or ask for a link with “Forgot your password?” in the login window.",
+      "Para recibir la newsletter, primero hay que confirmar tu correo: inicia sesión con Google o pide un enlace con «¿Has olvidado tu contraseña?» en la ventana de inicio de sesión."
+    );
+  }
   return problem === "email"
     ? T(`On n'arrive pas à lire ton adresse e-mail chez Whop pour le moment. Écris-nous à ${CONTACT} et on s'en occupe.`, `We can't read your email address at Whop right now. Write to us at ${CONTACT} and we'll sort it out.`, `No conseguimos leer tu correo en Whop por ahora. Escríbenos a ${CONTACT} y lo solucionamos.`)
     : T("Le service d'envoi ne répond pas pour le moment. Réessaie dans un instant.", "The email service isn't responding right now. Please try again in a moment.", "El servicio de correo no responde por ahora. Inténtalo de nuevo en un instante.");

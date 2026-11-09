@@ -4,6 +4,7 @@ import { COOKIE, decodeSession } from "../../../lib/pro";
 import { dbRpc } from "../../../lib/roles";
 import { getL } from "../../../lib/lang-server";
 import InviteClaim from "../../../components/InviteClaim";
+import AuthButton from "../../../components/AuthButton";
 
 export const dynamic = "force-dynamic";
 export async function generateMetadata() {
@@ -43,11 +44,12 @@ export default async function InvitationPage({ params }) {
     ) : (
       <>
         <ol className="invite-steps">
-          <li>{L.t("Crée ton compte gratuit (e-mail, Google ou Apple), ou connecte-toi si tu en as déjà un.", "Create your free account (email, Google or Apple), or log in if you already have one.", "Crea tu cuenta gratuita (correo, Google o Apple), o inicia sesión si ya tienes una.")}</li>
-          <li>{L.t("Tu reviens ici automatiquement : active ton accès en un clic.", "You'll come back here automatically: activate your access in one click.", "Volverás aquí automáticamente: activa tu acceso con un clic.")}</li>
+          <li>{L.t("Crée ton compte gratuit (Google ou e-mail), ou connecte-toi si tu en as déjà un.", "Create your free account (Google or email), or log in if you already have one.", "Crea tu cuenta gratuita (Google o correo), o inicia sesión si ya tienes una.")}</li>
+          <li>{L.t("Tu reviens sur cette page : active ton accès en un clic.", "You'll come back to this page: activate your access in one click.", "Volverás a esta página: activa tu acceso con un clic.")}</li>
         </ol>
-        <a href={`/api/whop/signup?next=${here}`} className="btn-solid">{L.t("Créer mon compte gratuit", "Create my free account", "Crear mi cuenta gratuita")}</a>
-        <a href={`/api/whop/login?next=${here}`} className="comp-more">{L.t("J'ai déjà un compte : me connecter", "I already have an account: log in", "Ya tengo una cuenta: iniciar sesión")} →</a>
+        <AuthButton mode="inscription" source="invitation" next={L.href(`/invitation/${code}`)} className="btn-solid">{L.t("Créer mon compte gratuit", "Create my free account", "Crear mi cuenta gratuita")}</AuthButton>
+        <AuthButton mode="connexion" source="invitation" next={L.href(`/invitation/${code}`)} className="comp-more">{L.t("J'ai déjà un compte : me connecter", "I already have an account: log in", "Ya tengo una cuenta: iniciar sesión")} →</AuthButton>
+        <a href={`/api/whop/login?next=${here}`} className="comp-more invite-whop">{L.t("Compte Whop ? Me connecter avec Whop", "Whop account? Log in with Whop", "¿Cuenta de Whop? Iniciar sesión con Whop")} →</a>
       </>
     );
   } else if (mine) {

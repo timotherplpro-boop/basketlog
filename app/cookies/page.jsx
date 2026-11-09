@@ -14,14 +14,17 @@ export async function generateMetadata() {
 
 const TRACEURS = [
   ["bl_consent", "Stockage local", "Mémoriser ton choix sur les cookies", "Nécessaire", "6 mois"],
-  ["bl_pro", "Cookie", "Garder ta session d'abonné connectée (cookie signé, inaccessible aux scripts)", "Nécessaire", "60 jours"],
+  ["bl_pro", "Cookie", "Garder ta session connectée (compte Basketlog ou Whop ; cookie signé, inaccessible aux scripts)", "Nécessaire", "60 jours"],
   ["bl_switch", "Cookie", "Retenir un changement de formule en cours pendant que tu paies chez Whop (cookie signé, inaccessible aux scripts ; supprimé dès que le changement est terminé ou annulé)", "Nécessaire", "12 heures"],
   ["whop_state, whop_pkce", "Cookie", "Sécuriser la connexion avec Whop", "Nécessaire", "10 minutes"],
+  ["g_state, g_pkce, g_nonce, g_next, g_lang", "Cookie", "Sécuriser la connexion avec Google et te ramener sur la page d'où tu viens", "Nécessaire", "10 minutes"],
+  ["bl_paiement", "Stockage local", "Te proposer d'activer ton abonnement quand tu reviens sur Basketlog après un paiement chez Whop", "Nécessaire", "48 heures"],
   ["bl_install_dismiss", "Stockage local", "Ne plus te proposer d'installer l'appli si tu as refermé la proposition", "Nécessaire", "30 jours"],
   ["bl_views", "Stockage de session", "Compter les pages vues pendant la visite, pour proposer l'appli au bon moment", "Nécessaire", "La visite"],
   ["bl-v…-static, bl-v…-assets", "Cache de l'appli", "Fichiers du site (code, icônes) pour un démarrage rapide et une page hors ligne ; aucune donnée personnelle", "Nécessaire", "Jusqu'à la mise à jour suivante"],
   ["AMP_…, AMP_MKTG_…", "Cookie", "Mesure d'audience Amplitude : identifiant aléatoire de visiteur et de session, source de la visite", "Consentement", "12 mois"],
   ["AMP_unsent_…, AMP_remote_config_…", "Stockage local", "Mesure d'audience Amplitude : file d'attente des événements et réglages", "Consentement", "Jusqu'au refus ou à l'effacement"],
+  ["bl_auth_src", "Stockage de session", "Mesure d'audience : le bouton depuis lequel tu t'es inscrit ou connecté", "Consentement", "Effacé dès la page suivante"],
 ];
 
 function CookiesFr() {
@@ -64,14 +67,17 @@ function CookiesFr() {
 
 const TRACKERS_EN = [
   ["bl_consent", "Local storage", "Remember your cookie choice", "Necessary", "6 months"],
-  ["bl_pro", "Cookie", "Keep your account session logged in (signed cookie, not accessible to scripts)", "Necessary", "60 days"],
+  ["bl_pro", "Cookie", "Keep your session logged in (Basketlog or Whop account; signed cookie, not accessible to scripts)", "Necessary", "60 days"],
   ["bl_switch", "Cookie", "Remember a plan change in progress while you pay on Whop (signed cookie, not accessible to scripts; deleted as soon as the change is completed or cancelled)", "Necessary", "12 hours"],
   ["whop_state, whop_pkce", "Cookie", "Secure the login with Whop", "Necessary", "10 minutes"],
+  ["g_state, g_pkce, g_nonce, g_next, g_lang", "Cookie", "Secure the login with Google and bring you back to the page you came from", "Necessary", "10 minutes"],
+  ["bl_paiement", "Local storage", "Offer to activate your subscription when you come back to Basketlog after paying on Whop", "Necessary", "48 hours"],
   ["bl_install_dismiss", "Local storage", "Stop offering to install the app once you have closed the offer", "Necessary", "30 days"],
   ["bl_views", "Session storage", "Count pages viewed during the visit, to offer the app at the right time", "Necessary", "The visit"],
   ["bl-v…-static, bl-v…-assets", "App cache", "Website files (code, icons) for a fast start and an offline page; no personal data", "Necessary", "Until the next update"],
   ["AMP_…, AMP_MKTG_…", "Cookie", "Amplitude audience measurement: random visitor and session ID, visit source", "Consent", "12 months"],
   ["AMP_unsent_…, AMP_remote_config_…", "Local storage", "Amplitude audience measurement: event queue and settings", "Consent", "Until you refuse or clear it"],
+  ["bl_auth_src", "Session storage", "Audience measurement: the button you signed up or logged in from", "Consent", "Erased on the next page"],
 ];
 
 function CookiesEn({ L }) {
@@ -115,14 +121,17 @@ function CookiesEn({ L }) {
 
 const TRACKERS_ES = [
   ["bl_consent", "Almacenamiento local", "Recordar tu elección sobre las cookies", "Necesaria", "6 meses"],
-  ["bl_pro", "Cookie", "Mantener abierta la sesión de tu cuenta (cookie firmada, inaccesible para los scripts)", "Necesaria", "60 días"],
+  ["bl_pro", "Cookie", "Mantener abierta tu sesión (cuenta de Basketlog o de Whop; cookie firmada, inaccesible para los scripts)", "Necesaria", "60 días"],
   ["bl_switch", "Cookie", "Recordar un cambio de plan en curso mientras pagas en Whop (cookie firmada, inaccesible para los scripts; se elimina en cuanto el cambio se completa o se cancela)", "Necesaria", "12 horas"],
   ["whop_state, whop_pkce", "Cookie", "Proteger el inicio de sesión con Whop", "Necesaria", "10 minutos"],
+  ["g_state, g_pkce, g_nonce, g_next, g_lang", "Cookie", "Proteger el inicio de sesión con Google y devolverte a la página de la que vienes", "Necesaria", "10 minutos"],
+  ["bl_paiement", "Almacenamiento local", "Proponerte activar tu suscripción cuando vuelves a Basketlog después de pagar en Whop", "Necesaria", "48 horas"],
   ["bl_install_dismiss", "Almacenamiento local", "No volver a proponerte instalar la app si has cerrado la propuesta", "Necesaria", "30 días"],
   ["bl_views", "Almacenamiento de sesión", "Contar las páginas vistas durante la visita, para proponerte la app en el momento oportuno", "Necesaria", "La visita"],
   ["bl-v…-static, bl-v…-assets", "Caché de la app", "Archivos del sitio (código, iconos) para un arranque rápido y una página sin conexión; ningún dato personal", "Necesaria", "Hasta la siguiente actualización"],
   ["AMP_…, AMP_MKTG_…", "Cookie", "Medición de audiencia de Amplitude: identificador aleatorio de visitante y de sesión, origen de la visita", "Consentimiento", "12 meses"],
   ["AMP_unsent_…, AMP_remote_config_…", "Almacenamiento local", "Medición de audiencia de Amplitude: cola de eventos y ajustes", "Consentimiento", "Hasta que la rechaces o la borres"],
+  ["bl_auth_src", "Almacenamiento de sesión", "Medición de audiencia: el botón desde el que te registraste o iniciaste sesión", "Consentimiento", "Se borra en la página siguiente"],
 ];
 
 function CookiesEs({ L }) {

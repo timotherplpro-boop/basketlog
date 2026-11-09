@@ -38,7 +38,7 @@ export default function NewsletterSettings() {
       {s.subscribed === null ? (
         <>
           <p className="acc-note" role="status">{problemText(T, s.problem)}</p>
-          {s.problem !== "email" && <div className="acc-actions"><button type="button" className="acc-btn" onClick={() => nl.reload()}>{T("Réessayer", "Try again", "Reintentar")}</button></div>}
+          {s.problem !== "email" && s.problem !== "verify" && <div className="acc-actions"><button type="button" className="acc-btn" onClick={() => nl.reload()}>{T("Réessayer", "Try again", "Reintentar")}</button></div>}
         </>
       ) : s.blocked ? (
         <p className="acc-note">{blockedText(T)}</p>
@@ -46,7 +46,7 @@ export default function NewsletterSettings() {
         <>
           <p>
             <span className="adm-tag ok">{T("Inscription active", "Signed up", "Suscripción activa")}</span>{" "}
-            {T(`La newsletter arrive à l'adresse de ton compte Whop${s.email ? ` (${s.email})` : ""}.`, `The newsletter goes to the address of your Whop account${s.email ? ` (${s.email})` : ""}.`, `La newsletter llega a la dirección de tu cuenta de Whop${s.email ? ` (${s.email})` : ""}.`)}
+            {T(`La newsletter arrive à l'adresse de ton compte${s.email ? ` (${s.email})` : ""}.`, `The newsletter goes to your account's email address${s.email ? ` (${s.email})` : ""}.`, `La newsletter llega a la dirección de tu cuenta${s.email ? ` (${s.email})` : ""}.`)}
           </p>
           <div className="acc-actions">
             <button type="button" className="acc-btn" disabled={nl.busy} onClick={() => go(false)}>

@@ -69,9 +69,9 @@ export default function NewsletterInvite({ uid, hidden = false }) {
       <div className="nl-invite">
         <section className="nl-card done" role="status" aria-label={T("Newsletter du dimanche", "Sunday newsletter", "Newsletter del domingo")}>
           <p>{T(
-            `C'est noté : tu recevras la newsletter chaque dimanche à 18 h, à l'adresse ${s.email || "de ton compte Whop"}. Pour te désinscrire : le lien au bas de chaque e-mail, ou « Mon compte ».`,
-            `You're signed up: you'll get the newsletter every Sunday at 6 pm, at ${s.email || "your Whop account's address"}. To unsubscribe: the link at the bottom of every email, or “My account”.`,
-            `Hecho: recibirás la newsletter cada domingo a las 18:00, en ${s.email || "la dirección de tu cuenta de Whop"}. Para darte de baja: el enlace al final de cada correo, o «Mi cuenta».`
+            `C'est noté : tu recevras la newsletter chaque dimanche à 18 h, à l'adresse ${s.email || "de ton compte"}. Pour te désinscrire : le lien au bas de chaque e-mail, ou « Mon compte ».`,
+            `You're signed up: you'll get the newsletter every Sunday at 6 pm, at ${s.email || "your account's address"}. To unsubscribe: the link at the bottom of every email, or “My account”.`,
+            `Hecho: recibirás la newsletter cada domingo a las 18:00, en ${s.email || "la dirección de tu cuenta"}. Para darte de baja: el enlace al final de cada correo, o «Mi cuenta».`
           )}</p>
           <div className="nl-actions"><button type="button" className="acc-btn" onClick={() => close(null)}>{T("Fermer", "Close", "Cerrar")}</button></div>
         </section>
