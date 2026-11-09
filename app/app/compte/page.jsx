@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AccountPanel from "../../../components/AccountPanel";
+import AuthButton from "../../../components/AuthButton";
 import { pageMeta } from "../../../lib/seo";
 import { getL } from "../../../lib/lang-server";
 import { memberSession } from "../../../lib/usage";
@@ -20,7 +21,6 @@ export async function generateMetadata() {
 export default async function ComptePage() {
   const L = await getL();
   const m = await memberSession();
-  const next = encodeURIComponent(L.href("/app/compte"));
 
   return (
     <main className="app-page">
@@ -32,7 +32,7 @@ export default async function ComptePage() {
         <div className="panel hist-empty">
           <b>{L.t("Connecte-toi pour gérer ton compte", "Log in to manage your account", "Inicia sesión para gestionar tu cuenta")}</b>
           <p>{L.t("Tu pourras y choisir ton nom, résilier ou reprendre ton abonnement et supprimer ton compte.", "You'll be able to choose your name, cancel or resume your subscription and delete your account.", "Podrás elegir tu nombre, cancelar o reanudar tu suscripción y eliminar tu cuenta.")}</p>
-          <a href={`/api/whop/login?next=${next}`} className="btn-solid">{L.t("Se connecter", "Log in", "Iniciar sesión")}</a>
+          <AuthButton mode="connexion" source="mon_compte" next={L.href("/app/compte")} className="btn-solid">{L.t("Se connecter", "Log in", "Iniciar sesión")}</AuthButton>
           <Link href={L.href("/pro")} className="comp-more">{L.t("Voir les formules", "See the plans", "Ver los planes")} →</Link>
         </div>
       ) : (

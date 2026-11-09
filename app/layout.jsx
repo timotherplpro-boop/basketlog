@@ -13,6 +13,9 @@ import Nav from "../components/Nav";
 import Analytics from "../components/Analytics";
 import CookieBanner from "../components/CookieBanner";
 import WelcomeToast from "../components/WelcomeToast";
+import AuthHost from "../components/AuthHost";
+import { googleReady } from "../lib/google-auth";
+import PaymentReturn from "../components/PaymentReturn";
 import PreviewBar from "../components/PreviewBar";
 import JsonLd from "../components/JsonLd";
 import { SITE, GOOGLE_SITE_VERIFICATION, BING_SITE_VERIFICATION } from "../lib/site";
@@ -102,6 +105,9 @@ export default async function RootLayout({ children }) {
           {children}
           <SiteChrome member={member}><SiteFooter L={L} /></SiteChrome>
           <WelcomeToast />
+          {/* Fenêtre « Créer un compte / Se connecter » (e-mail ou Google), ouverte par les boutons du site */}
+          <AuthHost googleOn={googleReady()} />
+          <PaymentReturn />
           <CookieBanner />
           <InstallApp />
           {preview && <PreviewBar tier={preview} />}

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { money } from "../lib/pricing";
 import { SOURCES, DEVICES } from "../lib/funnel-steps";
 import AdminNav from "./AdminNav";
+import AdminAccounts from "./AdminAccounts";
 
 // Page Statistiques de l'admin (données : lib/admin-stats.js). Rendu seul, sans appel réseau.
 export const PERIODS = [7, 30, 90];
@@ -72,6 +73,27 @@ export default function AdminStats({ st }) {
           <div className="st-kpi"><span>Visite → abonnement</span><strong>{conv == null ? "–" : `${(conv * 100).toFixed(1).replace(".", ",")} %`}</strong><small>{f && top ? `${n(f.steps[f.steps.length - 1].n)} abonné${f.steps[f.steps.length - 1].n > 1 ? "s" : ""} pour ${n(top)} visites` : "parcours pas encore mesuré"}</small></div>
           <div className="st-kpi"><span>Analyses complètes ouvertes</span><strong>{st.db.usage ? "–" : n(k.analyses)}</strong><small>par les comptes, sur {days} jours</small></div>
         </div>
+      </section>
+
+      {/* ================= COMPTES BASKETLOG ================= */}
+      <section className="panel adm" aria-labelledby="st-comptes">
+        <div className="adm-head">
+          <h2 id="st-comptes">Comptes Basketlog</h2>
+          {st.comptes && <span className="adm-count">{n(st.comptes.total)} au total</span>}
+        </div>
+        {!st.comptes ? (
+          <p className="adm-help">Les comptes par e-mail et Google ne sont pas encore activés dans la base (script <code>supabase/comptes.sql</code>), ou la base ne répond pas.</p>
+        ) : (
+          <>
+            <div className="st-kpis">
+              <div className="st-kpi hero"><span>Comptes créés</span><strong>{n(st.comptes.total)}</strong><small>{n(st.comptes.periode)} sur {days} jours</small></div>
+              <div className="st-kpi"><span>Avec Google</span><strong>{n(st.comptes.google)}</strong><small>{pct(st.comptes.google, st.comptes.total)} des comptes</small></div>
+              <div className="st-kpi"><span>Acceptent les e-mails</span><strong>{n(st.comptes.marketing)}</strong><small>{pct(st.comptes.marketing, st.comptes.total)} des comptes</small></div>
+              <div className="st-kpi"><span>Abonnement relié</span><strong>{n(st.comptes.relies)}</strong><small>compte Whop relié après paiement</small></div>
+            </div>
+            <AdminAccounts comptes={st.comptes} />
+          </>
+        )}
       </section>
 
       {/* ================= PARCOURS ================= */}

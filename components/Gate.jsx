@@ -6,6 +6,7 @@ import { track } from "../lib/analytics";
 import { useL } from "./LangProvider";
 import AnalysisProgress, { useAnalysisRun } from "./AnalysisProgress";
 import UnlockModal from "./UnlockModal";
+import { openAuth } from "../lib/auth-client";
 
 // Robots d'indexation : pas de fenêtre par-dessus le contenu.
 const BOT = /bot|crawl|spider|slurp|lighthouse/i;
@@ -145,8 +146,8 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
               ) : state === "visitor" ? (
                 <>
                   <p>{contents} {L.t("Elle est incluse dans Pro et Lifetime ; Starter donne 1 analyse réduite par jour.", "It comes with Pro and Lifetime; Starter gives 1 reduced analysis per day.", "Está incluido en Pro y Lifetime; Starter da 1 análisis reducido al día.")}</p>
-                  <Link href={L.href("/pro")} className="btn-solid" onClick={() => track("Clic Passer Pro", { source: "analyse_bloquee", ligue: target.league })}>🔓 {L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo")}</Link>
-                  <a href={`/api/whop/login?next=${here}`} className="gate-login" onClick={() => track("Connexion Whop", { etape: "clic", source: "analyse_bloquee" })}>{L.t("Déjà abonné ? Se connecter", "Already subscribed? Log in", "¿Ya estás suscrito? Inicia sesión")}</a>
+                  <button type="button" className="btn-solid" onClick={() => openAuth({ mode: "inscription", source: "analyse" })}>{L.t("Créer mon compte gratuit", "Create my free account", "Crear mi cuenta gratis")}</button>
+                  <button type="button" className="gate-login" onClick={() => openAuth({ mode: "connexion", source: "analyse" })}>{L.t("Déjà un compte ? Se connecter", "Already have an account? Log in", "¿Ya tienes cuenta? Inicia sesión")}</button>
                 </>
               ) : (
                 <>
@@ -155,7 +156,7 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
                     : L.t("Elle est incluse dans Pro et Lifetime ; Starter donne 1 analyse réduite par jour.", "It comes with Pro and Lifetime; Starter gives 1 reduced analysis per day.", "Está incluido en Pro y Lifetime; Starter da 1 análisis reducido al día.")}</p>
                   <Link href={L.href("/pro")} className="btn-solid" onClick={() => track("Clic Passer Pro", { source: free ? "compte_gratuit" : "limite" })}>🔓 {L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo")}</Link>
                   {!free && <small className="gate-reset">{L.t("Ou reviens demain : le compteur repart à minuit.", "Or come back tomorrow: the counter resets at midnight (Paris time).", "O vuelve mañana: el contador se reinicia a medianoche (hora de París).")}</small>}
-                  <a href={`/api/whop/login?next=${here}`} className="gate-login" onClick={() => track("Connexion Whop", { etape: "actualiser", source: "analyse_bloquee" })}>{L.t("Tu viens de t'abonner ? Actualiser mon accès", "Just subscribed? Refresh my access", "¿Te acabas de suscribir? Actualizar mi acceso")}</a>
+                  <a href={`/api/whop/login?next=${here}`} className="gate-login" onClick={() => track("Connexion Whop", { etape: "actualiser", source: "analyse_bloquee" })}>{L.t("Tu viens de payer ? Activer mon abonnement", "Just paid? Activate my subscription", "¿Acabas de pagar? Activar mi suscripción")}</a>
                 </>
               )}
             </>

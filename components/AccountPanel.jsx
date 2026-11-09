@@ -13,6 +13,7 @@ import { fmtDate } from "../lib/i18n";
 import { patchProStatus } from "../lib/useProStatus";
 import { track } from "../lib/analytics";
 import { switchDoneText } from "../lib/switch-text";
+import { openAuth } from "../lib/auth-client";
 
 // Page Whop où l'on retrouve ses commandes (repli quand le site ne peut pas lire ou modifier l'abonnement) et réglages du compte Whop.
 const WHOP_ORDERS = "https://whop.com/@me/settings/orders/";
@@ -46,6 +47,10 @@ export default function AccountPanel() {
   const autoStarted = useRef(false);
   const [agree, setAgree] = useState(false); // CGV et CGU acceptées, accès immédiat demandé (nouvel achat)
   const [nudge, setNudge] = useState(false); // rappel : la case n'est pas cochée
+  // Compte e-mail ou Google : mot de passe (actuel, nouveau) et accord pour les e-mails.
+  const [pwOld, setPwOld] = useState("");
+  const [pwNew, setPwNew] = useState("");
+  const [pwShow, setPwShow] = useState(false);
 
   const money = (p) => {
     if (!p) return "";
@@ -91,6 +96,38 @@ export default function AccountPanel() {
     router.refresh();
     setData((d) => (d ? { ...d, name: j.name } : d));
     setOk({ sec: "nom", msg: value ? T(`Nom enregistré : ${j.name.current}.`, `Name saved: ${j.name.current}.`, `Nombre guardado: ${j.name.current}.`) : T("Nom d'origine rétabli.", "Original name restored.", "Nombre original restablecido.") });
+  }
+
+  async function savePassword() {
+    setBusy("mdp"); setFail(null); setOk(null);
+    const { good, j } = await post({ action: "mdp", actuel: pwOld, nouveau: pwNew });
+    setBusy("");
+    if (!good) { setFail({ sec: "cpt", msg: j?.error || generic }); return; }
+    const first = !data?.compte?.mdp;
+    setPwOld(""); setPwNew(""); setPwShow(false);
+    setData((d) => (d?.compte ? { ...d, compte: { ...d.compte, mdp: true } } : d));
+    setOk({ sec: "cpt", msg: first
+      ? T("Mot de passe enregistré : tu peux maintenant te connecter avec ton e-mail et ce mot de passe.", "Password saved: you can now log in with your email and this password.", "Contraseña guardada: ya puedes iniciar sesión con tu correo y esta contraseña.")
+      : T("Nouveau mot de passe enregistré. Tes autres appareils sont déconnectés.", "New password saved. Your other devices are logged out.", "Nueva contraseña guardada. Tus otros dispositivos han cerrado sesión.") });
+    track("Mot de passe changé", { premier: first });
+  }
+
+  async function saveMarketing(on) {
+    // La case suit tout de suite le clic ; elle revient en arrière si l'enregistrement échoue.
+    setBusy("marketing"); setFail(null); setOk(null);
+    setData((d) => (d?.compte ? { ...d, compte: { ...d.compte, marketing: on } } : d));
+    const { good, j } = await post({ action: "marketing", ok: on });
+    setBusy("");
+    if (!good) {
+      setData((d) => (d?.compte ? { ...d, compte: { ...d.compte, marketing: !on } } : d));
+      setFail({ sec: "cpt", msg: j?.error || generic });
+      return;
+    }
+    setData((d) => (d?.compte ? { ...d, compte: { ...d.compte, marketing: !!j.marketing } } : d));
+    setOk({ sec: "cpt", msg: j.marketing
+      ? T("C'est noté : tu recevras nos e-mails (analyses et offres). Tu peux arrêter quand tu veux.", "Got it: you'll receive our emails (analyses and offers). You can stop anytime.", "Anotado: recibirás nuestros correos (análisis y ofertas). Puedes dejarlo cuando quieras.")
+      : T("C'est noté : tu ne recevras plus nos e-mails d'analyses et d'offres.", "Got it: you won't receive our analysis and offer emails anymore.", "Anotado: ya no recibirás nuestros correos de análisis y ofertas.") });
+    track("E-mails Basketlog", { accord: !!j.marketing });
   }
 
   async function act(action, id) {
@@ -206,7 +243,7 @@ export default function AccountPanel() {
     setBusy("");
     if (!good) { setFail({ sec: "sup", msg: j?.error || generic }); await load(); return; }
     patchProStatus({ connected: false, uid: null, name: null, tier: "gratuit", role: null });
-    setGone({ stopped: j.stopped || 0, creator: !!j.creator, codes: Array.isArray(j.codes) ? j.codes : [] });
+    setGone({ stopped: j.stopped || 0, creator: !!j.creator, codes: Array.isArray(j.codes) ? j.codes : [], acct: !!data?.compte, whop: !!data?.compte?.whop });
   }
 
   const orders = <a href={WHOP_ORDERS} target="_blank" rel="noopener noreferrer">{T("ta page de commandes Whop", "your Whop orders page", "tu página de pedidos de Whop")}</a>;
@@ -234,7 +271,8 @@ export default function AccountPanel() {
           {gone.stopped > 0 && <p>{gone.stopped > 1
             ? T(`${gone.stopped} abonnements sont arrêtés : plus aucun prélèvement, accès conservé jusqu'à la fin de la période déjà payée.`, `${gone.stopped} subscriptions are stopped: no further charges, access kept until the end of the period already paid.`, `${gone.stopped} suscripciones detenidas: sin más cobros, acceso conservado hasta el final del periodo ya pagado.`)
             : T("Ton abonnement est arrêté : plus aucun prélèvement, accès conservé jusqu'à la fin de la période déjà payée.", "Your subscription is stopped: no further charges, access kept until the end of the period already paid.", "Tu suscripción está detenida: sin más cobros, acceso conservado hasta el final del periodo ya pagado.")}</p>}
-          <p className="acc-help">{T("Ton compte Whop (e-mail, moyens de paiement, factures) est géré par Whop : tu peux le supprimer depuis ", "Your Whop account (email, payment methods, invoices) is managed by Whop: you can delete it from ", "Tu cuenta de Whop (correo, medios de pago, facturas) la gestiona Whop: puedes eliminarla desde ")}<a href={WHOP_SETTINGS} target="_blank" rel="noopener noreferrer">{T("tes réglages Whop", "your Whop settings", "tus ajustes de Whop")}</a>.</p>
+          {gone.acct && <p>{T("Ton compte Basketlog (adresse e-mail, mot de passe, connexion Google) est supprimé.", "Your Basketlog account (email address, password, Google sign-in) is deleted.", "Tu cuenta de Basketlog (correo, contraseña, inicio de sesión con Google) está eliminada.")}</p>}
+          {(!gone.acct || gone.whop) && <p className="acc-help">{T("Ton compte Whop (e-mail, moyens de paiement, factures) est géré par Whop : tu peux le supprimer depuis ", "Your Whop account (email, payment methods, invoices) is managed by Whop: you can delete it from ", "Tu cuenta de Whop (correo, medios de pago, facturas) la gestiona Whop: puedes eliminarla desde ")}<a href={WHOP_SETTINGS} target="_blank" rel="noopener noreferrer">{T("tes réglages Whop", "your Whop settings", "tus ajustes de Whop")}</a>.</p>}
           <a className="btn-solid acc-home" href={L.href("/")}>{T("Retour à l'accueil", "Back to the home page", "Volver al inicio")}</a>
         </section>
       </div>
@@ -246,7 +284,7 @@ export default function AccountPanel() {
         <section className="panel acc-sec">
           <h2>{T("Reconnecte-toi", "Please log in again", "Vuelve a iniciar sesión")}</h2>
           <p>{T("Ta session a expiré. Reconnecte-toi pour gérer ton compte.", "Your session has expired. Log in again to manage your account.", "Tu sesión ha caducado. Vuelve a iniciar sesión para gestionar tu cuenta.")}</p>
-          <a className="btn-solid acc-home" href={`/api/whop/login?next=${encodeURIComponent(L.href("/app/compte"))}`}>{T("Se connecter", "Log in", "Iniciar sesión")}</a>
+          <button type="button" className="btn-solid acc-home" onClick={() => openAuth({ mode: "connexion", source: "mon_compte", next: L.href("/app/compte") })}>{T("Se connecter", "Log in", "Iniciar sesión")}</button>
         </section>
       </div>
     );
@@ -310,13 +348,70 @@ export default function AccountPanel() {
         </form>
         {data.name.custom && can.rename && (
           <button type="button" className="acc-link" disabled={busy === "nom"} onClick={() => saveName("")}>
-            {data.name.whop
-              ? T(`Revenir au nom de mon compte Whop (${data.name.whop})`, `Go back to my Whop account name (${data.name.whop})`, `Volver al nombre de mi cuenta de Whop (${data.name.whop})`)
-              : T("Revenir au nom de mon compte Whop", "Go back to my Whop account name", "Volver al nombre de mi cuenta de Whop")}
+            {data.compte
+              ? T(`Revenir au nom par défaut (${data.name.whop || "Membre"})`, `Go back to the default name (${data.name.whop || "Member"})`, `Volver al nombre por defecto (${data.name.whop || "Miembro"})`)
+              : data.name.whop
+                ? T(`Revenir au nom de mon compte Whop (${data.name.whop})`, `Go back to my Whop account name (${data.name.whop})`, `Volver al nombre de mi cuenta de Whop (${data.name.whop})`)
+                : T("Revenir au nom de mon compte Whop", "Go back to my Whop account name", "Volver al nombre de mi cuenta de Whop")}
           </button>
         )}
         {!can.rename && !preview && <p className="acc-note">{T("Le choix du nom sera disponible très bientôt.", "Choosing your name will be available very soon.", "Podrás elegir tu nombre muy pronto.")}</p>}
       </section>
+
+      {/* ---------- Compte e-mail ou Google : adresse, mot de passe, e-mails, compte Whop relié ---------- */}
+      {data.compte && !data.compte.unreachable && (
+        <section className="panel acc-sec" aria-labelledby="acc-cpt">
+          <h2 id="acc-cpt">{T("Mon compte Basketlog", "My Basketlog account", "Mi cuenta de Basketlog")}</h2>
+          {section("cpt")}
+          <dl className="acc-facts">
+            <div><dt>{T("Adresse e-mail", "Email address", "Correo electrónico")}</dt><dd>{data.compte.email}</dd></div>
+            <div><dt>{T("Connexion", "Sign-in", "Inicio de sesión")}</dt><dd>{[
+              data.compte.google && T("Google", "Google", "Google"),
+              data.compte.mdp && T("e-mail et mot de passe", "email and password", "correo y contraseña"),
+            ].filter(Boolean).join(T(" ou ", " or ", " o ")) || "–"}</dd></div>
+            <div><dt>{T("Abonnement Whop", "Whop subscription", "Suscripción de Whop")}</dt><dd>{data.compte.whop
+              ? T("compte Whop relié", "Whop account linked", "cuenta de Whop vinculada")
+              : T("aucun compte Whop relié", "no Whop account linked", "ninguna cuenta de Whop vinculada")}</dd></div>
+          </dl>
+          {!preview && (
+            <p className="acc-help">
+              {data.compte.whop
+                ? T("Tu as payé avec un autre compte Whop ? ", "Paid with another Whop account? ", "¿Has pagado con otra cuenta de Whop? ")
+                : T("Tu as payé une formule chez Whop ? ", "Paid for a plan on Whop? ", "¿Has pagado un plan en Whop? ")}
+              <a href={`/api/whop/login?next=${encodeURIComponent(L.href("/app/compte"))}`} className="acc-link strong" onClick={() => track("Connexion Whop", { etape: "actualiser", source: "mon_compte" })}>{T("Activer mon abonnement", "Activate my subscription", "Activar mi suscripción")}</a>
+              {T(" : connecte-toi à Whop avec le compte utilisé pour payer, il sera relié à ton compte Basketlog.", ": log in to Whop with the account you paid with, and it will be linked to your Basketlog account.", ": inicia sesión en Whop con la cuenta con la que pagaste y quedará vinculada a tu cuenta de Basketlog.")}
+            </p>
+          )}
+
+          <form className="acc-form" onSubmit={(e) => { e.preventDefault(); if (!busy) savePassword(); }}>
+            <p className="acc-sub">{data.compte.mdp ? T("Changer mon mot de passe", "Change my password", "Cambiar mi contraseña") : T("Choisir un mot de passe", "Set a password", "Elegir una contraseña")}</p>
+            {!data.compte.mdp && <small className="acc-help">{T("Tu te connectes avec Google. Un mot de passe te permet aussi de te connecter avec ton e-mail.", "You log in with Google. A password also lets you log in with your email.", "Inicias sesión con Google. Una contraseña te permite también iniciar sesión con tu correo.")}</small>}
+            {data.compte.mdp && (
+              <>
+                <label htmlFor="acc-pw-old">{T("Mot de passe actuel", "Current password", "Contraseña actual")}</label>
+                <input id="acc-pw-old" type={pwShow ? "text" : "password"} autoComplete="current-password" value={pwOld} maxLength={200} disabled={!!busy || preview} onChange={(e) => setPwOld(e.target.value)} />
+              </>
+            )}
+            <label htmlFor="acc-pw-new">{T("Nouveau mot de passe (6 caractères minimum)", "New password (at least 6 characters)", "Nueva contraseña (mínimo 6 caracteres)")}</label>
+            <div className="acc-row">
+              <input id="acc-pw-new" type={pwShow ? "text" : "password"} autoComplete="new-password" value={pwNew} minLength={6} maxLength={200} disabled={!!busy || preview} onChange={(e) => setPwNew(e.target.value)} />
+              <button type="submit" className="acc-btn primary" disabled={!!busy || preview || pwNew.length < 6 || (data.compte.mdp && !pwOld)}>
+                {busy === "mdp" ? T("Enregistrement…", "Saving…", "Guardando…") : T("Enregistrer", "Save", "Guardar")}
+              </button>
+            </div>
+            <label className="acc-check"><input type="checkbox" checked={pwShow} onChange={(e) => setPwShow(e.target.checked)} /> {T("Afficher les mots de passe", "Show passwords", "Mostrar las contraseñas")}</label>
+          </form>
+
+          <label className="acc-check acc-mkt">
+            <input type="checkbox" checked={!!data.compte.marketing} disabled={!!busy || preview} onChange={(e) => saveMarketing(e.target.checked)} />
+            <span>{T(
+              "Recevoir par e-mail les analyses et les offres de Basketlog. Tu peux arrêter à tout moment, ici.",
+              "Receive Basketlog's analyses and offers by email. You can stop at any time, right here.",
+              "Recibir por correo los análisis y las ofertas de Basketlog. Puedes dejarlo en cualquier momento, aquí."
+            )}</span>
+          </label>
+        </section>
+      )}
 
       {/* ---------- Abonnement ---------- */}
       <section className="panel acc-sec" aria-labelledby="acc-abo">
@@ -368,6 +463,9 @@ export default function AccountPanel() {
             <>
               <p>{T("Tu es sur le compte gratuit : aucun abonnement à gérer.", "You're on the free account: no subscription to manage.", "Estás en la cuenta gratuita: no hay ninguna suscripción que gestionar.")}</p>
               <Link href={L.href("/pro")} className="btn-solid acc-home">{T("Voir les formules", "See the plans", "Ver los planes")}</Link>
+              {data.compte && !preview && (
+                <p className="acc-help">{T("Tu viens de payer chez Whop ? ", "Just paid on Whop? ", "¿Acabas de pagar en Whop? ")}<a href={`/api/whop/login?next=${encodeURIComponent(L.href("/app/compte"))}`} className="acc-link strong">{T("Activer mon abonnement", "Activate my subscription", "Activar mi suscripción")}</a></p>
+              )}
             </>
           )
         ) : (
@@ -507,6 +605,7 @@ export default function AccountPanel() {
         <p>{T("Cette action est définitive. Voici ce qui se passe :", "This can't be undone. Here is what happens:", "Esta acción es definitiva. Esto es lo que ocurre:")}</p>
         <ul className="acc-list">
           <li>{T("Tes données Basketlog sont effacées : historique d'analyses, questions posées, avis publié et nom affiché.", "Your Basketlog data is erased: analysis history, questions asked, published review and display name.", "Tus datos de Basketlog se borran: historial de análisis, preguntas, opinión publicada y nombre mostrado.")}</li>
+          {data.compte && <li>{T("Ton compte Basketlog est supprimé : adresse e-mail, mot de passe et connexion Google.", "Your Basketlog account is deleted: email address, password and Google sign-in.", "Tu cuenta de Basketlog se elimina: correo, contraseña e inicio de sesión con Google.")}</li>}
           {isCreator && <li>{T("Ton accès créateur (accès complet à Basketlog) est retiré et ton lien d'invitation ne fonctionne plus.", "Your creator access (full access to Basketlog) is removed and your invitation link stops working.", "Tu acceso de creador (acceso completo a Basketlog) se retira y tu enlace de invitación deja de funcionar.")}</li>}
           {isCreator && codes.length > 0 && <li>
             {codes.length > 1 ? T("Tes codes promo ", "Your promo codes ", "Tus códigos promocionales ") : T("Ton code promo ", "Your promo code ", "Tu código promocional ")}
@@ -519,8 +618,10 @@ export default function AccountPanel() {
           {renewingCount > 0 && <li>{renewingCount > 1
             ? T("Tes abonnements en cours sont arrêtés : plus aucun prélèvement, et ton accès est conservé jusqu'à la fin de la période déjà payée.", "Your active subscriptions are stopped: no further charges, and you keep your access until the end of the period already paid.", "Tus suscripciones activas se detienen: sin más cobros, y conservas el acceso hasta el final del periodo ya pagado.")
             : T("Ton abonnement en cours est arrêté : plus aucun prélèvement, et ton accès est conservé jusqu'à la fin de la période déjà payée.", "Your active subscription is stopped: no further charges, and you keep your access until the end of the period already paid.", "Tu suscripción activa se detiene: sin más cobros, y conservas el acceso hasta el final del periodo ya pagado.")}</li>}
-          {hasLifetime && <li>{T("Ton accès Lifetime reste attaché à ton compte Whop : si tu te reconnectes un jour, tu le retrouveras.", "Your Lifetime access stays attached to your Whop account: if you ever log in again, it will still be there.", "Tu acceso Lifetime sigue vinculado a tu cuenta de Whop: si vuelves a iniciar sesión algún día, seguirá ahí.")}</li>}
-          <li>{T("Ton compte Whop (e-mail, moyens de paiement, factures) est géré par Whop et n'est pas supprimé ici. Pour le supprimer aussi : ", "Your Whop account (email, payment methods, invoices) is managed by Whop and isn't deleted here. To delete it too: ", "Tu cuenta de Whop (correo, medios de pago, facturas) la gestiona Whop y no se elimina aquí. Para eliminarla también: ")}<a href={WHOP_SETTINGS} target="_blank" rel="noopener noreferrer">{T("tes réglages Whop", "your Whop settings", "tus ajustes de Whop")}</a>.</li>
+          {hasLifetime && <li>{data.compte
+            ? T("Ton accès Lifetime reste attaché à ton compte Whop : si tu recrées un compte Basketlog un jour, relie-le à ce compte Whop pour le retrouver.", "Your Lifetime access stays attached to your Whop account: if you create a Basketlog account again someday, link it to that Whop account to get it back.", "Tu acceso Lifetime sigue vinculado a tu cuenta de Whop: si algún día vuelves a crear una cuenta de Basketlog, vincúlala a esa cuenta de Whop para recuperarlo.")
+            : T("Ton accès Lifetime reste attaché à ton compte Whop : si tu te reconnectes un jour, tu le retrouveras.", "Your Lifetime access stays attached to your Whop account: if you ever log in again, it will still be there.", "Tu acceso Lifetime sigue vinculado a tu cuenta de Whop: si vuelves a iniciar sesión algún día, seguirá ahí.")}</li>}
+          {(!data.compte || data.compte.whop) && <li>{T("Ton compte Whop (e-mail, moyens de paiement, factures) est géré par Whop et n'est pas supprimé ici. Pour le supprimer aussi : ", "Your Whop account (email, payment methods, invoices) is managed by Whop and isn't deleted here. To delete it too: ", "Tu cuenta de Whop (correo, medios de pago, facturas) la gestiona Whop y no se elimina aquí. Para eliminarla también: ")}<a href={WHOP_SETTINGS} target="_blank" rel="noopener noreferrer">{T("tes réglages Whop", "your Whop settings", "tus ajustes de Whop")}</a>.</li>}
         </ul>
 
         {role === "admin" ? (
