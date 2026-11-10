@@ -991,8 +991,9 @@ a.team:hover .team-name { color: var(--peach); }
 @keyframes agreeShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 
 
-/* Message de bienvenue */
-.welcome-toast { position: fixed; top: 86px; left: 50%; transform: translateX(-50%); z-index: 90; max-width: min(560px, calc(100vw - 32px)); padding: 12px 18px; border-radius: 14px; background: #0f2a1a; border: 1px solid rgba(74, 222, 128, .45); color: #d1fae5; font-size: 14px; line-height: 1.5; box-shadow: 0 16px 40px rgba(0, 0, 0, .45); animation: riseIn .5s var(--ease) both; cursor: pointer; }
+/* Message de bienvenue : sous les fenêtres (paiement 85, questions d'accueil 95…) qui s'ouvrent pendant qu'il est affiché,
+   au lieu de les recouvrir ; sur téléphone, aussi sous le menu ☰ ouvert (.sb-scrim, .sb) et le menu du site (.mmenu 55). */
+.welcome-toast { position: fixed; top: 86px; left: 50%; transform: translateX(-50%); z-index: 84; max-width: min(560px, calc(100vw - 32px)); padding: 12px 18px; border-radius: 14px; background: #0f2a1a; border: 1px solid rgba(74, 222, 128, .45); color: #d1fae5; font-size: 14px; line-height: 1.5; box-shadow: 0 16px 40px rgba(0, 0, 0, .45); animation: riseIn .5s var(--ease) both; cursor: pointer; }
 
 /* Sélecteur de langue */
 .lang-switch { display: inline-flex; gap: 6px; align-items: center; font-size: 12.5px; color: var(--dim); }
@@ -1073,10 +1074,13 @@ body:has(.mmenu.open) .install-banner { display: none; }
   .sb-top { display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 55; height: 64px; padding: 0 16px; background: rgba(4, 8, 23, .92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
   .sb-top .logo { font-size: 22px; } .sb-top .logo .ball { width: 22px; height: 22px; }
   .sb-top .burger { display: block; }
-  .sb { width: min(290px, 86vw); padding-top: 8px; transform: translateX(-100%); visibility: hidden; transition: transform .3s var(--ease), visibility 0s linear .3s; }
-  .sb-open .sb { transform: none; visibility: visible; box-shadow: 20px 0 60px rgba(0, 0, 0, .5); transition: transform .3s var(--ease), visibility 0s; }
-  .sb-scrim { display: block; position: fixed; inset: 0; z-index: 58; background: rgba(0, 0, 0, .55); opacity: 0; pointer-events: none; transition: opacity .3s; }
-  .sb-open .sb-scrim { opacity: 1; pointer-events: auto; }
+  /* Menu ☰ ouvert : au-dessus des bandeaux du bas (cookies 80, appli 70, retour de paiement 95, question de source 92),
+     sinon ils cachent « Déconnexion » en bas du menu ; il redescend une fois refermé (après le glissement). */
+  .sb { width: min(290px, 86vw); padding-top: 8px; transform: translateX(-100%); visibility: hidden; transition: transform .3s var(--ease), visibility 0s linear .3s, z-index 0s linear .3s; }
+  .sb-open .sb { z-index: 97; transform: none; visibility: visible; box-shadow: 20px 0 60px rgba(0, 0, 0, .5); transition: transform .3s var(--ease), visibility 0s, z-index 0s; }
+  .sb-scrim { display: block; position: fixed; inset: 0; z-index: 58; background: rgba(0, 0, 0, .55); opacity: 0; pointer-events: none; transition: opacity .3s, z-index 0s linear .3s; }
+  .sb-open .sb-scrim { z-index: 96; opacity: 1; pointer-events: auto; transition: opacity .3s, z-index 0s; }
+  .welcome-toast { z-index: 54; }
   .shell-main { margin-left: 0; }
   .shell .app-page { padding-top: 20px; }
   .shell .pro-page { padding-top: 28px; }
@@ -1216,6 +1220,13 @@ body:has(.mmenu.open) .install-banner { display: none; }
 .ulk-badge { display: inline-flex; align-items: center; gap: 10px; max-width: calc(100% - 64px); margin: 2px auto 18px; padding: 9px 18px; border-radius: 999px; background: rgba(16,185,129,.12); border: 1px solid rgba(52,211,153,.35); color: #6ee7b7; font-weight: 600; font-size: 14.5px; line-height: 1.3; text-align: left; }
 .ulk-badge svg { flex: none; }
 .modal-box.ulk-box h3 { margin: 0; font-size: 22px; letter-spacing: -.01em; text-align: center; }
+/* Titre à hauteur de la croix ✕ (en haut à droite) : marge des deux côtés pour que le texte ne passe pas dessous, en
+   restant centré, quelle que soit la police de l'appareil. Ordinateur : 21 px laissent le titre français sur une ligne (Inter)
+   et font passer l'espagnol (plus long) sur deux au lieu de toucher la croix. Téléphone : la fenêtre est plus étroite, le
+   texte allait jusque sous la croix ; idem pour les questions d'accueil (.onb-box, même croix ; sur ordinateur leur titre
+   est plus bas que la croix, rien à faire). */
+.modal-box.ulk-box > h3 { padding-inline: 21px; }
+@media (max-width: 480px) { .modal-box.ulk-box > h3, .modal-box.onb-box > h3 { padding-inline: 32px; } }
 .ulk-sub { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 10px 0 22px; color: rgba(255,255,255,.6); font-size: 14.5px; }
 .ulk-sub svg { flex: none; }
 .ulk-list { padding: 16px 16px 4px; border-radius: 16px; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.03); text-align: left; }

@@ -131,7 +131,8 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
           />
         ) : (<>
         {badge && <div className="ulk-badge"><Trend /><span>{badge} 🔥</span></div>}
-        <h3 id="ulk-title">{L.t("Tu veux voir l'analyse complète ?", "Want to see the full analysis?", "¿Quieres ver el análisis completo?")}</h3>
+        {/* Espace insécable avant « ? » : sur un petit téléphone, le point d'interrogation ne part pas seul à la ligne. */}
+        <h3 id="ulk-title">{L.t("Tu veux voir l'analyse complète ?", "Want to see the full analysis?", "¿Quieres ver el análisis completo?")}</h3>
         {crowd && <p className="ulk-sub">{crowd.icon}{crowd.txt}</p>}
 
         <div className="ulk-list">
