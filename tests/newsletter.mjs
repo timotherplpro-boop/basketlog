@@ -7,7 +7,7 @@ import {
 } from "../lib/newsletter.js";
 import { CONSENT_PROP, ResendError, SEGMENT_NAME, createResend, isEmail, maskEmail, newsletterConfig, normEmail, topicName } from "../lib/resend.js";
 import { WhopEmailError, memberEmail } from "../lib/whop-email.js";
-import { forgetNewsletter, scheduleWeek } from "../lib/newsletter-server.js";
+import { forgetNewsletter, rehearseBroadcast, scheduleWeek } from "../lib/newsletter-server.js";
 import { CONFIRM_LIMITS, CONFIRM_TOKEN_RE, CONFIRM_TTL_MS, checkConfirmation, confirmLink, emailTag, makeConfirm, readConfirm, requestConfirmation } from "../lib/newsletter-confirm.js";
 import { confirmEmail } from "../lib/mail.js";
 import { signToken } from "../lib/switch.js";
@@ -308,6 +308,19 @@ export async function newsletterTests({ ok, ko, eq }) {
     eq("Diffusion : programmée à l'instant exact transmis (17 h UTC = 18 h à Paris)", [st.broadcasts[0].status, st.broadcasts[0].scheduled_at], ["queued", "2026-11-15T17:00:00.000Z"]);
     eq("Diffusion : relue par nom et supprimable", [(await client.broadcasts()).map((x) => x.name), await client.deleteBroadcast(id).then(() => st.broadcasts.length)], [["Newsletter 2026-W46 fr"], 0]);
     eq("Liste vide : pas de diffusion à préparer", await mkClient().client.hasContacts(), false);
+  }
+  {
+    // Répétition (admin) : brouillon dans la liste et le sujet, relu, supprimé ; jamais programmé ni envoyé
+    const { st, client } = mkClient();
+    await client.subscribe("tim@gmail.com", "fr");
+    const r = await rehearseBroadcast({ client, from: "Basketlog <newsletter@basketlog-app.com>", replyTo: "contact@basketlog-app.com", now: new Date("2026-11-10T09:40:00Z") });
+    eq("Répétition : brouillon créé dans la liste et le sujet, relu, supprimé, rien programmé ni envoyé",
+      [r.ok, r.steps.relecture.status, r.steps.relecture.liste, r.steps.relecture.sujet, r.steps.relecture.apercu, r.steps.relecture.reponse, r.steps.suppression.disparu, st.broadcasts.length, calls(st, "POST", /\/send$/).length, st.emails.length],
+      [true, "draft", true, true, true, true, true, 0, 0, 0]);
+    const bad = mkClient({ intercept: (m, p) => (m === "POST" && p === "/broadcasts" ? { ok: false, status: 403, headers: { get: () => null }, json: async () => ({ message: "Broadcasts are not available on your plan" }) } : null) });
+    await bad.client.subscribe("tim@gmail.com", "fr");
+    const rb = await rehearseBroadcast({ client: bad.client, from: "Basketlog <newsletter@basketlog-app.com>", replyTo: "contact@basketlog-app.com" });
+    eq("Répétition : si Resend refuse la création, l'étape le dit (sans lever d'erreur) et rien n'est supprimé ni envoyé", [rb.ok, rb.steps.creation.ok, rb.steps.creation.kind, rb.steps.relecture, rb.steps.suppression, bad.st.broadcasts.length], [false, false, "scope", undefined, undefined, 0]);
   }
   {
     const { st, client } = mkClient();

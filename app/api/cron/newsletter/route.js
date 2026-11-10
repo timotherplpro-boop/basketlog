@@ -11,7 +11,7 @@ import { mk } from "../../../../lib/i18n";
 import { ISSUE_LANGS, buildIssue, clearestFavorites, runWindow, sundaySlot, weekBilan } from "../../../../lib/newsletter";
 import { maskEmail, newsletterConfig, resend } from "../../../../lib/resend";
 import { sessionEmail } from "../../../../lib/session-email";
-import { scheduleWeek } from "../../../../lib/newsletter-server";
+import { rehearseBroadcast, scheduleWeek } from "../../../../lib/newsletter-server";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -30,6 +30,7 @@ export const maxDuration = 60;
 //   ?dry=1&lang=fr&format=html|text   le mail lui-même, à ouvrir dans le navigateur
 //   ?test=1[&lang=fr]       envoie le mail à l'adresse de l'admin connecté (lui seul), précédé de [TEST]
 //   ?diag=1                 vérifie les branchements (adresse de l'admin lisible, domaine d'envoi, liste, sujets) sans rien envoyer
+//   ?rehearse=1             répétition de la diffusion : crée un brouillon (liste + sujet), le relit et le supprime ; rien n'est programmé ni envoyé
 // Accès : tâche planifiée de Vercel (avec CRON_SECRET s'il est défini) ou compte admin connecté.
 let lastRun = 0;
 
@@ -118,6 +119,14 @@ export async function GET(req) {
       };
     }
     return json({ ok: true, diag: true, ...out, at: new Date().toISOString() });
+  }
+
+  // ---------- Répétition de la diffusion (admin) : un brouillon créé puis supprimé, jamais programmé ni envoyé ----------
+  if (sp.get("rehearse") === "1") {
+    if (!admin) return json({ error: "interdit" }, 401);
+    const r = resend();
+    if (!r) return json({ ok: false, rehearse: true, error: "RESEND_API_KEY absente" });
+    return json({ rehearse: true, ...(await rehearseBroadcast({ client: r, from: cfg.from, replyTo: cfg.replyTo })), at: new Date().toISOString() });
   }
 
   // ---------- Programmation : d'abord les garde-fous, avant toute lecture des chiffres ----------
