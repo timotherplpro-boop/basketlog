@@ -15,6 +15,7 @@ import { RESET_TOKEN_RE, accountIdOf, accountUid, clientIp, inAppBrowser, isAcco
 import { GoogleAuthError, exchangeCode, googleAuthUrl, readIdToken } from "../lib/google-auth.js";
 import { mailReady, resetEmail, sendMail } from "../lib/mail.js";
 import { newsletterTests } from "./newsletter.mjs";
+import { accueilTests } from "./accueil.mjs";
 
 export async function unit() {
   let passed = 0, failed = 0;
@@ -567,6 +568,7 @@ export async function unit() {
   }
 
   await newsletterTests({ ok, ko, eq });
+  await accueilTests({ ok, ko, eq });
 
   return { passed, failed };
 }

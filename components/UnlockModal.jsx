@@ -4,8 +4,12 @@
 // réussite du modèle tirée du bilan, membres Whop (à partir de +100) ou matchs analysés, vrai compte à rebours.
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { track } from "../lib/analytics";
+import { exitAllowed, exitMark, proUrlWithCode } from "../lib/exit-offer-ui";
+import { localStore } from "../lib/safe-store";
 import { useL } from "./LangProvider";
 import { useFocusTrap } from "./useFocusTrap";
+import { ExitOfferBody, useExitOffer } from "./ExitOffer";
 
 const Svg = ({ children, size = 18 }) => (
   <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>{children}</svg>
@@ -38,11 +42,33 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
     const t = setInterval(() => setNow(Date.now()), 30000);
     return () => clearInterval(t);
   }, []);
+  // Offre de dernière chance (components/ExitOffer.jsx) : réservée aux comptes gratuits, et seulement si elle est active
+  // (éteinte par défaut). Fermer la fenêtre (croix, Échap, clic à côté) la montre une fois à la place de la fermeture ;
+  // la fermer à nouveau, ou « Non merci », ferme pour de bon.
+  const offer = useExitOffer(tier === "compte");
+  const [pitch, setPitch] = useState(false);
+  const tryClose = () => {
+    if (offer && !pitch) {
+      const store = localStore();
+      if (exitAllowed(store)) {
+        exitMark(store);
+        setPitch(true);
+        track("Offre de sortie affichée", { lieu: "fenetre_analyse", code: offer.code, remise: offer.pct });
+        setTimeout(() => boxRef.current?.focus({ preventScroll: true }), 30);
+        return;
+      }
+    }
+    if (pitch) track("Offre de sortie refusée", { lieu: "fenetre_analyse" });
+    onClose();
+  };
+  const closeRef = useRef(tryClose);
+  useEffect(() => { closeRef.current = tryClose; });
+
   useEffect(() => {
     const prevFocus = document.activeElement;
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    const esc = (e) => e.key === "Escape" && onClose();
+    const esc = (e) => e.key === "Escape" && closeRef.current();
     document.addEventListener("keydown", esc);
     const t = setTimeout(() => boxRef.current?.focus({ preventScroll: true }), 60); // focus dans la fenêtre, sans halo sur le bouton
     return () => {
@@ -51,7 +77,7 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
       document.body.style.overflow = prevOverflow;
       prevFocus?.focus?.({ preventScroll: true });
     };
-  }, [onClose]);
+  }, []);
 
   if (!mounted) return null;
 
@@ -92,9 +118,18 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
     : L.t("Accès instantané après l'abonnement", "Instant access once you subscribe", "Acceso inmediato al suscribirte");
 
   return createPortal(
-    <div className="modal ulk" role="dialog" aria-modal="true" aria-labelledby="ulk-title" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="modal ulk" role="dialog" aria-modal="true" aria-labelledby="ulk-title" onClick={(e) => e.target === e.currentTarget && tryClose()}>
       <div className="modal-box ulk-box" ref={boxRef} tabIndex={-1}>
-        <button type="button" className="ulk-x" onClick={onClose} aria-label={L.t("Fermer", "Close", "Cerrar")}><Cross /></button>
+        <button type="button" className="ulk-x" onClick={tryClose} aria-label={L.t("Fermer", "Close", "Cerrar")}><Cross /></button>
+        {pitch && offer ? (
+          <ExitOfferBody
+            offer={offer}
+            href={proUrlWithCode(href, offer.code)}
+            titleId="ulk-title"
+            onAccept={() => track("Clic offre de sortie", { lieu: "fenetre_analyse", code: offer.code, remise: offer.pct })}
+            onDecline={tryClose}
+          />
+        ) : (<>
         {badge && <div className="ulk-badge"><Trend /><span>{badge} 🔥</span></div>}
         <h3 id="ulk-title">{L.t("Tu veux voir l'analyse complète ?", "Want to see the full analysis?", "¿Quieres ver el análisis completo?")}</h3>
         {crowd && <p className="ulk-sub">{crowd.icon}{crowd.txt}</p>}
@@ -115,6 +150,7 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
 
         <a href={href} className="btn-solid ulk-cta" onClick={onCta}>{L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo")}</a>
         <small className="ulk-foot">{foot}</small>
+        </>)}
       </div>
     </div>,
     document.body
