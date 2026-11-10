@@ -6,7 +6,7 @@
 import { useEffect, useState } from "react";
 import { useL } from "./LangProvider";
 import { useNewsletter } from "../lib/useNewsletter";
-import { Consent, useNewsletterError } from "./NewsletterBits";
+import { Consent, pendingText, useNewsletterError } from "./NewsletterBits";
 
 const LATER_DAYS = 7; // « Plus tard » : la carte revient au bout d'une semaine
 const keyOf = (uid) => `bl_nl:${uid}`;
@@ -34,6 +34,7 @@ export default function NewsletterInvite({ uid, hidden = false }) {
   const [ask, setAsk] = useState(false); // le membre n'a pas encore répondu dans ce navigateur : on peut interroger le serveur
   const [gone, setGone] = useState(false); // carte fermée (refus, plus tard ou fermeture de la confirmation)
   const [thanks, setThanks] = useState(false); // inscription faite : la carte devient une confirmation
+  const [pending, setPending] = useState(false); // e-mail de confirmation envoyé (adresse pas encore prouvée) : la carte dit d'aller le lire
   const [joining, setJoining] = useState(false); // inscription en cours : la carte reste affichée jusqu'à la confirmation
   const nl = useNewsletter(L.lang, ask);
   const error = useNewsletterError(nl.error);
@@ -51,7 +52,7 @@ export default function NewsletterInvite({ uid, hidden = false }) {
   }, [s, uid, thanks]);
 
   if (!uid || hidden || gone || !s || s.available === false) return null;
-  if (!thanks && !joining && !error && (s.subscribed !== false || s.blocked)) return null; // déjà inscrit, adresse bloquée ou lecture impossible : on ne dit rien
+  if (!thanks && !pending && !joining && !error && (s.subscribed !== false || s.blocked)) return null; // déjà inscrit, adresse bloquée ou lecture impossible : on ne dit rien
 
   const lead = T("Je m'inscris", "Sign me up", "Quiero suscribirme");
   const close = (choice) => { if (choice && uid) saveChoice(uid, choice); setGone(true); };
@@ -59,9 +60,27 @@ export default function NewsletterInvite({ uid, hidden = false }) {
   async function join() {
     setJoining(true);
     const good = await nl.subscribe();
-    if (good && uid) saveChoice(uid, "on");
-    setThanks(good);
+    if (good === "pending") {
+      // Pas encore inscrit : on ne le retient pas comme « fait » (la carte reviendrait pourtant tout de suite à chaque page), mais comme
+      // « plus tard » ; si le lien est ouvert entre-temps, le serveur répond « déjà inscrit » et la carte n'apparaît plus.
+      if (uid) saveChoice(uid, "later");
+      setPending(true);
+    } else {
+      if (good && uid) saveChoice(uid, "on");
+      setThanks(!!good);
+    }
     setJoining(false);
+  }
+
+  if (pending) {
+    return (
+      <div className="nl-invite">
+        <section className="nl-card done" role="status" aria-label={T("Newsletter du dimanche", "Sunday newsletter", "Newsletter del domingo")}>
+          <p>{pendingText(T, s.email)}</p>
+          <div className="nl-actions"><button type="button" className="acc-btn" onClick={() => close(null)}>{T("Fermer", "Close", "Cerrar")}</button></div>
+        </section>
+      </div>
+    );
   }
 
   if (thanks) {
@@ -88,7 +107,7 @@ export default function NewsletterInvite({ uid, hidden = false }) {
           "Every Sunday at 6 pm (Paris time), by email: the record of the last 7 days and the week's very-high-confidence games. Free, unsubscribe in one click.",
           "Cada domingo a las 18:00 (hora de París), por correo: el balance de los últimos 7 días y los partidos de confianza muy alta de la semana. Gratis, con baja en un clic."
         )}</p>
-        <Consent email={s.email} lead={lead} />
+        <Consent email={s.email} lead={lead} confirm={!!s.confirm} />
         {error && <p className="nl-err" role="alert">{error}</p>}
         <div className="nl-actions">
           <button type="button" className="acc-btn primary" disabled={nl.busy} onClick={join}>{nl.busy ? T("Inscription…", "Signing up…", "Suscribiendo…") : lead}</button>

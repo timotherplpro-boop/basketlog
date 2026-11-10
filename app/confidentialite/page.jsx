@@ -41,7 +41,7 @@ const DONNEES = [
   ["Paiement", "Données de paiement et de facturation (traitées directement par Whop, jamais par Basketlog)", "Encaisser les paiements, établir les reçus", "Exécution du contrat, obligation légale", "10 ans pour les pièces comptables"],
   ["Avis (abonnés)", "Prénom, description facultative, note, texte de l'avis ; identifiant du compte et formule au moment de l'avis, jamais affichés", "Publier les avis des abonnés après relecture (un par compte), avec la mention « Abonné vérifié »", "Consentement", "Jusqu'à ta demande de suppression"],
   ["Accès créateur ou admin (sur invitation)", "Identifiant et nom du compte, rôle, nom noté sur l'invitation, date d'activation", "Ouvrir l'accès complet offert aux créateurs partenaires et aux administrateurs", "Exécution du contrat", "Jusqu'au retrait de l'accès"],
-  ["Newsletter du dimanche (si tu la demandes)", "Adresse e-mail de ton compte (pour un compte Whop, lue chez Whop quand tu t'inscris), langue choisie, date et heure de ta demande ; aucun suivi d'ouverture ni de clic dans les e-mails", "T'envoyer la newsletter de la semaine chaque dimanche et garder la preuve de ton accord", "Consentement", "Jusqu'à ta désinscription ; ensuite l'adresse est conservée, marquée « désinscrit », pour ne plus t'écrire, jusqu'à la suppression de ton compte"],
+  ["Newsletter du dimanche (si tu la demandes)", "Adresse e-mail de ton compte (pour un compte Whop, lue chez Whop quand tu t'inscris), langue choisie, date et heure de ta demande ; aucun suivi d'ouverture ni de clic dans les e-mails. Pour un compte créé avec un e-mail et un mot de passe : un lien de confirmation signé, valable 48 heures, qui ne contient pas ton adresse et dont rien n'est gardé de notre côté", "T'envoyer la newsletter de la semaine chaque dimanche (après confirmation de ton adresse par e-mail pour un compte e-mail + mot de passe) et garder la preuve de ton accord", "Consentement", "Jusqu'à ta désinscription ; ensuite l'adresse est conservée, marquée « désinscrit », pour ne plus t'écrire, jusqu'à la suppression de ton compte"],
   ["Contact", "Adresse e-mail et contenu de tes messages", "Répondre à tes demandes", "Intérêt légitime", "3 ans après le dernier échange"],
 ];
 
@@ -52,7 +52,7 @@ const PRESTATAIRES = [
   ["Google LLC (États-Unis)", "Connexion avec Google, seulement si tu la choisis : nous recevons ton adresse e-mail, ton prénom et l'identifiant de ton compte Google", "google"],
   ["Amplitude, Inc. (données dans l'UE)", "Mesure d'audience, uniquement avec ton accord"],
   ["Zoho Corporation (données dans l'UE)", "Messagerie de l'adresse de contact"],
-  ["Resend, Inc. (États-Unis)", "Envoi des e-mails du site : lien pour choisir un nouveau mot de passe et, uniquement si tu la demandes, newsletter du dimanche (ton adresse e-mail y est alors conservée, aux États-Unis)"],
+  ["Resend, Inc. (États-Unis)", "Envoi des e-mails du site : lien pour choisir un nouveau mot de passe, e-mail de confirmation de ton inscription à la newsletter et, uniquement si tu la demandes, newsletter du dimanche (ton adresse e-mail y est alors conservée, aux États-Unis)"],
   ["Anthropic, PBC (États-Unis)", "IA qui répond aux questions des abonnés et rédige l'argumentation des analyses", "ia"],
 ];
 
@@ -77,7 +77,7 @@ function ConfidentialiteFr() {
           </table>
         </div>
         <p>Les analyses complètes que tu lances avec ton compte sont enregistrées avec l&apos;identifiant de ton compte, pour appliquer la limite du jour de ta formule sur tous tes appareils et t&apos;afficher ton historique. Si tu acceptes la mesure d&apos;audience, l&apos;identifiant de ton compte et ta formule sont associés à tes statistiques d&apos;usage, pour savoir quelles fonctionnalités servent le plus.</p>
-        <p>La newsletter du dimanche n&apos;est envoyée qu&apos;à celles et ceux qui la demandent eux-mêmes, en cliquant sur « Je m&apos;inscris » ou « Recevoir la newsletter » dans leur compte : personne n&apos;est inscrit d&apos;office. Ton adresse e-mail n&apos;est transmise à Resend qu&apos;à ce moment-là, avec la langue choisie et la date de ta demande.</p>
+        <p>La newsletter du dimanche n&apos;est envoyée qu&apos;à celles et ceux qui la demandent eux-mêmes, en cliquant sur « Je m&apos;inscris » ou « Recevoir la newsletter » dans leur compte : personne n&apos;est inscrit d&apos;office. Ton adresse e-mail n&apos;est transmise à Resend qu&apos;à ce moment-là, avec la langue choisie et la date de ta demande. Si ton compte a été créé avec une adresse e-mail et un mot de passe (adresse pas encore confirmée), nous t&apos;envoyons d&apos;abord, via Resend, un e-mail de confirmation : l&apos;inscription n&apos;est effective, et ton adresse n&apos;est ajoutée à la liste d&apos;envoi, qu&apos;après ton clic sur le bouton de la page qu&apos;ouvre le lien (valable 48 heures). Sans ce clic, aucune inscription n&apos;est enregistrée.</p>
       </Sec>
 
       <Sec n={3} title="Ton compte, le paiement et les abonnés">
@@ -141,7 +141,7 @@ const DATA_EN = [
   ["Payment", "Payment and billing data (processed directly by Whop, never by Basketlog)", "Collect payments, issue receipts", "Performance of the contract, legal obligation", "10 years for accounting records"],
   ["Reviews (subscribers)", "First name, optional description, rating, review text; account ID and plan at the time of the review, never displayed", "Publish subscribers' reviews after they are checked (one per account), with a “Verified subscriber” label", "Consent", "Until you ask for removal"],
   ["Creator or admin access (by invitation)", "Account ID and name, role, name noted on the invitation, activation date", "Provide the free full access given to partner creators and administrators", "Performance of the contract", "Until the access is removed"],
-  ["Sunday newsletter (if you ask for it)", "Email address of your account (for a Whop account, read from Whop when you sign up), chosen language, date and time of your request; no open or click tracking in the emails", "Send you the weekly newsletter every Sunday and keep proof of your consent", "Consent", "Until you unsubscribe; the address is then kept, marked “unsubscribed”, so we don't write to you again, until your account is deleted"],
+  ["Sunday newsletter (if you ask for it)", "Email address of your account (for a Whop account, read from Whop when you sign up), chosen language, date and time of your request; no open or click tracking in the emails. For an account created with an email and a password: a signed confirmation link, valid for 48 hours, that does not contain your address and of which nothing is kept on our side", "Send you the weekly newsletter every Sunday (after your address is confirmed by email, for an email + password account) and keep proof of your consent", "Consent", "Until you unsubscribe; the address is then kept, marked “unsubscribed”, so we don't write to you again, until your account is deleted"],
   ["Contact", "Email address and content of your messages", "Reply to your requests", "Legitimate interest", "3 years after the last exchange"],
 ];
 
@@ -152,7 +152,7 @@ const PROVIDERS_EN = [
   ["Google LLC (United States)", "Sign-in with Google, only if you choose it: we receive your email address, first name and Google account ID", "google"],
   ["Amplitude, Inc. (data in the EU)", "Audience measurement, only with your consent"],
   ["Zoho Corporation (data in the EU)", "Email for the contact address"],
-  ["Resend, Inc. (United States)", "Sending the website's emails: link to choose a new password and, only if you ask for it, the Sunday newsletter (your email address is then stored there, in the United States)"],
+  ["Resend, Inc. (United States)", "Sending the website's emails: link to choose a new password, email confirming your newsletter signup and, only if you ask for it, the Sunday newsletter (your email address is then stored there, in the United States)"],
   ["Anthropic, PBC (United States)", "AI that answers subscribers' questions and writes the analysis reasoning", "ia"],
 ];
 
@@ -178,7 +178,7 @@ function ConfidentialiteEn({ L }) {
           </table>
         </div>
         <p>The full analyses you run with your account are recorded with your account ID, to apply your plan&apos;s daily limit across all your devices and show your history. If you accept audience measurement, your account ID and plan are linked to your usage statistics, so we know which features are used most.</p>
-        <p>The Sunday newsletter is only sent to people who ask for it themselves, by clicking “Sign me up” or “Receive the newsletter” in their account: nobody is signed up by default. Your email address is passed to Resend only at that moment, together with the chosen language and the date of your request.</p>
+        <p>The Sunday newsletter is only sent to people who ask for it themselves, by clicking “Sign me up” or “Receive the newsletter” in their account: nobody is signed up by default. Your email address is passed to Resend only at that moment, together with the chosen language and the date of your request. If your account was created with an email address and a password (address not yet confirmed), we first send you, through Resend, a confirmation email: the signup is only effective, and your address is only added to the mailing list, after you click the button on the page that the link opens (valid for 48 hours). Without that click, no signup is recorded.</p>
       </Sec>
 
       <Sec n={3} title="Your account, payment and subscribers">
@@ -242,7 +242,7 @@ const DATA_ES = [
   ["Pago", "Datos de pago y de facturación (tratados directamente por Whop, nunca por Basketlog)", "Cobrar los pagos y emitir los recibos", "Ejecución del contrato, obligación legal", "10 años para los documentos contables"],
   ["Opiniones (suscriptores)", "Nombre, descripción opcional, nota y texto de la opinión; identificador de la cuenta y plan en el momento de la opinión, nunca se muestran", "Publicar las opiniones de los suscriptores tras revisarlas (una por cuenta), con la mención «Suscriptor verificado»", "Consentimiento", "Hasta que pidas su eliminación"],
   ["Acceso de creador o administrador (por invitación)", "Identificador y nombre de la cuenta, rol, nombre anotado en la invitación, fecha de activación", "Dar el acceso completo gratuito a los creadores colaboradores y a los administradores", "Ejecución del contrato", "Hasta que se retire el acceso"],
-  ["Newsletter del domingo (si la pides)", "Dirección de correo de tu cuenta (para una cuenta de Whop, leída en Whop cuando te suscribes), idioma elegido, fecha y hora de tu solicitud; sin seguimiento de aperturas ni de clics en los correos", "Enviarte la newsletter semanal cada domingo y conservar la prueba de tu consentimiento", "Consentimiento", "Hasta que te des de baja; después la dirección se conserva, marcada como «dada de baja», para no volver a escribirte, hasta que se elimine tu cuenta"],
+  ["Newsletter del domingo (si la pides)", "Dirección de correo de tu cuenta (para una cuenta de Whop, leída en Whop cuando te suscribes), idioma elegido, fecha y hora de tu solicitud; sin seguimiento de aperturas ni de clics en los correos. Para una cuenta creada con correo y contraseña: un enlace de confirmación firmado, válido durante 48 horas, que no contiene tu dirección y del que no guardamos nada", "Enviarte la newsletter semanal cada domingo (tras confirmar tu dirección por correo, en una cuenta de correo + contraseña) y conservar la prueba de tu consentimiento", "Consentimiento", "Hasta que te des de baja; después la dirección se conserva, marcada como «dada de baja», para no volver a escribirte, hasta que se elimine tu cuenta"],
   ["Contacto", "Dirección de correo electrónico y contenido de tus mensajes", "Responder a tus solicitudes", "Interés legítimo", "3 años después del último intercambio"],
 ];
 
@@ -253,7 +253,7 @@ const PROVIDERS_ES = [
   ["Google LLC (Estados Unidos)", "Inicio de sesión con Google, solo si lo eliges: recibimos tu correo, tu nombre y el identificador de tu cuenta de Google", "google"],
   ["Amplitude, Inc. (datos en la UE)", "Medición de audiencia, solo con tu consentimiento"],
   ["Zoho Corporation (datos en la UE)", "Correo de la dirección de contacto"],
-  ["Resend, Inc. (Estados Unidos)", "Envío de los correos del sitio: enlace para elegir una nueva contraseña y, solo si la pides, la newsletter del domingo (tu dirección de correo se conserva entonces allí, en Estados Unidos)"],
+  ["Resend, Inc. (Estados Unidos)", "Envío de los correos del sitio: enlace para elegir una nueva contraseña, correo de confirmación de tu suscripción a la newsletter y, solo si la pides, la newsletter del domingo (tu dirección de correo se conserva entonces allí, en Estados Unidos)"],
   ["Anthropic, PBC (Estados Unidos)", "IA que responde a las preguntas de los suscriptores y redacta la argumentación de los análisis", "ia"],
 ];
 
@@ -279,7 +279,7 @@ function ConfidentialiteEs({ L }) {
           </table>
         </div>
         <p>Los análisis completos que realizas con tu cuenta se registran con el identificador de tu cuenta, para aplicar el límite diario de tu plan en todos tus dispositivos y mostrarte tu historial. Si aceptas la medición de audiencia, el identificador de tu cuenta y tu plan se asocian a tus estadísticas de uso, para saber qué funciones se usan más.</p>
-        <p>La newsletter del domingo solo se envía a quienes la piden ellos mismos, haciendo clic en «Quiero suscribirme» o «Recibir la newsletter» en su cuenta: nadie se suscribe de oficio. Tu dirección de correo solo se transmite a Resend en ese momento, junto con el idioma elegido y la fecha de tu solicitud.</p>
+        <p>La newsletter del domingo solo se envía a quienes la piden ellos mismos, haciendo clic en «Quiero suscribirme» o «Recibir la newsletter» en su cuenta: nadie se suscribe de oficio. Tu dirección de correo solo se transmite a Resend en ese momento, junto con el idioma elegido y la fecha de tu solicitud. Si tu cuenta se creó con una dirección de correo y una contraseña (dirección aún sin confirmar), primero te enviamos, a través de Resend, un correo de confirmación: la suscripción solo es efectiva, y tu dirección solo se añade a la lista de envío, cuando haces clic en el botón de la página que abre el enlace (válido durante 48 horas). Sin ese clic, no se registra ninguna suscripción.</p>
       </Sec>
 
       <Sec n={3} title="Tu cuenta, el pago y los suscriptores">

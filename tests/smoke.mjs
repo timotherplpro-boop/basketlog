@@ -16,10 +16,10 @@ function session(tier, extra = {}) {
   return `bl_pro=${data}.${crypto.createHmac("sha256", SECRET).update(data).digest("base64url")}`;
 }
 
-async function get(path, { cookie, method = "GET", body, ua = "basketlog-tests" } = {}) {
+async function get(path, { cookie, method = "GET", body, ua = "basketlog-tests", headers = {} } = {}) {
   const res = await fetch(BASE + path, {
     method, redirect: "manual",
-    headers: { ...(cookie ? { cookie } : {}), ...(body ? { "content-type": "application/json" } : {}), "user-agent": ua },
+    headers: { ...(cookie ? { cookie } : {}), ...(body ? { "content-type": "application/json" } : {}), "user-agent": ua, ...headers },
     body: body ? JSON.stringify(body) : undefined,
   });
   return { status: res.status, text: await res.text() };
@@ -29,7 +29,7 @@ const ERROR_PAGE = /Une erreur est survenue|Application error|Internal Server Er
 
 async function pages() {
   console.log("Pages");
-  for (const p of ["/", "/en", "/es", "/analyse-basket", "/en/analyse-basket", "/es/analyse-basket", "/pronostic-basket", "/en/pronostic-basket", "/es/pronostic-basket", "/app", "/app/matchs", "/app/bilan", "/app/bilan?l=pub", "/app/classement", "/app/euroleague", "/pro", "/en/pro", "/es/pro", "/pro?code=TESTAUTO", "/avis", "/en/avis", "/es/avis", "/methode", "/cgu", "/cgv", "/confidentialite", "/mentions-legales", "/cookies", "/reinitialiser", "/en/reinitialiser", "/es/reinitialiser", "/sitemap.xml", "/robots.txt"]) {
+  for (const p of ["/", "/en", "/es", "/analyse-basket", "/en/analyse-basket", "/es/analyse-basket", "/pronostic-basket", "/en/pronostic-basket", "/es/pronostic-basket", "/app", "/app/matchs", "/app/bilan", "/app/bilan?l=pub", "/app/classement", "/app/euroleague", "/pro", "/en/pro", "/es/pro", "/pro?code=TESTAUTO", "/avis", "/en/avis", "/es/avis", "/methode", "/cgu", "/cgv", "/confidentialite", "/mentions-legales", "/cookies", "/reinitialiser", "/en/reinitialiser", "/es/reinitialiser", "/newsletter/confirmer", "/en/newsletter/confirmer", "/es/newsletter/confirmer", "/sitemap.xml", "/robots.txt"]) {
     const r = await get(p);
     if (r.status !== 200) ko(p, `HTTP ${r.status}`);
     else if (ERROR_PAGE.test(r.text)) ko(p, "page d'erreur affichée");
@@ -146,6 +146,21 @@ async function newsletterRoutes() {
   cron.status === 401 ? ok("newsletter : préparation de l'envoi refusée aux inconnus") : ko("newsletter : préparation de l'envoi refusée aux inconnus", `HTTP ${cron.status}`);
   const preview = await get("/api/cron/newsletter?dry=1&format=html");
   preview.status === 401 ? ok("newsletter : aperçu du mail refusé sans compte admin") : ko("newsletter : aperçu du mail refusé sans compte admin", `HTTP ${preview.status}`);
+  // Lien « Confirme ton inscription » (page ouverte depuis l'e-mail, sans session) : un jeton absent, absurde ou forgé n'inscrit personne.
+  const confirm = (body, headers) => get("/api/newsletter/confirmer", { method: "POST", body, headers });
+  const forged = `${"A".repeat(60)}.${"B".repeat(43)}`;
+  const c1 = await confirm({ action: "verifier", jeton: "abc", lang: "fr" });
+  c1.status === 200 && /"valide":false/.test(c1.text) ? ok("confirmation : jeton absurde = lien non valable") : ko("confirmation : jeton absurde = lien non valable", `HTTP ${c1.status} ${c1.text.slice(0, 120)}`);
+  const c2 = await confirm({ action: "confirmer", jeton: "abc", lang: "fr" });
+  c2.status === 400 ? ok("confirmation : inscription refusée avec un jeton absurde") : ko("confirmation : inscription refusée avec un jeton absurde", `HTTP ${c2.status}`);
+  const c3 = await confirm({ action: "confirmer", jeton: forged, lang: "fr" });
+  [400, 503].includes(c3.status) && !/"subscribed":true/.test(c3.text) ? ok("confirmation : jeton forgé = aucune inscription (503 tant que la newsletter est fermée)") : ko("confirmation : jeton forgé = aucune inscription", `HTTP ${c3.status} ${c3.text.slice(0, 120)}`);
+  const c4 = await confirm({ action: "autre", jeton: forged, lang: "fr" });
+  c4.status === 400 ? ok("confirmation : action inconnue refusée") : ko("confirmation : action inconnue refusée", `HTTP ${c4.status}`);
+  const c5 = await confirm({ action: "confirmer", jeton: forged, lang: "fr" }, { "sec-fetch-site": "cross-site" });
+  c5.status === 403 ? ok("confirmation : requête venue d'un autre site refusée") : ko("confirmation : requête venue d'un autre site refusée", `HTTP ${c5.status}`);
+  const c6 = await get("/api/newsletter/confirmer");
+  c6.status === 405 ? ok("confirmation : lecture directe de l'adresse refusée (POST seulement)") : ko("confirmation : lecture directe de l'adresse refusée", `HTTP ${c6.status}`);
   if (!SECRET) return;
   const mine = await get("/api/compte/newsletter?lang=fr", { cookie: session("compte") });
   let j = null;

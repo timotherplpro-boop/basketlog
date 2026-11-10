@@ -5,13 +5,13 @@
 import { useState } from "react";
 import { useL } from "./LangProvider";
 import { useNewsletter } from "../lib/useNewsletter";
-import { Consent, blockedText, problemText, useNewsletterError } from "./NewsletterBits";
+import { Consent, blockedText, pendingText, problemText, useNewsletterError } from "./NewsletterBits";
 
 export default function NewsletterSettings() {
   const L = useL();
   const T = L.t;
   const nl = useNewsletter(L.lang, true);
-  const [done, setDone] = useState(""); // "on" | "off" : dernière action réussie
+  const [done, setDone] = useState(""); // "on" | "off" | "pending" : dernière action réussie
   const error = useNewsletterError(nl.error);
   const s = nl.state;
   if (!s || s.available === false) return null;
@@ -19,7 +19,7 @@ export default function NewsletterSettings() {
   async function go(on) {
     setDone("");
     const good = await (on ? nl.subscribe() : nl.unsubscribe());
-    if (good) setDone(on ? "on" : "off");
+    if (good) setDone(!on ? "off" : good === "pending" ? "pending" : "on");
   }
 
   const lead = T("Recevoir la newsletter", "Receive the newsletter", "Recibir la newsletter");
@@ -33,12 +33,13 @@ export default function NewsletterSettings() {
       )}</p>
       {error && <div className="adm-err" role="alert">{error}</div>}
       {done === "on" && !error && <div className="adm-notice ok" role="status">{T("Inscription enregistrée : tu recevras la newsletter chaque dimanche à 18 h.", "You're signed up: you'll get the newsletter every Sunday at 6 pm.", "Suscripción registrada: recibirás la newsletter cada domingo a las 18:00.")}</div>}
+      {done === "pending" && !error && <div className="adm-notice ok" role="status">{T("E-mail de confirmation envoyé : ton inscription sera effective après ton clic sur le lien.", "Confirmation email sent: your signup will be active after you click its link.", "Correo de confirmación enviado: tu suscripción será efectiva cuando hagas clic en su enlace.")}</div>}
       {done === "off" && !error && <div className="adm-notice ok" role="status">{T("Désinscription enregistrée : tu ne recevras plus la newsletter.", "You're unsubscribed: you won't receive the newsletter any more.", "Baja registrada: ya no recibirás la newsletter.")}</div>}
 
       {s.subscribed === null ? (
         <>
           <p className="acc-note" role="status">{problemText(T, s.problem)}</p>
-          {s.problem !== "email" && s.problem !== "verify" && <div className="acc-actions"><button type="button" className="acc-btn" onClick={() => nl.reload()}>{T("Réessayer", "Try again", "Reintentar")}</button></div>}
+          {s.problem !== "email" && <div className="acc-actions"><button type="button" className="acc-btn" onClick={() => nl.reload()}>{T("Réessayer", "Try again", "Reintentar")}</button></div>}
         </>
       ) : s.blocked ? (
         <p className="acc-note">{blockedText(T)}</p>
@@ -54,10 +55,22 @@ export default function NewsletterSettings() {
             </button>
           </div>
         </>
+      ) : s.pending ? (
+        <>
+          <p>
+            <span className="adm-tag wait">{T("En attente de confirmation", "Waiting for confirmation", "Pendiente de confirmar")}</span>{" "}
+            {pendingText(T, s.email)}
+          </p>
+          <div className="acc-actions">
+            <button type="button" className="acc-btn" disabled={nl.busy} onClick={() => go(true)}>
+              {nl.busy ? "…" : T("Renvoyer l'e-mail", "Send the email again", "Reenviar el correo")}
+            </button>
+          </div>
+        </>
       ) : (
         <>
           <p>{T("Tu ne reçois pas la newsletter.", "You're not receiving the newsletter.", "No recibes la newsletter.")}</p>
-          <Consent email={s.email} lead={lead} />
+          <Consent email={s.email} lead={lead} confirm={!!s.confirm} />
           <div className="acc-actions">
             <button type="button" className="acc-btn primary" disabled={nl.busy} onClick={() => go(true)}>
               {nl.busy ? T("Inscription…", "Signing up…", "Suscribiendo…") : lead}

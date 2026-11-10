@@ -1,12 +1,17 @@
 // Tests de la newsletter du dimanche (sans serveur ni réseau) : créneau d'envoi 18 h à Paris, semaine ISO, contenu du mail en
 // français, anglais et espagnol, client Resend simulé (inscription, désinscription, suppression, diffusion, erreurs),
-// lecture de l'adresse chez Whop et retrait de la liste à la suppression d'un compte. Appelé par tests/unit.mjs.
+// lecture de l'adresse chez Whop, e-mail de confirmation des comptes Basketlog (lien signé, limites d'envoi) et retrait de la liste
+// à la suppression d'un compte. Appelé par tests/unit.mjs.
 import {
   BILAN_MIN, MAX_SHOWN, PLACEHOLDER, afterSend, buildIssue, clearestFavorites, isoWeek, issueName, parisToUtc, runWindow, sundaySlot, weekBilan,
 } from "../lib/newsletter.js";
 import { CONSENT_PROP, ResendError, SEGMENT_NAME, createResend, isEmail, maskEmail, newsletterConfig, normEmail, topicName } from "../lib/resend.js";
 import { WhopEmailError, memberEmail } from "../lib/whop-email.js";
 import { forgetNewsletter, scheduleWeek } from "../lib/newsletter-server.js";
+import { CONFIRM_LIMITS, CONFIRM_TOKEN_RE, CONFIRM_TTL_MS, checkConfirmation, confirmLink, emailTag, makeConfirm, readConfirm, requestConfirmation } from "../lib/newsletter-confirm.js";
+import { confirmEmail } from "../lib/mail.js";
+import { signToken } from "../lib/switch.js";
+import crypto from "node:crypto";
 
 // ---------- Un « faux Resend » en mémoire : les routes de l'API REST dont le client a besoin ----------
 function fakeResend(opts = {}) {
@@ -437,6 +442,131 @@ export async function newsletterTests({ ok, ko, eq }) {
       await client.subscribe("tim@gmail.com", "fr");
       const r = await quiet(() => scheduleWeek(args(client, { data: { at: slot.iso, week: "2026-W46", bilan: null, sure: [started], favorites: [], record: null } })));
       eq("Programmation : tous les matchs déjà commencés à 18 h et pas de bilan = rien à dire, pas de mail", [r[0].state, r[0].reason, st.broadcasts.length], ["ignorée", "rien à dire cette semaine", 0]);
+    }
+  }
+
+  // --- Confirmation de l'adresse (comptes Basketlog e-mail + mot de passe) : lien signé, e-mail, limites d'envoi
+  {
+    const key = "k".repeat(64);
+    const uid = "bl_8a5f0c1e-1111-4222-8333-944455556666";
+    const NOW = Date.UTC(2026, 10, 10, 12);
+    const tok = makeConfirm(key, { uid, email: "Tim@Exemple.fr", lang: "fr" }, NOW);
+    const payload = Buffer.from(tok.split(".")[0], "base64url").toString();
+    eq("Confirmation : jeton de forme attendue, sans l'adresse ni le début de l'adresse dedans", [CONFIRM_TOKEN_RE.test(tok), /tim|exemple/i.test(payload)], [true, false]);
+    eq("Confirmation : jeton lu (compte, langue, empreinte de l'adresse insensible à la casse et aux espaces)", readConfirm(key, tok, NOW + 3600e3), { uid, lang: "fr", tag: emailTag(key, " tim@exemple.fr "), at: NOW });
+    eq("Confirmation : valable 48 h pile, refusé à la milliseconde suivante", [readConfirm(key, tok, NOW + CONFIRM_TTL_MS) !== null, readConfirm(key, tok, NOW + CONFIRM_TTL_MS + 1)], [true, null]);
+    eq("Confirmation : jeton daté du futur refusé (une minute de décalage d'horloge tolérée)", [readConfirm(key, tok, NOW - 30e3) !== null, readConfirm(key, tok, NOW - 120e3)], [true, null]);
+    {
+      const [data, sig] = tok.split(".");
+      const flip = (c) => (c === "A" ? "B" : "A");
+      const forged = Buffer.from(JSON.stringify({ ...JSON.parse(payload), u: "bl_00000000-0000-4000-8000-000000000000" })).toString("base64url");
+      eq("Confirmation : jeton modifié (données ou signature) ou signé avec une autre clé refusé", [
+        readConfirm(key, `${data.slice(0, 5)}${flip(data[5])}${data.slice(6)}.${sig}`, NOW),
+        readConfirm(key, `${data}.${sig.slice(0, 5)}${flip(sig[5])}${sig.slice(6)}`, NOW),
+        readConfirm(key, `${forged}.${sig}`, NOW),
+        readConfirm("autre".repeat(13), tok, NOW),
+      ], [null, null, null, null]);
+      const asSwitch = signToken(key, "switch", JSON.parse(payload));
+      const asSession = `${data}.${crypto.createHmac("sha256", key).update(data).digest("base64url")}`;
+      eq("Confirmation : un jeton d'un autre usage (changement de formule) ou un cookie de session signé avec la même clé ne passe pas pour une confirmation", [readConfirm(key, asSwitch, NOW), readConfirm(key, asSession, NOW)], [null, null]);
+    }
+    eq("Confirmation : pas de jeton pour un compte Whop, une langue inconnue, sans adresse ni clé", [
+      makeConfirm(key, { uid: "user_abc", email: "a@b.fr", lang: "fr" }, NOW), makeConfirm(key, { uid, email: "a@b.fr", lang: "de" }, NOW),
+      makeConfirm(key, { uid, email: "  ", lang: "fr" }, NOW), makeConfirm("", { uid, email: "a@b.fr", lang: "fr" }, NOW),
+    ], [null, null, null, null]);
+    eq("Confirmation : valeurs absurdes refusées sans erreur", [readConfirm(key, "", NOW), readConfirm(key, null, NOW), readConfirm(key, "abc", NOW), readConfirm(key, "a.b", NOW), readConfirm(key, `${"A".repeat(5000)}.${"B".repeat(43)}`, NOW)], [null, null, null, null, null]);
+    eq("Confirmation : lien dans la langue du membre, jeton dans le fragment (il ne part pas vers le serveur)", [confirmLink("https://basketlog-app.com/", "fr", "T"), confirmLink("https://basketlog-app.com", "en", "T"), confirmLink("https://basketlog-app.com", "es", "T")], ["https://basketlog-app.com/newsletter/confirmer#T", "https://basketlog-app.com/en/newsletter/confirmer#T", "https://basketlog-app.com/es/newsletter/confirmer#T"]);
+
+    // E-mail de confirmation
+    const link = confirmLink("https://basketlog-app.com", "fr", tok);
+    const mails = { fr: confirmEmail({ lang: "fr", link }), en: confirmEmail({ lang: "en", link }), es: confirmEmail({ lang: "es", link }) };
+    eq("E-mail de confirmation : objet et bouton dans la langue du compte", [mails.fr.subject, mails.en.subject, mails.es.subject, mails.fr.html.includes("Je confirme mon inscription"), mails.en.html.includes("Confirm my signup"), mails.es.html.includes("Confirmo mi suscripción")], ["Confirme ton inscription à la newsletter Basketlog", "Confirm your Basketlog newsletter signup", "Confirma tu suscripción a la newsletter de Basketlog", true, true, true]);
+    eq("E-mail de confirmation : lien présent (texte et HTML), durée de 48 heures annoncée, rien n'est envoyé avant la confirmation", [mails.fr.text.includes(link), mails.fr.html.includes(link), mails.fr.text.includes("48 heures"), mails.en.text.includes("48 hours"), mails.es.text.includes("48 horas"), /rien ne t'est envoyé/.test(mails.fr.text)], [true, true, true, true, true, true]);
+    eq("E-mail de confirmation : aucun vocabulaire de paris (FR, EN, ES)", [bets.fr.test(mails.fr.text), bets.en.test(mails.en.text), bets.es.test(mails.es.text)], [false, false, false]);
+    eq("E-mail de confirmation : lien échappé dans le HTML, pas de script ni d'image distante", [confirmEmail({ lang: "fr", link: 'https://x.fr/#"><script>1</script>' }).html.includes("<script>"), /<script|<img/i.test(mails.fr.html)], [false, false]);
+
+    // Demande d'envoi : limites, états, panne
+    const mk2 = (o = {}) => {
+      const n = new Map(), sent = [], asked = [];
+      return {
+        n, sent, asked,
+        deps: {
+          key, site: "https://basketlog-app.com", now: NOW,
+          allowed: async (a, v, max) => { const k = `${a}:${v}`; n.set(k, (n.get(k) || 0) + 1); return n.get(k) <= max; },
+          status: o.status || (async (e, l) => { asked.push([e, l]); return { known: false, subscribed: false, blocked: false }; }),
+          send: o.send || (async (m) => { sent.push(m); return { id: "em_1" }; }),
+        },
+      };
+    };
+    const who = (i = 1, extra = {}) => ({ uid: `bl_8a5f0c1e-1111-4222-8333-${String(i).padStart(12, "0")}`, email: `Membre${i}@Exemple.fr`, lang: "fr", ip: `10.0.0.${i}`, ...extra });
+    {
+      const t = mk2();
+      const r = await requestConfirmation(who(), t.deps);
+      const m = t.sent[0];
+      const sentLink = m?.text.match(/https:\/\/\S+/)?.[0] || "";
+      const back = readConfirm(key, sentLink.split("#")[1], NOW);
+      eq("Demande : e-mail envoyé à l'adresse du compte (en minuscules), avec un lien dont le jeton est celui du compte et de sa langue", [r, t.sent.length, m.to, m.subject, sentLink.startsWith("https://basketlog-app.com/newsletter/confirmer#"), back?.uid, back?.lang], [{ ok: true, pending: true }, 1, "membre1@exemple.fr", "Confirme ton inscription à la newsletter Basketlog", true, who().uid, "fr"]);
+      eq("Demande : l'état est lu chez Resend avant d'envoyer (adresse minuscule, langue du membre)", t.asked, [["Membre1@Exemple.fr", "fr"]]);
+    }
+    {
+      const t = mk2({ status: async () => ({ known: true, subscribed: true, blocked: false }) });
+      const r = await requestConfirmation(who(), t.deps);
+      eq("Demande : déjà inscrit = rien à envoyer, et le plafond du site n'est pas entamé", [r, t.sent.length, t.n.get("nl-confirm-global:tous") || 0], [{ ok: true, subscribed: true }, 0, 0]);
+    }
+    {
+      const t = mk2({ status: async () => ({ known: true, subscribed: false, blocked: true }) });
+      const r = await requestConfirmation(who(), t.deps);
+      eq("Demande : adresse désinscrite de tous les envois = refusée, aucun e-mail, plafond du site intact", [r, t.sent.length, t.n.get("nl-confirm-global:tous") || 0], [{ ok: false, reason: "blocked" }, 0, 0]);
+    }
+    {
+      const t = mk2();
+      const rs = [];
+      for (let i = 0; i < CONFIRM_LIMITS.perAccountHour + 2; i++) rs.push((await requestConfirmation(who(), t.deps)).ok);
+      eq(`Demande : au plus ${CONFIRM_LIMITS.perAccountHour} e-mails par heure pour un même compte, les suivants refusés sans e-mail`, [rs, t.sent.length], [[true, true, true, false, false], CONFIRM_LIMITS.perAccountHour]);
+    }
+    {
+      const t = mk2();
+      const rs = [];
+      for (let i = 1; i <= CONFIRM_LIMITS.perIpHour + 1; i++) rs.push((await requestConfirmation(who(i, { ip: "203.0.113.9" }), t.deps)).ok);
+      eq(`Demande : au plus ${CONFIRM_LIMITS.perIpHour} e-mails par heure depuis une même adresse IP (comptes différents)`, [rs.filter(Boolean).length, rs[rs.length - 1], t.sent.length], [CONFIRM_LIMITS.perIpHour, false, CONFIRM_LIMITS.perIpHour]);
+    }
+    {
+      const t = mk2();
+      let last = null, okCount = 0;
+      for (let i = 1; i <= CONFIRM_LIMITS.globalDay + 1; i++) { last = await requestConfirmation(who(i), t.deps); if (last.ok) okCount++; }
+      eq(`Demande : plafond de ${CONFIRM_LIMITS.globalDay} e-mails de confirmation par jour pour tout le site (le plan Resend gratuit en permet 100 pour tous les usages)`, [okCount, last, t.sent.length], [CONFIRM_LIMITS.globalDay, { ok: false, reason: "busy" }, CONFIRM_LIMITS.globalDay]);
+    }
+    {
+      const boom = new Error("Resend 500");
+      const t = mk2({ send: async () => { throw boom; } });
+      const r = await requestConfirmation(who(), t.deps);
+      eq("Demande : e-mail non parti (Resend en panne) = « mail », l'erreur est rendue à l'appelant pour le journal", [r.ok, r.reason, r.error === boom], [false, "mail", true]);
+      const t2 = mk2();
+      eq("Demande : sans clé de signature, rien n'est envoyé", [await requestConfirmation(who(), { ...t2.deps, key: "" }), t2.sent.length], [{ ok: false, reason: "config" }, 0]);
+      const t3 = mk2({ status: async () => { throw new ResendError("network", "panne"); } });
+      let thrown = null;
+      try { await requestConfirmation(who(), t3.deps); } catch (e) { thrown = e; }
+      eq("Demande : lecture de l'état impossible chez Resend = erreur levée telle quelle, aucun e-mail", [thrown?.kind, t3.sent.length], ["network", 0]);
+    }
+
+    // Lien reçu : vérification
+    {
+      const id = "8a5f0c1e-1111-4222-8333-944455556666";
+      let reads = 0;
+      const fiche = (email) => async (x) => { reads++; return x === id ? (email === null ? null : { email, email_ok: false }) : null; };
+      const check = (token, f, now = NOW + 3600e3) => checkConfirmation(token, { key, fiche: f, now });
+      eq("Lien : jeton valable pour un compte qui existe encore avec la même adresse (la fiche est lue par son identifiant sans « bl_ »)", await check(tok, fiche("tim@exemple.fr")), { ok: true, uid, email: "tim@exemple.fr", lang: "fr" });
+      eq("Lien : même adresse écrite autrement dans la fiche (casse, espaces) = valable", (await check(tok, fiche(" TIM@Exemple.FR "))).ok, true);
+      eq("Lien : compte supprimé depuis = refusé", await check(tok, fiche(null)), { ok: false, reason: "invalid" });
+      eq("Lien : l'adresse du compte n'est plus celle du jeton = refusé", await check(tok, fiche("autre@exemple.fr")), { ok: false, reason: "invalid" });
+      reads = 0;
+      eq("Lien : expiré, modifié ou absurde = refusé sans jamais lire la base", [await check(tok, fiche("tim@exemple.fr"), NOW + CONFIRM_TTL_MS + 1), await check(`${tok}x`, fiche("tim@exemple.fr")), await check("n'importe quoi", fiche("tim@exemple.fr")), reads], [{ ok: false, reason: "invalid" }, { ok: false, reason: "invalid" }, { ok: false, reason: "invalid" }, 0]);
+      let thrown = null;
+      try { await check(tok, async () => { throw new Error("base injoignable"); }); } catch (e) { thrown = e.message; }
+      eq("Lien : base injoignable = erreur levée (la page dit « réessaie », elle ne dit pas « lien invalide »)", thrown, "base injoignable");
+      // Un jeton ne vaut que pour son compte : celui d'un autre compte, même avec la bonne adresse, ne passe pas par la fiche du premier
+      const other = makeConfirm(key, { uid: "bl_8a5f0c1e-1111-4222-8333-000000000002", email: "tim@exemple.fr", lang: "fr" }, NOW);
+      eq("Lien : le jeton d'un autre compte n'ouvre pas ce compte (fiche introuvable pour lui)", await check(other, fiche("tim@exemple.fr")), { ok: false, reason: "invalid" });
     }
   }
 
