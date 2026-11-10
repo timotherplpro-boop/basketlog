@@ -73,8 +73,17 @@ function fakeResend(opts = {}) {
     if ((m = path.match(/^\/broadcasts\/([^/]+)\/send$/)) && method === "POST") {
       const b = st.broadcasts.find((x) => x.id === m[1]);
       if (!b) return res(404, { message: "Broadcast not found" });
-      b.status = "queued"; b.scheduled_at = body?.scheduled_at || null;
+      // opts.scheduledStatus : l'API réelle appelle « scheduled » une diffusion programmée pour plus tard (les autres tests gardent « queued »)
+      b.status = body?.scheduled_at && opts.scheduledStatus ? opts.scheduledStatus : "queued"; b.scheduled_at = body?.scheduled_at || null;
       return res(200, { id: b.id });
+    }
+    if ((m = path.match(/^\/broadcasts\/([^/]+)\/cancel$/)) && method === "POST") {
+      const b = st.broadcasts.find((x) => x.id === m[1]);
+      if (!b) return res(404, { message: "Broadcast not found" });
+      // Comme l'API réelle : seules les diffusions programmées ou en file peuvent être annulées ; « programmée » repasse en brouillon.
+      if (!["scheduled", "queued"].includes(b.status)) return res(422, { message: "Only queued or scheduled broadcasts can be canceled" });
+      b.status = b.status === "scheduled" ? "draft" : "canceled"; b.scheduled_at = null;
+      return res(200, { object: "broadcast", id: b.id });
     }
     if ((m = path.match(/^\/broadcasts\/([^/]+)$/))) {
       const b = st.broadcasts.find((x) => x.id === m[1]);
@@ -321,6 +330,36 @@ export async function newsletterTests({ ok, ko, eq }) {
     await bad.client.subscribe("tim@gmail.com", "fr");
     const rb = await rehearseBroadcast({ client: bad.client, from: "Basketlog <newsletter@basketlog-app.com>", replyTo: "contact@basketlog-app.com" });
     eq("Répétition : si Resend refuse la création, l'étape le dit (sans lever d'erreur) et rien n'est supprimé ni envoyé", [rb.ok, rb.steps.creation.ok, rb.steps.creation.kind, rb.steps.relecture, rb.steps.suppression, bad.st.broadcasts.length], [false, false, "scope", undefined, undefined, 0]);
+  }
+  {
+    // Répétition avec programmation : instant lointain, relu, annulé puis supprimé ; aucun e-mail ne peut partir
+    const args = { from: "Basketlog <newsletter@basketlog-app.com>", replyTo: "contact@basketlog-app.com", schedule: true };
+    const now = new Date("2026-11-10T09:40:00Z");
+    const sch = mkClient({ scheduledStatus: "scheduled" });
+    await sch.client.subscribe("tim@gmail.com", "fr");
+    const r = await rehearseBroadcast({ client: sch.client, ...args, now });
+    eq("Répétition avec programmation : programmée dans 14 jours à 3 h 33 UTC, relue, annulée (brouillon), supprimée, aucun e-mail",
+      [r.ok, calls(sch.st, "POST", /\/send$/).map((c) => c.body), r.steps.verification.status, r.steps.verification.heure, calls(sch.st, "POST", /\/cancel$/).length, r.steps.annulation.status, r.steps.suppression.disparu, sch.st.broadcasts.length, sch.st.emails.length],
+      [true, [{ scheduled_at: "2026-11-24T03:33:00.000Z" }], "scheduled", true, 1, "draft", true, 0, 0]);
+    const lead = async (days) => {
+      const t = mkClient({ scheduledStatus: "scheduled" });
+      await t.client.subscribe("tim@gmail.com", "fr");
+      await rehearseBroadcast({ client: t.client, ...args, now, days });
+      return calls(t.st, "POST", /\/send$/)[0].body.scheduled_at;
+    };
+    eq("Répétition avec programmation : l'avance est bornée entre 2 et 28 jours (jamais dans les 48 heures qui suivent)", [await lead(1), await lead(400), await lead("n'importe quoi")], ["2026-11-12T03:33:00.000Z", "2026-12-08T03:33:00.000Z", "2026-11-24T03:33:00.000Z"]);
+    const refuse = mkClient({ intercept: (m, p) => (m === "POST" && /\/send$/.test(p) ? { ok: false, status: 422, headers: { get: () => null }, json: async () => ({ message: "scheduled_at is invalid" }) } : null) });
+    await refuse.client.subscribe("tim@gmail.com", "fr");
+    const rr = await rehearseBroadcast({ client: refuse.client, ...args, now });
+    eq("Répétition avec programmation : si Resend refuse, l'étape le dit, rien n'est à annuler et le brouillon est quand même supprimé",
+      [rr.ok, rr.steps.programmation.ok, rr.steps.programmation.kind, rr.steps.verification, rr.steps.annulation, calls(refuse.st, "POST", /\/cancel$/).length, rr.steps.suppression.disparu, refuse.st.broadcasts.length],
+      [false, false, "invalid", undefined, undefined, 0, true, 0]);
+    const lost = mkClient({ intercept: (m, p) => { if (m === "POST" && /\/send$/.test(p)) throw new Error("connexion coupée"); return null; } });
+    await lost.client.subscribe("tim@gmail.com", "fr");
+    const rl = await rehearseBroadcast({ client: lost.client, ...args, now });
+    eq("Répétition avec programmation : réponse perdue (réseau) = annulation tentée par précaution, puis suppression du brouillon",
+      [rl.ok, rl.steps.programmation.kind, calls(lost.st, "POST", /\/cancel$/).length, rl.steps.annulation.ok, rl.steps.suppression.disparu, lost.st.broadcasts.length],
+      [false, "network", 1, false, true, 0]);
   }
   {
     const { st, client } = mkClient();

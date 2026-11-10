@@ -31,6 +31,7 @@ export const maxDuration = 60;
 //   ?test=1[&lang=fr]       envoie le mail à l'adresse de l'admin connecté (lui seul), précédé de [TEST]
 //   ?diag=1                 vérifie les branchements (adresse de l'admin lisible, domaine d'envoi, liste, sujets) sans rien envoyer
 //   ?rehearse=1             répétition de la diffusion : crée un brouillon (liste + sujet), le relit et le supprime ; rien n'est programmé ni envoyé
+//   ?rehearse=1&schedule=1[&days=14]   idem, et programme ce brouillon pour dans 14 jours (2 à 28), le relit, l'annule et le supprime aussitôt
 // Accès : tâche planifiée de Vercel (avec CRON_SECRET s'il est défini) ou compte admin connecté.
 let lastRun = 0;
 
@@ -126,7 +127,9 @@ export async function GET(req) {
     if (!admin) return json({ error: "interdit" }, 401);
     const r = resend();
     if (!r) return json({ ok: false, rehearse: true, error: "RESEND_API_KEY absente" });
-    return json({ rehearse: true, ...(await rehearseBroadcast({ client: r, from: cfg.from, replyTo: cfg.replyTo })), at: new Date().toISOString() });
+    const days = Math.round(Number(sp.get("days")));
+    const rehearsal = await rehearseBroadcast({ client: r, from: cfg.from, replyTo: cfg.replyTo, schedule: sp.get("schedule") === "1", ...(days ? { days } : {}) });
+    return json({ rehearse: true, ...rehearsal, at: new Date().toISOString() });
   }
 
   // ---------- Programmation : d'abord les garde-fous, avant toute lecture des chiffres ----------
