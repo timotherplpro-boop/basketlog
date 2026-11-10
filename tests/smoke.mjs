@@ -209,12 +209,23 @@ async function promoCodes() {
     : ko("/api/offre : éteinte par défaut", `HTTP ${offre.status} ${offre.text.slice(0, 120)} (${offre.cache})`);
   const diagPublic = await get("/api/offre?diagnostic=1");
   diagPublic.status === 200 && !/raison|actif/.test(diagPublic.text) ? ok("/api/offre : diagnostic caché aux visiteurs") : ko("/api/offre : diagnostic caché aux visiteurs", diagPublic.text.slice(0, 120));
-  const diagAdmin = await get("/api/offre?diagnostic=1", { cookie: session("lifetime", { role: "admin", admin: true }) });
-  let dj = null;
-  try { dj = JSON.parse(diagAdmin.text); } catch {}
-  diagAdmin.status === 200 && dj?.actif === false && typeof dj.raison === "string" && /no-store/.test(diagAdmin.cache)
+  // Les sessions de test ont la forme réelle : un admin porte role: "admin" (sans « admin »), « admin » vrai n'existe que pendant
+  // l'aperçu d'une formule (role: null) ; un abonné ou un créateur ne voit jamais le diagnostic.
+  const diagSeen = (r) => {
+    try { const j = JSON.parse(r.text); return r.status === 200 && j?.actif === false && typeof j.raison === "string" && /no-store/.test(r.cache); } catch { return false; }
+  };
+  const diagAdmin = await get("/api/offre?diagnostic=1", { cookie: session("lifetime", { role: "admin" }) });
+  diagSeen(diagAdmin)
     ? ok("/api/offre : diagnostic pour l'admin (offre éteinte), jamais mis en cache")
     : ko("/api/offre : diagnostic pour l'admin", `HTTP ${diagAdmin.status} ${diagAdmin.text.slice(0, 160)} (${diagAdmin.cache})`);
+  const diagPreview = await get("/api/offre?diagnostic=1", { cookie: session("lifetime", { role: null, admin: true }) });
+  diagSeen(diagPreview)
+    ? ok("/api/offre : diagnostic aussi pendant l'aperçu d'une formule par l'admin")
+    : ko("/api/offre : diagnostic pendant l'aperçu d'une formule", `HTTP ${diagPreview.status} ${diagPreview.text.slice(0, 160)}`);
+  for (const [who, extra] of [["à un abonné", {}], ["à un créateur", { role: "createur" }]]) {
+    const r = await get("/api/offre?diagnostic=1", { cookie: session("lifetime", extra) });
+    r.status === 200 && !/raison|actif/.test(r.text) ? ok(`/api/offre : diagnostic caché ${who}`) : ko(`/api/offre : diagnostic caché ${who}`, r.text.slice(0, 120));
+  }
   const promoOffre = await json("/api/promo?code=BIENVENUE10");
   promoOffre.body?.ok === false ? ok("/api/promo : le code de l'offre de sortie n'est jamais accepté tant qu'elle est éteinte") : ko("/api/promo : code de l'offre éteinte", JSON.stringify(promoOffre.body));
 }
