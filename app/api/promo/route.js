@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { dbRpc } from "../../../lib/roles";
 import { CODE_RE, cleanCode } from "../../../lib/promo";
 import { promoMonths } from "../../../lib/whop-promo";
+import { liveOffer } from "../../../lib/exit-offer";
 
 export const dynamic = "force-dynamic";
 
@@ -15,12 +16,16 @@ const out = (body, status = 200) => NextResponse.json(body, { status, headers: {
 export async function GET(req) {
   const code = cleanCode(new URL(req.url).searchParams.get("code") || "");
   if (!CODE_RE.test(code)) return out({ ok: false, raison: "format" });
+  let down = false;
   try {
     const list = await dbRpc("basketlog_admin_promos");
     const promo = Array.isArray(list) ? list.find((p) => p?.code === code && p.whop_ok === true) : null;
-    if (!promo) return out({ ok: false, raison: "inconnu" });
-    return out({ ok: true, code: promo.code, pct: promo.pct, mois: promoMonths() });
+    if (promo) return out({ ok: true, code: promo.code, pct: promo.pct, mois: promoMonths() });
   } catch {
-    return out({ ok: false, raison: "indisponible" }, 503);
+    down = true;
   }
+  // Offre de dernière chance (lib/exit-offer.js) : acceptée seulement quand Whop confirme le code (et éteinte par défaut).
+  const offer = await liveOffer();
+  if (offer.ok && offer.code === code) return out({ ok: true, code: offer.code, pct: offer.pct, mois: offer.mois });
+  return down ? out({ ok: false, raison: "indisponible" }, 503) : out({ ok: false, raison: "inconnu" });
 }

@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { track } from "../lib/analytics";
+import { localStore } from "../lib/safe-store";
+import { ONBOARDING_EVENT, SOURCE_EVENT, isAnalysisPath, onboardingDone } from "../lib/onboarding";
 import { useL } from "./LangProvider";
 
 const MSG = {
@@ -41,9 +43,17 @@ export default function WelcomeToast() {
     history.replaceState(null, "", u.pathname + (u.search || "") + u.hash);
     // Page d'invitation : elle affiche elle-même l'étape suivante (activer l'accès), pas de message par-dessus.
     if (/^\/(?:(?:en|es)\/)?invitation\//.test(u.pathname)) return;
+    // Compte tout juste créé hors d'une page d'analyse : les questions d'accueil (components/Onboarding.jsx) prennent la
+    // place du message, qu'elles recouvriraient. Sur une fiche match, la personne vient lire l'analyse : pas de questions.
+    if (m && m[1] === "nouveau" && !isAnalysisPath(u.pathname, u.search) && !onboardingDone(localStore())) {
+      const t = setTimeout(() => window.dispatchEvent(new Event(ONBOARDING_EVENT)), 700);
+      return () => clearTimeout(t);
+    }
     setMsg({ text: MSG[k][L.en ? 1 : L.es ? 2 : 0], warn: WARN.has(k) });
-    const t = setTimeout(() => setMsg(null), WARN.has(k) ? 12000 : 6000);
-    return () => clearTimeout(t);
+    const timers = [setTimeout(() => setMsg(null), WARN.has(k) ? 12000 : 6000)];
+    // Abonnement activé : une question sur la source (components/SourceAsk.jsx), une fois le message de bienvenue passé.
+    if (k === "abonne") timers.push(setTimeout(() => window.dispatchEvent(new Event(SOURCE_EVENT)), 3500));
+    return () => timers.forEach(clearTimeout);
   }, []);
   if (!msg) return null;
   return <div className={`welcome-toast${msg.warn ? " warn" : ""}`} role="status" onClick={() => setMsg(null)}>{msg.text}</div>;

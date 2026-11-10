@@ -13,6 +13,8 @@ import Nav from "../components/Nav";
 import Analytics from "../components/Analytics";
 import CookieBanner from "../components/CookieBanner";
 import WelcomeToast from "../components/WelcomeToast";
+import Onboarding from "../components/Onboarding";
+import SourceAsk from "../components/SourceAsk";
 import AuthHost from "../components/AuthHost";
 import { googleReady } from "../lib/google-auth";
 import PaymentReturn from "../components/PaymentReturn";
@@ -105,6 +107,9 @@ export default async function RootLayout({ children }) {
           {children}
           <SiteChrome member={member}><SiteFooter L={L} /></SiteChrome>
           <WelcomeToast />
+          {/* Questions d'accueil après l'inscription, et « comment as-tu connu Basketlog ? » après le paiement : ouvertes par WelcomeToast */}
+          <Onboarding />
+          <SourceAsk />
           {/* Fenêtre « Créer un compte / Se connecter » (e-mail ou Google), ouverte par les boutons du site */}
           <AuthHost googleOn={googleReady()} />
           <PaymentReturn />

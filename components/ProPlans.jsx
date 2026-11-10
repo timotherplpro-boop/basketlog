@@ -8,6 +8,7 @@ import { price, money, PRICES } from "../lib/pricing";
 import { pctOf } from "../lib/i18n";
 import { CODE_RE, cleanCode, discounted, withPromo } from "../lib/promo";
 import SwitchWatch from "./SwitchWatch";
+import { ProExitIntent } from "./ExitOffer";
 import { openAuth } from "../lib/auth-client";
 
 const Icon = ({ name }) => {
@@ -183,6 +184,9 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
         )}</div>
       )}
       {switching && <SwitchWatch />}
+      {/* Offre de dernière chance (éteinte par défaut, voir lib/exit-offer.js) : ordinateur, sortie de la souris par le haut
+          de la fenêtre ; jamais à quelqu'un qui paie déjà ni par-dessus un code de créateur déjà appliqué. */}
+      <ProExitIntent enabled={!!pro && !switching && !promo && (current === "gratuit" || current === "compte")} onApply={applyPromo} />
       <div className="pro-promo">
         {promo ? (
           <div className="pro-promo-ok" role="status">

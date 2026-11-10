@@ -22,7 +22,7 @@ async function get(path, { cookie, method = "GET", body, ua = "basketlog-tests",
     headers: { ...(cookie ? { cookie } : {}), ...(body ? { "content-type": "application/json" } : {}), "user-agent": ua, ...headers },
     body: body ? JSON.stringify(body) : undefined,
   });
-  return { status: res.status, text: await res.text() };
+  return { status: res.status, text: await res.text(), cache: res.headers.get("cache-control") || "" };
 }
 
 const ERROR_PAGE = /Une erreur est survenue|Application error|Internal Server Error/i;
@@ -199,6 +199,24 @@ async function promoCodes() {
   const unk = await json("/api/promo?code=TESTAUTO0000");
   const refused = unk.body?.ok === false && ((unk.status === 200 && unk.body.raison === "inconnu") || (unk.status === 503 && unk.body.raison === "indisponible"));
   refused ? ok("/api/promo : code inconnu jamais accepté") : ko("/api/promo : code inconnu jamais accepté", `HTTP ${unk.status} ${JSON.stringify(unk.body)}`);
+  // Offre de dernière chance : éteinte tant qu'elle n'est pas réglée et confirmée par Whop (réponse vide, jamais un code), et
+  // le diagnostic n'est lisible que par l'admin.
+  const offre = await get("/api/offre");
+  let oj = null;
+  try { oj = JSON.parse(offre.text); } catch {}
+  offre.status === 200 && oj && typeof oj === "object" && !oj.code && Object.keys(oj).length === 0 && /s-maxage/.test(offre.cache)
+    ? ok("/api/offre : éteinte par défaut ({}), réponse gardée par le CDN")
+    : ko("/api/offre : éteinte par défaut", `HTTP ${offre.status} ${offre.text.slice(0, 120)} (${offre.cache})`);
+  const diagPublic = await get("/api/offre?diagnostic=1");
+  diagPublic.status === 200 && !/raison|actif/.test(diagPublic.text) ? ok("/api/offre : diagnostic caché aux visiteurs") : ko("/api/offre : diagnostic caché aux visiteurs", diagPublic.text.slice(0, 120));
+  const diagAdmin = await get("/api/offre?diagnostic=1", { cookie: session("lifetime", { role: "admin", admin: true }) });
+  let dj = null;
+  try { dj = JSON.parse(diagAdmin.text); } catch {}
+  diagAdmin.status === 200 && dj?.actif === false && typeof dj.raison === "string" && /no-store/.test(diagAdmin.cache)
+    ? ok("/api/offre : diagnostic pour l'admin (offre éteinte), jamais mis en cache")
+    : ko("/api/offre : diagnostic pour l'admin", `HTTP ${diagAdmin.status} ${diagAdmin.text.slice(0, 160)} (${diagAdmin.cache})`);
+  const promoOffre = await json("/api/promo?code=BIENVENUE10");
+  promoOffre.body?.ok === false ? ok("/api/promo : le code de l'offre de sortie n'est jamais accepté tant qu'elle est éteinte") : ko("/api/promo : code de l'offre éteinte", JSON.stringify(promoOffre.body));
 }
 
 async function videosApi() {
