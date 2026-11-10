@@ -10,7 +10,11 @@ export const dynamic = "force-dynamic";
 // La réponse publique est gardée 5 minutes par le CDN : l'API de Whop n'est pas appelée à chaque visite.
 // GET /api/offre?diagnostic=1, connecté en admin : pourquoi l'offre est éteinte, en clair (jamais mis en cache).
 export async function GET(req) {
-  const admin = decodeSession(req.cookies.get(COOKIE)?.value)?.admin === true;
+  // Admin : même repère que les autres routes réservées (cron/newsletter, cron/social…) : rôle « admin » dans la session signée.
+  // « admin » vrai seulement pendant l'aperçu d'une formule par l'admin (le rôle est alors mis de côté) : accepté aussi.
+  // Lecture seule : la réponse ne contient aucune clé, seulement la raison pour laquelle l'offre est éteinte.
+  const s = decodeSession(req.cookies.get(COOKIE)?.value);
+  const admin = s?.role === "admin" || s?.admin === true;
   if (admin && new URL(req.url).searchParams.get("diagnostic")) {
     const o = await liveOffer({ fresh: true });
     const body = o.ok
