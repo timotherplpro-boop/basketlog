@@ -54,7 +54,8 @@ function fakeResend(opts = {}) {
     if ((m = path.match(/^\/contacts\/([^/]+)\/topics$/))) {
       const c = find(m[1]);
       if (!c) return res(404, { message: "Contact not found" });
-      if (method === "PATCH") { if (!opts.ignoreTopicWrites) for (const t of body.topics) c.topics[t.id] = t.subscription; return res(200, { id: c.id }); }
+      // Comme l'API réelle : le corps est directement la liste [{ id, subscription }] ; un objet { topics: [...] } est refusé (422).
+      if (method === "PATCH") { if (!Array.isArray(body)) return res(422, { message: "The `` field must be an `array`." }); if (!opts.ignoreTopicWrites) for (const t of body) c.topics[t.id] = t.subscription; return res(200, { id: c.id }); }
       if (method === "GET") return res(200, { data: st.topics.map((t) => ({ id: t.id, name: t.name, subscription: c.topics[t.id] || t.default_subscription })), has_more: false });
     }
     if ((m = path.match(/^\/contacts\/([^/]+)\/segments$/)) && method === "GET") {
@@ -240,6 +241,7 @@ export async function newsletterTests({ ok, ko, eq }) {
     const s = await client.subscribe(MAIL, "fr", { now: new Date("2026-11-09T19:30:00Z") });
     const c = st.contacts[0];
     eq("Resend : inscription = abonnée au sujet de sa langue (opt_in), relue chez Resend", [s.subscribed, s.blocked, st.topics.length, c.topics[st.topics[0].id]], [true, false, 1, "opt_in"]);
+    eq("Resend : l'abonnement au sujet part comme l'API le veut (corps = liste [{ id, subscription }], pas { topics: [...] } : 422 sinon)", calls(st, "PATCH", /\/topics$/).map((x) => x.body), [[{ id: st.topics[0].id, subscription: "opt_in" }]]);
     eq("Resend : le contact est créé en minuscules, avec la date de la demande (preuve du consentement), dans la liste « Basketlog newsletter »", [c.email, c.properties[CONSENT_PROP], c.segments, st.segments.map((x) => x.name)], ["tim@gmail.com", "2026-11-09T19:30:00.000Z", [st.segments[0].id], [SEGMENT_NAME]]);
     eq("Resend : sujet créé « opt_out par défaut » (personne n'est abonné d'office), nommé par langue", [st.topics[0].default_subscription, st.topics[0].name], ["opt_out", topicName("fr")]);
     eq("Resend : la propriété consent_at est créée en texte", st.props, [{ key: CONSENT_PROP, type: "string" }]);
