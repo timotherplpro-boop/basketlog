@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Vidéos TikTok / Reels Basketlog à partir des matchs NBA du jour.
+"""Vidéos TikTok / Reels Basketlog à partir des matchs NBA du jour, en anglais (public américain, heures de New York).
 
 Usage : python3 video/make.py --day jour.json --out sortie/ [--formats choc,favori,serre,programme] [--check]
 Quand le plus gros favori de la nuit est en confiance « Très élevée » (88 % et plus), la vidéo « favori » devient « sur » :
 elle passe en premier et montre le bilan réel de ce niveau (champ sureRecord du fichier du jour).
-Le fichier du jour vient de https://basketlog-app.com/api/videos?d=AAAAMMJJ (voir README.md).
+Le fichier du jour vient de https://basketlog-app.com/api/videos?d=AAAAMMJJ&lang=en (voir README.md).
 """
 import argparse
 import functools
@@ -27,20 +27,19 @@ REPO = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 import sound  # noqa: E402
 import voice  # noqa: E402
-from voice import BRAND, agree, fr_num, spoken  # noqa: E402
+from voice import BRAND, agree, an, cap, spoken  # noqa: E402
 
 FPS = 30
 SHOW = {"UTAH": "UTA"}  # sigles affichés
-SING = {"Jazz", "Thunder", "Magic", "Heat"}  # « le Thunder », mais « les Spurs »
 
 
-def les(short):
-    return f"le {short}" if short in SING else f"les {short}"
+def the(short):
+    return f"the {short}"
 
-# Intérêt d'une équipe pour le public français (vitrine, joueurs français, gros marchés).
-POP = {"LAL": 10, "GS": 9, "BOS": 8, "SA": 9, "NY": 7, "OKC": 7, "DEN": 6, "CLE": 6, "MIA": 6, "DAL": 6, "PHI": 6, "HOU": 6,
-       "ATL": 6, "WSH": 5, "MIL": 5, "MIN": 5, "PHX": 5, "LAC": 5, "CHI": 5, "BKN": 4, "DET": 4, "ORL": 4, "IND": 4, "MEM": 4,
-       "NO": 4, "POR": 4, "CHA": 4, "TOR": 3, "SAC": 3, "UTAH": 3}
+# Intérêt d'une équipe pour le public américain (gros marchés, stars, équipes en vue).
+POP = {"LAL": 10, "GS": 9, "BOS": 9, "NY": 9, "OKC": 7, "SA": 7, "DEN": 7, "PHI": 7, "MIA": 7, "DAL": 7, "CHI": 7, "CLE": 6,
+       "MIL": 6, "PHX": 6, "LAC": 6, "MIN": 6, "HOU": 6, "ATL": 5, "BKN": 5, "DET": 5, "ORL": 5, "IND": 5, "MEM": 5, "NO": 5,
+       "SAC": 4, "POR": 4, "CHA": 4, "WSH": 4, "TOR": 4, "UTAH": 4}
 
 
 # ---------- données ----------
@@ -55,41 +54,29 @@ def wl(rec):
 
 
 def parse(g):
-    t = re.sub(r"^Pronostic\s+", "", g.get("title") or "")
-    shortA, shortH = (t.split(" – ") + [g["away"]["abbr"], g["home"]["abbr"]])[:2]
+    t = re.sub(r"\s+prediction$", "", g.get("title") or "")
+    shortA, shortH = (re.split(r" vs | – ", t) + [g["away"]["abbr"], g["home"]["abbr"]])[:2]
     pA, pH = round(num(g["probs"][0]["v"])), round(num(g["probs"][1]["v"]))
     projA, projH = (int(x) for x in re.findall(r"\d+", g.get("proj") or "0-0")[:2])
-    res = g.get("resume") or ""
-    streak = {}
-    m = re.search(r"séries en cours : ([^)]+)\)", res)
-    if m:
-        for part in m.group(1).split(","):
-            mm = re.match(r"\s*(.+?) ([VD])(\d+)\s*$", part)
-            if mm:
-                streak[mm.group(1)] = (mm.group(2), int(mm.group(3)))
-    hr = re.search(r"les (.+?) sont à (\d+-\d+) à domicile et les (.+?) à (\d+-\d+) à l'extérieur", res)
-    b2b = set()
-    m = re.search(r"Fatigue : (.+?) (?:a|ont) joué la veille", res)
-    if m:
-        for name in (shortA, shortH):
-            if name in m.group(1):
-                b2b.add(name)
+    fx = g.get("facts") or {}  # séries, bilans domicile/extérieur, back-to-back (champ « facts » de /api/videos)
     out = {"raw": g, "id": g["id"], "d": g.get("d"), "time": (g.get("tag") or "").split("·")[-1].strip(),
            "venue": (g.get("venue") or "").split("·")[0].strip(), "conf": g.get("conf") or "", "pA": pA, "pH": pH,
            "projA": projA, "projH": projH, "sure": bool(g.get("sure"))}
     for side, short in (("a", shortA), ("h", shortH)):
         tm = g["away" if side == "a" else "home"]
+        f = fx.get("away" if side == "a" else "home") or {}
         absent = []
         for blk in g.get("injuries") or []:
             if blk.get("abbr") == tm["abbr"]:
                 for r in blk.get("rows") or []:
-                    if (r.get("status") or "").startswith("Absent"):
+                    if (r.get("status") or "") in ("Out", "Absent"):
                         absent.append({"name": r["name"], "pts": num((r.get("info") or "").split("·")[-1]) if "pts" in (r.get("info") or "") else 0})
         absent.sort(key=lambda r: -r["pts"])
-        form = next((f["label"] for f in g.get("form") or [] if f.get("abbr") == tm["abbr"]), "")
+        form = next((x["label"] for x in g.get("form") or [] if x.get("abbr") == tm["abbr"]), "")
+        st = re.match(r"([WLVD])(\d+)$", str(f.get("streak") or "").strip())
         out[side] = {"abbr": tm["abbr"], "short": short, "name": tm["name"], "rec": tm["record"], "absent": absent,
-                     "streak": streak.get(short), "b2b": short in b2b, "form": re.sub(r"^\W+\s*", "", form).strip(),
-                     "split": (hr.group(2) if side == "h" else hr.group(4)) if hr else None}
+                     "streak": ({"V": "W", "D": "L"}.get(st.group(1), st.group(1)), int(st.group(2))) if st else None, "b2b": bool(f.get("b2b")),
+                     "form": re.sub(r"^\W+\s*", "", form).strip(), "split": f.get("split")}
     return out
 
 
@@ -99,31 +86,30 @@ def facts(g, side):
     w, l = wl(t["rec"]); out = []
     ab = t["absent"]; big = [r for r in ab if r["pts"] >= 10]
     if len(ab) >= 3 and len(big) >= 2:
-        out.append((9, f"{em} privé de {len(ab)} joueurs", f"dont {big[0]['name']} et {big[1]['name']}",
-                    f"{T} {agree(A, 'est privé', 'sont privés')} de {fr_num(len(ab))} joueurs."))
+        out.append((9, f"{em} missing {len(ab)} players", f"including {big[0]['name']} and {big[1]['name']}",
+                    f"{cap(T)} {agree(A, 'is', 'are')} missing {len(ab)} players."))
     elif big and big[0]["pts"] >= 15:
-        out.append((7, f"{em} sans {big[0]['name'].split(' ')[-1]}", f"{big[0]['name']} : {str(big[0]['pts']).replace('.', ',')} pts par match",
-                    f"{T} {agree(A, 'doit', 'doivent')} faire sans un joueur à plus de {fr_num(int(big[0]['pts']))} points par match."))
+        out.append((7, f"{em} without {big[0]['name'].split(' ')[-1]}", f"{big[0]['name']}: {big[0]['pts']:g} PPG",
+                    f"{cap(T)} {agree(A, 'has', 'have')} to play without a {int(big[0]['pts'])}-point scorer."))
     if w >= 3 and l == 0:
-        out.append((8, f"{em} invaincu", f"{w} victoires en {w} matchs", f"{T} n'{agree(A, 'a', 'ont')} pas encore perdu cette saison."))
+        out.append((8, f"{em} unbeaten", f"{w}-0 this season", f"{cap(T)} {agree(A, 'is', 'are')} still unbeaten this season."))
     if w == 0 and l >= 3:
-        out.append((8, f"{em} : 0 victoire", f"{l} défaites en {l} matchs", f"{T} n'{agree(A, 'a', 'ont')} toujours pas gagné cette saison."))
+        out.append((8, f"{em}: still winless", f"0-{l} this season", f"{cap(T)} {agree(A, 'is', 'are')} still looking for a first win."))
     st = t["streak"]
     if st and st[1] >= 3 and not (w == 0 or l == 0):
-        word = "victoires" if st[0] == "V" else "défaites"
-        out.append((6, f"{em} : {st[1]} {word} de suite", f"bilan {t['rec']}", f"{T} {agree(A, 'reste', 'restent')} sur {fr_num(st[1])} {word} de suite."))
+        word = "wins" if st[0] == "W" else "losses"
+        out.append((6, f"{em}: {st[1]} straight {word}", f"record {t['rec']}", f"{cap(T)} {agree(A, 'has', 'have')} {'won' if st[0] == 'W' else 'lost'} {st[1]} straight."))
     sw, sl = wl(t["split"])
     if t["split"] and sl == 0 and sw >= 2:
-        where = "à domicile" if side == "h" else "à l'extérieur"
-        out.append((5, f"{em} : {t['rec']}", f"et invaincu {where} ({t['split']})", f"{T} n'{agree(A, 'a', 'ont')} pas encore perdu {where} cette saison."))
+        where = "at home" if side == "h" else "on the road"
+        out.append((5, f"{em}: {t['rec']}", f"unbeaten {where} ({t['split']})", f"{cap(T)} {agree(A, 'has', 'have')}n't lost {where} yet."))
     if t["b2b"]:
-        out.append((4, f"{em} a joué hier", "deuxième match en deux soirs", f"{T} {agree(A, 'joue son', 'jouent leur')} deuxième match en deux soirs."))
+        out.append((4, f"{em} played last night", "second game in two nights", f"{cap(T)} {agree(A, 'is', 'are')} on the second night of a back-to-back."))
     f = t["form"].lower()
-    if f:
-        adj = {"irrégulier": agree(A, "irrégulier", "irréguliers")}.get(f, f)
-        out.append((2, f"{em} : {t['rec']}", t["form"].lower(), f"{T} {agree(A, 'est', 'sont')} {adj}."))
+    if f and not f.startswith("no games"):
+        out.append((2, f"{em}: {t['rec']}", f, f"{cap(T)} {agree(A, 'is', 'are')} {f}."))
     else:
-        out.append((1, f"{em} : {t['rec']}", "bilan de la saison", f"{T} : {fr_num(w)} victoires, {fr_num(l)} défaites."))
+        out.append((1, f"{em}: {t['rec']}", "season record", f"{cap(T)}: {w} wins, {l} losses."))
     return sorted(out, key=lambda x: -x[0])
 
 
@@ -167,8 +153,9 @@ def word_at(sentence, word, start, dur):
     return start + dur * max(0, i) / max(1, len(sentence))
 
 
-CTA_RESULT = "Analyses NBA et EuroLeague, match par match"
-DISC = "Probabilités estimées par le modèle Basketlog. Pas un conseil de pari."
+CTA_RESULT = "NBA and EuroLeague analysis, game by game"
+DISC = "Probabilities estimated by the Basketlog model. Not betting advice."
+TAGS = "#NBA #basketball #NBApicks #NBAtonight #Basketlog"
 
 
 def cta(v, title, ask, ask2, say_ask, say_brand):
@@ -186,134 +173,134 @@ def hero_caps(c1, c2, rel, durs, seg_len, hl1=None, hl2=None):
 
 def fmt_choc(g, day):
     v = Video(); A, H = g["a"], g["h"]; F = g[fav_side(g)]; D = g["h" if fav_side(g) == "a" else "a"]
-    s = {"type": "hook", "kind": "vs", "chip": f"NBA · Cette nuit · {g['time']}", "b1": A["short"], "b2": H["short"],
-         "rec1": f"{A['abbr']} · {A['rec']}", "rec2": f"{H['abbr']} · {H['rec']}", "sub": "Le modèle <em>Basketlog</em> a tranché"}
-    rel, _ = v.add(s, [f"{spoken(A['abbr'])} contre {spoken(H['abbr'])}, cette nuit.", f"Le modèle {BRAND} a déjà tranché."], lead=0.1, tail=0.25)
+    s = {"type": "hook", "kind": "vs", "chip": f"NBA · Tonight · {g['time']}", "b1": A["short"], "b2": H["short"],
+         "rec1": f"{A['abbr']} · {A['rec']}", "rec2": f"{H['abbr']} · {H['rec']}", "sub": "The <em>Basketlog</em> model has a pick"}
+    rel, _ = v.add(s, [f"{cap(spoken(A['abbr']))} at {spoken(H['abbr'])}, tonight.", f"The {BRAND} model already has a pick."], lead=0.1, tail=0.25)
     s["subAt"] = rel[1] - 0.05
     c1, c2 = facts(g, "a")[0], facts(g, "h")[0]
     s = {"type": "phone", "page": "match"}
     rel, durs = v.add(s, [c1[3], c2[3]], lead=0.3, tail=0.2, min_dur=4.5)
     s["caps"] = hero_caps(c1, c2, rel, durs, s["t1"] - s["t0"], "away", "home")
-    line = "Forme, absences, fatigue, scénarios : le modèle passe tout au crible."
+    line = "Form, injuries, fatigue, scenarios: the model checks it all."
     s = {"type": "phone", "page": "match", "mode": "scroll", "scrollDur": 2.8}
     rel, durs = v.add(s, [line], lead=0.1, tail=0.2, min_dur=3.6)
-    s["pills"] = {"title": "Le modèle <em>analyse</em>", "items": [{"at": word_at(line, w, rel[0], durs[0]), "text": w} for w in ("Forme", "Absences", "Fatigue", "Scénarios")],
-                  "hotAt": word_at(line, "le modèle", rel[0], durs[0])}
+    s["pills"] = {"title": "The model <em>checks</em>", "items": [{"at": word_at(line, w, rel[0], durs[0]), "text": w} for w in ("Form", "Injuries", "Fatigue", "Scenarios")],
+                  "hotAt": word_at(line, "the model", rel[0], durs[0])}
     s = {"type": "phone", "page": "list", "hlRow": g["id"], "caps": []}
-    rel, durs = v.add(s, ["Et il fait ça pour chaque match NBA, tous les soirs."], lead=0.15, tail=0.25, min_dur=3.6)
-    s["caps"] = [{"at": 0.15, "until": s["t1"] - s["t0"] + 0.1, "l1": "Chaque match <em>NBA</em>", "l2": "+ EuroLeague · tous les soirs"}]
+    rel, durs = v.add(s, ["And it does that for every NBA game, every night."], lead=0.15, tail=0.25, min_dur=3.6)
+    s["caps"] = [{"at": 0.15, "until": s["t1"] - s["t0"] + 0.1, "l1": "Every <em>NBA</em> game", "l2": "+ EuroLeague · every night"}]
     pf = max(g["pA"], g["pH"])
-    s = {"type": "verdict", "chip": "Verdict du modèle", "team": F["short"], "pct": pf,
+    s = {"type": "verdict", "chip": "The model's pick", "team": F["short"], "pct": pf,
          "bar": {"a": {"abbr": A["abbr"], "p": g["pA"]}, "h": {"abbr": H["abbr"], "p": g["pH"]}},
          "score": {"la": F["abbr"], "a": g["projH"] if F is H else g["projA"], "b": g["projA"] if F is H else g["projH"], "lb": D["abbr"]}, "conf": g["conf"].lower()}
     fa, fb = (s["score"]["a"], s["score"]["b"])
-    rel, durs = v.add(s, ["Verdict :", f"{spoken(F['abbr'])} {agree(F['abbr'], 'favori', 'favoris')} à {fr_num(pf)} pour cent.", f"Score projeté : {fr_num(fa)}, {fr_num(fb)}."], lead=0.25, tail=0.35)
+    rel, durs = v.add(s, ["The pick:", f"{cap(spoken(F['abbr']))}, with {an(pf)} {pf} percent chance to win.", f"Projected score: {fa} to {fb}."], lead=0.25, tail=0.35)
     s.update(chipAt=max(0.1, rel[0] - 0.1), teamAt=rel[1] + 0.05, countA=rel[1] + 0.45, countB=rel[1] + durs[1] * 0.8, scoreAt=rel[2] - 0.05, confAt=rel[2] + durs[2] + 0.1)
-    cta(v, "Le reste de l'analyse<br>est sur <em>Basketlog</em>", "Et toi, tu mets qui gagnant ?", "Dis-le en commentaire",
-        "Et toi, tu mets qui gagnant ?", f"Le reste de l'analyse est sur {BRAND}, va voir.")
-    return v, f"{A['short']} – {H['short']} cette nuit ({g['time']}) : le modèle Basketlog donne {les(F['short'])} à {pf} %. Et toi, tu mets qui gagnant ?"
+    cta(v, "The full breakdown<br>is on <em>Basketlog</em>", "Who's winning this one?", "Drop your pick in the comments",
+        "Who's winning this one? Drop your pick in the comments.", f"The full breakdown is on {BRAND}. Go check it out.")
+    return v, f"{A['short']} at {H['short']} tonight ({g['time']} ET): the Basketlog model gives {the(F['short'])} {an(pf)} {pf}% chance to win. Who's winning this one?"
 
 
 def fmt_favori(g, day):
     v = Video(); fs = fav_side(g); F = g[fs]; D = g["h" if fs == "a" else "a"]; pf = max(g["pA"], g["pH"])
-    s = {"type": "hook", "kind": "title", "chip": "NBA · Cette nuit", "b1": "Le plus gros", "b2": "favori", "sub": "selon le modèle <em>Basketlog</em>"}
-    rel, _ = v.add(s, ["Le plus gros favori de la nuit en NBA ?", f"Le modèle {BRAND} a la réponse."], lead=0.1, tail=0.25)
+    s = {"type": "hook", "kind": "title", "chip": "NBA · Tonight", "b1": "The biggest", "b2": "favorite", "sub": "according to the <em>Basketlog</em> model"}
+    rel, _ = v.add(s, ["Who's the biggest NBA favorite tonight?", f"The {BRAND} model has the answer."], lead=0.1, tail=0.25)
     s["subAt"] = rel[1] - 0.05
-    c1 = (0, f"<em>{F['abbr']}</em> vs {D['abbr']}", f"{g['time']} · {g['venue']}", f"{spoken(F['abbr'])} contre {spoken(D['abbr'])}, cette nuit.")
+    c1 = (0, f"<em>{F['abbr']}</em> vs {D['abbr']}", f"{g['time']} · {g['venue']}", f"{cap(spoken(F['abbr']))} versus {spoken(D['abbr'])}, tonight.")
     pool = facts(g, fs) + [x for x in facts(g, "h" if fs == "a" else "a") if x[0] >= 6]
     c2 = sorted(pool, key=lambda x: -x[0])[0]
     s = {"type": "phone", "page": "match"}
     rel, durs = v.add(s, [c1[3], c2[3]], lead=0.3, tail=0.25, min_dur=4.2)
     s["caps"] = hero_caps(c1, c2, rel, durs, s["t1"] - s["t0"], "home" if fs == "h" else "away", "home" if c2 in facts(g, "h") else "away")
-    s = {"type": "verdict", "chip": "Le favori du modèle", "team": F["short"], "pct": pf,
+    s = {"type": "verdict", "chip": "The model's favorite", "team": F["short"], "pct": pf,
          "bar": {"a": {"abbr": g["a"]["abbr"], "p": g["pA"]}, "h": {"abbr": g["h"]["abbr"], "p": g["pH"]}},
          "score": {"la": F["abbr"], "a": g["projH"] if fs == "h" else g["projA"], "b": g["projA"] if fs == "h" else g["projH"], "lb": D["abbr"]}, "conf": g["conf"].lower()}
-    rel, durs = v.add(s, [f"Le modèle donne {spoken(F['abbr'])} {agree(F['abbr'], 'gagnant', 'gagnants')} à {fr_num(pf)} pour cent.",
-                          f"Score projeté : {fr_num(s['score']['a'])}, {fr_num(s['score']['b'])}."], lead=0.25, tail=0.3)
+    rel, durs = v.add(s, [f"The model gives {spoken(F['abbr'])} {an(pf)} {pf} percent chance to win.",
+                          f"Projected score: {s['score']['a']} to {s['score']['b']}."], lead=0.25, tail=0.3)
     s.update(chipAt=0.1, teamAt=rel[0] + 0.25, countA=rel[0] + durs[0] * 0.45, countB=rel[0] + durs[0] * 0.92, scoreAt=rel[1] - 0.05, confAt=rel[1] + durs[1] + 0.1)
-    s = {"type": "twist", "chip": "Mais attention", "line1": D["short"], "pct": 100 - pf, "line2": "de chances de victoire selon le modèle"}
-    rel, durs = v.add(s, ["Mais attention :", f"{spoken(D['abbr'])} {agree(D['abbr'], 'garde', 'gardent')} {fr_num(100 - pf)} pour cent de chances.", "Surprise possible ?"], lead=0.25, tail=0.3)
+    s = {"type": "twist", "chip": "But watch out", "line1": D["short"], "pct": 100 - pf, "line2": "chance to win, according to the model"}
+    rel, durs = v.add(s, ["But watch out:", f"{cap(spoken(D['abbr']))} still {agree(D['abbr'], 'has', 'have')} {an(100 - pf)} {100 - pf} percent chance.", "Upset alert?"], lead=0.25, tail=0.3)
     s.update(chipAt=max(0.1, rel[0] - 0.1), bigAt=max(0.2, rel[1] - 0.95))  # le chiffre tombe juste avant la phrase qui l'annonce
-    cta(v, "Toute l'analyse<br>est sur <em>Basketlog</em>", "Favori solide ou match piège ?", "Dis-le en commentaire",
-        "Favori solide ou match piège ? Dis-le en commentaire.", f"Toute l'analyse est sur {BRAND}, va voir.")
-    return v, f"Le plus gros favori de la nuit en NBA : {les(F['short'])} à {pf} % contre {les(D['short'])}. Favori solide ou match piège ?"
+    cta(v, "The full breakdown<br>is on <em>Basketlog</em>", "Lock or trap game?", "Tell us in the comments",
+        "Lock or trap game? Tell us in the comments.", f"The full breakdown is on {BRAND}. Go check it out.")
+    return v, f"Tonight's biggest NBA favorite: {the(F['short'])} at {pf}% against {the(D['short'])}. Lock or trap game?"
 
 
 def fmt_sur(g, day, rec=None):
     """Confiance très élevée (favori à 88 % et plus) : le pronostic le plus sûr de la nuit, puis le bilan réel de ce niveau."""
     v = Video(); fs = fav_side(g); F = g[fs]; D = g["h" if fs == "a" else "a"]; pf = max(g["pA"], g["pH"])
-    s = {"type": "hook", "kind": "title", "chip": "NBA · Cette nuit", "b1": "Confiance", "b2": "très élevée", "sub": "selon le modèle <em>Basketlog</em>"}
-    rel, _ = v.add(s, ["Le pronostic le plus sûr de la nuit en NBA ?", f"Confiance très élevée pour le modèle {BRAND}."], lead=0.1, tail=0.25)
+    s = {"type": "hook", "kind": "title", "chip": "NBA · Tonight", "b1": "Very high", "b2": "confidence", "sub": "according to the <em>Basketlog</em> model"}
+    rel, _ = v.add(s, ["Tonight's safest NBA pick?", f"Very high confidence from the {BRAND} model."], lead=0.1, tail=0.25)
     s["subAt"] = rel[1] - 0.05
-    c1 = (0, f"<em>{F['abbr']}</em> vs {D['abbr']}", f"{g['time']} · {g['venue']}", f"{spoken(F['abbr'])} contre {spoken(D['abbr'])}, cette nuit.")
+    c1 = (0, f"<em>{F['abbr']}</em> vs {D['abbr']}", f"{g['time']} · {g['venue']}", f"{cap(spoken(F['abbr']))} versus {spoken(D['abbr'])}, tonight.")
     pool = facts(g, fs) + [x for x in facts(g, "h" if fs == "a" else "a") if x[0] >= 6]
     c2 = sorted(pool, key=lambda x: -x[0])[0]
     s = {"type": "phone", "page": "match"}
     rel, durs = v.add(s, [c1[3], c2[3]], lead=0.3, tail=0.25, min_dur=4.2)
     s["caps"] = hero_caps(c1, c2, rel, durs, s["t1"] - s["t0"], "home" if fs == "h" else "away", "home" if c2 in facts(g, "h") else "away")
-    s = {"type": "verdict", "chip": "Le favori du modèle", "team": F["short"], "pct": pf,
+    s = {"type": "verdict", "chip": "The model's favorite", "team": F["short"], "pct": pf,
          "bar": {"a": {"abbr": g["a"]["abbr"], "p": g["pA"]}, "h": {"abbr": g["h"]["abbr"], "p": g["pH"]}},
-         "score": {"la": F["abbr"], "a": g["projH"] if fs == "h" else g["projA"], "b": g["projA"] if fs == "h" else g["projH"], "lb": D["abbr"]}, "conf": "très élevée"}
-    rel, durs = v.add(s, [f"Le modèle donne {spoken(F['abbr'])} {agree(F['abbr'], 'gagnant', 'gagnants')} à {fr_num(pf)} pour cent.",
-                          f"Score projeté : {fr_num(s['score']['a'])}, {fr_num(s['score']['b'])}."], lead=0.25, tail=0.3)
+         "score": {"la": F["abbr"], "a": g["projH"] if fs == "h" else g["projA"], "b": g["projA"] if fs == "h" else g["projH"], "lb": D["abbr"]}, "conf": "very high"}
+    rel, durs = v.add(s, [f"The model gives {spoken(F['abbr'])} {an(pf)} {pf} percent chance to win.",
+                          f"Projected score: {s['score']['a']} to {s['score']['b']}."], lead=0.25, tail=0.3)
     s.update(chipAt=0.1, teamAt=rel[0] + 0.25, countA=rel[0] + durs[0] * 0.45, countB=rel[0] + durs[0] * 0.92, scoreAt=rel[1] - 0.05, confAt=rel[1] + durs[1] + 0.1)
     tail = ""
     if rec and rec.get("n", 0) >= 20:
         # Bilan réel de ce niveau (le même que la carte « Confiance très élevée » de basketlog-app.com/app/bilan)
         ok, n = int(rec["ok"]), int(rec["n"]); rate = round(100 * ok / n)
-        s = {"type": "twist", "chip": "Le bilan du modèle", "line1": f"{ok} sur {n}", "pct": rate,
-             "line2": f"de pronostics justes en confiance très élevée<br>NBA · bilan recalculé depuis {rec.get('since') or 'la saison dernière'}"}
-        rel, durs = v.add(s, ["Et à ce niveau de confiance ?", f"Le modèle a vu juste {fr_num(ok)} fois sur {fr_num(n)} depuis la saison dernière."], lead=0.25, tail=0.45)
+        s = {"type": "twist", "chip": "The model's record", "line1": f"{ok} of {n}", "pct": rate,
+             "line2": f"correct picks at very high confidence<br>NBA · record since {rec.get('since') or 'last season'}"}
+        rel, durs = v.add(s, ["And at this confidence level?", f"The model has been right {ok} times out of {n} since last season."], lead=0.25, tail=0.45)
         s.update(chipAt=max(0.1, rel[0] - 0.1), bigAt=max(0.2, rel[1] - 0.95))
-        tail = f" À ce niveau de confiance, le modèle a vu juste {ok} fois sur {n} depuis la saison dernière ({rate} %)."
-    cta(v, "Toute l'analyse<br>est sur <em>Basketlog</em>", "Favori solide ou match piège ?", "Dis-le en commentaire",
-        "Favori solide ou match piège ? Dis-le en commentaire.", f"Toute l'analyse est sur {BRAND}, va voir.")
-    return v, f"Confiance très élevée cette nuit en NBA : le modèle Basketlog donne {les(F['short'])} à {pf} % contre {les(D['short'])}.{tail} Favori solide ou match piège ?"
+        tail = f" At this confidence level, the model has been right {ok} times out of {n} since last season ({rate}%)."
+    cta(v, "The full breakdown<br>is on <em>Basketlog</em>", "Lock or trap game?", "Tell us in the comments",
+        "Lock or trap game? Tell us in the comments.", f"The full breakdown is on {BRAND}. Go check it out.")
+    return v, f"Very high confidence tonight in the NBA: the Basketlog model gives {the(F['short'])} {an(pf)} {pf}% chance against {the(D['short'])}.{tail} Lock or trap game?"
 
 
 def fmt_serre(g, day):
     v = Video(); A, H = g["a"], g["h"]
-    s = {"type": "hook", "kind": "title", "chip": "NBA · Cette nuit", "b1": "Le match", "b2": "le plus serré", "sub": "selon le modèle <em>Basketlog</em>"}
-    rel, _ = v.add(s, ["Le match le plus serré de la nuit en NBA ?", f"Le modèle {BRAND} a la réponse."], lead=0.1, tail=0.25)
+    s = {"type": "hook", "kind": "title", "chip": "NBA · Tonight", "b1": "The closest", "b2": "game", "sub": "according to the <em>Basketlog</em> model"}
+    rel, _ = v.add(s, ["Tonight's closest NBA game?", f"The {BRAND} model has the answer."], lead=0.1, tail=0.25)
     s["subAt"] = rel[1] - 0.05
-    c1 = (0, f"{A['abbr']} <em>@</em> {H['abbr']}", f"{g['time']} · {g['venue']}", f"{spoken(A['abbr'])} contre {spoken(H['abbr'])}.")
+    c1 = (0, f"{A['abbr']} <em>@</em> {H['abbr']}", f"{g['time']} · {g['venue']}", f"{cap(spoken(A['abbr']))} at {spoken(H['abbr'])}.")
     c2 = sorted(facts(g, "a") + facts(g, "h"), key=lambda x: -x[0])[0]
     s = {"type": "phone", "page": "match"}
     rel, durs = v.add(s, [c1[3], c2[3]], lead=0.3, tail=0.25, min_dur=4.0)
     s["caps"] = hero_caps(c1, c2, rel, durs, s["t1"] - s["t0"], None, "away" if c2 in facts(g, "a") else "home")
-    s = {"type": "split", "chip": "Probabilités du modèle", "a": {"abbr": A["abbr"], "p": g["pA"]}, "h": {"abbr": H["abbr"], "p": g["pH"]},
-         "score": {"la": A["abbr"], "a": g["projA"], "b": g["projH"], "lb": H["abbr"]}, "note": f"Confiance du modèle : <b>{g['conf'].lower()}</b>"}
-    rel, durs = v.add(s, [f"{fr_num(g['pA'])} pour cent contre {fr_num(g['pH'])}.", f"Score projeté : {fr_num(g['projA'])}, {fr_num(g['projH'])}.", "Ça peut basculer des deux côtés."], lead=0.25, tail=0.35)
+    s = {"type": "split", "chip": "Model probabilities", "a": {"abbr": A["abbr"], "p": g["pA"]}, "h": {"abbr": H["abbr"], "p": g["pH"]},
+         "score": {"la": A["abbr"], "a": g["projA"], "b": g["projH"], "lb": H["abbr"]}, "note": f"Model confidence: <b>{g['conf'].lower()}</b>"}
+    rel, durs = v.add(s, [f"{g['pA']} percent to {g['pH']}.", f"Projected score: {g['projA']} to {g['projH']}.", "This one could go either way."], lead=0.25, tail=0.35)
     s.update(chipAt=0.1, splitAt=rel[0], scoreAt=rel[1] - 0.05, noteAt=rel[2] - 0.05)
-    cta(v, "Toute l'analyse<br>est sur <em>Basketlog</em>", "Et toi, tu vois qui gagner ?", "Ton pronostic en commentaire",
-        "Et toi, tu vois qui gagner ?", f"Toute l'analyse est sur {BRAND}, va voir.")
-    return v, f"Le match le plus serré de la nuit en NBA : {A['short']} – {H['short']}, {g['pA']} % contre {g['pH']} % selon le modèle Basketlog. Et toi, tu vois qui gagner ?"
+    cta(v, "The full breakdown<br>is on <em>Basketlog</em>", "Who takes this one?", "Drop your pick in the comments",
+        "Who takes this one? Drop your pick in the comments.", f"The full breakdown is on {BRAND}. Go check it out.")
+    return v, f"Tonight's closest NBA game: {A['short']} at {H['short']}, {g['pA']}% to {g['pH']}% according to the Basketlog model. Who takes this one?"
 
 
 def fmt_programme(games, day):
     v = Video(); n = len(games)
-    s = {"type": "hook", "kind": "title", "chip": "NBA · Cette nuit", "b1": f"{n} matchs", "b2": "au programme", "sub": "Les favoris du modèle <em>Basketlog</em>"}
-    rel, _ = v.add(s, [f"{fr_num(n).capitalize()} matchs NBA cette nuit.", f"Le modèle {BRAND} a choisi ses favoris."], lead=0.1, tail=0.25)
+    s = {"type": "hook", "kind": "title", "chip": "NBA · Tonight", "b1": f"{n} games", "b2": "on the slate", "sub": "The <em>Basketlog</em> model's favorites"}
+    rel, _ = v.add(s, [f"{n} NBA games tonight.", f"The {BRAND} model picked its favorites."], lead=0.1, tail=0.25)
     s["subAt"] = rel[1] - 0.05
     order = {r: i for i, r in enumerate(x["id"] for x in games)}
     cards = []
     for x in sorted(games, key=lambda x: order[x["id"]])[:8]:
         fs = fav_side(x)
-        cards.append({"id": x["id"], "time": x["time"], "a": SHOW.get(x["a"]["abbr"], x["a"]["abbr"]), "h": SHOW.get(x["h"]["abbr"], x["h"]["abbr"]), "fav": fs, "p": f"{SHOW.get(x[fs]['abbr'], x[fs]['abbr'])} {max(x['pA'], x['pH'])} %"})
+        cards.append({"id": x["id"], "time": x["time"], "a": SHOW.get(x["a"]["abbr"], x["a"]["abbr"]), "h": SHOW.get(x["h"]["abbr"], x["h"]["abbr"]), "fav": fs, "p": f"{SHOW.get(x[fs]['abbr'], x[fs]['abbr'])} {max(x['pA'], x['pH'])}%"})
     fav = max(games, key=lambda x: max(x["pA"], x["pH"])); close = min(games, key=lambda x: abs(x["pH"] - 50))
     F = fav[fav_side(fav)]
     step = 0.16; cards_at = 0.45; lead = cards_at + step * len(cards) + 0.35
-    s = {"type": "program", "chip": "Heures de Paris", "title": "Les favoris", "cards": cards, "cardsAt": cards_at, "cardStep": step}
-    first = "En confiance très élevée" if fav["sure"] else "Le plus gros favori"
-    rel, durs = v.add(s, [f"{first} : {spoken(F['abbr'])}, à {fr_num(max(fav['pA'], fav['pH']))} pour cent.",
-                          f"Le plus serré : {spoken(close['a']['abbr'])} contre {spoken(close['h']['abbr'])}."], lead=lead, tail=0.5)
+    s = {"type": "program", "chip": "Times ET", "title": "The favorites", "cards": cards, "cardsAt": cards_at, "cardStep": step}
+    first = "Very high confidence" if fav["sure"] else "Biggest favorite"
+    rel, durs = v.add(s, [f"{first}: {spoken(F['abbr'])}, at {max(fav['pA'], fav['pH'])} percent.",
+                          f"Closest game: {spoken(close['a']['abbr'])} at {spoken(close['h']['abbr'])}."], lead=lead, tail=0.5)
     shown = {c["id"] for c in cards}
     sure = [x["id"] for x in games if x["sure"] and x["id"] in shown] if fav["sure"] else []
-    s["marks"] = [{"id": i, "at": rel[0], "label": "Confiance très élevée"} for i in sure] or [{"id": fav["id"], "at": rel[0], "label": "Plus gros favori"}]
-    s["marks"].append({"id": close["id"], "at": rel[1], "label": "Le plus serré"})
-    cta(v, "Toutes les analyses<br>sont sur <em>Basketlog</em>", "Ton pronostic pour cette nuit ?", "Dis-le en commentaire",
-        "Et toi, ton pronostic pour cette nuit ?", f"Toutes les analyses sont sur {BRAND}, va voir.")
-    return v, f"{n} matchs NBA cette nuit : les favoris du modèle Basketlog. {first} : {les(F['short'])} ({max(fav['pA'], fav['pH'])} %). Ton pronostic ?"
+    s["marks"] = [{"id": i, "at": rel[0], "label": "Very high confidence"} for i in sure] or [{"id": fav["id"], "at": rel[0], "label": "Biggest favorite"}]
+    s["marks"].append({"id": close["id"], "at": rel[1], "label": "Closest game"})
+    cta(v, "Every breakdown<br>is on <em>Basketlog</em>", "Your picks for tonight?", "Drop them in the comments",
+        "What are your picks for tonight? Drop them in the comments.", f"Every breakdown is on {BRAND}. Go check it out.")
+    return v, f"{n} NBA games tonight: the Basketlog model's favorites. {first}: {the(F['short'])} ({max(fav['pA'], fav['pH'])}%). What are your picks?"
 
 
 def cues_for(segs):
@@ -489,6 +476,9 @@ def main():
     ap.add_argument("--check", action="store_true", help="quelques images fixes par vidéo, sans rendu complet")
     a = ap.parse_args()
     day = json.load(open(a.day))
+    # Vidéos en anglais (public américain) : le fichier du jour doit venir de /api/videos?lang=en
+    if day.get("lang") != "en":
+        sys.exit("Fichier du jour pas en anglais : le prendre sur https://basketlog-app.com/api/videos?d=AAAAMMJJ&lang=en")
     # Seulement les matchs à venir (un match déjà commencé n'a plus d'intérêt pour une vidéo de pronostic)
     games = [parse(g) for g in day.get("games") or [] if g.get("state", "pre") == "pre"]
     if not games:
@@ -538,7 +528,7 @@ def main():
     if not a.check:
         with open(os.path.join(outdir, "legendes.txt"), "w") as fh:
             for s in summary:
-                fh.write(f"{s['files'][0]}\n{s['caption']}\n#NBA #basket #basketball #pronostic #Basketlog\n\n")
+                fh.write(f"{s['files'][0]}\n{s['caption']}\n{TAGS}\n\n")
         json.dump(summary, open(os.path.join(outdir, "videos.json"), "w"), ensure_ascii=False, indent=1)
         print(json.dumps(summary, ensure_ascii=False, indent=1))
 

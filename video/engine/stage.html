@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><title>Basketlog vidéo</title>
+<html lang="en"><head><meta charset="utf-8"><title>Basketlog video</title>
 <link rel="stylesheet" href="fonts/inter/latin-500.css"><link rel="stylesheet" href="fonts/inter/latin-600.css"><link rel="stylesheet" href="fonts/inter/latin-700.css"><link rel="stylesheet" href="fonts/inter/latin-800.css">
 <link rel="stylesheet" href="fonts/jetbrains-mono/latin-500.css"><link rel="stylesheet" href="fonts/jetbrains-mono/latin-700.css"><link rel="stylesheet" href="fonts/tilt-warp/latin-400.css">
 <style>
@@ -187,13 +187,13 @@ function build() {
       d.append(h("div", "abs center k-chip", `<span class="chip"><span class="dot"></span>${s.chip}</span>`, "top:118px"));
       d.append(h("div", "abs center big orange vteam k-team", s.team, "top:172px"));
       d.append(h("div", "abs center vpct k-pct", `<span class="k-num">0</span><small>%</small>`, "top:262px"));
-      d.append(h("div", "abs vbarw k-bar", `<div class="vbar"><i class="k-ba" style="background:#6f675f"></i><i class="k-bh" style="background:linear-gradient(90deg,#c2410c,#ff7a1a)"></i></div><div class="vlab"><span>${s.bar.a.abbr} ${s.bar.a.p} %</span><b>${s.bar.h.abbr} ${s.bar.h.p} %</b></div>`, "top:500px"));
-      d.append(h("div", "abs center vscore k-score", `<div class="lab">Score projeté</div><div class="sc"><span>${s.score.la}</span>${s.score.a} – ${s.score.b}<span>${s.score.lb}</span></div>`, "top:572px"));
-      if (s.conf) d.append(h("div", "abs center vnote k-conf", `Confiance du modèle : <b>${s.conf}</b>`, "top:672px"));
+      d.append(h("div", "abs vbarw k-bar", `<div class="vbar"><i class="k-ba" style="background:#6f675f"></i><i class="k-bh" style="background:linear-gradient(90deg,#c2410c,#ff7a1a)"></i></div><div class="vlab"><span>${s.bar.a.abbr} ${s.bar.a.p}%</span><b>${s.bar.h.abbr} ${s.bar.h.p}%</b></div>`, "top:500px"));
+      d.append(h("div", "abs center vscore k-score", `<div class="lab">Projected score</div><div class="sc"><span>${s.score.la}</span>${s.score.a} – ${s.score.b}<span>${s.score.lb}</span></div>`, "top:572px"));
+      if (s.conf) d.append(h("div", "abs center vnote k-conf", `Model confidence: <b>${s.conf}</b>`, "top:672px"));
     } else if (s.type === "split") {
       d.append(h("div", "abs center k-chip", `<span class="chip"><span class="dot"></span>${s.chip}</span>`, "top:150px"));
       d.append(h("div", "abs split k-split", `<div class="col"><div class="ab peach">${s.a.abbr}</div><div class="p peach"><span class="k-na">0</span><small>%</small></div></div><div class="mid">VS</div><div class="col"><div class="ab orange">${s.h.abbr}</div><div class="p orange"><span class="k-nh">0</span><small>%</small></div></div>`, "top:236px"));
-      d.append(h("div", "abs center vscore k-score", `<div class="lab">Score projeté</div><div class="sc"><span>${s.score.la}</span>${s.score.a} – ${s.score.b}<span>${s.score.lb}</span></div>`, "top:470px"));
+      d.append(h("div", "abs center vscore k-score", `<div class="lab">Projected score</div><div class="sc"><span>${s.score.la}</span>${s.score.a} – ${s.score.b}<span>${s.score.lb}</span></div>`, "top:470px"));
       if (s.note) d.append(h("div", "abs center vnote k-note", s.note, "top:580px"));
     } else if (s.type === "twist") {
       d.append(h("div", "abs center k-chip", `<span class="chip"><span class="dot"></span>${s.chip}</span>`, "top:150px"));
