@@ -73,9 +73,9 @@ def parse(g):
                         absent.append({"name": r["name"], "pts": num((r.get("info") or "").split("·")[-1]) if "pts" in (r.get("info") or "") else 0})
         absent.sort(key=lambda r: -r["pts"])
         form = next((x["label"] for x in g.get("form") or [] if x.get("abbr") == tm["abbr"]), "")
-        st = re.match(r"([WL])(\d+)$", str(f.get("streak") or ""))
+        st = re.match(r"([WLVD])(\d+)$", str(f.get("streak") or "").strip())
         out[side] = {"abbr": tm["abbr"], "short": short, "name": tm["name"], "rec": tm["record"], "absent": absent,
-                     "streak": (st.group(1), int(st.group(2))) if st else None, "b2b": bool(f.get("b2b")),
+                     "streak": ({"V": "W", "D": "L"}.get(st.group(1), st.group(1)), int(st.group(2))) if st else None, "b2b": bool(f.get("b2b")),
                      "form": re.sub(r"^\W+\s*", "", form).strip(), "split": f.get("split")}
     return out
 
@@ -98,7 +98,7 @@ def facts(g, side):
     st = t["streak"]
     if st and st[1] >= 3 and not (w == 0 or l == 0):
         word = "wins" if st[0] == "W" else "losses"
-        out.append((6, f"{em}: {st[1]} straight {word}", f"record {t['rec']}", f"{cap(T)} {agree(A, 'has', 'have')} {st[1]} straight {word}."))
+        out.append((6, f"{em}: {st[1]} straight {word}", f"record {t['rec']}", f"{cap(T)} {agree(A, 'has', 'have')} {'won' if st[0] == 'W' else 'lost'} {st[1]} straight."))
     sw, sl = wl(t["split"])
     if t["split"] and sl == 0 and sw >= 2:
         where = "at home" if side == "h" else "on the road"

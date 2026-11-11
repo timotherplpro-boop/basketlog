@@ -19,6 +19,8 @@ export const maxDuration = 30;
 // ?lang=en : mêmes données en anglais (textes de la version /en du site, heures de New York), pour les vidéos US.
 // « facts » : séries, bilans domicile/extérieur et back-to-back en clair, pour ne pas les relire dans le résumé.
 const pct = (p, L) => (L.en ? `${Math.round(p * 100)}%` : `${Math.round(p * 100)} %`);
+// Série en cours toujours en W/L (« V3 » / « D2 » côté données françaises).
+const wlStreak = (x) => (x ? String(x).trim().replace(/^V/, "W").replace(/^D/, "L") : null);
 const vd = (l) => `${l.filter((x) => x.res === "W").length}-${l.filter((x) => x.res !== "W").length}`;
 const dec1 = (x, L) => (L.en ? x.toFixed(1) : x.toFixed(1).replace(".", ","));
 
@@ -65,8 +67,8 @@ export async function GET(req) {
       sure: conf === "Très élevée",
       injuries: [inj(aw, g.away), inj(h, g.home)],
       facts: {
-        away: { streak: aw.cur?.streak || null, split: aw.cur?.road && aw.cur.road !== "0-0" ? aw.cur.road : null, b2b: !!aw.b2b },
-        home: { streak: h.cur?.streak || null, split: h.cur?.home && h.cur.home !== "0-0" ? h.cur.home : null, b2b: !!h.b2b },
+        away: { streak: wlStreak(aw.cur?.streak), split: aw.cur?.road && aw.cur.road !== "0-0" ? aw.cur.road : null, b2b: !!aw.b2b },
+        home: { streak: wlStreak(h.cur?.streak), split: h.cur?.home && h.cur.home !== "0-0" ? h.cur.home : null, b2b: !!h.b2b },
       },
     };
   });
