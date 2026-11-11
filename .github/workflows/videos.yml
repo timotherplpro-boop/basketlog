@@ -67,7 +67,7 @@ jobs:
           [ -z "$D" ] && D=$(TZ=America/New_York date +%Y%m%d)
           [[ "$D" =~ ^[0-9]{8}$ ]] || { echo "Date invalide : $D"; exit 1; }
           echo "D=$D" >> "$GITHUB_ENV"
-          curl -sf --retry 4 --retry-delay 30 --retry-all-errors "https://basketlog-app.com/api/videos?d=$D" -o jour.json
+          curl -sf --retry 4 --retry-delay 30 --retry-all-errors "https://basketlog-app.com/api/videos?d=$D&lang=en" -o jour.json
           N=$(python3 -c "import json; j = json.load(open('jour.json')); print(sum(1 for g in j.get('games') or [] if g.get('state', 'pre') == 'pre'))")
           echo "$N matchs à venir le $D"
           echo "n=$N" >> "$GITHUB_OUTPUT"
