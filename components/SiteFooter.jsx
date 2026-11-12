@@ -55,6 +55,8 @@ export default function SiteFooter({ L, compact = false }) {
           <a href="https://www.youtube.com/@basketlog" target="_blank" rel="me noopener">{L.t("Basketlog sur YouTube", "Basketlog on YouTube", "Basketlog en YouTube")}</a>
           <a href="https://www.tiktok.com/@basketlog" target="_blank" rel="me noopener">{L.t("Basketlog sur TikTok", "Basketlog on TikTok", "Basketlog en TikTok")}</a>
           <a href="https://bsky.app/profile/basketlog.bsky.social" target="_blank" rel="me noopener">{L.t("Basketlog sur Bluesky", "Basketlog on Bluesky", "Basketlog en Bluesky")}</a>
+          <a href="https://www.instagram.com/basketlog_app/" target="_blank" rel="me noopener">{L.t("Basketlog sur Instagram", "Basketlog on Instagram", "Basketlog en Instagram")}</a>
+          <a href="https://www.facebook.com/profile.php?id=61596281440513" target="_blank" rel="me noopener">{L.t("Basketlog sur Facebook", "Basketlog on Facebook", "Basketlog en Facebook")}</a>
           <a href="https://www.linkedin.com/company/basketlog" target="_blank" rel="me noopener">{L.t("Basketlog sur LinkedIn", "Basketlog on LinkedIn", "Basketlog en LinkedIn")}</a>
           <a href="https://t.me/basketlog" target="_blank" rel="me noopener">{L.t("Basketlog sur Telegram", "Basketlog on Telegram", "Basketlog en Telegram")}</a>
         </nav>
