@@ -5,7 +5,7 @@ import { nbaPicks, summarize } from "../../lib/history";
 import { nbaToday, seasonForDate, shiftDate } from "../../lib/espn";
 import { confText } from "../../lib/matchtext";
 import JsonLd from "../../components/JsonLd";
-import { pageMeta } from "../../lib/seo";
+import { pageMeta, topFavorites } from "../../lib/seo";
 import { SITE } from "../../lib/site";
 import { getL } from "../../lib/lang-server";
 import { pctOf, fmtDate, fmtTime } from "../../lib/i18n";
@@ -22,7 +22,7 @@ export async function generateMetadata() {
     title: L.t(
       "Pronostic basket gratuit du jour : NBA et EuroLeague – Basketlog",
       "Free basketball predictions today: NBA and EuroLeague – Basketlog",
-      "Pronósticos de baloncesto gratis de hoy: NBA y Euroliga – Basketlog"
+      "Pronósticos de baloncesto hoy gratis: NBA y Euroliga – Basketlog"
     ),
     description: L.t(
       "Pronostic basket gratuit pour chaque match NBA et EuroLeague d'aujourd'hui et de demain : favori, probabilités de victoire, score projeté et total de points.",
@@ -74,7 +74,7 @@ function PickList({ games, href, L }) {
   );
 }
 
-function faqOf(L, s) {
+function faqOf(L, s, favs = []) {
   const rate = s.n > 0
     ? L.t(
       `Cette saison, le modèle a trouvé le bon vainqueur dans ${pctOf(s.pct, L)} des ${s.n} matchs NBA terminés. Tout le détail, match par match, est sur la page Bilan.`,
@@ -82,7 +82,17 @@ function faqOf(L, s) {
       `Esta temporada, el modelo ha acertado el ganador en el ${pctOf(s.pct, L)} de los ${s.n} partidos NBA terminados. Todo el detalle, partido a partido, está en la página Balance.`
     )
     : L.t("Tout le détail, match par match, est sur la page Bilan.", "The full game-by-game detail is on the Track record page.", "Todo el detalle, partido a partido, está en la página Balance.");
+  // Question du jour, calculée à partir des matchs déjà chargés (« favoritos para hoy nba » dans la Search Console).
+  const today = favs.length ? [{
+    q: L.t("Quels sont les favoris NBA du jour ?", "Who are today's NBA favorites?", "¿Cuáles son los favoritos de la NBA hoy?"),
+    a: L.t(
+      `Selon le modèle de Basketlog, les plus gros favoris des prochains matchs NBA sont : ${favs.join(", ")}. Le pourcentage est la probabilité de victoire de chaque équipe.`,
+      `According to Basketlog's model, the biggest favorites in the next NBA games are: ${favs.join(", ")}. The percentage is each team's win probability.`,
+      `Según el modelo de Basketlog, los grandes favoritos de los próximos partidos de la NBA son: ${favs.join(", ")}. El porcentaje es la probabilidad de victoria de cada equipo.`
+    ),
+  }] : [];
   return [
+    ...today,
     {
       q: L.t("Les pronostics basket de Basketlog sont-ils gratuits ?", "Are Basketlog's basketball predictions free?", "¿Los pronósticos de baloncesto de Basketlog son gratis?"),
       a: L.t(
@@ -147,7 +157,7 @@ export default async function PronosticBasketPage() {
     pHome: a.pHome, homePts: a.homePts, awayPts: a.awayPts, total: a.total, confidence: a.confidence,
   }));
   const s = summarize(picks || []);
-  const faq = faqOf(L, s);
+  const faq = faqOf(L, s, topFavorites(nba, L));
   const url = `${SITE}${L.href(PATH)}`;
 
   const ld = [

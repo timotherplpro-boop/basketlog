@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata() {
   const L = await getL();
   return pageMeta({
-    title: L.t("Pronostic EuroLeague (Euroligue) : matchs et classement – Basketlog", "EuroLeague predictions: games, analysis and standings – Basketlog", "Pronósticos Euroliga: partidos, análisis y clasificación – Basketlog"),
+    title: L.t("Pronostic EuroLeague (Euroligue) : matchs et classement – Basketlog", "EuroLeague predictions today: games, win probabilities, standings", "Pronósticos Euroliga hoy: partidos, probabilidades y clasificación"),
     description: L.t(
       "Pronostic Euroligue gratuit pour chaque journée d'EuroLeague : probabilités de victoire, score projeté et forme des 20 clubs, avec le classement à jour.",
       "EuroLeague predictions for every round: win probabilities, projected score and form for all 20 clubs, with up-to-date standings.", "Pronósticos de la Euroliga para cada jornada: probabilidades de victoria, marcador proyectado y forma de los 20 clubes, con la clasificación actualizada."
@@ -35,7 +35,7 @@ export default async function EuroLeaguePage() {
     <main className="app-page wide">
       <AppTabs active="euroleague" />
       <div className="app-head">
-        <h1>{L.t("EuroLeague", "EuroLeague", "Euroliga")} {year}-{String(year + 1).slice(2)}</h1>
+        <h1>{L.t("Pronostics EuroLeague", "EuroLeague predictions", "Pronósticos Euroliga")} {year}-{String(year + 1).slice(2)}</h1>
         <p>{L.t("Les 20 meilleurs clubs d'Europe, analysés comme la NBA", "Europe's top 20 clubs, analyzed like the NBA", "Los 20 mejores clubes de Europa, analizados como la NBA")}</p>
         <p className="note">{L.t("Probabilités, score projeté et forme : clique sur un match pour l'analyse complète.", "Probabilities, projected score and form: click a game for the full analysis.", "Probabilidades, marcador proyectado y forma: haz clic en un partido para ver el análisis completo.")}</p>
       </div>
