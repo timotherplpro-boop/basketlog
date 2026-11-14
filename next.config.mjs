@@ -19,13 +19,20 @@ const nextConfig = {
         headers: [
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
           { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
-          // Interdit d'intégrer le site dans la page d'un autre site, les objets Flash/plugins et le détournement de <base>.
+        ],
+      },
+      // Interdit d'intégrer le site dans la page d'un autre site, les objets Flash/plugins et le détournement de <base>,
+      // sauf pour le widget (/api/widget), fait justement pour être intégré par les sites partenaires.
+      {
+        source: "/:path((?!api/widget).*)",
+        headers: [
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
           { key: "Content-Security-Policy", value: "frame-ancestors 'self'; object-src 'none'; base-uri 'self'" },
         ],
       },
+      { source: "/api/widget", headers: [{ key: "Content-Security-Policy", value: "frame-ancestors *; object-src 'none'; base-uri 'self'" }] },
     ];
   },
   // Nom de domaine comme nom de compte Bluesky : identifiant du compte servi par app/api/atproto-did.

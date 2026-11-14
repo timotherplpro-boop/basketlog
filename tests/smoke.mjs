@@ -37,7 +37,7 @@ const ERROR_PAGE = /Une erreur est survenue|Application error|Internal Server Er
 
 async function pages() {
   console.log("Pages");
-  for (const p of ["/", "/en", "/es", "/analyse-basket", "/en/analyse-basket", "/es/analyse-basket", "/pronostic-basket", "/en/pronostic-basket", "/es/pronostic-basket", "/app", "/app/matchs", "/app/bilan", "/app/bilan?l=pub", "/app/classement", "/app/euroleague", "/pro", "/en/pro", "/es/pro", "/pro?code=TESTAUTO", "/avis", "/en/avis", "/es/avis", "/methode", "/cgu", "/cgv", "/confidentialite", "/mentions-legales", "/cookies", "/reinitialiser", "/en/reinitialiser", "/es/reinitialiser", "/newsletter/confirmer", "/en/newsletter/confirmer", "/es/newsletter/confirmer", "/sitemap.xml", "/robots.txt"]) {
+  for (const p of ["/", "/en", "/es", "/analyse-basket", "/en/analyse-basket", "/es/analyse-basket", "/pronostic-basket", "/en/pronostic-basket", "/es/pronostic-basket", "/app", "/app/matchs", "/app/bilan", "/app/bilan?l=pub", "/app/classement", "/app/euroleague", "/pro", "/en/pro", "/es/pro", "/pro?code=TESTAUTO", "/avis", "/en/avis", "/es/avis", "/methode", "/widget", "/en/widget", "/es/widget", "/cgu", "/cgv", "/confidentialite", "/mentions-legales", "/cookies", "/reinitialiser", "/en/reinitialiser", "/es/reinitialiser", "/newsletter/confirmer", "/en/newsletter/confirmer", "/es/newsletter/confirmer", "/sitemap.xml", "/robots.txt"]) {
     const r = await get(p);
     if (r.status !== 200) ko(p, `HTTP ${r.status}`);
     else if (ERROR_PAGE.test(r.text)) ko(p, "page d'erreur affichée");
@@ -257,6 +257,24 @@ async function offreEnLigne() {
     : ko("/api/promo : code de l'offre active", JSON.stringify(promo.body));
 }
 
+// Widget à intégrer : page HTML autonome, gardée par le CDN, intégrable par d'autres sites (le reste du site ne l'est pas).
+async function widgetRoute() {
+  console.log("Widget");
+  for (const [lang, re] of [["fr", /Probabilités NBA/], ["en", /NBA win probabilities/], ["es", /Probabilidades NBA/]]) {
+    const res = await fetch(`${BASE}/api/widget?lang=${lang}`, { headers: { "user-agent": "basketlog-tests" } });
+    const text = await res.text();
+    const csp = res.headers.get("content-security-policy") || "";
+    res.status === 200 && re.test(text) && /Basketlog/.test(text) && /public/.test(res.headers.get("cache-control") || "") && /frame-ancestors \*/.test(csp) && !res.headers.get("x-frame-options")
+      ? ok(`/api/widget (${lang}) : HTML, lien Basketlog, cache public, intégrable partout`)
+      : ko(`/api/widget (${lang})`, `HTTP ${res.status} csp=${csp} xfo=${res.headers.get("x-frame-options")} ${text.slice(0, 80)}`);
+  }
+  const page = await fetch(`${BASE}/widget`, { headers: { "user-agent": "basketlog-tests" } });
+  const ptext = await page.text();
+  page.status === 200 && /api\/widget\?lang=fr/.test(ptext) && /frame-ancestors 'self'/.test(page.headers.get("content-security-policy") || "")
+    ? ok("/widget : aperçu et code d'intégration, la page elle-même reste non intégrable")
+    : ko("/widget", `HTTP ${page.status} csp=${page.headers.get("content-security-policy")}`);
+}
+
 async function videosApi() {
   console.log("Données des vidéos");
   const r = await get("/api/videos");
@@ -275,6 +293,7 @@ await protectedRoutes();
 await newsletterRoutes();
 await promoCodes();
 await videosApi();
+await widgetRoute();
 { const u = await unit(); passed += u.passed; failed += u.failed; } // traduction des avis (sans serveur)
 console.log(`\n${passed} réussis, ${failed} en échec, ${skipped} ignorés`);
 process.exit(failed ? 1 : 0);

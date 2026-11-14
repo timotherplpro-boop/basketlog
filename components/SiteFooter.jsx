@@ -49,6 +49,7 @@ export default function SiteFooter({ L, compact = false }) {
           <Link href={L.href("/methode")}>{L.t("Méthode", "Methodology", "Metodología")}</Link>
           <Link href={L.href("/pro")}>Basketlog Pro</Link>
           <Link href={L.href("/avis")}>{L.t("Avis", "Reviews", "Opiniones")}</Link>
+          <Link href={L.href("/widget")}>{L.t("Widget pour votre site", "Widget for your site", "Widget para tu web")}</Link>
           {/* Comptes officiels (mêmes adresses que sameAs dans app/layout.jsx) : liens visibles pour que Google
               relie ces pages au nom « Basketlog » et les découvre depuis le site. */}
           <a href="https://x.com/Basketlog" target="_blank" rel="me noopener">{L.t("Basketlog sur X", "Basketlog on X", "Basketlog en X")}</a>

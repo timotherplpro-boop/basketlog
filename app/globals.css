@@ -1729,3 +1729,8 @@ button.comp-more { border: 0; background: none; padding: 0; font-family: inherit
 @media (max-width: 480px) {
   .modal-box .exo h3, .modal-box.ulk-box .exo h3 { font-size: 22px; }
 }
+
+/* Page /widget : code d'intégration à copier */
+.copy-code { position: relative; margin: 8px 0 18px; }
+.copy-code pre { margin: 0; padding: 12px 12px 44px; border: 1px solid var(--line); border-radius: 10px; overflow-x: auto; font-size: 12px; line-height: 1.5; white-space: pre-wrap; word-break: break-all; }
+.copy-code button { position: absolute; right: 8px; bottom: 8px; padding: 6px 12px; border: 0; border-radius: 8px; background: var(--orange); color: #fff; font-weight: 600; cursor: pointer; }
