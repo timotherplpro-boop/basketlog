@@ -14,7 +14,7 @@ jobs:
     timeout-minutes: 15
     env:
       SESSION_SECRET: tests-ci-uniquement
-      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      # Pas de NEXT_PUBLIC_SITE_URL : le site et les tests unitaires utilisent l'adresse publique (https://basketlog-app.com).
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@v4

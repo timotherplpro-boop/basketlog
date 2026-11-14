@@ -6,6 +6,9 @@ import { unit } from "./unit.mjs";
 
 const BASE = (process.argv[2] || process.env.BASE_URL || "http://localhost:3000").replace(/\/$/, "");
 const SECRET = process.env.SESSION_SECRET || "";
+// Site en ligne (vérification du matin) : les réglages de production sont actifs (offre de sortie, publications), et les
+// sessions de test ne peuvent pas être signées (pas de SESSION_SECRET) : on vérifie alors la forme des réponses, pas l'état.
+const LIVE = !/^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(BASE);
 let failed = 0, passed = 0, skipped = 0;
 const ok = (name) => { passed++; console.log(`  ok   ${name}`); };
 const ko = (name, why) => { failed++; console.log(`  ÉCHEC ${name} : ${why}`); };
@@ -23,6 +26,11 @@ async function get(path, { cookie, method = "GET", body, ua = "basketlog-tests",
     body: body ? JSON.stringify(body) : undefined,
   });
   return { status: res.status, text: await res.text(), cache: res.headers.get("cache-control") || "" };
+}
+
+async function json(path) {
+  const r = await get(path);
+  try { return { status: r.status, body: JSON.parse(r.text) }; } catch { return { status: r.status, body: null }; }
 }
 
 const ERROR_PAGE = /Une erreur est survenue|Application error|Internal Server Error/i;
@@ -99,7 +107,7 @@ async function protectedRoutes() {
   const preview = await get("/api/social");
   let pv = null;
   try { pv = JSON.parse(preview.text); } catch {}
-  preview.status === 200 && pv && "posts" in pv && pv.status && pv.status.enabled === false && !/TOKEN|PASSWORD/i.test(preview.text)
+  preview.status === 200 && pv && "posts" in pv && pv.status && (LIVE ? typeof pv.status.enabled === "boolean" : pv.status.enabled === false) && !/TOKEN|PASSWORD/i.test(preview.text)
     ? ok("aperçu des publications : public, rien d'activé, aucun code d'accès")
     : ko("aperçu des publications : public, rien d'activé, aucun code d'accès", `HTTP ${preview.status} ${preview.text.slice(0, 120)}`);
   const did = await get("/.well-known/atproto-did");
@@ -188,10 +196,6 @@ async function promoCodes() {
     const r = await get(path);
     re.test(r.text) ? ok(`${path} : champ « ${label} » proposé`) : ko(`${path} : champ « ${label} » proposé`, "libellé absent");
   }
-  const json = async (path) => {
-    const r = await get(path);
-    try { return { status: r.status, body: JSON.parse(r.text) }; } catch { return { status: r.status, body: null }; }
-  };
   for (const [path, name] of [["/api/promo", "sans code"], ["/api/promo?code=a", "trop court"], ["/api/promo?code=%21%21%21%20", "symboles seuls"]]) {
     const r = await json(path);
     r.status === 200 && r.body?.ok === false && r.body.raison === "format" ? ok(`/api/promo : ${name} refusé`) : ko(`/api/promo : ${name} refusé`, `HTTP ${r.status} ${JSON.stringify(r.body)}`);
@@ -201,6 +205,7 @@ async function promoCodes() {
   refused ? ok("/api/promo : code inconnu jamais accepté") : ko("/api/promo : code inconnu jamais accepté", `HTTP ${unk.status} ${JSON.stringify(unk.body)}`);
   // Offre de dernière chance : éteinte tant qu'elle n'est pas réglée et confirmée par Whop (réponse vide, jamais un code), et
   // le diagnostic n'est lisible que par l'admin.
+  if (LIVE) return offreEnLigne();
   const offre = await get("/api/offre");
   let oj = null;
   try { oj = JSON.parse(offre.text); } catch {}
@@ -228,6 +233,27 @@ async function promoCodes() {
   }
   const promoOffre = await json("/api/promo?code=BIENVENUE10");
   promoOffre.body?.ok === false ? ok("/api/promo : le code de l'offre de sortie n'est jamais accepté tant qu'elle est éteinte") : ko("/api/promo : code de l'offre éteinte", JSON.stringify(promoOffre.body));
+}
+
+// Site en ligne : l'offre peut être activée (code et remise venant de Vercel, vérifiés auprès de Whop). On vérifie que la
+// réponse est cohérente : vide si éteinte, sinon un code valide accepté par /api/promo avec la même remise, et le diagnostic
+// toujours caché aux visiteurs.
+async function offreEnLigne() {
+  const offre = await get("/api/offre");
+  let oj = null;
+  try { oj = JSON.parse(offre.text); } catch {}
+  const off = oj && typeof oj === "object" && Object.keys(oj).length === 0;
+  const on = oj && /^[A-Z0-9]{3,32}$/.test(oj.code || "") && Number.isInteger(oj.pct) && oj.pct >= 1 && oj.pct <= 90;
+  offre.status === 200 && (off || on) && /s-maxage/.test(offre.cache)
+    ? ok(`/api/offre : ${on ? `active (${oj.code}, -${oj.pct} %)` : "éteinte"}, réponse gardée par le CDN`)
+    : ko("/api/offre : réponse cohérente", `HTTP ${offre.status} ${offre.text.slice(0, 120)} (${offre.cache})`);
+  const diagPublic = await get("/api/offre?diagnostic=1");
+  diagPublic.status === 200 && !/raison|actif/.test(diagPublic.text) ? ok("/api/offre : diagnostic caché aux visiteurs") : ko("/api/offre : diagnostic caché aux visiteurs", diagPublic.text.slice(0, 120));
+  if (!on) return;
+  const promo = await json(`/api/promo?code=${encodeURIComponent(oj.code)}`);
+  promo.body?.ok === true && promo.body.pct === oj.pct
+    ? ok("/api/promo : le code de l'offre active est accepté avec la même remise")
+    : ko("/api/promo : code de l'offre active", JSON.stringify(promo.body));
 }
 
 async function videosApi() {
