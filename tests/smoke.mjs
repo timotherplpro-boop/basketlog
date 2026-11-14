@@ -244,8 +244,9 @@ async function offreEnLigne() {
   try { oj = JSON.parse(offre.text); } catch {}
   const off = oj && typeof oj === "object" && Object.keys(oj).length === 0;
   const on = oj && /^[A-Z0-9]{3,32}$/.test(oj.code || "") && Number.isInteger(oj.pct) && oj.pct >= 1 && oj.pct <= 90;
-  offre.status === 200 && (off || on) && /s-maxage/.test(offre.cache)
-    ? ok(`/api/offre : ${on ? `active (${oj.code}, -${oj.pct} %)` : "éteinte"}, réponse gardée par le CDN`)
+  // Le CDN de Vercel garde s-maxage pour lui et ne renvoie au navigateur que « public, max-age=60 ».
+  offre.status === 200 && (off || on) && /public/.test(offre.cache) && !/no-store|private/.test(offre.cache)
+    ? ok(`/api/offre : ${on ? `active (${oj.code}, -${oj.pct} %)` : "éteinte"}, réponse publique (cache)`)
     : ko("/api/offre : réponse cohérente", `HTTP ${offre.status} ${offre.text.slice(0, 120)} (${offre.cache})`);
   const diagPublic = await get("/api/offre?diagnostic=1");
   diagPublic.status === 200 && !/raison|actif/.test(diagPublic.text) ? ok("/api/offre : diagnostic caché aux visiteurs") : ko("/api/offre : diagnostic caché aux visiteurs", diagPublic.text.slice(0, 120));
