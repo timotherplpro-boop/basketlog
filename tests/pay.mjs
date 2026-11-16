@@ -1,5 +1,5 @@
 // Paiement intégré (lib/whop-pay.js) : vérification d'un paiement relu chez Whop et appels simulés à l'API.
-import { PAY_ID_RE, checkPayment, createCheckout, getPayment, newPayToken, payTag, planIdOf } from "../lib/whop-pay.js";
+import { PAY_ID_RE, checkPayment, createCheckout, getPayment, newPayToken, payTag, paymentIdFrom, planIdOf } from "../lib/whop-pay.js";
 
 export async function payTests({ eq }) {
   console.log("Paiement intégré");
@@ -11,6 +11,9 @@ export async function payTests({ eq }) {
   eq("Identifiant de paiement accepté", PAY_ID_RE.test("pay_AbC123xyz"), true);
   eq("Identifiant de paiement refusé (autre forme)", PAY_ID_RE.test("pay_../memberships"), false);
 
+  eq("Retour : identifiant sous payment_id", paymentIdFrom(new URLSearchParams("payment_id=pay_abc123&status=success")), "pay_abc123");
+  eq("Retour : identifiant sous receipt_id", paymentIdFrom(new URLSearchParams("receipt_id=pay_xyz789")), "pay_xyz789");
+  eq("Retour : rien d'exploitable", paymentIdFrom(new URLSearchParams("payment=abc")), null);
   const products = { starter: "prod_S", pro: "prod_P", lifetime: "prod_L" };
   const tag = payTag(t1);
   const base = { id: "pay_ok1234", status: "paid", substatus: "succeeded", metadata: { bl: tag }, product: { id: "prod_P" }, user: { id: "user_abc123", email: "Fan@Example.com" }, membership: { id: "mem_x1" } };
@@ -28,7 +31,7 @@ export async function payTests({ eq }) {
   process.env.WHOP_API_KEY = "test-key";
   let sent = null;
   const fake = async (url, init) => { sent = { url, init }; return new Response(JSON.stringify({ id: "ch_TEST123" }), { status: 200 }); };
-  eq("Configuration de paiement créée", await createCheckout({ planId: "plan_qpRxDjCSA3Qy6", tag, plan: "pro", redirectUrl: "https://basketlog-app.com/api/pay/retour" }, fake), "ch_TEST123");
+  eq("Configuration de paiement créée", await createCheckout({ planId: "plan_qpRxDjCSA3Qy6", tag, plan: "pro", redirectUrl: "https://basketlog-app.com/api/pay/retour" }, fake), { id: "ch_TEST123", url: "https://whop.com/checkout/ch_TEST123/" });
   const body = JSON.parse(sent.init.body);
   eq("Configuration : plan, étiquette et retour", [sent.url, body.variant_id, body.metadata.bl, body.metadata.formule, body.redirect_url], ["https://api.whop.com/api/v1/checkout_configurations", "plan_qpRxDjCSA3Qy6", tag, "pro", "https://basketlog-app.com/api/pay/retour"]);
   let kind = null;

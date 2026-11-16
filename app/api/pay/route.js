@@ -35,7 +35,7 @@ export async function POST(req) {
     console.warn(`[paiement] configuration Whop refusée : ${String(e?.message || e).slice(0, 240)}`);
     return no(e?.kind === "nokey" ? 503 : 502, e?.kind === "nokey" ? "config" : "whop");
   }
-  const res = NextResponse.json({ ok: true, session, plan, cur }, { headers: { "Cache-Control": "no-store" } });
+  const res = NextResponse.json({ ok: true, session: session.id, url: session.url, plan, cur }, { headers: { "Cache-Control": "no-store" } });
   const opts = { httpOnly: true, secure: true, sameSite: "lax", path: "/api/pay", maxAge: 6 * 3600 };
   res.cookies.set(PAY_COOKIE, token, opts);
   // Page où revenir une fois l'accès débloqué (la fiche match d'où vient le visiteur), sinon l'espace membre.

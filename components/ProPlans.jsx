@@ -97,7 +97,8 @@ function PayRetry({ L }) {
   useEffect(() => {
     try {
       const p = new URLSearchParams(window.location.search).get("payment");
-      if (p && /^pay_[A-Za-z0-9]{4,60}$/.test(p)) setHref(`/api/pay/retour?payment=${encodeURIComponent(p)}&status=succeeded&l=${L.en ? "en" : L.es ? "es" : "fr"}`);
+      const l = L.en ? "en" : L.es ? "es" : "fr";
+      setHref(p && /^pay_[A-Za-z0-9]{4,60}$/.test(p) ? `/api/pay/retour?payment=${encodeURIComponent(p)}&status=succeeded&l=${l}` : `/api/pay/retour?l=${l}`);
     } catch {}
   }, [L]);
   if (!href) return null;

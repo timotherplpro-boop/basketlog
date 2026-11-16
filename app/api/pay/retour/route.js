@@ -4,7 +4,7 @@ import { COOKIE, SESSION_V, cookieOptions, decodeSession, displayName, encodeSes
 import { accountIdOf, isAccountSession, normEmail } from "../../../../lib/auth-utils";
 import { compteParEmail, lierWhop } from "../../../../lib/comptes";
 import { productIds } from "../../../../lib/whop-account";
-import { PAY_COOKIE, PAY_ID_RE, PAY_NEXT_COOKIE, checkPayment, getPayment, payTag } from "../../../../lib/whop-pay";
+import { PAY_COOKIE, PAY_ID_RE, PAY_NEXT_COOKIE, checkPayment, findTaggedPayment, getPayment, payTag, paymentIdFrom } from "../../../../lib/whop-pay";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 25;
@@ -20,12 +20,13 @@ const pause = (ms) => new Promise((r) => setTimeout(r, ms));
 //    qu'il le retrouve en se connectant sur un autre appareil.
 export async function GET(req) {
   const u = new URL(req.url);
-  const payment = u.searchParams.get("payment") || "";
+  let payment = paymentIdFrom(u.searchParams) || "";
   const status = u.searchParams.get("status") || "";
-  const lang = u.searchParams.get("l") === "en" || u.searchParams.get("l") === "es" ? u.searchParams.get("l") : null;
-  const pre = lang ? `/${lang}` : "";
   const token = req.cookies.get(PAY_COOKIE)?.value || "";
   const next = safeNext(req.cookies.get(PAY_NEXT_COOKIE)?.value);
+  // Langue : paramètre l, sinon celle de la page d'où vient le visiteur.
+  const l = u.searchParams.get("l") || (next || "").match(/^\/(en|es)(?=\/|$|\?)/)?.[1];
+  const pre = l === "en" || l === "es" ? `/${l}` : "";
   const go = (path, clear = false) => {
     const r = NextResponse.redirect(`${SITE}${path}`);
     if (clear) {
@@ -35,10 +36,18 @@ export async function GET(req) {
     return r;
   };
   if (status === "failed" || status === "canceled") return go(`${pre}/pro?erreur=paiement_annule`);
-  if (!PAY_ID_RE.test(payment) || !token) return go(`${pre}/pro?erreur=paiement_inconnu`);
+  if (!token) return go(`${pre}/pro?erreur=paiement_inconnu`);
+  const tag = payTag(token);
+  // Retour de la page Whop sans identifiant de paiement : on le retrouve grâce à l'étiquette.
+  if (!payment) {
+    for (let i = 0; i < 3 && !payment; i++) {
+      try { payment = (await findTaggedPayment(tag))?.id || ""; } catch (e) { console.warn(`[paiement] recherche du paiement : ${String(e?.message || e).slice(0, 200)}`); }
+      if (!payment) await pause(1500);
+    }
+  }
+  if (!PAY_ID_RE.test(payment)) return go(`${pre}/pro?erreur=paiement_attente`);
 
   // Whop peut mettre quelques secondes à rattacher l'acheteur et l'abonnement au paiement : jusqu'à 4 lectures.
-  const tag = payTag(token);
   const products = productIds();
   let verdict = { ok: false, reason: "attente" };
   for (let i = 0; i < 4; i++) {
