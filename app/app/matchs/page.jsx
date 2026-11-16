@@ -117,6 +117,7 @@ export default async function MatchsPage({ searchParams }) {
           )}</p>
         )}
         <p className="note"><Link href={L.href("/pronostic-basket")}>{L.t("Pronostic basket du jour : NBA et EuroLeague →", "Today's basketball predictions: NBA and EuroLeague →", "Pronósticos de baloncesto de hoy: NBA y Euroliga →")}</Link></p>
+        <p className="note"><Link href={L.href("/app/power-rankings")}>{L.t("Power ranking NBA", "NBA power rankings", "Power ranking NBA")}</Link>{" · "}<Link href={L.href("/app/nba-cup")}>{L.t("Pronostics NBA Cup", "NBA Cup predictions", "Pronósticos NBA Cup")}</Link></p>
       </div>
       <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 18 }}>
         <Link className="btn-white" href={L.href(`/app/matchs?d=${shiftDate(date, -1)}`)}>{L.t("← Veille", "← Previous day", "← Día anterior")}</Link>
