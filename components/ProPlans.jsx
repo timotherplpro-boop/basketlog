@@ -85,10 +85,26 @@ const NOTICES = {
   connexion: ["warn", "La connexion avec Whop n'a pas abouti. Réessaie dans un instant.", "Logging in with Whop didn't work. Please try again in a moment.", "No se ha podido iniciar sesión con Whop. Vuelve a intentarlo en un momento."],
   config: ["warn", "Le paiement n'est pas encore activé sur Basketlog. Reviens très bientôt.", "Payments aren't enabled on Basketlog yet. Please come back soon.", "El pago todavía no está activado en Basketlog. Vuelve muy pronto."],
   whop_autre: ["warn", "Ce compte Whop est déjà relié à un autre compte Basketlog. Connecte-toi à Basketlog avec l'adresse e-mail de cet autre compte, ou écris-nous à contact@basketlog-app.com.", "This Whop account is already linked to another Basketlog account. Log in to Basketlog with that other account's email, or write to us at contact@basketlog-app.com.", "Esta cuenta de Whop ya está vinculada a otra cuenta de Basketlog. Inicia sesión en Basketlog con el correo de esa otra cuenta o escríbenos a contact@basketlog-app.com."],
+  paiement_annule: ["warn", "Le paiement n'a pas abouti : rien n'a été prélevé. Tu peux réessayer ci-dessous.", "The payment didn't go through: nothing was charged. You can try again below.", "El pago no se ha completado: no se ha cobrado nada. Puedes volver a intentarlo abajo."],
+  paiement_attente: ["warn", "Ton paiement est en cours de validation chez Whop. Patiente quelques secondes puis clique sur « Vérifier mon paiement ».", "Your payment is still being confirmed by Whop. Wait a few seconds, then click “Check my payment”.", "Whop todavía está validando tu pago. Espera unos segundos y haz clic en «Comprobar mi pago»."],
+  paiement_inconnu: ["warn", "Nous n'avons pas pu relier ce paiement à ta visite. Si tu as été prélevé, écris-nous à contact@basketlog-app.com avec l'e-mail du paiement : on active ton accès tout de suite.", "We couldn't match this payment to your visit. If you were charged, email us at contact@basketlog-app.com with the payment email: we'll unlock your access right away.", "No hemos podido vincular este pago a tu visita. Si se te ha cobrado, escríbenos a contact@basketlog-app.com con el correo del pago: activamos tu acceso enseguida."],
   lien: ["warn", "Impossible de relier ton compte Whop pour le moment. Réessaie dans un instant.", "We couldn't link your Whop account right now. Please try again in a moment.", "No hemos podido vincular tu cuenta de Whop por ahora. Inténtalo de nuevo en un instante."],
 };
 
-export default function ProPlans({ checkout, loginReady, notice, ai = false, cur = "EUR", switching = false }) {
+// « Vérifier mon paiement » : relance la vérification du paiement intégré (le cookie du paiement est gardé dans ce cas).
+function PayRetry({ L }) {
+  const [href, setHref] = useState(null);
+  useEffect(() => {
+    try {
+      const p = new URLSearchParams(window.location.search).get("payment");
+      if (p && /^pay_[A-Za-z0-9]{4,60}$/.test(p)) setHref(`/api/pay/retour?payment=${encodeURIComponent(p)}&status=succeeded&l=${L.en ? "en" : L.es ? "es" : "fr"}`);
+    } catch {}
+  }, [L]);
+  if (!href) return null;
+  return <> <a href={href} className="pro-login">{L.t("Vérifier mon paiement", "Check my payment", "Comprobar mi pago")}</a></>;
+}
+
+export default function ProPlans({ checkout, loginReady, notice, ai = false, cur = "EUR", switching = false, embed = false }) {
   const L = useL();
   const pro = useProStatus();
   const [agree, setAgree] = useState(false);
@@ -131,18 +147,19 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
     } catch { /* adresse illisible : pas de code pré-rempli */ }
   }, [applyPromo]);
   // Avant le paiement : acceptation des CGV et demande d'accès immédiat (renonciation à la rétractation, art. L221-28 13°).
-  // Comme Visifoot, le compte vient avant le paiement : un visiteur sans compte crée d'abord son compte gratuit (fenêtre
-  // « Créer un compte »), puis part payer ; après le paiement, « Activer mon abonnement » relie son compte Whop.
-  const buy = (id, url) => (e) => {
+  // Depuis le 16/11/2026, plus de compte à créer ni de passage sur whop.com : le clic mène à la page /paiement du site, où le
+  // formulaire Whop s'affiche ; l'accès s'ouvre dès le paiement (lib/whop-pay.js). Un compte Basketlog connecté reçoit
+  // l'abonnement automatiquement.
+  const buy = (id) => (e) => {
     if (!agree) { e.preventDefault(); setNudge(true); document.getElementById("pro-agree")?.focus(); return; }
-    if (pro && !pro.connected) {
-      e.preventDefault();
-      openAuth({ mode: "inscription", source: "paiement", then: "paiement", checkout: url, plan: id });
-      return;
-    }
-    try { localStorage.setItem("bl_paiement", JSON.stringify({ plan: id, at: Date.now() })); } catch {}
-    track("Clic abonnement", { formule: id, devise: cur, ...(promo ? { code_promo: promo.code } : {}) });
+    if (!embed) { try { localStorage.setItem("bl_paiement", JSON.stringify({ plan: id, at: Date.now() })); } catch {} }
+    track("Clic abonnement", { formule: id, devise: cur, integre: embed, ...(promo ? { code_promo: promo.code } : {}) });
   };
+  // embed : paiement intégré activé (PAY_EMBED=1 dans Vercel, ou /pro?paiement=test pour l'essayer avant). Sinon, lien de
+  // paiement Whop habituel (avec le code promo), sans compte Basketlog à créer avant.
+  const payHref = (id) => embed
+    ? L.href(`/paiement?plan=${id}${promo?.code ? `&code=${encodeURIComponent(promo.code)}` : ""}`)
+    : withPromo(checkout[id], promo?.code);
   useEffect(() => {
     if (!pro) return;
     track("Page Pro vue", { formule: pro.tier });
@@ -175,7 +192,7 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
 
   return (
     <>
-      {n && !payer && <div className={`pro-notice ${n[0]}`} role="status">{L.t(n[1], n[2], n[3])}</div>}
+      {n && !payer && <div className={`pro-notice ${n[0]}`} role="status">{L.t(n[1], n[2], n[3])}{notice === "paiement_attente" && <PayRetry L={L} />}</div>}
       {payer && pro?.connected && (
         <div className="pro-notice good" role="status">{L.t(
           "Ton compte est prêt ! Coche la case ci-dessous, puis clique sur « Débloquer » pour payer ta formule.",
@@ -238,7 +255,7 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
       {nudge && !agree && <p className="pro-agree-hint" role="alert">{L.t("Coche la case ci-dessus pour continuer vers le paiement.", "Tick the box above to continue to checkout.", "Marca la casilla de arriba para continuar con el pago.")}</p>}
       <div className="plans">
         {PLANS(L, ai, cur, promo).map((p, i) => {
-          const url = withPromo(checkout[p.id], promo?.code);
+          const url = checkout[p.id];
           return (
             <article key={p.id} className={`plan plan-${p.id} reveal-in${payer === p.id ? " plan-picked" : ""}`} style={{ animationDelay: `${i * 90}ms` }}>
               {p.badge && <span className="plan-badge">{p.id === "pro" ? "⭐⭐ " : "∞∞ "}{p.badge}</span>}
@@ -258,7 +275,7 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
               {pro?.connected && current === p.id ? (
                 <span className="plan-cta plan-current">{L.t("Ta formule actuelle", "Your current plan", "Tu plan actual")}</span>
               ) : url ? (
-                <a href={url} className={`plan-cta plan-buy ${agree ? "" : "plan-wait"}`} aria-disabled={!agree} onClick={buy(p.id, url)}>{p.cta}</a>
+                <a href={payHref(p.id)} className={`plan-cta plan-buy ${agree ? "" : "plan-wait"}`} aria-disabled={!agree} onClick={buy(p.id)}>{p.cta}</a>
               ) : (
                 <span className="plan-cta plan-soon">{L.t("Bientôt disponible", "Coming soon", "Próximamente")}</span>
               )}
@@ -285,15 +302,15 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
           </p>
         ) : (
           <p>
-            {L.t("Pas encore de compte ?", "No account yet?", "¿Todavía no tienes cuenta?")} <button type="button" className="pro-login" onClick={() => openAuth({ mode: "inscription", source: "page_pro" })}>{L.t("Créer mon compte gratuit", "Create my free account", "Crear mi cuenta gratis")}</button>
-            {" · "}{L.t("Déjà inscrit ?", "Already signed up?", "¿Ya estás registrado?")} <button type="button" className="pro-login" onClick={() => openAuth({ mode: "connexion", source: "page_pro" })}>{L.t("Me connecter", "Log in", "Iniciar sesión")}</button>
+            {L.t("Pas de compte à créer : ton accès s'ouvre dès le paiement.", "No account needed: your access opens as soon as you pay.", "Sin cuenta que crear: tu acceso se abre en cuanto pagas.")}
+            {" · "}{L.t("Déjà abonné ?", "Already subscribed?", "¿Ya estás suscrito?")} <button type="button" className="pro-login" onClick={() => openAuth({ mode: "connexion", source: "page_pro" })}>{L.t("Me connecter", "Log in", "Iniciar sesión")}</button>
           </p>
         )}
         {pro?.connected && pro.acct && (current === "compte" || current === "starter") && (
           <p className="pro-secure">{L.t(
-            "Le paiement se fait sur la page sécurisée de Whop. Ensuite, reviens ici et clique sur « Activer mon abonnement » : tu te connectes à Whop avec le compte utilisé pour payer, et ta formule se débloque sur ton compte Basketlog.",
-            "Payment happens on Whop's secure page. Then come back here and click “Activate my subscription”: log in to Whop with the account you paid with, and your plan unlocks on your Basketlog account.",
-            "El pago se hace en la página segura de Whop. Después, vuelve aquí y haz clic en «Activar mi suscripción»: inicia sesión en Whop con la cuenta con la que pagaste y tu plan se desbloquea en tu cuenta de Basketlog."
+            "Le paiement se fait ici, sur Basketlog (formulaire sécurisé Whop) : ta formule se débloque tout de suite sur ton compte. Tu as payé sur l'ancienne page Whop ? Clique sur « Activer mon abonnement ».",
+            "You pay right here on Basketlog (secure Whop form): your plan unlocks on your account right away. Paid on the old Whop page? Click “Activate my subscription”.",
+            "El pago se hace aquí, en Basketlog (formulario seguro de Whop): tu plan se desbloquea enseguida en tu cuenta. ¿Pagaste en la antigua página de Whop? Haz clic en «Activar mi suscripción»."
           )}</p>
         )}
         <p className="pro-secure">{L.t("Tu peux arrêter ton abonnement à tout moment. Toutes nos analyses sont fournies à titre informatif uniquement.", "You can cancel your subscription anytime. All our analyses are provided for information only.", "Puedes cancelar tu suscripción en cualquier momento. Todos nuestros análisis se ofrecen solo a título informativo.")}</p>

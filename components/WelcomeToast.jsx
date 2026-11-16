@@ -26,6 +26,13 @@ export default function WelcomeToast() {
   useEffect(() => {
     const u = new URL(location.href);
     const raw = u.searchParams.get("bienvenue");
+    // Paiement intégré confirmé (app/api/pay/retour) : ?paye=<formule>.
+    const paye = u.searchParams.get("paye");
+    if (paye) {
+      track("Abonnement payé", { formule: paye, parcours: "integre" });
+      u.searchParams.delete("paye");
+      if (!raw) history.replaceState(null, "", u.pathname + (u.search || "") + u.hash);
+    }
     const m = /^(nouveau|retour)-(email|google)$/.exec(raw || "");
     const k = m ? m[1] : raw;
     if (!k || !MSG[k]) return;

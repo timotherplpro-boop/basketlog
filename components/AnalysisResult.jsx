@@ -2,7 +2,6 @@
 // pour tout le monde ; le reste (probabilités exactes, argumentation, facteurs, scénarios, stats, infirmerie)
 // seulement une fois l'analyse complète lancée. Utilisé dans « Analyse de match » et sur les fiches des matchs.
 import Gate from "./Gate";
-import SignupWall from "./SignupWall";
 import FormToggle from "./FormToggle";
 import MatchExtras from "./MatchExtras";
 import { TeamLogo } from "./ui";
@@ -41,7 +40,6 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
   const leagueKey = isNBA ? "NBA" : "EL";
   const access = await analysisAccess(leagueKey, g.id);
   const open = access.state === "open";
-  const visitor = access.state === "visitor"; // pas de compte : rien de l'analyse avant l'inscription
   const target = {
     league: leagueKey,
     id: String(g.id),
@@ -185,10 +183,9 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
         </div>
       )}
 
-      {visitor ? (
-        // Visiteur sans compte, comme chez Visifoot : fenêtre « Créer un compte » tout de suite, analyse floutée.
-        <SignupWall target={target} mode={mode}>{freePart}</SignupWall>
-      ) : (
+      {(
+        // Depuis le 16/11/2026, un visiteur sans compte voit l'aperçu gratuit comme un compte gratuit (plus de fenêtre
+        // « Créer un compte ») : le bouton mène aux formules puis au paiement intégré.
         <>
           {freePart}
           <Gate key={target.id} access={access} target={target} pct={visiblePct} proof={proof} match={matchInfo} mode={mode}>
