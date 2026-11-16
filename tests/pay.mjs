@@ -30,7 +30,7 @@ export async function payTests({ eq }) {
   const fake = async (url, init) => { sent = { url, init }; return new Response(JSON.stringify({ id: "ch_TEST123" }), { status: 200 }); };
   eq("Configuration de paiement créée", await createCheckout({ planId: "plan_qpRxDjCSA3Qy6", tag, plan: "pro", redirectUrl: "https://basketlog-app.com/api/pay/retour" }, fake), "ch_TEST123");
   const body = JSON.parse(sent.init.body);
-  eq("Configuration : plan, étiquette et retour", [sent.url, body.plan_id, body.metadata.bl, body.metadata.formule, body.redirect_url], ["https://api.whop.com/api/v1/checkout_configurations", "plan_qpRxDjCSA3Qy6", tag, "pro", "https://basketlog-app.com/api/pay/retour"]);
+  eq("Configuration : plan, étiquette et retour", [sent.url, body.variant_id, body.metadata.bl, body.metadata.formule, body.redirect_url], ["https://api.whop.com/api/v1/checkout_configurations", "plan_qpRxDjCSA3Qy6", tag, "pro", "https://basketlog-app.com/api/pay/retour"]);
   let kind = null;
   try { await getPayment("pay_x1234", async () => new Response(JSON.stringify({ error: { message: "nope" } }), { status: 403 })); } catch (e) { kind = e.kind; }
   eq("Clé sans la permission de lire les paiements : erreur « scope »", kind, "scope");
