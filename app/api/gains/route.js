@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { COOKIE, cookieOptions, currentSession } from "../../../lib/pro";
 import { mk } from "../../../lib/i18n";
 import { creatorEarnings, readCreator } from "../../../lib/creator-stats";
+import { demoReport } from "../../../lib/creator-demo";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -53,12 +54,15 @@ export async function GET(req) {
     return res;
   }
   if (tooMany(session.uid)) return err(M.many, 429);
-  // Un admin qui regarde le site « en tant que » créateur : aucun chiffre réel à montrer.
-  if (session.preview) return json({ ok: true, preview: true }, 200, refreshed);
+  // Un admin qui regarde le site « en tant que » créateur n'a aucun chiffre réel à voir : il reçoit un aperçu avec des chiffres d'exemple
+  // inventés (marqués « demo »), calculés comme les vrais, sans lecture chez Whop.
+  if (session.preview) return json({ ok: true, demo: true, ...demoReport() }, 200, refreshed);
 
   const creator = await readCreator(session.uid);
   if (!creator.installed) return err(M.notReady, 503);
   if (creator.unreachable) return err(M.dbDown, 503);
+  // Un administrateur qui ouvre la rubrique voit la même chose : l'aperçu avec chiffres d'exemple (jamais ceux d'un vrai créateur).
+  if (creator.role === "admin") return json({ ok: true, demo: true, ...demoReport() }, 200, refreshed);
   if (creator.role !== "createur") return err(M.forbidden, 403);
 
   try {

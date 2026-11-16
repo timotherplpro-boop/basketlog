@@ -1,7 +1,9 @@
 // « Mes gains » des créateurs : calcul (lib/creator-report.js), lecture partagée gardée en mémoire (lib/shared-read.js)
-// et part reversée (lib/commission.js). Aucun réseau : les abonnements et paiements de Whop sont simulés.
-import { CREATOR_COMMISSION, COMMISSION_PCT } from "../lib/commission.js";
+// et part reversée (lib/commission.js : 40 % du montant hors TVA), aperçu avec chiffres d'exemple (lib/creator-demo.js).
+// Aucun réseau : les abonnements et paiements de Whop sont simulés.
+import { CREATOR_COMMISSION, COMMISSION_PCT, VAT_RATE, VAT_PCT, commissionOf, exVat } from "../lib/commission.js";
 import { buildCreatorReport, membershipPromos, monthOf, prevMonth, promoOf } from "../lib/creator-report.js";
+import { DEMO_CODE, demoReport } from "../lib/creator-demo.js";
 import { sharedReader } from "../lib/shared-read.js";
 
 const T = (iso) => Date.parse(iso);
@@ -44,7 +46,10 @@ export async function creatorGainsTests({ ok, ko, eq }) {
   console.log("Mes gains (créateurs)");
   const report = (codes, extra = {}) => buildCreatorReport({ codes, promoCodes, memberships, payments, asOf: NOW - 20e3, now: NOW, ...extra });
 
-  eq("gains : part du créateur = 40 %, partagée avec l'admin", [CREATOR_COMMISSION, COMMISSION_PCT, report([]).ratePct], [0.4, 40, 40]);
+  eq("gains : part du créateur = 40 % du montant hors TVA (TVA 20 %), partagée avec l'admin", [CREATOR_COMMISSION, COMMISSION_PCT, VAT_RATE, VAT_PCT, report([]).ratePct, report([]).vatPct], [0.4, 40, 0.2, 20, 40, 20]);
+  eq("gains : 1 000 € payés = 833,33 € hors TVA = 333,33 € pour le créateur", [exVat(1000), commissionOf(1000)], [833.33, 333.33]);
+  eq("gains : prix des formules (13,99 / 12,59 / 29,99 / 89,99) -> commission", [exVat(13.99), commissionOf(13.99), commissionOf(12.59), commissionOf(29.99), commissionOf(89.99), commissionOf(0)], [11.66, 4.66, 4.2, 10, 30, 0]);
+  eq("gains : sans TVA (taux 0), la commission est 40 % du montant payé", [commissionOf(1000, 0.4, 0), exVat(50, 0)], [400, 50]);
   eq("gains : mois à l'heure de Paris (31 oct. 23 h 30 UTC = 1er nov. à Paris)", [monthOf(T("2026-10-31T23:30:00Z")), monthOf(T("2026-10-31T22:30:00Z")), prevMonth("2026-01"), prevMonth("2026-11")], ["2026-11", "2026-10", "2025-12", "2026-10"]);
 
   const a = report([{ code: "GONZOPICKS10", pct: 10 }]);
@@ -52,13 +57,18 @@ export async function creatorGainsTests({ ok, ko, eq }) {
   eq("gains : mois en cours et mois précédent", a.months, { this: "2026-11", prev: "2026-10" });
   eq("gains : personnes par formule (Starter 2, Pro 2, Lifetime 1) et total", [t.plans.starter.people, t.plans.pro.people, t.plans.lifetime.people, t.people], [2, 2, 1, 5]);
   eq("gains : abonnés actifs par formule (le résilié n'en fait pas partie)", [t.plans.starter.active, t.plans.pro.active, t.plans.lifetime.active, t.active], [1, 2, 1, 4]);
-  eq("gains : le renouvellement d'un abonnement dont Whop a retiré le code reste au créateur", [t.plans.pro.paid.USD, t.commission.month.USD], [56.98, 12]);
+  eq("gains : le renouvellement d'un abonnement dont Whop a retiré le code reste au créateur", [t.plans.pro.paid.USD, t.commission.month.USD], [56.98, 10]);
   eq("gains : payé par formule, euros et dollars séparés", [t.plans.starter.paid, sorted(t.plans.pro.paid), t.plans.lifetime.paid], [{ EUR: 26.58 }, { EUR: 26.99, USD: 56.98 }, { EUR: 89.99 }]);
-  eq("gains : commission par formule (40 %)", [t.plans.starter.commission, sorted(t.plans.pro.commission), t.plans.lifetime.commission], [{ EUR: 10.63 }, { EUR: 10.8, USD: 22.79 }, { EUR: 36 }]);
-  eq("gains : commission du mois (novembre)", sorted(t.commission.month), { EUR: 52.39, USD: 12 });
-  eq("gains : commission du mois précédent (octobre), remboursement déduit", sorted(t.commission.prev), { EUR: 5.04, USD: 10.8 });
-  eq("gains : commission cumulée = somme des formules", sorted(t.commission.all), { EUR: 57.43, USD: 22.79 });
-  eq("gains : estimation mensuelle (ni Lifetime, ni arrêt programmé, ni résilié)", sorted(t.monthly), { EUR: 5.6, USD: 12 });
+  eq("gains : montant hors TVA par formule (payé ÷ 1,2)", [t.plans.starter.exVat, sorted(t.plans.pro.exVat), t.plans.lifetime.exVat], [{ EUR: 22.15 }, { EUR: 22.49, USD: 47.48 }, { EUR: 74.99 }]);
+  eq("gains : commission par formule (40 % du hors TVA)", [t.plans.starter.commission, sorted(t.plans.pro.commission), t.plans.lifetime.commission], [{ EUR: 8.86 }, { EUR: 9, USD: 18.99 }, { EUR: 30 }]);
+  eq("gains : la commission affichée = 40 % du hors TVA affiché, pour chaque formule et chaque monnaie",
+    Object.values(t.plans).every((v) => Object.keys(v.paid).every((c) => Math.round(v.exVat[c] * 0.4 * 100) / 100 === v.commission[c])), true);
+  eq("gains : commission du mois (novembre)", sorted(t.commission.month), { EUR: 43.66, USD: 10 });
+  eq("gains : commission du mois précédent (octobre), remboursement déduit", sorted(t.commission.prev), { EUR: 4.2, USD: 9 });
+  eq("gains : commission cumulée = somme des formules", sorted(t.commission.all), { EUR: 47.86, USD: 18.99 });
+  eq("gains : hors TVA du mois, du mois précédent et cumulé", [sorted(t.exVat.month), sorted(t.exVat.prev), sorted(t.exVat.all)], [{ EUR: 109.14, USD: 24.99 }, { EUR: 10.49, USD: 22.49 }, { EUR: 119.63, USD: 47.48 }]);
+  eq("gains : estimation mensuelle (ni Lifetime, ni arrêt programmé, ni résilié), hors TVA puis 40 %", sorted(t.monthly), { EUR: 4.66, USD: 10 });
+  eq("gains : sans TVA (taux 0), la commission redevient 40 % du payé", sorted(report([{ code: "GONZOPICKS10" }], { vat: 0 }).total.commission.month), { EUR: 52.39, USD: 12 });
 
   eq("gains : paiements récents du plus récent au plus ancien, non encaissés exclus", a.recent.map((r) => [r.at, r.plan, r.first, r.state]), [
     [T("2026-11-15T09:00:00Z"), "starter", false, "paid"],
@@ -69,11 +79,11 @@ export async function creatorGainsTests({ ok, ko, eq }) {
     [T("2026-10-10T09:00:00Z"), "pro", true, "paid"],
     [T("2026-10-05T09:00:00Z"), "starter", true, "refunded"],
   ]);
-  eq("gains : commission d'un paiement récent", [a.recent[0].net, a.recent[0].commission, a.recent[1].currency, a.recent[1].commission], [13.99, 5.6, "USD", 12]);
+  eq("gains : commission d'un paiement récent (13,99 € payés = 11,66 € hors TVA = 4,66 €)", [a.recent[0].net, a.recent[0].exVat, a.recent[0].commission, a.recent[1].currency, a.recent[1].exVat, a.recent[1].commission], [13.99, 11.66, 4.66, "USD", 24.99, 10]);
 
   // Un créateur ne voit rien des autres : ni leurs chiffres, ni un identifiant d'abonné ou de paiement.
   const b = report([{ code: "AUTRE10", pct: 10 }]);
-  eq("gains : un autre créateur ne voit que son propre code (1 personne, Pro, 26,99 €)", [b.total.people, b.total.plans.pro.people, b.total.plans.pro.paid, b.total.commission.all, b.recent.length], [1, 1, { EUR: 26.99 }, { EUR: 10.8 }, 1]);
+  eq("gains : un autre créateur ne voit que son propre code (1 personne, Pro, 26,99 €)", [b.total.people, b.total.plans.pro.people, b.total.plans.pro.paid, b.total.commission.all, b.recent.length], [1, 1, { EUR: 26.99 }, { EUR: 9 }, 1]);
   eq("gains : un code inconnu ne reçoit rien", [report([{ code: "PIRATE99", pct: 5 }]).total.people, report([{ code: "PIRATE99", pct: 5 }]).recent.length], [0, 0]);
   eq("gains : sans code, tout est à zéro", [report([]).codes, report([]).total.people, report([]).total.commission.all], [[], 0, {}]);
   eq("gains : le code est reconnu quelle que soit la casse", report([{ code: "gonzopicks10", pct: 10 }]).total.people, 5);
@@ -101,7 +111,18 @@ export async function creatorGainsTests({ ok, ko, eq }) {
   });
   eq("gains : formule inconnue = ligne « autre » seulement quand elle existe", [Object.keys(other.total.plans), Object.keys(report([{ code: "AUTRE10" }]).total.plans)], [["starter", "pro", "lifetime", "other"], ["starter", "pro", "lifetime"]]);
   eq("gains : le drapeau « partiel » est transmis", [report([]).partial, report([], { partial: true }).partial], [false, true]);
-  eq("gains : paiement complètement remboursé = 0 € de commission", report([{ code: "GONZOPICKS10" }]).recent.at(-1).commission, 0);
+  eq("gains : paiement complètement remboursé = 0 € de commission", [report([{ code: "GONZOPICKS10" }]).recent.at(-1).exVat, report([{ code: "GONZOPICKS10" }]).recent.at(-1).commission], [0, 0]);
+
+  // Aperçu avec chiffres d'exemple (admin et « voir comme ») : même calcul, dates calées sur « maintenant », jamais de vrai code.
+  const demo = demoReport(NOW);
+  eq("démo : un code d'exemple, 7 personnes dont 5 actives (Starter 4, Pro 2, Lifetime 1)", [demo.codes.map((c) => c.code), demo.total.people, demo.total.active, demo.total.plans.starter.people, demo.total.plans.pro.people, demo.total.plans.lifetime.people], [[DEMO_CODE], 7, 5, 4, 2, 1]);
+  eq("démo : commission du mois et du mois précédent (hors TVA puis 40 %)", [sorted(demo.total.commission.month), sorted(demo.total.commission.prev)], [{ EUR: 48.32, USD: 4.2 }, { EUR: 8.39, USD: 9 }]);
+  eq("démo : euros et dollars, un paiement remboursé, des renouvellements", [Object.keys(demo.total.paid.all).sort(), demo.recent.some((r) => r.state === "refunded"), demo.recent.some((r) => !r.first), demo.recent.some((r) => r.first)], [["EUR", "USD"], true, true, true]);
+  eq("démo : aucun identifiant d'abonné ni de paiement", /mem_|pay_|user_|promo_|"d[0-9]"|"p[0-9]"/.test(JSON.stringify(demo)), false);
+  for (const iso of ["2026-11-01T00:30:00Z", "2026-10-31T23:30:00Z", "2026-01-01T09:00:00Z", "2026-03-31T21:30:00Z", "2026-07-15T10:00:00Z"]) {
+    const d = demoReport(T(iso));
+    eq(`démo : le mois en cours et le mois précédent sont remplis (${iso})`, [d.total.people, Object.keys(d.total.commission.month).includes("EUR"), Object.keys(d.total.commission.prev).includes("EUR"), d.recent.every((r) => r.at <= T(iso))], [7, true, true, true]);
+  }
 
   // Lecture partagée : une seule lecture chez Whop pour tous, cache de 60 s, erreurs, chiffres anciens en secours.
   let clock = 1_000_000;

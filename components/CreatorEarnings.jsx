@@ -4,9 +4,13 @@
 // Les chiffres viennent de /api/gains (Whop, lu en direct, gardé 60 s côté serveur). Le créateur n'y voit que ses propres codes,
 // jamais le nom d'un abonné. La page se rafraîchit toute seule une fois par minute tant qu'elle est visible, au plus AUTO_MAX fois
 // de suite sans que le créateur y touche (ménage le serveur), et le bouton « Actualiser » relance la lecture à tout moment.
+// Ce que touche le créateur = 40 % du montant HORS TVA : chaque ligne montre ce que l'abonné a payé, le montant hors TVA, puis la commission.
+// Un administrateur (ou le mode « voir comme ») reçoit un aperçu avec des chiffres d'exemple (réponse marquée « demo »), sans actualisation.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useL } from "./LangProvider";
 import { openAuth } from "../lib/auth-client";
+import { VAT_RATE, commissionOf, exVat } from "../lib/commission";
+import { PRICES } from "../lib/pricing";
 
 const REFRESH_MS = 60e3;
 const AUTO_MAX = 20;
@@ -23,6 +27,7 @@ export default function CreatorEarnings() {
   const inflight = useRef(false);
   const left = useRef(AUTO_MAX);
   const lastAt = useRef(0);
+  const isDemo = useRef(false); // aperçu avec chiffres d'exemple : rien à actualiser
 
   const load = useCallback(async () => {
     if (inflight.current) return;
@@ -34,6 +39,10 @@ export default function CreatorEarnings() {
       if (res.ok && j?.ok) {
         setData(j);
         setErr(null);
+        if (j.demo) {
+          isDemo.current = true;
+          left.current = 0;
+        }
       } else {
         if (res.status === 401 || res.status === 403) left.current = 0; // inutile de réessayer tant que la session ou le rôle ne change pas
         setErr({ status: res.status, msg: j?.error || T("Impossible de lire tes gains pour le moment, réessaie dans un instant.", "Couldn't load your earnings right now, please try again in a moment.", "No se pudieron cargar tus ganancias por ahora, inténtalo de nuevo en un instante.") });
@@ -50,6 +59,7 @@ export default function CreatorEarnings() {
   useEffect(() => {
     load();
     const tick = () => {
+      if (isDemo.current) return;
       if (document.visibilityState !== "visible" || left.current <= 0) {
         if (left.current <= 0 && document.visibilityState === "visible") setPaused(true);
         return;
@@ -59,7 +69,7 @@ export default function CreatorEarnings() {
     };
     const id = setInterval(tick, REFRESH_MS);
     const onVisible = () => {
-      if (document.visibilityState !== "visible") return;
+      if (document.visibilityState !== "visible" || isDemo.current) return;
       if (Date.now() - lastAt.current >= REFRESH_MS) {
         left.current = AUTO_MAX;
         setPaused(false);
@@ -130,35 +140,48 @@ export default function CreatorEarnings() {
       </section></div>
     );
   }
-  if (data.preview) {
-    return (
-      <div className="earn"><section className="panel acc-sec">
-        <div className="adm-notice" role="status">{T("Tu regardes le site en mode aperçu : les gains réels s'affichent depuis un vrai compte créateur.", "You're viewing the site in preview mode: real earnings are shown from an actual creator account.", "Estás viendo el sitio en modo vista previa: las ganancias reales se muestran desde una cuenta de creador real.")}</div>
-      </section></div>
-    );
-  }
 
   // ---------- chiffres ----------
   const { total, codes, recent } = data;
+  const demo = !!data.demo;
   const plans = PLAN_ORDER.filter((k) => total.plans[k]);
   const hasMonthly = Object.keys(total.monthly || {}).length > 0;
+  // Exemple chiffré de la règle (prix Starter du moment) : payé -> hors TVA -> ce que touche le créateur.
+  const vat = data.vat ?? VAT_RATE;
+  const exCur = L.en ? "USD" : "EUR";
+  const exPaid = PRICES[exCur]?.starter || 13.99;
+  const exHt = exVat(exPaid, vat);
+  const exGain = commissionOf(exPaid, data.rate ?? data.ratePct / 100, vat);
+  const ofVat = T(`${pct(data.ratePct)} du montant hors TVA`, `${pct(data.ratePct)} of the ex-VAT amount`, `${pct(data.ratePct)} del importe sin IVA`); // précision sous « Ta commission »
 
   return (
     <div className="earn">
       <section className="panel acc-sec" aria-labelledby="earn-top">
         <div className="earn-bar">
           <h2 id="earn-top">{T("Mes gains en direct", "My earnings, live", "Mis ganancias en directo")}</h2>
-          <div className="earn-live" aria-live="polite">
-            <span className="earn-dot" aria-hidden />
-            <span>{T("Mis à jour à ", "Updated at ", "Actualizado a las ")}{clock(data.asOf)}</span>
-            <button type="button" className="acc-btn" onClick={refresh} disabled={busy}>{busy ? T("Actualisation…", "Refreshing…", "Actualizando…") : T("Actualiser", "Refresh", "Actualizar")}</button>
-          </div>
+          {!demo && (
+            <div className="earn-live" aria-live="polite">
+              <span className="earn-dot" aria-hidden />
+              <span>{T("Mis à jour à ", "Updated at ", "Actualizado a las ")}{clock(data.asOf)}</span>
+              <button type="button" className="acc-btn" onClick={refresh} disabled={busy}>{busy ? T("Actualisation…", "Refreshing…", "Actualizando…") : T("Actualiser", "Refresh", "Actualizar")}</button>
+            </div>
+          )}
         </div>
+        {demo && (
+          <div className="adm-notice earn-demo" role="status">
+            <b>{T("Aperçu avec des chiffres d'exemple.", "Preview with sample figures.", "Vista previa con cifras de ejemplo.")}</b>{" "}
+            {T(
+              "Ces chiffres sont inventés pour te montrer la page (code « EXEMPLE10 »). Chaque créateur y voit ses vrais chiffres, lus chez Whop toutes les minutes.",
+              "These numbers are made up to show you the page (code “EXEMPLE10”). Each creator sees their real figures here, read from Whop every minute.",
+              "Estas cifras son inventadas para mostrarte la página (código «EXEMPLE10»). Cada creador ve aquí sus cifras reales, leídas de Whop cada minuto."
+            )}
+          </div>
+        )}
         <p className="acc-help">
           {T(
-            `Tu touches ${pct(data.ratePct)} de chaque paiement des abonnés venus avec ton code, tant qu'ils restent abonnés. Les chiffres sont lus chez Whop (remboursements déduits) et se mettent à jour toutes les minutes.`,
-            `You earn ${pct(data.ratePct)} of every payment from subscribers who joined with your code, for as long as they stay subscribed. Figures come from Whop (refunds deducted) and refresh every minute.`,
-            `Ganas el ${pct(data.ratePct)} de cada pago de los suscriptores que llegaron con tu código, mientras sigan suscritos. Las cifras vienen de Whop (con los reembolsos descontados) y se actualizan cada minuto.`
+            `Tu touches ${pct(data.ratePct)} du montant hors TVA de chaque paiement des abonnés venus avec ton code, tant qu'ils restent abonnés. Les chiffres sont lus chez Whop (remboursements déduits) et se mettent à jour toutes les minutes.`,
+            `You earn ${pct(data.ratePct)} of the amount excluding VAT of every payment from subscribers who joined with your code, for as long as they stay subscribed. Figures come from Whop (refunds deducted) and refresh every minute.`,
+            `Ganas el ${pct(data.ratePct)} del importe sin IVA de cada pago de los suscriptores que llegaron con tu código, mientras sigan suscritos. Las cifras vienen de Whop (con los reembolsos descontados) y se actualizan cada minuto.`
           )}
         </p>
         {err && <div className="adm-err" role="alert">{err.msg}</div>}
@@ -213,11 +236,19 @@ export default function CreatorEarnings() {
             {T(" par mois, tant qu'ils restent abonnés (estimation).", " per month, for as long as they stay subscribed (estimate).", " al mes, mientras sigan suscritos (estimación).")}
           </p>
         )}
+        <p className="earn-how">
+          <b>{T("Comment ton gain est calculé", "How your earnings are calculated", "Cómo se calcula tu ganancia")}</b>
+          {T(
+            ` : on prend ce que l'abonné a payé, on retire la TVA (${pct(Math.round(vat * 100))}), puis tu touches ${pct(data.ratePct)} du reste. Exemple : un paiement Starter de ${cur(exPaid, exCur)} = ${cur(exHt, exCur)} hors TVA, soit ${cur(exGain, exCur)} pour toi.`,
+            `: we take what the subscriber paid, remove the VAT (${pct(Math.round(vat * 100))}), and you get ${pct(data.ratePct)} of what's left. Example: a Starter payment of ${cur(exPaid, exCur)} = ${cur(exHt, exCur)} excluding VAT, so ${cur(exGain, exCur)} for you.`,
+            `: tomamos lo que pagó el suscriptor, quitamos el IVA (${pct(Math.round(vat * 100))}) y tú recibes el ${pct(data.ratePct)} del resto. Ejemplo: un pago Starter de ${cur(exPaid, exCur)} = ${cur(exHt, exCur)} sin IVA, es decir ${cur(exGain, exCur)} para ti.`
+          )}
+        </p>
       </section>
 
       <section className="panel acc-sec" aria-labelledby="earn-plans">
         <h2 id="earn-plans">{T("Par formule", "By plan", "Por plan")}</h2>
-        <p className="acc-help">{T("Combien de personnes ont pris chaque formule avec ton code, ce qu'elles ont payé et ce que cela te rapporte.", "How many people took each plan with your code, what they paid and what it earns you.", "Cuántas personas tomaron cada plan con tu código, lo que pagaron y lo que eso te aporta.")}</p>
+        <p className="acc-help">{T("Combien de personnes ont pris chaque formule avec ton code, ce qu'elles ont payé, le montant hors TVA et ce que cela te rapporte.", "How many people took each plan with your code, what they paid, the amount excluding VAT and what it earns you.", "Cuántas personas tomaron cada plan con tu código, lo que pagaron, el importe sin IVA y lo que eso te aporta.")}</p>
         <div className="earn-plans">
           {plans.map((k) => {
             const v = total.plans[k];
@@ -231,7 +262,8 @@ export default function CreatorEarnings() {
                 </span>
                 <dl>
                   <div><dt>{T("Payé par eux", "Paid by them", "Pagado por ellos")}</dt><dd>{stack(v.paid)}</dd></div>
-                  <div><dt>{T("Ta commission", "Your commission", "Tu comisión")}</dt><dd className="earn-gain">{stack(v.commission)}</dd></div>
+                  <div><dt>{T("Hors TVA", "Excl. VAT", "Sin IVA")}</dt><dd>{stack(v.exVat)}</dd></div>
+                  <div><dt>{T("Ta commission", "Your commission", "Tu comisión")}<small>{ofVat}</small></dt><dd className="earn-gain">{stack(v.commission)}</dd></div>
                 </dl>
               </article>
             );
@@ -250,7 +282,8 @@ export default function CreatorEarnings() {
                 <span className="earn-sub">{people(c.people)} · {actives(c.active)}</span>
                 <dl>
                   <div><dt>{T("Payé par eux", "Paid by them", "Pagado por ellos")}</dt><dd>{stack(c.paid.all)}</dd></div>
-                  <div><dt>{T("Ta commission", "Your commission", "Tu comisión")}</dt><dd className="earn-gain">{stack(c.commission.all)}</dd></div>
+                  <div><dt>{T("Hors TVA", "Excl. VAT", "Sin IVA")}</dt><dd>{stack(c.exVat.all)}</dd></div>
+                  <div><dt>{T("Ta commission", "Your commission", "Tu comisión")}<small>{ofVat}</small></dt><dd className="earn-gain">{stack(c.commission.all)}</dd></div>
                 </dl>
               </article>
             ))}
@@ -260,6 +293,7 @@ export default function CreatorEarnings() {
 
       <section className="panel acc-sec" aria-labelledby="earn-recent">
         <h2 id="earn-recent">{T("Derniers paiements avec ton code", "Latest payments with your code", "Últimos pagos con tu código")}</h2>
+        {recent.length > 0 && <p className="acc-help">{T("Pour chaque paiement : ce que l'abonné a payé (avec le montant hors TVA en dessous), puis ta commission en vert.", "For each payment: what the subscriber paid (with the amount excluding VAT below), then your commission in green.", "Para cada pago: lo que pagó el suscriptor (con el importe sin IVA debajo) y tu comisión en verde.")}</p>}
         {recent.length > 0 ? (
           <ul className="earn-list">
             {recent.map((r, i) => (
@@ -270,7 +304,7 @@ export default function CreatorEarnings() {
                   {r.state === "refunded" && <em> · {T("remboursé", "refunded", "reembolsado")}</em>}
                   {r.state === "partial" && <em> · {T("remboursé en partie", "partly refunded", "reembolsado en parte")}</em>}
                 </span>
-                <span className="earn-amt">{cur(r.net, r.currency)}</span>
+                <span className="earn-amt">{cur(r.net, r.currency)}{r.net > 0 && <small>{cur(r.exVat, r.currency)} {T("hors TVA", "excl. VAT", "sin IVA")}</small>}</span>
                 <span className={r.commission > 0 ? "earn-gain" : "earn-none"}>{r.commission > 0 ? "+" : ""}{cur(r.commission, r.currency)}</span>
               </li>
             ))}
