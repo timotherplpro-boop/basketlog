@@ -12,6 +12,7 @@ import { accountIdOf, isAccountSession, whopUidOf } from "../../../lib/auth-util
 import { changerMdp, compteParEmail, getCompte, supprimerCompteEmail } from "../../../lib/comptes";
 import { MAX_PASSWORD, hashPassword, passwordProblem, verifyPassword } from "../../../lib/password";
 import { forgetNewsletter } from "../../../lib/newsletter-server";
+import { readCreator } from "../../../lib/creator-stats";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -91,20 +92,7 @@ async function readProfile(uid) {
   }
 }
 
-// Fiche du créateur (supabase/compte-createur.sql) : { installed, unreachable, role, codes }.
-// installed est faux tant que ce script n'a pas été lancé ; role vient de la base (« createur », « admin » ou null : la base fait foi,
-// pas le cookie) ; codes : ses codes promo [{ code, pct }], à désactiver chez Whop avant l'effacement.
-async function readCreator(uid) {
-  const none = { role: null, codes: [] };
-  if (!rolesConfigured()) return { installed: false, ...none };
-  try {
-    const r = await dbRpc("basketlog_createur_infos", { p_uid: uid });
-    if (r?.ok) return { installed: true, role: "createur", codes: creatorCodes(r.codes) };
-    return { installed: true, ...none, role: r?.reason === "admin" ? "admin" : null };
-  } catch (e) {
-    return profileNotInstalled(e) ? { installed: false, ...none } : { installed: true, unreachable: true, ...none };
-  }
-}
+// Fiche du créateur (rôle lu en base, codes promo) : lib/creator-stats.js, partagée avec la rubrique « Mes gains » (/api/gains).
 
 function messages(lang) {
   const { t } = mk(lang);

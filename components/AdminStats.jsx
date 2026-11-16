@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { money } from "../lib/pricing";
+import { COMMISSION_PCT } from "../lib/commission";
 import { SOURCES, DEVICES } from "../lib/funnel-steps";
 import AdminNav from "./AdminNav";
 import AdminAccounts from "./AdminAccounts";
@@ -219,7 +220,7 @@ export default function AdminStats({ st }) {
       {/* ================= CODES CRÉATEURS ================= */}
       <section className="panel adm" aria-labelledby="st-codes">
         <div className="adm-head"><h2 id="st-codes">Codes créateurs</h2></div>
-        <p className="adm-help">Ce que chaque code promo a rapporté et la commission de 20 % à verser au créateur, mois par mois (paiements encaissés, remboursements déduits).</p>
+        <p className="adm-help">Ce que chaque code promo a rapporté et la commission de {COMMISSION_PCT} % à verser au créateur, mois par mois (paiements encaissés, remboursements déduits).</p>
         <WhopNote fail={st.whop.codes} what="les codes promo" />
         <WhopNote fail={st.whop.payments} what="les paiements" scope="payment:basic:read" />
         {st.creatorCodes.length ? (

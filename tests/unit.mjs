@@ -17,6 +17,7 @@ import { mailReady, resetEmail, sendMail } from "../lib/mail.js";
 import { newsletterTests } from "./newsletter.mjs";
 import { accueilTests } from "./accueil.mjs";
 import { widgetTests } from "./widget.mjs";
+import { creatorGainsTests } from "./creator-gains.mjs";
 
 export async function unit() {
   let passed = 0, failed = 0;
@@ -571,6 +572,7 @@ export async function unit() {
   await newsletterTests({ ok, ko, eq });
   await accueilTests({ ok, ko, eq });
   await widgetTests({ ok, ko, eq });
+  await creatorGainsTests({ ok, ko, eq });
 
   return { passed, failed };
 }

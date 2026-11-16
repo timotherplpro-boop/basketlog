@@ -1,0 +1,140 @@
+// « Mes gains » des créateurs : calcul (lib/creator-report.js), lecture partagée gardée en mémoire (lib/shared-read.js)
+// et part reversée (lib/commission.js). Aucun réseau : les abonnements et paiements de Whop sont simulés.
+import { CREATOR_COMMISSION, COMMISSION_PCT } from "../lib/commission.js";
+import { buildCreatorReport, membershipPromos, monthOf, prevMonth, promoOf } from "../lib/creator-report.js";
+import { sharedReader } from "../lib/shared-read.js";
+
+const T = (iso) => Date.parse(iso);
+export const NOW = T("2026-11-16T17:00:00Z"); // lundi 16 novembre 2026
+
+export const promoCodes = {
+  promo_A: { id: "promo_A", code: "GONZOPICKS10" },
+  promo_B: { id: "promo_B", code: "AUTRE10" },
+};
+// Abonnements : m1 Starter (code gardé sur l'abonnement), m2 Pro en dollars (code retiré de l'abonnement par Whop),
+// m3 Lifetime, m4 Starter résilié et remboursé, m5 Pro d'un autre créateur, m6 sans code, m7 Pro dont l'arrêt est programmé.
+export const memberships = [
+  { id: "mem_1", plan: "starter", status: "active", cancelAtEnd: false, promo: "promo_A", renewal: 13.99, currency: "eur" },
+  { id: "mem_2", plan: "pro", status: "active", cancelAtEnd: false, promo: null, renewal: 29.99, currency: "usd" },
+  { id: "mem_3", plan: "lifetime", status: "completed", cancelAtEnd: false, promo: "promo_A", renewal: null, currency: "eur" },
+  { id: "mem_4", plan: "starter", status: "canceled", cancelAtEnd: false, promo: "promo_A", renewal: 13.99, currency: "eur" },
+  { id: "mem_5", plan: "pro", status: "active", cancelAtEnd: false, promo: "promo_B", renewal: 29.99, currency: "eur" },
+  { id: "mem_6", plan: "starter", status: "active", cancelAtEnd: false, promo: null, renewal: 13.99, currency: "eur" },
+  { id: "mem_7", plan: "pro", status: "active", cancelAtEnd: true, promo: "promo_A", renewal: 29.99, currency: "eur" },
+];
+const pay = (id, membership, plan, at, total, extra = {}) => ({
+  id, membership, plan, status: "paid", reason: "subscription_cycle", currency: "eur", total, refunded: 0, at: T(at), promo: null, ...extra,
+});
+export const payments = [
+  pay("pay_1", "mem_1", "starter", "2026-10-15T09:00:00Z", 12.59, { reason: "subscription_create", promo: "promo_A" }),
+  pay("pay_2", "mem_1", "starter", "2026-11-15T09:00:00Z", 13.99), // renouvellement : sans code sur le paiement
+  pay("pay_3", "mem_2", "pro", "2026-10-10T09:00:00Z", 26.99, { reason: "subscription_create", promo: "promo_A", currency: "usd" }),
+  pay("pay_4", "mem_2", "pro", "2026-11-10T09:00:00Z", 29.99, { currency: "usd" }), // renouvellement, abonnement sans code
+  pay("pay_5", "mem_3", "lifetime", "2026-11-02T09:00:00Z", 89.99, { reason: "one_time", promo: "promo_A" }),
+  pay("pay_6", "mem_4", "starter", "2026-10-05T09:00:00Z", 12.59, { reason: "subscription_create", promo: "promo_A", refunded: 12.59 }),
+  pay("pay_7", "mem_5", "pro", "2026-11-03T09:00:00Z", 26.99, { reason: "subscription_create", promo: "promo_B" }),
+  pay("pay_8", "mem_6", "starter", "2026-11-04T09:00:00Z", 13.99, { reason: "subscription_create" }),
+  pay("pay_9", "mem_7", "pro", "2026-11-01T09:00:00Z", 26.99, { reason: "subscription_create", promo: "promo_A" }),
+  pay("pay_10", "mem_1", "starter", "2026-11-14T09:00:00Z", 13.99, { status: "open" }), // paiement non encaissé : ignoré
+];
+
+const sorted = (bag) => Object.fromEntries(Object.entries(bag).sort(([x], [y]) => x.localeCompare(y))); // l'ordre des monnaies n'a pas d'importance
+
+export async function creatorGainsTests({ ok, ko, eq }) {
+  console.log("Mes gains (créateurs)");
+  const report = (codes, extra = {}) => buildCreatorReport({ codes, promoCodes, memberships, payments, asOf: NOW - 20e3, now: NOW, ...extra });
+
+  eq("gains : part du créateur = 40 %, partagée avec l'admin", [CREATOR_COMMISSION, COMMISSION_PCT, report([]).ratePct], [0.4, 40, 40]);
+  eq("gains : mois à l'heure de Paris (31 oct. 23 h 30 UTC = 1er nov. à Paris)", [monthOf(T("2026-10-31T23:30:00Z")), monthOf(T("2026-10-31T22:30:00Z")), prevMonth("2026-01"), prevMonth("2026-11")], ["2026-11", "2026-10", "2025-12", "2026-10"]);
+
+  const a = report([{ code: "GONZOPICKS10", pct: 10 }]);
+  const t = a.total;
+  eq("gains : mois en cours et mois précédent", a.months, { this: "2026-11", prev: "2026-10" });
+  eq("gains : personnes par formule (Starter 2, Pro 2, Lifetime 1) et total", [t.plans.starter.people, t.plans.pro.people, t.plans.lifetime.people, t.people], [2, 2, 1, 5]);
+  eq("gains : abonnés actifs par formule (le résilié n'en fait pas partie)", [t.plans.starter.active, t.plans.pro.active, t.plans.lifetime.active, t.active], [1, 2, 1, 4]);
+  eq("gains : le renouvellement d'un abonnement dont Whop a retiré le code reste au créateur", [t.plans.pro.paid.USD, t.commission.month.USD], [56.98, 12]);
+  eq("gains : payé par formule, euros et dollars séparés", [t.plans.starter.paid, sorted(t.plans.pro.paid), t.plans.lifetime.paid], [{ EUR: 26.58 }, { EUR: 26.99, USD: 56.98 }, { EUR: 89.99 }]);
+  eq("gains : commission par formule (40 %)", [t.plans.starter.commission, sorted(t.plans.pro.commission), t.plans.lifetime.commission], [{ EUR: 10.63 }, { EUR: 10.8, USD: 22.79 }, { EUR: 36 }]);
+  eq("gains : commission du mois (novembre)", sorted(t.commission.month), { EUR: 52.39, USD: 12 });
+  eq("gains : commission du mois précédent (octobre), remboursement déduit", sorted(t.commission.prev), { EUR: 5.04, USD: 10.8 });
+  eq("gains : commission cumulée = somme des formules", sorted(t.commission.all), { EUR: 57.43, USD: 22.79 });
+  eq("gains : estimation mensuelle (ni Lifetime, ni arrêt programmé, ni résilié)", sorted(t.monthly), { EUR: 5.6, USD: 12 });
+
+  eq("gains : paiements récents du plus récent au plus ancien, non encaissés exclus", a.recent.map((r) => [r.at, r.plan, r.first, r.state]), [
+    [T("2026-11-15T09:00:00Z"), "starter", false, "paid"],
+    [T("2026-11-10T09:00:00Z"), "pro", false, "paid"],
+    [T("2026-11-02T09:00:00Z"), "lifetime", true, "paid"],
+    [T("2026-11-01T09:00:00Z"), "pro", true, "paid"],
+    [T("2026-10-15T09:00:00Z"), "starter", true, "paid"],
+    [T("2026-10-10T09:00:00Z"), "pro", true, "paid"],
+    [T("2026-10-05T09:00:00Z"), "starter", true, "refunded"],
+  ]);
+  eq("gains : commission d'un paiement récent", [a.recent[0].net, a.recent[0].commission, a.recent[1].currency, a.recent[1].commission], [13.99, 5.6, "USD", 12]);
+
+  // Un créateur ne voit rien des autres : ni leurs chiffres, ni un identifiant d'abonné ou de paiement.
+  const b = report([{ code: "AUTRE10", pct: 10 }]);
+  eq("gains : un autre créateur ne voit que son propre code (1 personne, Pro, 26,99 €)", [b.total.people, b.total.plans.pro.people, b.total.plans.pro.paid, b.total.commission.all, b.recent.length], [1, 1, { EUR: 26.99 }, { EUR: 10.8 }, 1]);
+  eq("gains : un code inconnu ne reçoit rien", [report([{ code: "PIRATE99", pct: 5 }]).total.people, report([{ code: "PIRATE99", pct: 5 }]).recent.length], [0, 0]);
+  eq("gains : sans code, tout est à zéro", [report([]).codes, report([]).total.people, report([]).total.commission.all], [[], 0, {}]);
+  eq("gains : le code est reconnu quelle que soit la casse", report([{ code: "gonzopicks10", pct: 10 }]).total.people, 5);
+  const leak = JSON.stringify(a);
+  eq("gains : aucun identifiant d'abonné ni de paiement dans le résultat", /mem_|pay_|user_|promo_/.test(leak), false);
+
+  // Plusieurs codes : chacun a ses chiffres, le total les additionne.
+  const both = report([{ code: "GONZOPICKS10", pct: 10 }, { code: "AUTRE10", pct: 10 }]);
+  eq("gains : deux codes, chiffres par code et total", [both.codes.map((c) => [c.code, c.people]), both.total.people, both.total.plans.pro.people], [[["GONZOPICKS10", 5], ["AUTRE10", 1]], 6, 3]);
+
+  // Cas limites de rattachement.
+  eq("gains : le code de l'abonnement l'emporte, sinon celui du premier paiement remisé", [...membershipPromos(
+    [{ id: "m1", promo: "P1" }, { id: "m2", promo: null }],
+    [{ membership: "m1", promo: "P2", at: 1 }, { membership: "m2", promo: "P3", at: 5 }, { membership: "m2", promo: "P4", at: 2 }]
+  ).entries()], [["m1", "P1"], ["m2", "P4"]]);
+  eq("gains : paiement sans code ni abonnement connu = aucun code", promoOf({ promo: null, membership: "mem_x" }, new Map()), null);
+  const trial = buildCreatorReport({
+    codes: [{ code: "AUTRE10" }], promoCodes, asOf: NOW, now: NOW,
+    memberships: [{ id: "t1", plan: "pro", status: "trialing", promo: "promo_B", renewal: 29.99, currency: "eur" }], payments: [],
+  });
+  eq("gains : un abonnement en essai avec le code compte comme une personne, sans argent", [trial.total.people, trial.total.active, trial.total.plans.pro.paid], [1, 1, {}]);
+  const other = buildCreatorReport({
+    codes: [{ code: "AUTRE10" }], promoCodes, asOf: NOW, now: NOW, memberships: [],
+    payments: [pay("pay_x", "mem_x", null, "2026-11-10T09:00:00Z", 10, { promo: "promo_B" })],
+  });
+  eq("gains : formule inconnue = ligne « autre » seulement quand elle existe", [Object.keys(other.total.plans), Object.keys(report([{ code: "AUTRE10" }]).total.plans)], [["starter", "pro", "lifetime", "other"], ["starter", "pro", "lifetime"]]);
+  eq("gains : le drapeau « partiel » est transmis", [report([]).partial, report([], { partial: true }).partial], [false, true]);
+  eq("gains : paiement complètement remboursé = 0 € de commission", report([{ code: "GONZOPICKS10" }]).recent.at(-1).commission, 0);
+
+  // Lecture partagée : une seule lecture chez Whop pour tous, cache de 60 s, erreurs, chiffres anciens en secours.
+  let clock = 1_000_000;
+  let calls = 0;
+  let fail = false;
+  const slow = [];
+  const reader = sharedReader({
+    fetcher: async () => { calls++; if (fail) throw new Error("Whop 500"); await new Promise((r) => setTimeout(r, 5)); slow.push(calls); return { n: calls }; },
+    now: () => clock,
+  });
+  const burst = await Promise.all(Array.from({ length: 25 }, () => reader()));
+  eq("cache : 25 demandes en même temps = 1 seule lecture chez Whop", [calls, burst.every((x) => x.n === 1)], [1, true]);
+  clock += 59_000;
+  eq("cache : encore valable après 59 s", [(await reader()).n, calls], [1, 1]);
+  clock += 2_000;
+  eq("cache : relu après 60 s", [(await reader()).n, calls], [2, 2]);
+  fail = true;
+  clock += 61_000;
+  const stale = await reader();
+  eq("cache : Whop en panne, derniers chiffres renvoyés et marqués", [stale.n, stale.stale, calls], [2, true, 3]);
+  clock += 5_000;
+  await reader();
+  eq("cache : pas de nouvelle lecture avant 10 s après un échec", calls, 3);
+  clock += 6_000;
+  await reader();
+  eq("cache : nouvelle tentative après 10 s", calls, 4);
+  clock += 16 * 60_000;
+  let msg = "";
+  try { await reader(); } catch (e) { msg = e.message; }
+  eq("cache : au-delà de 15 min, l'erreur est renvoyée plutôt que des chiffres périmés", msg, "Whop 500");
+  fail = false;
+  clock += 11_000;
+  eq("cache : Whop revenu, les chiffres sont de nouveau à jour", [(await reader()).stale, (await reader()).n >= 5], [undefined, true]);
+  reader.reset();
+  eq("cache : remise à zéro", [(await reader()).n >= 1], [true]);
+}

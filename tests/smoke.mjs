@@ -37,7 +37,7 @@ const ERROR_PAGE = /Une erreur est survenue|Application error|Internal Server Er
 
 async function pages() {
   console.log("Pages");
-  for (const p of ["/", "/en", "/es", "/analyse-basket", "/en/analyse-basket", "/es/analyse-basket", "/pronostic-basket", "/en/pronostic-basket", "/es/pronostic-basket", "/app", "/app/matchs", "/app/bilan", "/app/bilan?l=pub", "/app/classement", "/app/euroleague", "/pro", "/en/pro", "/es/pro", "/pro?code=TESTAUTO", "/avis", "/en/avis", "/es/avis", "/methode", "/widget", "/en/widget", "/es/widget", "/cgu", "/cgv", "/confidentialite", "/mentions-legales", "/cookies", "/reinitialiser", "/en/reinitialiser", "/es/reinitialiser", "/newsletter/confirmer", "/en/newsletter/confirmer", "/es/newsletter/confirmer", "/sitemap.xml", "/robots.txt"]) {
+  for (const p of ["/", "/en", "/es", "/analyse-basket", "/en/analyse-basket", "/es/analyse-basket", "/pronostic-basket", "/en/pronostic-basket", "/es/pronostic-basket", "/app", "/app/matchs", "/app/bilan", "/app/bilan?l=pub", "/app/classement", "/app/euroleague", "/app/gains", "/en/app/gains", "/es/app/gains", "/pro", "/en/pro", "/es/pro", "/pro?code=TESTAUTO", "/avis", "/en/avis", "/es/avis", "/methode", "/widget", "/en/widget", "/es/widget", "/cgu", "/cgv", "/confidentialite", "/mentions-legales", "/cookies", "/reinitialiser", "/en/reinitialiser", "/es/reinitialiser", "/newsletter/confirmer", "/en/newsletter/confirmer", "/es/newsletter/confirmer", "/sitemap.xml", "/robots.txt"]) {
     const r = await get(p);
     if (r.status !== 200) ko(p, `HTTP ${r.status}`);
     else if (ERROR_PAGE.test(r.text)) ko(p, "page d'erreur affichée");
@@ -140,6 +140,23 @@ async function protectedRoutes() {
 
   const cron = await get("/api/cron/pronos");
   cron.status === 401 ? ok("tâche planifiée refusée aux inconnus") : ko("tâche planifiée refusée aux inconnus", `HTTP ${cron.status}`);
+}
+
+// « Mes gains » (rubrique des créateurs) : les chiffres ne sortent jamais sans session, ni pour un compte qui n'est pas créateur,
+// et la réponse n'est jamais mise en cache. Ici rien n'est lu chez Whop.
+async function gainsRoutes() {
+  console.log("Mes gains");
+  const anon = await get("/api/gains");
+  anon.status === 401 ? ok("gains : refusés sans compte") : ko("gains : refusés sans compte", `HTTP ${anon.status}`);
+  /no-store/.test(anon.cache) ? ok("gains : réponse jamais mise en cache") : ko("gains : réponse jamais mise en cache", anon.cache || "en-tête absent");
+  if (!SECRET) return;
+  const LEAK = /apikey|api_key|bearer|supabase|secret|BASKETLOG_DB|WHOP_API/i;
+  for (const [name, cookie] of [["membre", session("pro")], ["créateur (base non configurée ici)", session("lifetime", { role: "createur" })]]) {
+    const r = await get("/api/gains?lang=fr&uid=autre&code=AUTRE", { cookie });
+    [403, 503].includes(r.status) && !/"codes"|"recent"|"total"/.test(r.text) && !LEAK.test(r.text)
+      ? ok(`gains : ${name}, aucun chiffre sans base ni vérification du rôle`)
+      : ko(`gains : ${name}, aucun chiffre sans base ni vérification du rôle`, `HTTP ${r.status} ${r.text.slice(0, 160)}`);
+  }
 }
 
 // Newsletter du dimanche : l'état et l'inscription demandent un compte, la préparation du mail et son envoi un compte admin.
@@ -291,6 +308,7 @@ await pages();
 await access();
 await protectedRoutes();
 await newsletterRoutes();
+await gainsRoutes();
 await promoCodes();
 await videosApi();
 await widgetRoute();
