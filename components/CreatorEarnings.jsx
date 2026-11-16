@@ -4,7 +4,8 @@
 // Les chiffres viennent de /api/gains (Whop, lu en direct, gardé 60 s côté serveur). Le créateur n'y voit que ses propres codes,
 // jamais le nom d'un abonné. La page se rafraîchit toute seule une fois par minute tant qu'elle est visible, au plus AUTO_MAX fois
 // de suite sans que le créateur y touche (ménage le serveur), et le bouton « Actualiser » relance la lecture à tout moment.
-// Ce que touche le créateur = 40 % du montant HORS TVA : chaque ligne montre ce que l'abonné a payé, le montant hors TVA, puis la commission.
+// Ce que touche le créateur = 40 % du montant HORS TVA. L'écran ne montre que ses GAINS (la commission) : ni ce que les abonnés ont payé, ni le hors TVA
+// (le serveur ne les envoie même pas). Seule l'explication du calcul cite un exemple au prix public.
 // Un administrateur (ou le mode « voir comme ») reçoit un aperçu avec des chiffres d'exemple (réponse marquée « demo »), sans actualisation.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useL } from "./LangProvider";
@@ -248,7 +249,7 @@ export default function CreatorEarnings() {
 
       <section className="panel acc-sec" aria-labelledby="earn-plans">
         <h2 id="earn-plans">{T("Par formule", "By plan", "Por plan")}</h2>
-        <p className="acc-help">{T("Combien de personnes ont pris chaque formule avec ton code, ce qu'elles ont payé, le montant hors TVA et ce que cela te rapporte.", "How many people took each plan with your code, what they paid, the amount excluding VAT and what it earns you.", "Cuántas personas tomaron cada plan con tu código, lo que pagaron, el importe sin IVA y lo que eso te aporta.")}</p>
+        <p className="acc-help">{T("Combien de personnes ont pris chaque formule avec ton code, et ce que cela te rapporte.", "How many people took each plan with your code, and what it earns you.", "Cuántas personas tomaron cada plan con tu código, y lo que eso te aporta.")}</p>
         <div className="earn-plans">
           {plans.map((k) => {
             const v = total.plans[k];
@@ -261,8 +262,6 @@ export default function CreatorEarnings() {
                   {k === "lifetime" ? ` · ${T("paiement unique", "one-time payment", "pago único")}` : v.people > 0 ? ` · ${actives(v.active)}` : ""}
                 </span>
                 <dl>
-                  <div><dt>{T("Payé par eux", "Paid by them", "Pagado por ellos")}</dt><dd>{stack(v.paid)}</dd></div>
-                  <div><dt>{T("Hors TVA", "Excl. VAT", "Sin IVA")}</dt><dd>{stack(v.exVat)}</dd></div>
                   <div><dt>{T("Ta commission", "Your commission", "Tu comisión")}<small>{ofVat}</small></dt><dd className="earn-gain">{stack(v.commission)}</dd></div>
                 </dl>
               </article>
@@ -281,8 +280,6 @@ export default function CreatorEarnings() {
                 <b className="earn-big">{c.people}</b>
                 <span className="earn-sub">{people(c.people)} · {actives(c.active)}</span>
                 <dl>
-                  <div><dt>{T("Payé par eux", "Paid by them", "Pagado por ellos")}</dt><dd>{stack(c.paid.all)}</dd></div>
-                  <div><dt>{T("Hors TVA", "Excl. VAT", "Sin IVA")}</dt><dd>{stack(c.exVat.all)}</dd></div>
                   <div><dt>{T("Ta commission", "Your commission", "Tu comisión")}<small>{ofVat}</small></dt><dd className="earn-gain">{stack(c.commission.all)}</dd></div>
                 </dl>
               </article>
@@ -293,7 +290,7 @@ export default function CreatorEarnings() {
 
       <section className="panel acc-sec" aria-labelledby="earn-recent">
         <h2 id="earn-recent">{T("Derniers paiements avec ton code", "Latest payments with your code", "Últimos pagos con tu código")}</h2>
-        {recent.length > 0 && <p className="acc-help">{T("Pour chaque paiement : ce que l'abonné a payé (avec le montant hors TVA en dessous), puis ta commission en vert.", "For each payment: what the subscriber paid (with the amount excluding VAT below), then your commission in green.", "Para cada pago: lo que pagó el suscriptor (con el importe sin IVA debajo) y tu comisión en verde.")}</p>}
+        {recent.length > 0 && <p className="acc-help">{T("Pour chaque paiement fait avec ton code : ta commission, en vert.", "For each payment made with your code: your commission, in green.", "Para cada pago hecho con tu código: tu comisión, en verde.")}</p>}
         {recent.length > 0 ? (
           <ul className="earn-list">
             {recent.map((r, i) => (
@@ -304,7 +301,6 @@ export default function CreatorEarnings() {
                   {r.state === "refunded" && <em> · {T("remboursé", "refunded", "reembolsado")}</em>}
                   {r.state === "partial" && <em> · {T("remboursé en partie", "partly refunded", "reembolsado en parte")}</em>}
                 </span>
-                <span className="earn-amt">{cur(r.net, r.currency)}{r.net > 0 && <small>{cur(r.exVat, r.currency)} {T("hors TVA", "excl. VAT", "sin IVA")}</small>}</span>
                 <span className={r.commission > 0 ? "earn-gain" : "earn-none"}>{r.commission > 0 ? "+" : ""}{cur(r.commission, r.currency)}</span>
               </li>
             ))}

@@ -3,13 +3,15 @@ import { COOKIE, cookieOptions, currentSession } from "../../../lib/pro";
 import { mk } from "../../../lib/i18n";
 import { creatorEarnings, readCreator } from "../../../lib/creator-stats";
 import { demoReport } from "../../../lib/creator-demo";
+import { creatorView } from "../../../lib/creator-report";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
 // « Mes gains » : combien de personnes ont utilisé le code promo du créateur connecté, sur quelle formule, et ce que cela lui rapporte
 // (euros et dollars à part), lu chez Whop. Réservé aux créateurs : le rôle et les codes viennent de la base à partir du cookie signé,
-// jamais de la requête, donc un créateur ne peut lire que ses propres chiffres. Aucun nom ni e-mail d'abonné ne sort d'ici.
+// jamais de la requête, donc un créateur ne peut lire que ses propres chiffres. Aucun nom ni e-mail d'abonné ne sort d'ici, ni ce que les
+// abonnés ont payé ni le montant hors TVA : le créateur ne reçoit que ses gains (creatorView).
 // La lecture chez Whop est faite une fois pour tous les créateurs et gardée 60 s (lib/creator-stats.js) ; en plus, chaque compte est
 // limité à 40 lectures par tranche de 10 minutes, ce qui laisse la place à l'actualisation automatique de la page (1 par minute).
 
@@ -56,18 +58,18 @@ export async function GET(req) {
   if (tooMany(session.uid)) return err(M.many, 429);
   // Un admin qui regarde le site « en tant que » créateur n'a aucun chiffre réel à voir : il reçoit un aperçu avec des chiffres d'exemple
   // inventés (marqués « demo »), calculés comme les vrais, sans lecture chez Whop.
-  if (session.preview) return json({ ok: true, demo: true, ...demoReport() }, 200, refreshed);
+  if (session.preview) return json({ ok: true, demo: true, ...creatorView(demoReport()) }, 200, refreshed);
 
   const creator = await readCreator(session.uid);
   if (!creator.installed) return err(M.notReady, 503);
   if (creator.unreachable) return err(M.dbDown, 503);
   // Un administrateur qui ouvre la rubrique voit la même chose : l'aperçu avec chiffres d'exemple (jamais ceux d'un vrai créateur).
-  if (creator.role === "admin") return json({ ok: true, demo: true, ...demoReport() }, 200, refreshed);
+  if (creator.role === "admin") return json({ ok: true, demo: true, ...creatorView(demoReport()) }, 200, refreshed);
   if (creator.role !== "createur") return err(M.forbidden, 403);
 
   try {
     const report = await creatorEarnings(creator.codes);
-    return json({ ok: true, ...report }, 200, refreshed);
+    return json({ ok: true, ...creatorView(report) }, 200, refreshed);
   } catch (e) {
     console.warn(`[gains] lecture Whop impossible : ${String(e?.message || e).slice(0, 200)}`);
     return e?.status === "sans clé" ? err(M.whopNoKey, 503) : err(M.whopDown, 503);

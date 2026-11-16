@@ -2,7 +2,7 @@
 // et part reversée (lib/commission.js : 40 % du montant hors TVA), aperçu avec chiffres d'exemple (lib/creator-demo.js).
 // Aucun réseau : les abonnements et paiements de Whop sont simulés.
 import { CREATOR_COMMISSION, COMMISSION_PCT, VAT_RATE, VAT_PCT, commissionOf, exVat } from "../lib/commission.js";
-import { buildCreatorReport, membershipPromos, monthOf, prevMonth, promoOf } from "../lib/creator-report.js";
+import { buildCreatorReport, creatorView, membershipPromos, monthOf, prevMonth, promoOf } from "../lib/creator-report.js";
 import { DEMO_CODE, demoReport } from "../lib/creator-demo.js";
 import { sharedReader } from "../lib/shared-read.js";
 
@@ -123,6 +123,22 @@ export async function creatorGainsTests({ ok, ko, eq }) {
     const d = demoReport(T(iso));
     eq(`démo : le mois en cours et le mois précédent sont remplis (${iso})`, [d.total.people, Object.keys(d.total.commission.month).includes("EUR"), Object.keys(d.total.commission.prev).includes("EUR"), d.recent.every((r) => r.at <= T(iso))], [7, true, true, true]);
   }
+
+  // Ce qui part vers un créateur : ses gains seulement. Jamais ce que les abonnés ont payé, ni le hors TVA, ni le total ou le net d'un paiement.
+  const keysOf = (o, acc = new Set()) => { if (o && typeof o === "object") for (const [k, v] of Object.entries(o)) { acc.add(k); keysOf(v, acc); } return acc; };
+  const full = report([{ code: "GONZOPICKS10" }]);
+  const vue = creatorView(full);
+  const vueDemo = creatorView(demo);
+  eq("vue créateur : ni « payé », ni hors TVA, ni net d'un paiement, nulle part (rapport réel et aperçu)", [vue, vueDemo].map((v) => ["paid", "exVat", "net"].filter((k) => keysOf(v).has(k))), [[], []]);
+  eq("vue créateur : une ligne de paiement ne garde que date, code, formule, monnaie, 1er paiement, état et commission", [...new Set(vue.recent.flatMap((r) => Object.keys(r)))].sort(), ["at", "code", "commission", "currency", "first", "plan", "state"]);
+  eq("vue créateur : les gains sont intacts (mois, mois dernier, depuis le début, estimation, par formule, par code, paiements)", [
+    sorted(vue.total.commission.month), sorted(vue.total.commission.prev), sorted(vue.total.commission.all), sorted(vue.total.monthly),
+    JSON.stringify(vue.total.plans.starter.commission) === JSON.stringify(full.total.plans.starter.commission), JSON.stringify(vue.codes[0].commission) === JSON.stringify(full.codes[0].commission),
+    vue.recent.map((r) => r.commission).join() === full.recent.map((r) => r.commission).join(),
+  ], [{ EUR: 43.66, USD: 10 }, { EUR: 4.2, USD: 9 }, { EUR: 47.86, USD: 18.99 }, { EUR: 4.66, USD: 10 }, true, true, true]);
+  eq("vue créateur : personnes, actifs, taux, TVA, mois et drapeau « partiel » inchangés", [vue.total.people, vue.total.active, vue.total.plans.pro.people, vue.codes[0].people, vue.rate, vue.ratePct, vue.vat, vue.vatPct, vue.months, vue.partial], [full.total.people, full.total.active, full.total.plans.pro.people, full.codes[0].people, full.rate, full.ratePct, full.vat, full.vatPct, full.months, full.partial]);
+  eq("vue créateur : le rapport d'origine garde son détail (il sert au calcul)", [keysOf(full).has("paid"), keysOf(full).has("exVat"), full.recent[0].net > 0], [true, true, true]);
+  eq("vue créateur : sans rapport, rien ne casse", [creatorView(null), creatorView(undefined), Object.keys(creatorView({}))], [null, undefined, ["codes", "total", "recent"]]);
 
   // Lecture partagée : une seule lecture chez Whop pour tous, cache de 60 s, erreurs, chiffres anciens en secours.
   let clock = 1_000_000;
