@@ -250,7 +250,7 @@ export async function unit() {
     nbaPick({ game: { id: 5, date: "2026-11-08T20:30:00Z", home: { short: "Bulls", name: "Chicago Bulls" }, away: { name: "Philadelphia 76ers" } }, pHome: 0.3, confidence: "Élevée" }, SD),
     elPick({ g: { id: 9, date: "2026-11-08T19:30:00Z", home: { name: "AS Monaco", short: "Monaco" }, away: { name: "Real Madrid" } }, a: { pHome: 0.42, confidence: "Moyenne" } }),
   ], [
-    { league: "NBA", href: "/app/match/5?d=20261108", date: "2026-11-08T20:30:00Z", home: "Bulls", away: "Philadelphia 76ers", pHome: 0.3, conf: "Élevée" },
+    { league: "NBA", href: "/nba/76ers-vs-bulls-2026-11-08", date: "2026-11-08T20:30:00Z", home: "Bulls", away: "Philadelphia 76ers", pHome: 0.3, conf: "Élevée" },
     { league: "EL", href: "/app/euroleague/match/9", date: "2026-11-08T19:30:00Z", home: "Monaco", away: "Real Madrid", pHome: 0.42, conf: "Moyenne" },
   ]);
 

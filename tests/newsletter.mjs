@@ -208,7 +208,7 @@ export async function newsletterTests({ ok, ko, eq }) {
     { id: "4", d: "20261116", date: "2026-11-16T21:00:00Z", home: team("G", "G"), away: team("H", "H"), pHome: 0.7 },
     { id: "5", d: "20261117", date: "2026-11-17T21:00:00Z", home: null, away: team("H", "H"), pHome: 0.99 },
   ], 2);
-  eq("Favoris les plus nets : les 2 plus nets, hors matchs en cours ou incomplets, classés par heure", clear.map((x) => x.href), ["/app/match/2?d=20261115", "/app/match/4?d=20261116"]);
+  eq("Favoris les plus nets : les 2 plus nets, hors matchs en cours ou incomplets, classés par heure", clear.map((x) => x.href), ["/nba/d-vs-c-2026-11-15", "/nba/h-vs-g-2026-11-16"]);
 
   // --- Envoi à 18 h : le mail est préparé à 13 h 11, un match déjà commencé à l'heure d'envoi sort de la liste
   {
