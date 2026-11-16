@@ -7,6 +7,7 @@ import { mk } from "../../../lib/i18n";
 import { confText } from "../../../lib/matchtext";
 import { formLabel, briefSummary, scenarioOne } from "../../../lib/freepart";
 import { parisDay, parisTime } from "../../../components/ui";
+import { nbaPath } from "../../../lib/slug.js";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -77,7 +78,7 @@ export async function GET(req) {
     const dt = new Date(g.date);
     const dm = new Intl.DateTimeFormat(L.locale, { timeZone: L.tz, day: "2-digit", month: "2-digit" }).format(dt);
     return {
-      href: `/app/match/${g.id}?d=${d}`, when: `${dm}${parisTime(g.date, L)}`, p: `${fav.abbr} ${pct(Math.max(a.pHome, a.pAway), L)}`,
+      href: nbaPath(g, d), when: `${dm}${parisTime(g.date, L)}`, p: `${fav.abbr} ${pct(Math.max(a.pHome, a.pAway), L)}`,
       teams: [{ name: g.away.short, abbr: g.away.abbr, fav: !favHome }, { name: g.home.short, abbr: g.home.abbr, fav: favHome }],
     };
   });

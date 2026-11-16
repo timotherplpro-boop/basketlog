@@ -5,7 +5,7 @@ import { stripLang } from "../lib/i18n";
 // Pages de l'espace membre : là, la barre latérale (AppShell) remplace l'en-tête et le pied de page du site.
 export const inMemberArea = (path) => {
   const p = stripLang((path || "/").split("?")[0]) || "/";
-  return p === "/app" || p.startsWith("/app/") || p === "/pro";
+  return p === "/app" || p.startsWith("/app/") || p.startsWith("/nba/") || p === "/pro";
 };
 
 export default function SiteChrome({ member, children }) {

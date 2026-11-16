@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { COOKIE, cookieOptions, currentSession, safeNext, usageKey } from "../../../../lib/pro";
 import { matchKey, recordAnalysis, tierLimit, tierOf } from "../../../../lib/usage";
 import { analyzeDuel } from "../../../../lib/data";
+import { nbaPath } from "../../../../lib/slug.js";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +28,7 @@ export async function POST(req) {
     if (res.fixture) {
       const f = res.fixture;
       id = f.id;
-      path = `/app/match/${f.id}?d=${f.d}`;
+      path = nbaPath(f, f.d);
       info = { date: f.date, home: team(f.home), away: team(f.away) };
     } else {
       const g = res.analysis.game;

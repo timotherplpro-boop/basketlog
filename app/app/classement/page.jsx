@@ -58,6 +58,7 @@ export default async function ClassementPage() {
       <div className="app-head">
         <h1>{L.t("Classement NBA", "NBA standings", "Clasificación NBA")}</h1>
         <p>{L.t("Découvre les conférences en cours", "Explore the current conferences", "Descubre las conferencias en curso")}</p>
+        <p><Link href={L.href("/app/power-rankings")}>{L.t("Power ranking NBA selon le modèle →", "NBA power rankings by our model →", "Power ranking NBA según el modelo →")}</Link></p>
         <p className="note">{L.t("Clique sur une équipe pour voir sa fiche : stats, joueurs, calendrier.", "Click a team to see its page: stats, players, schedule.", "Haz clic en un equipo para ver su ficha: estadísticas, jugadores, calendario.")}</p>
       </div>
       <div className="std-grid">

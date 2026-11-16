@@ -3,6 +3,7 @@ import { useMemo, useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useL } from "./LangProvider";
 import { fmtDate } from "../lib/i18n";
+import { nbaPath } from "../lib/slug.js";
 
 const norm = (s) => (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
@@ -47,7 +48,7 @@ export default function TeamSearch({ games }) {
         <div className="search-drop" role="listbox">
           {results.length ? (
             results.map((g) => (
-              <Link key={g.id} href={L.href(`/app/match/${g.id}?d=${g.d}`)} className="search-row" role="option">
+              <Link key={g.id} href={L.href(nbaPath(g, g.d))} className="search-row" role="option">
                 <span className="search-teams">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={g.away.logo} alt={g.away.name} width={26} height={26} />

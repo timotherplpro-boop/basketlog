@@ -2,6 +2,7 @@ import Link from "next/link";
 import { mk, fmtDate, fmtTime, pctOf } from "../lib/i18n";
 import { confText } from "../lib/matchtext";
 import { sized, LOGO_W } from "../lib/img";
+import { nbaPath } from "../lib/slug.js";
 
 export function TeamLogo({ team, size = 30 }) {
   if (!team.logo) return <div style={{ width: size, height: size, borderRadius: 8, background: team.color }} />;
@@ -40,7 +41,7 @@ export function GameCard({ a, date, L = mk("fr") }) {
   const favHome = a.pHome >= 0.5;
   const showScore = g.state !== "pre" && g.home.score != null;
   return (
-    <Link href={L.href(`/app/match/${g.id}?d=${date}`)} className="card game">
+    <Link href={L.href(nbaPath(g, date))} className="card game">
       <div className="game-top">
         <StatusTag game={g} L={L} />
         {a.confidence === "Très élevée" ? <span className="tag hot">{L.t("Confiance très élevée", "Very high confidence", "Confianza muy alta")}</span> : Math.max(a.pHome, a.pAway) > 0.72 ? <span className="tag hot">{L.t("Favori net", "Clear favorite", "Favorito claro")}</span> : Math.abs(a.pHome - 0.5) < 0.06 ? <span className="tag hot">{L.t("Indécis", "Toss-up", "Igualado")}</span> : <span>{L.t(`Confiance ${a.confidence.toLowerCase()}`, `${confText(a.confidence, L)} confidence`, `Confianza ${confText(a.confidence, L).toLowerCase()}`)}</span>}

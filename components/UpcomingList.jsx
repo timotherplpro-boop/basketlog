@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { mk, fmtDate, fmtTime, pctOf } from "../lib/i18n";
+import { nbaPath } from "../lib/slug.js";
 
 const day = (iso, L) => fmtDate(L, iso, { weekday: "long", day: "numeric", month: "long" });
 const parts = (iso, L) => [fmtDate(L, iso, { day: "2-digit", month: "2-digit" }), fmtTime(L, iso)];
 
 // Liste des matchs façon "Prochains matchs", regroupés par jour (heure de Paris).
-export default function UpcomingList({ games, title, grouped = true, href = (g) => `/app/match/${g.id}?d=${g.d}`, L = mk("fr"), className = "", children = null }) {
+export default function UpcomingList({ games, title, grouped = true, href = (g) => nbaPath(g, g.d), L = mk("fr"), className = "", children = null }) {
   if (title === undefined) title = L.t("Prochains matchs", "Upcoming games", "Próximos partidos");
   if (!games.length) return <div className="empty">{L.t("Aucun match au programme.", "No games scheduled.", "No hay partidos programados.")}</div>;
   const groups = [];

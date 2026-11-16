@@ -24,6 +24,7 @@ import { price } from "../lib/pricing";
 import { getCurrency } from "../lib/currency-server";
 import { getL } from "../lib/lang-server";
 import { fmtDate } from "../lib/i18n";
+import { nbaPath } from "../lib/slug.js";
 
 const AV = ["#ff7a1a", "#7c5cff", "#22c55e", "#0ea5e9", "#e11d48", "#eab308"];
 const avatarColor = (s) => AV[[...s].reduce((a, c) => a + c.charCodeAt(0), 0) % AV.length];
@@ -126,7 +127,7 @@ export default async function Home() {
     favShort: (top.pHome >= 0.5 ? top.home : top.away).short,
     pf: Math.max(top.pHome, 1 - top.pHome),
     conf: top.confidence,
-    href: `/app/match/${top.id}?d=${top.d}`,
+    href: nbaPath(top, top.d),
   } : null;
   const nameFor = (t) => t.abbr.toUpperCase();
 
@@ -255,7 +256,7 @@ export default async function Home() {
           {notifs.map((g, i) => {
             const fav = g.pHome >= 0.5 ? g.home : g.away;
             return (
-              <Link key={g.id} href={L.href(`/app/match/${g.id}?d=${g.d}`)} className={`notif n${i + 1}`}>
+              <Link key={g.id} href={L.href(nbaPath(g, g.d))} className={`notif n${i + 1}`}>
                 <span className="nico"><span className="ball" /></span>
                 <span>
                   <small>BASKETLOG</small>
@@ -305,7 +306,7 @@ export default async function Home() {
               <div className="stat reveal" style={{ "--d": "300ms" }}><strong><SlotNumber value={pct(big.close)} suffix={L.en ? "%" : "\u202f%"} /></strong><span>{L.t("Match serré", "Close game", "Partido igualado")}</span></div>
               <div className="stat reveal" style={{ "--d": "450ms" }}><strong><SlotNumber value={pct(1 - big.pHome)} suffix={L.en ? "%" : "\u202f%"} /></strong><span>{L.t(`Victoire ${big.away.short}`, `${big.away.short} win`, `Victoria ${big.away.short}`)}</span></div>
             </div>
-            <div className="reveal" style={{ "--d": "500ms" }}><BallButton href={L.href(`/app/match/${big.id}?d=${big.d}`)}>{L.t("Analyse prête", "Analysis ready", "Análisis listo")}</BallButton></div>
+            <div className="reveal" style={{ "--d": "500ms" }}><BallButton href={L.href(nbaPath(big, big.d))}>{L.t("Analyse prête", "Analysis ready", "Análisis listo")}</BallButton></div>
             <p className="demo-note reveal" style={{ "--d": "600ms" }}>{L.t(`Probabilités gratuites pour tous les matchs · analyses dès ${price("starter", cur, L)}/mois`, `Free probabilities for every game · analyses from ${price("starter", cur, L)}/month`, `Probabilidades gratis para todos los partidos · análisis desde ${price("starter", cur, L)}/mes`)}</p>
           </div>
         </section>

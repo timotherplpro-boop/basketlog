@@ -8,6 +8,7 @@ import { pageMeta, topFavorites } from "../../../lib/seo";
 import { getL } from "../../../lib/lang-server";
 import JsonLd from "../../../components/JsonLd";
 import { SITE } from "../../../lib/site";
+import { nbaPath } from "../../../lib/slug.js";
 
 export const dynamic = "force-dynamic";
 
@@ -93,7 +94,7 @@ export default async function MatchsPage({ searchParams }) {
       "@type": "ListItem",
       position: i + 1,
       name: L.t(`${g.away.name} – ${g.home.name}`, `${g.away.name} vs ${g.home.name}`, `${g.away.name} – ${g.home.name}`),
-      url: `${SITE}${L.href(`/app/match/${g.id}?d=${date}`)}`,
+      url: `${SITE}${L.href(nbaPath(g, date))}`,
     })),
   } : null;
 
@@ -119,7 +120,7 @@ export default async function MatchsPage({ searchParams }) {
       </div>
       <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 18 }}>
         <Link className="btn-white" href={L.href(`/app/matchs?d=${shiftDate(date, -1)}`)}>{L.t("← Veille", "← Previous day", "← Día anterior")}</Link>
-        <Link className="btn-white" href={L.href(`/app/matchs?d=${shiftDate(date, 1)}`)}>{L.t("Lendemain →", "Next day →", "Día siguiente →")}</Link>
+        <Link className="btn-white" href={L.href(shiftDate(date, 1) === shiftDate(today, 1) ? "/app/demain" : `/app/matchs?d=${shiftDate(date, 1)}`)}>{L.t("Lendemain →", "Next day →", "Día siguiente →")}</Link>
       </div>
       <UpcomingList games={games} title="" grouped={false} L={L} />
     </main>

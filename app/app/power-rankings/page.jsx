@@ -1,0 +1,83 @@
+import Link from "next/link";
+import { powerRankings } from "../../../lib/data";
+import AppTabs from "../../../components/AppTabs";
+import JsonLd from "../../../components/JsonLd";
+import { pageMeta } from "../../../lib/seo";
+import { getL } from "../../../lib/lang-server";
+import { SITE } from "../../../lib/site";
+
+export const dynamic = "force-dynamic";
+
+// Recherche US très fréquente : « nba power rankings ». Classement par la force mesurée par le modèle Basketlog
+// (écart de points attendu face à une équipe moyenne), recalculé chaque jour.
+const monthYear = (L) => new Intl.DateTimeFormat(L.locale, { month: "long", year: "numeric", timeZone: L.tz }).format(new Date());
+
+export async function generateMetadata() {
+  const L = await getL();
+  const my = monthYear(L);
+  return pageMeta({
+    title: L.t(`Power ranking NBA (${my}) : les 30 équipes classées par le modèle`, `NBA power rankings (${my}): all 30 teams ranked by our model`, `Power ranking NBA (${my}): los 30 equipos según nuestro modelo`),
+    description: L.t(
+      "Les 30 équipes NBA classées par leur vraie force selon le modèle Basketlog : écart de points attendu face à une équipe moyenne et chances de la battre. Mis à jour chaque jour.",
+      "All 30 NBA teams ranked by true strength according to the Basketlog model: expected point margin against an average team and the chance to beat it. Updated daily.",
+      "Los 30 equipos de la NBA ordenados por su fuerza real según el modelo de Basketlog: diferencia de puntos esperada ante un equipo medio y probabilidad de ganarle. Actualizado cada día."
+    ),
+    path: "/app/power-rankings",
+    L,
+  });
+}
+
+export default async function PowerRankingsPage() {
+  const L = await getL();
+  const rows = await powerRankings();
+  const num = (x) => `${x > 0 ? "+" : ""}${L.en ? x.toFixed(1) : x.toFixed(1).replace(".", ",")}`;
+  const pc = (p) => (L.en ? `${Math.round(p * 100)}%` : `${Math.round(p * 100)} %`);
+  return (
+    <main className="app-page wide">
+      <AppTabs active="classement" />
+      <div className="app-head">
+        <h1>{L.t("Power ranking NBA", "NBA power rankings", "Power ranking NBA")}</h1>
+        <p>{L.t(
+          `Les 30 équipes classées par le modèle Basketlog, ${monthYear(L)}. La force est l'écart de points attendu face à une équipe moyenne sur terrain neutre (sans les absences du jour).`,
+          `All 30 teams ranked by the Basketlog model, ${monthYear(L)}. Strength is the expected point margin against an average team on a neutral court (before today's injuries).`,
+          `Los 30 equipos según el modelo de Basketlog, ${monthYear(L)}. La fuerza es la diferencia de puntos esperada ante un equipo medio en campo neutral (sin las bajas del día).`
+        )}</p>
+      </div>
+      <div className="panel">
+        <table className="std-table">
+          <thead><tr><th>#</th><th>{L.t("Équipe", "Team", "Equipo")}</th><th>{L.t("V-D", "W-L", "V-D")}</th><th>{L.t("Force", "Strength", "Fuerza")}</th><th>{L.t("vs équipe moyenne", "vs average team", "vs equipo medio")}</th></tr></thead>
+          <tbody>
+            {rows.map((r, i) => (
+              <tr key={r.team.id}>
+                <td className="rk">{i + 1}</td>
+                <td className="tm">
+                  <Link href={L.href(`/app/equipe/${r.team.id}`)}>
+                    <span>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={r.team.logo} alt="" />
+                      {r.team.short}
+                    </span>
+                  </Link>
+                </td>
+                <td>{r.wins}-{r.losses}</td>
+                <td className={r.strength > 0 ? "pos" : r.strength < 0 ? "neg" : ""}>{num(r.strength)}</td>
+                <td>{pc(r.pAvg)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="team-rec">
+        {L.t("Comment c'est calculé : ", "How it's calculated: ", "Cómo se calcula: ")}
+        <Link href={L.href("/methode")}>{L.t("la méthode Basketlog", "the Basketlog method", "el método de Basketlog")}</Link>
+        {" · "}
+        <Link href={L.href("/app/matchs")}>{L.t("pronostics NBA du soir", "tonight's NBA predictions", "pronósticos NBA de hoy")}</Link>
+      </p>
+      <JsonLd data={{
+        "@context": "https://schema.org", "@type": "ItemList",
+        name: L.t("Power ranking NBA", "NBA power rankings", "Power ranking NBA"),
+        itemListElement: rows.map((r, i) => ({ "@type": "ListItem", position: i + 1, name: r.team.name, url: `${SITE}${L.href(`/app/equipe/${r.team.id}`)}` })),
+      }} />
+    </main>
+  );
+}

@@ -9,6 +9,7 @@ import { pageMeta, topFavorites } from "../../lib/seo";
 import { SITE } from "../../lib/site";
 import { getL } from "../../lib/lang-server";
 import { pctOf, fmtDate, fmtTime } from "../../lib/i18n";
+import { nbaPath } from "../../lib/slug.js";
 
 // Page d'entrée Google pour « pronostic basket » (aujourd'hui, gratuit, demain…) : les pronostics du jour NBA et EuroLeague
 // avec favori, probabilité, score projeté et total de points, chaque ligne menant à la fiche du match.
@@ -199,7 +200,7 @@ export default async function PronosticBasketPage() {
       </div>
 
       <h2 className="ab-sec">{L.t("Pronostic NBA : ce soir et demain", "NBA predictions: tonight and tomorrow", "Pronósticos NBA: esta noche y mañana")}</h2>
-      <PickList games={nba} href={(g) => `/app/match/${g.id}?d=${g.d}`} L={L} />
+      <PickList games={nba} href={(g) => nbaPath(g, g.d)} L={L} />
       <p className="ab-more"><Link href={L.href("/app/matchs")}>{L.t("Tous les pronostics NBA du jour", "All of today's NBA predictions", "Todos los pronósticos NBA de hoy")}</Link></p>
 
       <h2 className="ab-sec">{L.t("Pronostic EuroLeague (Euroligue) : les prochains matchs", "EuroLeague predictions: upcoming games", "Pronósticos de la Euroliga: próximos partidos")}</h2>

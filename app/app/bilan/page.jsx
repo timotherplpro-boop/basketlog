@@ -7,6 +7,7 @@ import AppTabs from "../../../components/AppTabs";
 import { pageMeta } from "../../../lib/seo";
 import { getL } from "../../../lib/lang-server";
 import { confText } from "../../../lib/matchtext";
+import { nbaPath } from "../../../lib/slug.js";
 
 export const dynamic = "force-dynamic";
 export async function generateMetadata() {
@@ -64,7 +65,7 @@ export default async function BilanPage({ searchParams }) {
   const s = summarize(list);
   const week = summarize(lastDays(list, 7));
   const strong = s.sure; // confiance « Très élevée » (favori à 88 % et plus), comme sur l'accueil et dans les vidéos
-  const href = (p) => L.href(view === "el" || p.league === "EL" ? `/app/euroleague/match/${p.id}` : `/app/match/${p.id}?d=${p.d}`);
+  const href = (p) => L.href(view === "el" || p.league === "EL" ? `/app/euroleague/match/${p.id}` : nbaPath(p, p.d));
 
   // Derniers résultats, groupés par jour (plus récents d'abord).
   const recent = [...list].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 45);

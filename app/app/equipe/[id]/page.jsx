@@ -9,6 +9,9 @@ import { teamSummary } from "../../../../lib/summary";
 import { pageMeta, fitTitle } from "../../../../lib/seo";
 import { getL } from "../../../../lib/lang-server";
 import { fmtDate, fmtTime, numOf } from "../../../../lib/i18n";
+import { nbaPath } from "../../../../lib/slug.js";
+import JsonLd from "../../../../components/JsonLd";
+import { SITE } from "../../../../lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +24,7 @@ export async function generateMetadata({ params }) {
     // « Pronostic » en tête : c'est ce que tapent ceux qui cherchent le prochain match d'une équipe.
     title: L.t(
       fitTitle(`Pronostic ${t.name} : prochains matchs et stats – Basketlog`, `Pronostic ${t.name} : prochains matchs et stats`),
-      fitTitle(`${t.name} predictions: upcoming games and stats – Basketlog`, `${t.name} predictions: upcoming games and stats`),
+      fitTitle(`${t.name} predictions: next game win probability – Basketlog`, `${t.name} predictions: next game win probability`),
       fitTitle(`Pronóstico ${t.name}: próximos partidos y estadísticas – Basketlog`, `Pronóstico ${t.name}: próximos partidos y estadísticas`)
     ),
     description: L.t(
@@ -57,6 +60,10 @@ export default async function TeamPage({ params }) {
   const next = regular.filter((g) => g.state !== "post").slice(0, 6);
   const probs = Object.fromEntries(up.map((g) => [g.id, g.pHome]));
   const summary = next[0] ? await getSummary(next[0].id) : null;
+  const nextG = next[0] || null;
+  const nextHome = nextG ? nextG.home.id === team.id : false;
+  const nextOpp = nextG ? (nextHome ? nextG.away : nextG.home) : null;
+  const nextMine = nextG && probs[nextG.id] != null ? (nextHome ? probs[nextG.id] : 1 - probs[nextG.id]) : null;
   const leaders = summary?.leaders?.[team.id] || [];
 
   const streak = L.en ? toWL(me.streak) : toVD(me.streak);
@@ -82,11 +89,28 @@ export default async function TeamPage({ params }) {
         <img src={sized(team.logo, 330)} alt="" />
         <div>
           <span className="tag hot">{L.t(`Conférence ${confName}`, `${confName}ern Conference`, `Conferencia ${confName}`)}</span>
-          <h1>{team.name}</h1>
+          <h1>{L.t(`Pronostics ${team.name}`, `${team.name} predictions`, `Pronósticos ${team.name}`)}</h1>
           <p className="team-rec">{streak ? L.t(`Série en cours : ${streak}`, `Current streak: ${streak}`, `Racha actual: ${streak}`) : L.t(`Saison ${seasonLabel}`, `${seasonLabel} season`, `Temporada ${seasonLabel}`)}{me.last10 ? L.t(` · 10 derniers : ${me.last10}`, ` · Last 10: ${me.last10}`, ` · Últimos 10: ${me.last10}`) : ""}</p>
         </div>
         <Link href={L.href(`/app?team=${team.id}`)} className="btn-solid">{L.t("Analyser un duel", "Analyze a matchup", "Analizar un duelo")}</Link>
       </div>
+
+      {nextG && (
+        // Prochain match en tête : répond à « heat next game prediction » / « pronostic prochain match ».
+        <Link href={L.href(nbaPath(nextG, nbaDateOf(nextG.date)))} className="card block next-game">
+          <h2>{L.t("Prochain match", "Next game", "Próximo partido")}</h2>
+          <p className="narr">
+            <b>{nextHome ? `${team.short} vs ${nextOpp.short || nextOpp.abbr}` : `${team.short} @ ${nextOpp.short || nextOpp.abbr}`}</b>
+            {" · "}{dfmt(nextG.date, { weekday: "long", day: "numeric", month: "long" })} · {fmtTime(L, nextG.date)}
+            {nextMine != null ? <>{" · "}<b>{L.t(`${Math.round(nextMine * 100)}\u202f% de chances de victoire`, `${Math.round(nextMine * 100)}% win probability`, `${Math.round(nextMine * 100)}\u202f% de probabilidad de victoria`)}</b></> : null}
+            {" → "}{L.t("voir l'analyse", "see the full prediction", "ver el análisis")}
+          </p>
+        </Link>
+      )}
+      <JsonLd data={{
+        "@context": "https://schema.org", "@type": "SportsTeam", name: team.name, sport: "Basketball", logo: team.logo,
+        memberOf: { "@type": "SportsOrganization", name: "NBA" }, url: `${SITE}${L.href(`/app/equipe/${team.id}`)}`,
+      }} />
 
       <div className="kpis kpis8">
         {kpis.map(([l, v]) => <div className="card kpi" key={l}><span>{l}</span><strong>{v}</strong></div>)}
@@ -122,7 +146,7 @@ export default async function TeamPage({ params }) {
             const p = probs[g.id];
             const mine = p == null ? null : home ? p : 1 - p;
             return (
-              <Link key={g.id} href={L.href(`/app/match/${g.id}?d=${nbaDateOf(g.date)}`)} className="h2h-row tl">
+              <Link key={g.id} href={L.href(nbaPath(g, nbaDateOf(g.date)))} className="h2h-row tl">
                 <span className="d">{dfmt(g.date, { day: "numeric", month: "short" })}</span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <span className="t">{home ? "vs" : "@"} {opp.logo && <img src={opp.logo} alt="" />}{opp.short || opp.abbr}</span>
@@ -138,7 +162,7 @@ export default async function TeamPage({ params }) {
             const me2 = home ? g.home : g.away, opp = home ? g.away : g.home;
             const win = me2.winner || (me2.score > opp.score);
             return (
-              <Link key={g.id} href={L.href(`/app/match/${g.id}?d=${nbaDateOf(g.date)}`)} className="h2h-row tl">
+              <Link key={g.id} href={L.href(nbaPath(g, nbaDateOf(g.date)))} className="h2h-row tl">
                 <span className="d">{dfmt(g.date, { day: "numeric", month: "short" })}</span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <span className="t">{home ? "vs" : "@"} {opp.logo && <img src={opp.logo} alt="" />}{opp.short || opp.abbr}{g.type === "pre" ? <small className="team-rec"> · {L.t("présaison", "preseason", "pretemporada")}</small> : null}</span>

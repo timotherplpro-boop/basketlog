@@ -1,73 +1,20 @@
-import { notFound } from "next/navigation";
-import { analyzeDay } from "../../../../lib/data";
+import { notFound, permanentRedirect } from "next/navigation";
 import { recordPronosSoon } from "../../../../lib/pronos";
-import { nbaToday, isValidDate, shiftDate, scoreboardReachable } from "../../../../lib/espn";
 import MatchView from "../../../../components/MatchView";
-import { pageMeta, dayLong, dayShort, pctTxt, fitTitle } from "../../../../lib/seo";
 import { getL } from "../../../../lib/lang-server";
+import { findAnalysis, matchMeta } from "../../../../lib/match-meta";
+import { nbaPath } from "../../../../lib/slug";
 
 export const dynamic = "force-dynamic";
 
-async function findAnalysis(id, d) {
-  const today = nbaToday();
-  const candidates = isValidDate(d) ? [d] : [today, shiftDate(today, 1), shiftDate(today, -1)];
-  for (const date of candidates) {
-    const { analyses } = await analyzeDay(date);
-    const a = analyses.find((x) => x.id === String(id));
-    if (a) return { a, date };
-  }
-  // Introuvable parce qu'ESPN ne répond pas : erreur temporaire (Google repassera), pas une page supprimée.
-  if (!(await scoreboardReachable(candidates[0]))) throw new Error("Données NBA momentanément indisponibles");
-  return null;
-}
-
+// Ancienne adresse des fiches NBA (/app/match/<id>?d=<date>) : redirige (308) vers /nba/<équipe>-vs-<équipe>-<date>.
 export async function generateMetadata({ params, searchParams }) {
   const { id } = await params;
   const sp = (await searchParams) || {};
   const L = await getL();
   const found = await findAnalysis(id, sp.d);
   if (!found) return { title: L.t("Match introuvable – Basketlog", "Game not found – Basketlog", "Partido no encontrado – Basketlog"), robots: { index: false } };
-  const { a, date } = found;
-  const g = a.game;
-  const pFav = Math.max(a.pHome, a.pAway);
-  const done = g.state === "post" && g.home.score != null;
-  if (L.es) return pageMeta({
-    title: fitTitle(
-      `Pronóstico NBA ${g.away.name} – ${g.home.name} (${dayShort(g.date, L)}) – Basketlog`,
-      `Pronóstico ${g.away.name} – ${g.home.name} (${dayShort(g.date, L)}) – Basketlog`,
-      `Pronóstico ${g.away.name} – ${g.home.name} (${dayShort(g.date, L)})`,
-      `Pronóstico ${g.away.short} – ${g.home.short} (${dayShort(g.date, L)}): análisis NBA – Basketlog`
-    ),
-    description: done
-      ? `${g.away.name} – ${g.home.name}, ${dayLong(g.date, L)}: resultado final ${g.away.score}-${g.home.score}. El pronóstico de Basketlog antes del partido, sus probabilidades y su análisis.`
-      : `${g.away.name} – ${g.home.name}, ${dayLong(g.date, L)}: ${a.fav.team.name}, favorito al ${pctTxt(pFav, L)}. Marcador proyectado ${Math.round(a.awayPts)}-${Math.round(a.homePts)}, bajas, forma y escenarios del partido.`,
-    path: `/app/match/${id}?d=${date}`,
-    L,
-  });
-  if (L.en) return pageMeta({
-    title: fitTitle(
-      `${g.away.name} vs ${g.home.name} prediction (${dayShort(g.date, L)}) – Basketlog`,
-      `${g.away.name} vs ${g.home.name} prediction (${dayShort(g.date, L)})`,
-      `${g.away.short} vs ${g.home.short} prediction (${dayShort(g.date, L)}): NBA analysis – Basketlog`
-    ),
-    description: done
-      ? `${g.away.name} vs ${g.home.name}, ${dayLong(g.date, L)}: final score ${g.away.score}-${g.home.score}. Basketlog's pregame prediction, its probabilities and analysis.`
-      : `${g.away.name} vs ${g.home.name}, ${dayLong(g.date, L)}: ${a.fav.team.name} favored at ${pctTxt(pFav, L)}. Projected score ${Math.round(a.awayPts)}-${Math.round(a.homePts)}, injuries, form and game scenarios.`,
-    path: `/app/match/${id}?d=${date}`,
-    L,
-  });
-  return pageMeta({
-    title: fitTitle(
-      `Pronostic NBA ${g.away.name} – ${g.home.name} (${dayShort(g.date)}) – Basketlog`,
-      `Pronostic ${g.away.name} – ${g.home.name} (${dayShort(g.date)}) – Basketlog`,
-      `Pronostic ${g.away.name} – ${g.home.name} (${dayShort(g.date)})`,
-      `Pronostic ${g.away.short} – ${g.home.short} (${dayShort(g.date)}) : analyse NBA – Basketlog`
-    ),
-    description: done
-      ? `${g.away.name} – ${g.home.name}, ${dayLong(g.date)} : score final ${g.away.score}-${g.home.score}. Le pronostic Basketlog d'avant-match, ses probabilités et son analyse.`
-      : `${g.away.name} – ${g.home.name}, ${dayLong(g.date)} : ${a.fav.team.name} favori à ${pctTxt(pFav)}. Score projeté ${Math.round(a.awayPts)}-${Math.round(a.homePts)}, absences, forme et scénarios du match.`,
-    path: `/app/match/${id}?d=${date}`,
-  });
+  return matchMeta(found.a, found.date, L, nbaPath(found.a.game, found.date));
 }
 
 export default async function MatchPage({ params, searchParams }) {
@@ -75,6 +22,11 @@ export default async function MatchPage({ params, searchParams }) {
   const sp = (await searchParams) || {};
   const found = await findAnalysis(id, sp.d);
   if (!found) notFound();
+  const path = nbaPath(found.a.game, found.date);
+  if (path.startsWith("/nba/")) {
+    const L = await getL();
+    permanentRedirect(L.href(path));
+  }
   recordPronosSoon("NBA", [found.a]);
-  return <MatchView a={found.a} backHref={`/app/matchs?d=${found.date}`} path={`/app/match/${id}?d=${found.date}`} />;
+  return <MatchView a={found.a} backHref={`/app/matchs?d=${found.date}`} path={path} />;
 }

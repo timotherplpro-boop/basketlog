@@ -3,6 +3,7 @@ import { SITE } from "../lib/site";
 import { upcomingGames } from "../lib/data";
 import { nbaToday, shiftDate, getScoreboardRange, nbaDateOf } from "../lib/espn";
 import { elContext } from "../lib/euroleague";
+import { nbaPath } from "../lib/slug.js";
 
 export const revalidate = 3600; // régénéré chaque heure, avec les matchs à venir
 
@@ -13,14 +14,14 @@ const both = ({ path, ...rest }) => {
   const fr = `${SITE}${path}`;
   const en = `${SITE}/en${path}`;
   const es = `${SITE}/es${path}`;
-  const alternates = { languages: { fr, en, es, "x-default": fr } };
+  const alternates = { languages: { fr, en, es, "x-default": en } }; // x-default : anglais (visiteurs ni francophones ni hispanophones)
   const p2 = Math.round(rest.priority * 0.9 * 100) / 100;
   return [{ url: fr, ...rest, alternates }, { url: en, ...rest, priority: p2, alternates }, { url: es, ...rest, priority: p2, alternates }];
 };
 
 export default async function sitemap() {
   const pages = [
-    u("", 1, "daily"), u("/analyse-basket", 0.9, "daily"), u("/pronostic-basket", 0.9, "hourly"), u("/app/matchs", 0.9, "hourly"), u("/app", 0.8, "daily"), u("/app/classement", 0.8, "daily"),
+    u("", 1, "daily"), u("/analyse-basket", 0.9, "daily"), u("/pronostic-basket", 0.9, "hourly"), u("/app/matchs", 0.9, "hourly"), u("/app/demain", 0.8, "hourly"), u("/app/power-rankings", 0.8, "daily"), u("/app", 0.8, "daily"), u("/app/classement", 0.8, "daily"),
     u("/app/euroleague", 0.8, "daily"), u("/app/competitions", 0.7, "daily"), u("/app/bilan", 0.8, "daily"), u("/methode", 0.7, "monthly"), u("/pro", 0.6, "weekly"), u("/avis", 0.5, "weekly"), u("/widget", 0.5, "monthly"),
     u("/mentions-legales", 0.2, "yearly"), u("/cgu", 0.2, "yearly"), u("/cgv", 0.2, "yearly"), u("/confidentialite", 0.2, "yearly"), u("/cookies", 0.2, "yearly"),
   ];
@@ -33,8 +34,8 @@ export default async function sitemap() {
     const today = nbaToday();
     const past = (await getScoreboardRange(shiftDate(today, -3), shiftDate(today, -1))).filter((g) => g.state === "post");
     nba = [
-      ...up.map((g) => u(`/app/match/${g.id}?d=${g.d}`, 0.7, "hourly")),
-      ...past.map((g) => u(`/app/match/${g.id}?d=${nbaDateOf(g.date)}`, 0.4, "weekly")),
+      ...up.map((g) => u(nbaPath(g, g.d), 0.7, "hourly")),
+      ...past.map((g) => u(nbaPath(g, nbaDateOf(g.date)), 0.4, "weekly")),
     ];
   } catch {}
 

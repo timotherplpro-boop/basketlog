@@ -19,6 +19,7 @@ import { nbaRecentForm } from "../lib/data";
 import { unlockProof } from "../lib/proof";
 import { nbaDateOf } from "../lib/espn";
 import { fmtDate, deFr } from "../lib/i18n";
+import { nbaPath } from "../lib/slug.js";
 
 const pctL = (p, L, d = 0) => `${(p * 100).toFixed(d).replace(".", L.en ? "." : ",")}${L.en ? "%" : " %"}`;
 const num = (v, L, d = 1) => v.toFixed(d).replace(".", L.en ? "." : ",");
@@ -44,7 +45,7 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
   const target = {
     league: leagueKey,
     id: String(g.id),
-    path: path || (g.hypothetical ? `/app?home=${g.home.id}&away=${g.away.id}` : isNBA ? `/app/match/${g.id}?d=${nbaDateOf(g.date)}` : `/app/euroleague/match/${g.id}`),
+    path: path || (g.hypothetical ? `/app?home=${g.home.id}&away=${g.away.id}` : isNBA ? nbaPath(g, nbaDateOf(g.date)) : `/app/euroleague/match/${g.id}`),
     info: { date: g.date, home: { short: g.home.short, abbr: g.home.abbr, logo: g.home.logo || null }, away: { short: g.away.short, abbr: g.away.abbr, logo: g.away.logo || null } },
   };
 

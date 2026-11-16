@@ -68,7 +68,7 @@ export default function AppShell({ session, ai = false, children }) {
   // Mêmes rubriques que Visifoot : Matchs, Compétitions, Historique, Pricing. Les matchs du jour et le bilan
   // restent accessibles par les onglets en haut des pages.
   const items = [
-    ["/app", "chart", L.t("Matchs", "Games", "Partidos"), p === "/app" || p.startsWith("/app/duel") || p.startsWith("/app/match/") || p.startsWith("/app/matchs")],
+    ["/app", "chart", L.t("Matchs", "Games", "Partidos"), p === "/app" || p.startsWith("/app/duel") || p.startsWith("/app/match/") || p.startsWith("/nba/") || p.startsWith("/app/matchs")],
     ["/app/competitions", "trophy", L.t("Compétitions", "Competitions", "Competiciones"), ["/app/competitions", "/app/classement", "/app/euroleague", "/app/equipe"].some((x) => p.startsWith(x))],
     ["/app/historique", "history", L.t("Historique", "History", "Historial"), p.startsWith("/app/historique")],
   ];

@@ -3,6 +3,7 @@ import { getSummary, getTeamStats, getPlayerStats, nbaDateOf, nbaToday, seasonFo
 import { nbaRecentForm } from "../lib/data";
 import StatCompare from "./StatCompare";
 import { mk, numOf, pctOf } from "../lib/i18n";
+import { nbaPath } from "../lib/slug.js";
 
 const initials = (n) => String(n || "?").split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
 
@@ -173,7 +174,7 @@ export default async function MatchExtras({ a, L = mk("fr") }) {
                 <p className="team-rec" style={{ marginTop: 0 }}>{serText}</p>
                 <div className="h2h">
                   {ser.games.map((x) => (
-                    <Link key={x.id} href={L.href(`/app/match/${x.id}?d=${nbaDateOf(x.date)}`)} className={`h2h-row ${x.id === g.id ? "cur" : ""}`}>
+                    <Link key={x.id} href={L.href(nbaPath(x, nbaDateOf(x.date)))} className={`h2h-row ${x.id === g.id ? "cur" : ""}`}>
                       <span className="d">{day(x.date, L)}</span>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <span className="t">{x.away.logo && <img src={x.away.logo} alt="" />}{x.away.abbr}</span>
