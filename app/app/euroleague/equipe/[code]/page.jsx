@@ -6,6 +6,7 @@ import AppTabs from "../../../../../components/AppTabs";
 import { pageMeta, fitTitle } from "../../../../../lib/seo";
 import { getL } from "../../../../../lib/lang-server";
 import { fmtDate, numOf } from "../../../../../lib/i18n";
+import { elPath } from "../../../../../lib/slug";
 
 export const dynamic = "force-dynamic";
 
@@ -83,7 +84,7 @@ export default async function ELTeamPage({ params }) {
             const opp = home ? g.away : g.home;
             const p = home ? a.pHome : 1 - a.pHome;
             return (
-              <Link key={g.id} href={L.href(`/app/euroleague/match/${g.id}`)} className="h2h-row tl">
+              <Link key={g.id} href={L.href(elPath(g))} className="h2h-row tl">
                 <span className="d">{dfmt(g.date, { day: "numeric", month: "short" })}</span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <span className="t">{home ? "vs" : "@"} {opp.logo && <img src={opp.logo} alt="" />}{opp.short}</span>
@@ -99,7 +100,7 @@ export default async function ELTeamPage({ params }) {
             const me = home ? g.home : g.away, opp = home ? g.away : g.home;
             const win = me.score > opp.score;
             return (
-              <Link key={g.id} href={L.href(`/app/euroleague/match/${g.id}`)} className="h2h-row tl">
+              <Link key={g.id} href={L.href(elPath(g))} className="h2h-row tl">
                 <span className="d">{dfmt(g.date, { day: "numeric", month: "short" })}</span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <span className="t">{home ? "vs" : "@"} {opp.logo && <img src={opp.logo} alt="" />}{opp.short}</span>

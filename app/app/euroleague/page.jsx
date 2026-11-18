@@ -7,6 +7,7 @@ import { pageMeta } from "../../../lib/seo";
 import { getL } from "../../../lib/lang-server";
 import { numOf, pctOf, fmtDate } from "../../../lib/i18n";
 import JsonLd from "../../../components/JsonLd";
+import { elPath } from "../../../lib/slug";
 
 export const dynamic = "force-dynamic";
 export async function generateMetadata() {
@@ -62,7 +63,7 @@ export default async function EuroLeaguePage() {
         <p className="note">{L.t("Probabilités, score projeté et forme : clique sur un match pour l'analyse complète.", "Probabilities, projected score and form: click a game for the full analysis.", "Probabilidades, marcador proyectado y forma: haz clic en un partido para ver el análisis completo.")}</p>
       </div>
       <div className="el-grid">
-        <UpcomingList games={games} L={L} href={(g) => `/app/euroleague/match/${g.id}`} />
+        <UpcomingList games={games} L={L} href={(g) => elPath(g)} />
         <div className="panel">
           <div className="panel-label" style={{ marginBottom: 8 }}>{L.t("CLASSEMENT", "STANDINGS", "CLASIFICACIÓN")}</div>
           <table className="std-table">

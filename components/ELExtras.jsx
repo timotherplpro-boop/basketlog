@@ -1,6 +1,7 @@
 import Link from "next/link";
 import StatCompare from "./StatCompare";
 import { mk } from "../lib/i18n";
+import { elPath } from "../lib/slug";
 
 const day = (iso, L) => { try { return new Intl.DateTimeFormat(L.locale, { timeZone: L.tz, day: "numeric", month: "short", year: "2-digit" }).format(new Date(iso)); } catch { return ""; } };
 const pct0 = (v) => `${Math.round(v)} %`;
@@ -62,7 +63,7 @@ export default function ELExtras({ a, games, prevGames, L = mk("fr") }) {
           {meets.length ? (
             <div className="h2h">
               {meets.map((x) => (
-                <Link key={x.season + x.id} href={x.season === a.game.season ? L.href(`/app/euroleague/match/${x.id}`) : "#"} className={`h2h-row ${`el-${x.id}` === a.game.id && x.season === a.game.season ? "cur" : ""}`}>
+                <Link key={x.season + x.id} href={x.season === a.game.season ? L.href(elPath(x)) : "#"} className={`h2h-row ${`el-${x.id}` === a.game.id && x.season === a.game.season ? "cur" : ""}`}>
                   <span className="d">{day(x.date, L)}</span>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <span className="t">{x.away.logo && <img src={x.away.logo} alt="" />}{x.away.abbr}</span>

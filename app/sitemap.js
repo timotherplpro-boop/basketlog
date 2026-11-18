@@ -3,7 +3,7 @@ import { SITE } from "../lib/site";
 import { upcomingGames } from "../lib/data";
 import { nbaToday, shiftDate, getScoreboardRange, nbaDateOf } from "../lib/espn";
 import { elContext } from "../lib/euroleague";
-import { nbaPath } from "../lib/slug.js";
+import { nbaPath, elPath } from "../lib/slug.js";
 import { pairPath } from "../lib/matchup.js";
 
 export const revalidate = 3600; // régénéré chaque heure, avec les matchs à venir
@@ -50,7 +50,7 @@ export default async function sitemap() {
     el = [
       ...Object.keys(cur).map((code) => u(`/app/euroleague/equipe/${code}`, 0.5, "daily")),
       ...games.filter((g) => !g.played && new Date(g.date).getTime() > now - 3 * 3600e3 && new Date(g.date).getTime() < now + 10 * 864e5)
-        .map((g) => u(`/app/euroleague/match/${g.id}`, 0.6, "hourly")),
+        .map((g) => u(elPath(g), 0.6, "hourly")),
     ];
   } catch {}
 

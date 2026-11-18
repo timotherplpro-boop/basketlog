@@ -9,6 +9,7 @@ import { pageMeta } from "../../lib/seo";
 import { SITE } from "../../lib/site";
 import { getL } from "../../lib/lang-server";
 import { pctOf } from "../../lib/i18n";
+import { elPath } from "../../lib/slug";
 
 // Page d'entrée Google pour « analyse basket » : les analyses du moment (liens vers chaque fiche match),
 // ce que contient une analyse Basketlog, comment la lire, et les questions fréquentes.
@@ -145,7 +146,7 @@ export default async function AnalyseBasketPage() {
       <p className="ab-more"><Link href={L.href("/app/matchs")}>{L.t("Tous les pronostics NBA du jour", "All of today's NBA predictions", "Todos los pronósticos NBA de hoy")}</Link> · <Link href={L.href("/pronostic-basket")}>{L.t("Pronostic basket du jour", "Today's basketball predictions", "Pronósticos de baloncesto de hoy")}</Link></p>
 
       <h2 className="ab-sec">{L.t("Analyse EuroLeague : les matchs à venir", "EuroLeague analysis: upcoming games", "Análisis de la Euroliga: próximos partidos")}</h2>
-      <UpcomingList games={elGames} title="" L={L} href={(g) => `/app/euroleague/match/${g.id}`} />
+      <UpcomingList games={elGames} title="" L={L} href={(g) => elPath(g)} />
       <p className="ab-more"><Link href={L.href("/app/euroleague")}>{L.t("Tous les pronostics EuroLeague", "All EuroLeague predictions", "Todos los pronósticos de la Euroliga")}</Link></p>
 
       <div className="card block">
