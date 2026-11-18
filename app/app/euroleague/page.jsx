@@ -8,6 +8,7 @@ import { getL } from "../../../lib/lang-server";
 import { numOf, pctOf, fmtDate } from "../../../lib/i18n";
 import JsonLd from "../../../components/JsonLd";
 import { elPath } from "../../../lib/slug";
+import Crumbs from "../../../components/Crumbs";
 
 export const dynamic = "force-dynamic";
 export async function generateMetadata() {
@@ -56,6 +57,7 @@ export default async function EuroLeaguePage() {
   return (
     <main className="app-page wide">
       <JsonLd data={ld} />
+      <Crumbs L={L} items={[[L.t("Accueil", "Home", "Inicio"), "/"], [L.t("Pronostic Euroligue", "EuroLeague predictions", "Pronósticos Euroliga"), "/app/euroleague"]]} />
       <AppTabs active="euroleague" />
       <div className="app-head">
         <h1>{L.t("Pronostics EuroLeague", "EuroLeague predictions", "Pronósticos Euroliga")} {year}-{String(year + 1).slice(2)}</h1>

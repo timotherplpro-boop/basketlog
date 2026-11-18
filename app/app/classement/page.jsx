@@ -6,6 +6,7 @@ import { getL } from "../../../lib/lang-server";
 import JsonLd from "../../../components/JsonLd";
 import { nbaToday, seasonForDate } from "../../../lib/espn";
 import { fmtDate } from "../../../lib/i18n";
+import Crumbs from "../../../components/Crumbs";
 
 // « 2026-27 » : saison NBA en cours.
 const seasonLabel = () => { const y = seasonForDate(nbaToday()); return `${y - 1}-${String(y).slice(2)}`; };
@@ -93,6 +94,7 @@ export default async function ClassementPage() {
   return (
     <main className="app-page wide">
       <JsonLd data={ld} />
+      <Crumbs L={L} items={[[L.t("Accueil", "Home", "Inicio"), "/"], [L.t("Classement NBA", "NBA standings", "Clasificación NBA"), "/app/classement"]]} />
       <AppTabs active="classement" />
       <div className="app-head">
         <h1>{L.t(`Classement NBA ${season} : conférence Est et Ouest`, `NBA standings ${season}: East and West`, `Clasificación NBA ${season}: Conferencia Este y Oeste`)}</h1>

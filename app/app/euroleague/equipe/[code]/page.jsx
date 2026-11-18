@@ -7,6 +7,7 @@ import { pageMeta, fitTitle } from "../../../../../lib/seo";
 import { getL } from "../../../../../lib/lang-server";
 import { fmtDate, numOf } from "../../../../../lib/i18n";
 import { elPath } from "../../../../../lib/slug";
+import Crumbs from "../../../../../components/Crumbs";
 
 export const dynamic = "force-dynamic";
 
@@ -16,9 +17,33 @@ const ord = (n) => { const m = n % 100; return `${n}${m >= 11 && m <= 13 ? "th" 
 export async function generateMetadata({ params }) {
   const { code } = await params;
   const L = await getL();
-  const { cur } = await elContext();
+  const ctx = await elContext();
+  const { cur } = ctx;
   const t = cur[code];
   if (!t) return { title: L.t("Club EuroLeague – Basketlog", "EuroLeague club – Basketlog", "Club de la Euroliga – Basketlog"), robots: { index: false } };
+  // Prochain match et sa probabilité dans le titre et la description (comme les pages équipes NBA).
+  const ng = ctx.games.find((g) => !g.played && (g.home.id === code || g.away.id === code));
+  if (ng) {
+    const a = elAnalyze(ng, cur, ctx.prev);
+    const home = ng.home.id === code, opp = home ? ng.away : ng.home;
+    const p = Math.round((home ? a.pHome : 1 - a.pHome) * 100);
+    const d = fmtDate(L, ng.date, L.en ? { month: "short", day: "numeric" } : { day: "numeric", month: "short" }).replace(/\.$/, "");
+    const pc = L.en ? `${p}%` : `${p}\u202f%`;
+    return pageMeta({
+      title: L.t(
+        fitTitle(`Pronostic ${t.name} – ${opp.short} (${d}) : EuroLeague, prochain match`, `Pronostic ${t.short} – ${opp.short} (${d}) : Euroligue`, `Pronostic ${t.name} (EuroLeague)`),
+        fitTitle(`${t.name} vs ${opp.short} prediction (${d}): EuroLeague win probability`, `${t.short} vs ${opp.short} prediction (${d}): EuroLeague`, `${t.name} EuroLeague predictions`),
+        fitTitle(`Pronóstico ${t.name} – ${opp.short} (${d}): Euroliga, próximo partido`, `Pronóstico ${t.short} – ${opp.short} (${d}): Euroliga`, `Pronóstico ${t.name} (Euroliga)`)
+      ),
+      description: L.t(
+        `${t.name} (${t.wins}-${t.losses}) ${home ? "reçoit" : "se déplace chez"} ${opp.name} le ${d} : ${pc} de chances de victoire selon le modèle Basketlog. Classement, forme, calendrier et pronostic de chaque match d'EuroLeague.`,
+        `${t.name} (${t.wins}-${t.losses}) ${home ? "host" : "visit"} ${opp.name} on ${d}: ${pc} win probability per the Basketlog model. Standing, form, schedule and a prediction for every EuroLeague game.`,
+        `${t.name} (${t.wins}-${t.losses}) ${home ? "recibe a" : "visita a"} ${opp.name} el ${d}: ${pc} de probabilidades de victoria según el modelo de Basketlog. Clasificación, forma, calendario y pronóstico de cada partido de la Euroliga.`
+      ),
+      path: `/app/euroleague/equipe/${code}`,
+      L,
+    });
+  }
   return pageMeta({
     title: L.t(
       fitTitle(`Pronostic ${t.name} : EuroLeague, matchs et stats – Basketlog`, `Pronostic ${t.name} : EuroLeague, matchs et stats`, `Pronostic ${t.name} (EuroLeague)`),
@@ -62,6 +87,7 @@ export default async function ELTeamPage({ params }) {
 
   return (
     <main className="app-page">
+      <Crumbs L={L} items={[[L.t("Accueil", "Home", "Inicio"), "/"], [L.t("Pronostic Euroligue", "EuroLeague predictions", "Pronósticos Euroliga"), "/app/euroleague"], [L.t(`Pronostic ${t.name}`, `${t.name} predictions`, `Pronóstico ${t.name}`), `/app/euroleague/equipe/${code}`]]} />
       <AppTabs active="euroleague" />
       <Link href={L.href("/app/euroleague")} className="back">← {L.t("EuroLeague", "EuroLeague", "Euroliga")}</Link>
       <div className="card match-hero team-hero">

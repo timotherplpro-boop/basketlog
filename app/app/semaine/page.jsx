@@ -9,6 +9,7 @@ import { getL } from "../../../lib/lang-server";
 import { SITE } from "../../../lib/site";
 import { nbaPath } from "../../../lib/slug";
 import { pctOf } from "../../../lib/i18n";
+import Crumbs from "../../../components/Crumbs";
 
 export const dynamic = "force-dynamic";
 
@@ -57,6 +58,7 @@ export default async function WeekPage() {
   return (
     <main className="app-page wide">
       <JsonLd data={ahead.length ? ld : null} />
+      <Crumbs L={L} items={[[L.t("Accueil", "Home", "Inicio"), "/"], [L.t("Pronostics NBA de ce soir", "NBA predictions tonight", "Pronósticos NBA de hoy"), "/app/matchs"], [L.t("Pronostics NBA de la semaine", "NBA predictions this week", "Pronósticos NBA de la semana"), "/app/semaine"]]} />
       <AppTabs active="analyse" />
       <div className="app-head">
         <h1>{L.t("Pronostics NBA de la semaine", "NBA predictions this week", "Pronósticos NBA de la semana")}</h1>

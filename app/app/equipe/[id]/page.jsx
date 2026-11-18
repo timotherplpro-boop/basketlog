@@ -12,6 +12,7 @@ import { fmtDate, fmtTime, numOf } from "../../../../lib/i18n";
 import { nbaPath } from "../../../../lib/slug.js";
 import JsonLd from "../../../../components/JsonLd";
 import { SITE } from "../../../../lib/site";
+import Crumbs from "../../../../components/Crumbs";
 
 export const dynamic = "force-dynamic";
 
@@ -163,6 +164,7 @@ export default async function TeamPage({ params }) {
           </p>
         </Link>
       )}
+      <Crumbs L={L} items={[[L.t("Accueil", "Home", "Inicio"), "/"], [L.t("Classement NBA", "NBA standings", "Clasificación NBA"), "/app/classement"], [L.t(`Pronostic ${team.name}`, `${team.name} predictions`, `Pronóstico ${team.name}`), `/app/equipe/${team.id}`]]} />
       <JsonLd data={{
         "@context": "https://schema.org", "@type": "SportsTeam", name: team.name, sport: "Basketball", logo: team.logo,
         memberOf: { "@type": "SportsOrganization", name: "NBA" }, url: `${SITE}${L.href(`/app/equipe/${team.id}`)}`,

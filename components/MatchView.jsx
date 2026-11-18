@@ -9,6 +9,7 @@ import { dayLong } from "../lib/seo";
 import { getL } from "../lib/lang-server";
 import { matchFaq } from "../lib/matchfaq";
 import { pairPath } from "../lib/matchup";
+import Crumbs from "./Crumbs";
 
 export default async function MatchView({ a, backHref = "/app", league = "NBA", extras = null, path = null, acc = null, others = null }) {
   const L = await getL();
@@ -63,6 +64,7 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
     <main className="app-page">
       <JsonLd data={ld} />
       {faqLd && <JsonLd data={faqLd} />}
+      {path && !g.hypothetical && <Crumbs L={L} items={[[L.t("Accueil", "Home", "Inicio"), "/"], isNBA ? [L.t("Pronostics NBA de ce soir", "NBA predictions tonight", "Pronósticos NBA de hoy"), "/app/matchs"] : [L.t("Pronostic Euroligue", "EuroLeague predictions", "Pronósticos Euroliga"), "/app/euroleague"], [L.t(`Pronostic ${g.away.short} – ${g.home.short}`, `${g.away.short} vs ${g.home.short} prediction`, `Pronóstico ${g.away.short} – ${g.home.short}`), path]]} />}
       <AppTabs active={isNBA ? "analyse" : "euroleague"} />
       <Link href={L.href(backHref)} className="back">← {L.t("Retour", "Back", "Volver")}</Link>
       <h1 className="match-title">

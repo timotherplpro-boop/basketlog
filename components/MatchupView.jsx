@@ -6,7 +6,9 @@ import { conferenceStandings, upcomingAnalyses } from "../lib/data";
 import { getTeamSchedule, nbaToday, nbaDateOf, seasonForDate } from "../lib/espn";
 import { nbaPicks } from "../lib/history";
 import { nbaPath } from "../lib/slug";
+import { pairPath } from "../lib/matchup";
 import { fmtDate, fmtTime, pctOf } from "../lib/i18n";
+import Crumbs from "./Crumbs";
 
 // Page duel sans date (/nba/celtics-vs-lakers) : voir lib/matchup.js.
 export async function matchupData(x, y) {
@@ -70,6 +72,7 @@ export default async function MatchupView({ x, y, data }) {
   return (
     <main className="app-page">
       <JsonLd data={ld} />
+      <Crumbs L={L} items={[[L.t("Accueil", "Home", "Inicio"), "/"], [L.t("Pronostics NBA de ce soir", "NBA predictions tonight", "Pronósticos NBA de hoy"), "/app/matchs"], [L.t(`Pronostic ${vs}`, `${vs} prediction`, `Pronóstico ${vs}`), pairPath(x, y)]]} />
       <AppTabs active="matchs" />
       <div className="app-head">
         <h1>{L.t(`Pronostic ${vs}`, `${vs} prediction`, `Pronóstico ${vs}`)}</h1>
