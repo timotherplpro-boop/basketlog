@@ -99,7 +99,7 @@ export async function matchOgImage(q, init = {}) {
           </div>
           {side(home, ph, lh, ph > pa)}
         </div>
-        <div style={{ display: "flex", marginTop: "auto", fontSize: 28, fontWeight: 500, color: "rgba(255,255,255,.75)" }}>{`${T.foot} · basketlog-app.com`}</div>
+        <div style={{ display: "flex", marginTop: "auto", fontSize: 28, fontWeight: 500, color: "rgba(255,255,255,.75)" }}>{`${T.foot} · basketlog-app.com${lang === "fr" ? "" : `/${lang}`}`}</div>
       </div>
     ),
     { ...OG_SIZE, ...(f ? { fonts: f } : {}), ...init }
