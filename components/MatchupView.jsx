@@ -85,7 +85,7 @@ export default async function MatchupView({ x, y, data }) {
         <section className="card block">
           <h2>{L.t("Prochaine rencontre", "Next meeting", "Próximo partido")}</h2>
           <p><b>{next.g.away.short} @ {next.g.home.short}</b> · {when(next.g)}</p>
-          {favOf(next) && <p>{L.t("Favori Basketlog", "Basketlog favorite", "Favorito de Basketlog")} : <b>{favOf(next).t.short} {pctOf(favOf(next).p, L)}</b></p>}
+          {favOf(next) && <p>{L.t("Favori Basketlog : ", "Basketlog favorite: ", "Favorito de Basketlog: ")}<b>{favOf(next).t.short} {pctOf(favOf(next).p, L)}</b></p>}
           <p><Link className="btn-white" href={L.href(next.path)}>{L.t("Voir le pronostic complet →", "See the full prediction →", "Ver el pronóstico completo →")}</Link></p>
         </section>
       )}
