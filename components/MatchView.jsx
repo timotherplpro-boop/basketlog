@@ -52,7 +52,7 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
     },
   ];
 
-  const faq = isNBA && path ? matchFaq(a, L, acc) : [];
+  const faq = path ? matchFaq(a, L, acc) : [];
   const faqLd = faq.length && url ? {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -116,13 +116,13 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
               <p>{f.a}</p>
             </div>
           ))}
-          <p className="mfaq-more"><Link href={L.href(pairPath(g.home, g.away))}>{L.t(`Toutes les rencontres ${g.away.short} – ${g.home.short} de la saison →`, `Every ${g.away.short} vs ${g.home.short} game this season →`, `Todos los ${g.away.short} – ${g.home.short} de la temporada →`)}</Link>{" · "}<Link href={L.href("/app/bilan")}>{L.t("Bilan public du modèle →", "Model track record →", "Balance público del modelo →")}</Link></p>
+          <p className="mfaq-more">{isNBA && <><Link href={L.href(pairPath(g.home, g.away))}>{L.t(`Toutes les rencontres ${g.away.short} – ${g.home.short} de la saison →`, `Every ${g.away.short} vs ${g.home.short} game this season →`, `Todos los ${g.away.short} – ${g.home.short} de la temporada →`)}</Link>{" · "}</>}<Link href={L.href(isNBA ? "/app/bilan" : "/app/euroleague")}>{isNBA ? L.t("Bilan public du modèle →", "Model track record →", "Balance público del modelo →") : L.t("Tous les pronostics EuroLeague →", "All EuroLeague predictions →", "Todos los pronósticos de la Euroliga →")}</Link></p>
         </section>
       )}
 
       {others && others.length > 0 && (
         <section className="card block match-others">
-          <h2>{L.t(`Les autres matchs NBA du ${dayLong(g.date, L)}`, `Other NBA games on ${dayLong(g.date, L)}`, `Los demás partidos de la NBA del ${dayLong(g.date, L)}`)}</h2>
+          <h2>{isNBA ? L.t(`Les autres matchs NBA du ${dayLong(g.date, L)}`, `Other NBA games on ${dayLong(g.date, L)}`, `Los demás partidos de la NBA del ${dayLong(g.date, L)}`) : L.t("Les autres matchs de la journée d'EuroLeague", "Other EuroLeague games this round", "Los demás partidos de la jornada de la Euroliga")}</h2>
           <ul>
             {others.map(({ a: o, path: p }) => {
               const og = o.game;

@@ -67,8 +67,17 @@ export default async function ELMatchPage({ params }) {
   const a = elAnalyze(g, before, ctx.prev);
   recordPronosSoon("EL", [a]);
   const L = await getL();
+  // Les autres matchs de la même journée : maillage interne entre fiches EuroLeague.
+  const others = ctx.games
+    .filter((x) => x.id !== g.id && x.round === g.round && x.phase === g.phase)
+    .slice(0, 12)
+    .map((x) => {
+      const b = x.played ? elTable(ctx.games.filter((y) => y.played && new Date(y.date) < new Date(x.date))) : ctx.cur;
+      return { a: elAnalyze(x, b, ctx.prev), path: `/app/euroleague/match/${x.id}` };
+    });
   return (
     <MatchView
+      others={others}
       a={a}
       league="EL"
       backHref="/app/euroleague"
