@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { analyzeDay } from "../../../lib/data";
+import { analyzeDay, recentAccuracy } from "../../../lib/data";
+import { fmtTime } from "../../../lib/i18n";
 import { recordPronosSoon } from "../../../lib/pronos";
 import { nbaToday, shiftDate, isValidDate } from "../../../lib/espn";
 import UpcomingList from "../../../components/UpcomingList";
@@ -98,9 +99,39 @@ export default async function MatchsPage({ searchParams }) {
     })),
   } : null;
 
+  // Questions-réponses du soir (« nba favorites tonight », « closest nba game tonight », « how many nba games tonight »).
+  const faq = [];
+  const pre = games.filter((g) => g.state === "pre" && !g.postponed && g.pHome != null);
+  if (date === today && pre.length) {
+    const fav = (g) => (g.pHome >= 0.5 ? { t: g.home, p: g.pHome } : { t: g.away, p: 1 - g.pHome });
+    const pc = (p) => `${Math.round(p * 100)}${L.en ? "%" : "\u202f%"}`;
+    const byFav = [...pre].sort((x, y) => fav(y).p - fav(x).p);
+    const close = [...pre].sort((x, y) => fav(x).p - fav(y).p)[0];
+    const acc = await recentAccuracy(400).catch(() => null);
+    const top = byFav.slice(0, 3).map((g) => `${fav(g).t.short} (${pc(fav(g).p)}, ${g.away.short} – ${g.home.short})`).join(", ");
+    faq.push({
+      q: L.t("Quels sont les plus gros favoris NBA ce soir ?", "Who are the biggest NBA favorites tonight?", "¿Quiénes son los grandes favoritos de la NBA hoy?"),
+      a: L.t(`Selon le modèle Basketlog : ${top}.`, `According to the Basketlog model: ${top}.`, `Según el modelo de Basketlog: ${top}.`),
+    });
+    faq.push({
+      q: L.t("Quel est le match NBA le plus serré ce soir ?", "What is the closest NBA game tonight?", "¿Cuál es el partido más igualado de la NBA hoy?"),
+      a: L.t(`${close.away.short} – ${close.home.short} : ${fav(close).t.short} à ${pc(fav(close).p)}, presque du 50-50.`, `${close.away.short} vs ${close.home.short}: the ${fav(close).t.short} at ${pc(fav(close).p)}, close to a coin flip.`, `${close.away.short} – ${close.home.short}: ${fav(close).t.short} al ${pc(fav(close).p)}, casi un 50-50.`),
+    });
+    faq.push({
+      q: L.t("Combien de matchs NBA ce soir ?", "How many NBA games are on tonight?", "¿Cuántos partidos de la NBA hay hoy?"),
+      a: L.t(`${games.length} match${games.length > 1 ? "s" : ""}, premier coup d'envoi à ${fmtTime(L, pre[0].date)} (${L.tzLabel}).`, `${games.length} game${games.length > 1 ? "s" : ""}, first tip-off at ${fmtTime(L, pre[0].date)} ${L.tzLabel}.`, `${games.length} partido${games.length > 1 ? "s" : ""}, el primero a las ${fmtTime(L, pre[0].date)} (${L.tzLabel}).`),
+    });
+    if (acc && acc.n >= 20) faq.push({
+      q: L.t("Ces pronostics sont-ils fiables ?", "How accurate are these NBA predictions?", "¿Son fiables estos pronósticos?"),
+      a: L.t(`Cette saison, le favori Basketlog a gagné ${acc.ok} matchs sur ${acc.n} (${pc(acc.ok / acc.n)}). Chaque pronostic est vérifié en public.`, `This season the Basketlog favorite won ${acc.ok} of ${acc.n} games (${pc(acc.ok / acc.n)}). Every pick is checked in public.`, `Esta temporada, el favorito de Basketlog ganó ${acc.ok} de ${acc.n} partidos (${pc(acc.ok / acc.n)}). Cada pronóstico se comprueba en público.`),
+    });
+  }
+  const faqLd = faq.length ? { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) } : null;
+
   return (
     <main className="app-page">
       {ld && <JsonLd data={ld} />}
+      {faqLd && <JsonLd data={faqLd} />}
       <AppTabs active="matchs" />
       <div className="app-head">
         <h1>{L.t(`Pronostics NBA ${labelOf(date, today, L)}`, `NBA predictions ${labelOf(date, today, L)}`, `Pronósticos NBA ${labelOf(date, today, L)}`)}</h1>
@@ -124,6 +155,18 @@ export default async function MatchsPage({ searchParams }) {
         <Link className="btn-white" href={L.href(shiftDate(date, 1) === shiftDate(today, 1) ? "/app/demain" : `/app/matchs?d=${shiftDate(date, 1)}`)}>{L.t("Lendemain →", "Next day →", "Día siguiente →")}</Link>
       </div>
       <UpcomingList games={games} title="" grouped={false} L={L} />
+      {faq.length > 0 && (
+        <section className="card block match-faq" style={{ marginTop: 22 }}>
+          <h2>{L.t("Ce soir en NBA : l'essentiel", "NBA tonight: quick answers", "La NBA hoy: lo esencial")}</h2>
+          {faq.map((f) => (
+            <div key={f.q} className="mfaq-item">
+              <h3>{f.q}</h3>
+              <p>{f.a}</p>
+            </div>
+          ))}
+          <p className="mfaq-more"><Link href={L.href("/app/bilan")}>{L.t("Voir le bilan public du modèle →", "See the model's public track record →", "Ver el balance público del modelo →")}</Link></p>
+        </section>
+      )}
     </main>
   );
 }
