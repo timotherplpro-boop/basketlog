@@ -7,8 +7,9 @@ import AnalysisResult from "./AnalysisResult";
 import { SITE } from "../lib/site";
 import { dayLong } from "../lib/seo";
 import { getL } from "../lib/lang-server";
+import { matchFaq } from "../lib/matchfaq";
 
-export default async function MatchView({ a, backHref = "/app", league = "NBA", extras = null, path = null }) {
+export default async function MatchView({ a, backHref = "/app", league = "NBA", extras = null, path = null, acc = null, others = null }) {
   const L = await getL();
   const isNBA = league === "NBA";
   const teamHref = (t) => L.href(isNBA ? `/app/equipe/${t.id}` : `/app/euroleague/equipe/${t.id}`);
@@ -50,9 +51,17 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
     },
   ];
 
+  const faq = isNBA && path ? matchFaq(a, L, acc) : [];
+  const faqLd = faq.length && url ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+  } : null;
+
   return (
     <main className="app-page">
       <JsonLd data={ld} />
+      {faqLd && <JsonLd data={faqLd} />}
       <AppTabs active={isNBA ? "analyse" : "euroleague"} />
       <Link href={L.href(backHref)} className="back">← {L.t("Retour", "Back", "Volver")}</Link>
       <h1 className="match-title">
@@ -96,6 +105,37 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
       )}
 
       <AnalysisResult a={a} league={league} L={L} mode="page" path={path} extras={extras} />
+
+      {faq.length > 0 && (
+        <section className="card block match-faq">
+          <h2>{L.t(`${g.away.short} – ${g.home.short} : l'essentiel`, `${g.away.short} vs ${g.home.short}: quick answers`, `${g.away.short} – ${g.home.short}: lo esencial`)}</h2>
+          {faq.map((f) => (
+            <div key={f.q} className="mfaq-item">
+              <h3>{f.q}</h3>
+              <p>{f.a}</p>
+            </div>
+          ))}
+          <p className="mfaq-more"><Link href={L.href("/app/bilan")}>{L.t("Voir le bilan public du modèle →", "See the model's public track record →", "Ver el balance público del modelo →")}</Link></p>
+        </section>
+      )}
+
+      {others && others.length > 0 && (
+        <section className="card block match-others">
+          <h2>{L.t(`Les autres matchs NBA du ${dayLong(g.date, L)}`, `Other NBA games on ${dayLong(g.date, L)}`, `Los demás partidos de la NBA del ${dayLong(g.date, L)}`)}</h2>
+          <ul>
+            {others.map(({ a: o, path: p }) => {
+              const og = o.game;
+              const fav = o.pHome >= 0.5 ? og.home : og.away;
+              return (
+                <li key={og.id}>
+                  <Link href={L.href(p)}>{L.t(`Pronostic ${og.away.short} – ${og.home.short}`, `${og.away.short} vs ${og.home.short} prediction`, `Pronóstico ${og.away.short} – ${og.home.short}`)}</Link>
+                  <span className="mono"> · {fav.abbr} {pctOf(Math.max(o.pHome, o.pAway), L)}</span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       <p className="disclaimer">
         {L.t(

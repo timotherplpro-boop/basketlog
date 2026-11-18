@@ -22,7 +22,7 @@ export default function SiteFooter({ L, compact = false }) {
   const notBetting = L.t("Analyses statistiques, pas un service de paris. Les probabilités sont des estimations, jamais des certitudes. Réservé aux 18 ans et plus.", "Statistical analysis, not a betting service. Probabilities are estimates, never certainties. For adults 18 and over.", "Análisis estadístico, no un servicio de apuestas. Las probabilidades son estimaciones, nunca certezas. Solo para mayores de 18 años.");
   const gambling = L.t(
     <>Les jeux d&apos;argent comportent des risques : endettement, dépendance… Appelle le {LEGAL.jeu.tel} ({LEGAL.jeu.nom}, appel non surtaxé).</>,
-    <>Gambling involves risks such as debt and addiction. If you need help in France, call {LEGAL.jeu.tel} ({LEGAL.jeu.nom}).</>,
+    <>Gambling involves risks such as debt and addiction. If you need help in the US, call 1-800-GAMBLER (National Problem Gambling Helpline); in France, {LEGAL.jeu.tel} ({LEGAL.jeu.nom}).</>,
     <>El juego conlleva riesgos como el endeudamiento o la adicción. En España puedes pedir ayuda en jugarbien.es; en Francia, en el {LEGAL.jeu.tel} ({LEGAL.jeu.nom}).</>
   );
 

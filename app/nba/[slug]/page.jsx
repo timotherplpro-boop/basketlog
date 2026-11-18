@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { analyzeDay } from "../../../lib/data";
+import { analyzeDay, recentAccuracy } from "../../../lib/data";
 import { recordPronosSoon } from "../../../lib/pronos";
 import { scoreboardReachable, isValidDate } from "../../../lib/espn";
 import MatchView from "../../../components/MatchView";
@@ -15,7 +15,7 @@ async function findBySlug(slug) {
   if (!s || !isValidDate(s.date)) return null;
   const { analyses } = await analyzeDay(s.date);
   const a = analyses.find((x) => teamSlug(x.game?.away) === s.away && teamSlug(x.game?.home) === s.home);
-  if (a) return { a, date: s.date };
+  if (a) return { a, date: s.date, day: analyses };
   // ESPN injoignable : erreur temporaire (Google repassera), pas une page supprimée.
   if (!(await scoreboardReachable(s.date))) throw new Error("Données NBA momentanément indisponibles");
   return null;
@@ -34,5 +34,10 @@ export default async function NbaMatchPage({ params }) {
   const found = await findBySlug(slug);
   if (!found) notFound();
   recordPronosSoon("NBA", [found.a]);
-  return <MatchView a={found.a} backHref={`/app/matchs?d=${found.date}`} path={nbaPath(found.a.game, found.date)} />;
+  // Pour Google et le visiteur : réponses propres au match et liens vers les autres matchs du même soir.
+  const acc = await recentAccuracy(400).catch(() => null);
+  const others = found.day
+    .filter((x) => x !== found.a && x.game && !x.game.hypothetical)
+    .map((x) => ({ a: x, path: nbaPath(x.game, found.date) }));
+  return <MatchView a={found.a} backHref={`/app/matchs?d=${found.date}`} path={nbaPath(found.a.game, found.date)} acc={acc} others={others} />;
 }

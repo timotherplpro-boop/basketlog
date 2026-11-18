@@ -1793,3 +1793,16 @@ button.comp-more { border: 0; background: none; padding: 0; font-family: inherit
 .pay-err { margin-top: 16px; text-align: center; }
 .pay-safe { margin-top: 14px; font-size: 13px; opacity: .8; text-align: center; }
 .pay-back { margin-top: 8px; text-align: center; font-size: 14px; }
+
+/* Fiche de match : questions-réponses et autres matchs du soir */
+.match-faq h2, .match-others h2 { margin-bottom: 14px; }
+.mfaq-item + .mfaq-item { margin-top: 14px; }
+.mfaq-item h3 { font-size: 1rem; margin: 0 0 4px; }
+.mfaq-item p { margin: 0; color: var(--muted, #b6bfd0); line-height: 1.55; }
+.mfaq-more { margin: 16px 0 0; }
+.match-others ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.match-others li { line-height: 1.4; }
+/* Récap de la semaine */
+.big-stat { font-size: 1.1rem; margin: 0 0 16px; }
+.wk-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.wk-list .mono { color: var(--muted); }
