@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
+import { sendWelcome } from "../../../../../lib/welcome-send";
 import { SITE } from "../../../../../lib/site";
 import { COOKIE, cookieOptions, encodeSession, freshAccountSession, safeNext } from "../../../../../lib/pro";
 import { GoogleAuthError, exchangeCode, readIdToken } from "../../../../../lib/google-auth";
@@ -53,7 +54,10 @@ export async function GET(req) {
     return fail("indispo");
   }
   if (!r?.ok) return fail(r?.reason === "email_non_verifie" ? "google_non_verifie" : "google");
-  if (r.nouveau) console.log("[comptes] nouveau compte (Google)");
+  if (r.nouveau) {
+    console.log("[comptes] nouveau compte (Google)");
+    after(() => sendWelcome({ to: r.email, lang, name: g.name || null }));
+  }
   if (r.mdp_retire) console.log("[comptes] compte relié à Google : ancien mot de passe jamais vérifié retiré");
   const session = await freshAccountSession({ id: r.id, email: r.email, nom: g.name, whop_uid: null, sv: r.sv });
   return done({ bienvenue: r.nouveau ? "nouveau-google" : "retour-google" }, session);

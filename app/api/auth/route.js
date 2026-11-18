@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
+import { sendWelcome } from "../../../lib/welcome-send";
 import { SITE } from "../../../lib/site";
 import { mk } from "../../../lib/i18n";
 import { COOKIE, accountSession, cookieOptions, encodeSession, freshAccountSession } from "../../../lib/pro";
@@ -92,6 +93,7 @@ export async function POST(req) {
         return err(M.email, 400, { field: "email" });
       }
       console.log("[comptes] nouveau compte (e-mail)");
+      after(() => sendWelcome({ to: r.email, lang, name: null }));
       return json({ ok: true, nouveau: true }, 200, accountSession({ id: r.id, email: r.email, nom: null, whop_uid: null, sv: r.sv }));
     }
 
