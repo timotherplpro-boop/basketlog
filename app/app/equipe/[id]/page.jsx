@@ -20,14 +20,36 @@ export async function generateMetadata({ params }) {
   const L = await getL();
   const t = teamById(id);
   if (!t) return { title: L.t("Équipe – Basketlog", "Team – Basketlog", "Equipo – Basketlog"), robots: { index: false } };
+  // Prochain match et sa probabilité dans le titre et la description : plus parlant dans Google
+  // (« Raptors vs Knicks », « 62 % ») que le titre générique, qui reste en secours.
+  let nx = null;
+  try {
+    const [sched, up] = await Promise.all([getTeamSchedule(t.id), upcomingAnalyses(7)]);
+    const g = sched.filter((x) => x.type !== "pre" && x.state !== "post" && !x.postponed).sort((x, y) => new Date(x.date) - new Date(y.date))[0];
+    if (g) {
+      const home = g.home.id === t.id;
+      const u = up.find((x) => x.id === g.id);
+      nx = { g, opp: home ? g.away : g.home, home, p: u ? (home ? u.pHome : 1 - u.pHome) : null };
+    }
+  } catch {}
+  const d = nx ? fmtDate(L, nx.g.date, L.en ? { month: "short", day: "numeric" } : { day: "numeric", month: "short" }).replace(/\.$/, "") : "";
+  const pTxt = nx && nx.p != null ? `${Math.round(nx.p * 100)}${L.en ? "%" : "\u202f%"}` : null;
   return pageMeta({
     // « Pronostic » en tête : c'est ce que tapent ceux qui cherchent le prochain match d'une équipe.
-    title: L.t(
+    title: nx ? L.t(
+      fitTitle(`Pronostic ${t.name} – ${nx.opp.short} (${d}) : prochain match et stats`, `Pronostic ${t.short} – ${nx.opp.short} (${d}) : prochain match et stats`, `Pronostic ${t.name} : prochains matchs et stats`),
+      fitTitle(`${t.name} vs ${nx.opp.short} prediction (${d}): next game win probability`, `${t.short} vs ${nx.opp.short} prediction (${d}): win probability and stats`, `${t.name} predictions: next game win probability`),
+      fitTitle(`Pronóstico ${t.name} – ${nx.opp.short} (${d}): próximo partido y estadísticas`, `Pronóstico ${t.short} – ${nx.opp.short} (${d}): próximo partido y estadísticas`, `Pronóstico ${t.name}: próximos partidos y estadísticas`)
+    ) : L.t(
       fitTitle(`Pronostic ${t.name} : prochains matchs et stats – Basketlog`, `Pronostic ${t.name} : prochains matchs et stats`),
       fitTitle(`${t.name} predictions: next game win probability – Basketlog`, `${t.name} predictions: next game win probability`),
       fitTitle(`Pronóstico ${t.name}: próximos partidos y estadísticas – Basketlog`, `Pronóstico ${t.name}: próximos partidos y estadísticas`)
     ),
-    description: L.t(
+    description: nx && pTxt ? L.t(
+      `${t.name} ${nx.home ? "reçoit" : "joue chez"} les ${nx.opp.short} le ${d} : ${pTxt} de chances de victoire selon le modèle Basketlog. Bilan, stats de la saison NBA, joueurs clés et calendrier.`,
+      `${t.name} ${nx.home ? "host" : "visit"} the ${nx.opp.short} on ${d}: ${pTxt} win probability per the Basketlog model. Record, NBA season stats, key players and schedule.`,
+      `Los ${t.name} ${nx.home ? "reciben a" : "visitan a"} los ${nx.opp.short} el ${d}: ${pTxt} de probabilidades de victoria según el modelo de Basketlog. Balance, estadísticas de la temporada NBA, jugadores clave y calendario.`
+    ) : L.t(
       `${t.name} : bilan, stats de la saison NBA, joueurs clés, calendrier et pronostic Basketlog pour chaque prochain match.`,
       `${t.name}: record, NBA season stats, key players, schedule and a Basketlog prediction for every upcoming game.`, `${t.name}: balance, estadísticas de la temporada NBA, jugadores clave, calendario y un pronóstico de Basketlog para cada próximo partido.`
     ),
