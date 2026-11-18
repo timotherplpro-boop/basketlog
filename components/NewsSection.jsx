@@ -8,8 +8,8 @@ export default async function NewsSection({ a, L }) {
   const now = Date.now();
   return (
     <div className="card block news">
-      <h2>📰 {L.t("Actualités en temps réel", "Real-time news", "Noticias en tiempo real")}</h2>
-      <div className="team-rec" style={{ marginBottom: 12 }}>{L.t("Mises à jour toutes les 5 minutes · articles ESPN en anglais", "Updated every 5 minutes · ESPN articles", "Actualizadas cada 5 minutos · artículos de ESPN en inglés")}</div>
+      <h2>📰 {L.t("Actualités en temps réel", "Real-time news", "Noticias en tiempo real", "Notícias em tempo real")}</h2>
+      <div className="team-rec" style={{ marginBottom: 12 }}>{L.t("Mises à jour toutes les 5 minutes · articles ESPN en anglais", "Updated every 5 minutes · ESPN articles", "Actualizadas cada 5 minutos · artículos de ESPN en inglés", "Atualizadas a cada 5 minutos · artigos da ESPN em inglês")}</div>
       <div className="grid2 news-grid">
         {[[g.away, an], [g.home, hn]].map(([t, list]) => (
           <div key={t.id} className="news-team">
@@ -24,7 +24,7 @@ export default async function NewsSection({ a, L }) {
                 ))}
               </ul>
             ) : (
-              <p className="team-rec">{L.t(`Pas d'actualité récente pour ${t.short}.`, `No recent news for ${t.short}.`, `No hay noticias recientes de ${t.short}.`)}</p>
+              <p className="team-rec">{L.t(`Pas d'actualité récente pour ${t.short}.`, `No recent news for ${t.short}.`, `No hay noticias recientes de ${t.short}.`, `Nenhuma notícia recente do ${t.short}.`)}</p>
             )}
           </div>
         ))}

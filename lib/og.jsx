@@ -9,6 +9,7 @@ const TXT = {
   fr: { l1: "Prédis chaque match", l2: "avant qu'il ne", l3: "commence.", sub: "NBA · EuroLeague · Probabilités, stats et scénarios" },
   en: { l1: "Predict every game", l2: "before it", l3: "starts.", sub: "NBA · EuroLeague · Probabilities, stats and scenarios" },
   es: { l1: "Predice cada partido", l2: "antes de que", l3: "empiece.", sub: "NBA · Euroliga · Probabilidades, estadísticas y escenarios" },
+  pt: { l1: "Preveja cada jogo", l2: "antes que ele", l3: "comece.", sub: "NBA · Euroliga · Probabilidades, estatísticas e cenários" },
 };
 
 const BALL =
@@ -61,7 +62,7 @@ export async function ogImage(lang, init = {}) {
 const clip = (s, n) => String(s || "").replace(/[^\p{L}\p{N} .'&-]/gu, "").slice(0, n);
 export async function matchOgImage(q, init = {}) {
   const f = await fonts();
-  const lang = q.get("lang") === "es" ? "es" : q.get("lang") === "fr" ? "fr" : "en";
+  const lang = ["es", "fr", "pt"].includes(q.get("lang")) ? q.get("lang") : "en";
   const away = clip(q.get("a"), 22), home = clip(q.get("h"), 22);
   const pa = Math.max(0, Math.min(100, parseInt(q.get("pa"), 10) || 50)), ph = 100 - pa;
   const score = /^\d{2,3}-\d{2,3}$/.test(q.get("s") || "") ? q.get("s") : null;
@@ -72,6 +73,7 @@ export async function matchOgImage(q, init = {}) {
   const T = {
     en: { pred: "prediction", win: "win", proj: final ? "Final score" : "Projected score", foot: "Free win probabilities for every NBA game" },
     es: { pred: "pronóstico", win: "victoria", proj: final ? "Resultado final" : "Marcador proyectado", foot: "Probabilidades gratis para cada partido de la NBA" },
+    pt: { pred: "palpite", win: "vitória", proj: final ? "Resultado final" : "Placar projetado", foot: "Probabilidades grátis para cada jogo da NBA" },
     fr: { pred: "pronostic", win: "victoire", proj: final ? "Score final" : "Score projeté", foot: "Probabilités gratuites pour chaque match NBA" },
   }[lang];
   const side = (name, p, lg, fav) => (

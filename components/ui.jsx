@@ -28,11 +28,11 @@ export function parisDay(iso, L = mk("fr")) {
 }
 
 export function StatusTag({ game, L = mk("fr") }) {
-  if (game.hypothetical) return <span className="tag hot">{L.t("Match hypothétique", "Hypothetical game", "Partido hipotético")}</span>;
-  if (game.state === "in") return <span className="tag live">● {L.t("En direct", "Live", "En directo")}</span>;
-  if (game.postponed === "canceled") return <span className="tag">{L.t("Annulé", "Canceled", "Cancelado")}</span>;
-  if (game.postponed) return <span className="tag">{L.t("Reporté", "Postponed", "Aplazado")}</span>;
-  if (game.state === "post") return <span className="tag">{L.t("Terminé", "Final", "Finalizado")}</span>;
+  if (game.hypothetical) return <span className="tag hot">{L.t("Match hypothétique", "Hypothetical game", "Partido hipotético", "Jogo hipotético")}</span>;
+  if (game.state === "in") return <span className="tag live">● {L.t("En direct", "Live", "En directo", "Ao vivo")}</span>;
+  if (game.postponed === "canceled") return <span className="tag">{L.t("Annulé", "Canceled", "Cancelado", "Cancelado")}</span>;
+  if (game.postponed) return <span className="tag">{L.t("Reporté", "Postponed", "Aplazado", "Adiado")}</span>;
+  if (game.state === "post") return <span className="tag">{L.t("Terminé", "Final", "Finalizado", "Encerrado")}</span>;
   return <span className="tag">{parisDay(game.date, L)} · {parisTime(game.date, L)}{L.en ? " ET" : ""}</span>;
 }
 
@@ -44,7 +44,7 @@ export function GameCard({ a, date, L = mk("fr") }) {
     <Link href={L.href(nbaPath(g, date))} className="card game">
       <div className="game-top">
         <StatusTag game={g} L={L} />
-        {a.confidence === "Très élevée" ? <span className="tag hot">{L.t("Confiance très élevée", "Very high confidence", "Confianza muy alta")}</span> : Math.max(a.pHome, a.pAway) > 0.72 ? <span className="tag hot">{L.t("Favori net", "Clear favorite", "Favorito claro")}</span> : Math.abs(a.pHome - 0.5) < 0.06 ? <span className="tag hot">{L.t("Indécis", "Toss-up", "Igualado")}</span> : <span>{L.t(`Confiance ${a.confidence.toLowerCase()}`, `${confText(a.confidence, L)} confidence`, `Confianza ${confText(a.confidence, L).toLowerCase()}`)}</span>}
+        {a.confidence === "Très élevée" ? <span className="tag hot">{L.t("Confiance très élevée", "Very high confidence", "Confianza muy alta", "Confiança muito alta")}</span> : Math.max(a.pHome, a.pAway) > 0.72 ? <span className="tag hot">{L.t("Favori net", "Clear favorite", "Favorito claro", "Favorito claro")}</span> : Math.abs(a.pHome - 0.5) < 0.06 ? <span className="tag hot">{L.t("Indécis", "Toss-up", "Igualado", "Equilibrado")}</span> : <span>{L.t(`Confiance ${a.confidence.toLowerCase()}`, `${confText(a.confidence, L)} confidence`, `Confianza ${confText(a.confidence, L).toLowerCase()}`, `Confiança ${confText(a.confidence, L).toLowerCase()}`)}</span>}
       </div>
       {[g.away, g.home].map((t, i) => {
         const p = i === 0 ? a.pAway : a.pHome;
@@ -64,8 +64,8 @@ export function GameCard({ a, date, L = mk("fr") }) {
       })}
       <ProbBar pAway={a.pAway} pHome={a.pHome} away={g.away} home={g.home} L={L} />
       <div className="game-foot">
-        <span>{L.t("Projeté :", "Projected:", "Proyectado:")} <span className="mono">{Math.round(a.awayPts)}–{Math.round(a.homePts)}</span></span>
-        <span>{L.t("Analyse →", "Analysis →", "Análisis →")}</span>
+        <span>{L.t("Projeté :", "Projected:", "Proyectado:", "Projetado:")} <span className="mono">{Math.round(a.awayPts)}–{Math.round(a.homePts)}</span></span>
+        <span>{L.t("Analyse →", "Analysis →", "Análisis →", "Análise →")}</span>
       </div>
     </Link>
   );

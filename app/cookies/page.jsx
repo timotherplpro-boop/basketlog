@@ -6,7 +6,7 @@ import { getL } from "../../lib/lang-server";
 
 export async function generateMetadata() {
   const L = await getL();
-  if (L.es) return pageMeta({ title: "Política de cookies – Basketlog", description: "Las cookies y rastreadores que usa Basketlog, su función, su duración y cómo aceptar o rechazar la medición de audiencia.", path: "/cookies", L });
+  if (L.es || L.pt) return pageMeta({ title: "Política de cookies – Basketlog", description: "Las cookies y rastreadores que usa Basketlog, su función, su duración y cómo aceptar o rechazar la medición de audiencia.", path: "/cookies", L });
   return L.en
     ? pageMeta({ title: "Cookie policy – Basketlog", description: "The cookies and trackers Basketlog uses, their purpose, their duration and how to accept or refuse audience measurement.", path: "/cookies", L })
     : pageMeta({ title: "Politique de cookies – Basketlog", description: "Les cookies et traceurs utilisés par Basketlog, leur rôle, leur durée et comment accepter ou refuser la mesure d'audience.", path: "/cookies" });
@@ -175,5 +175,5 @@ function CookiesEs({ L }) {
 
 export default async function CookiesPage() {
   const L = await getL();
-  return L.es ? <CookiesEs L={L} /> : L.en ? <CookiesEn L={L} /> : <CookiesFr />;
+  return L.es || L.pt ? <CookiesEs L={L} /> : L.en ? <CookiesEn L={L} /> : <CookiesFr />;
 }

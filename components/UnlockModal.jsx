@@ -25,8 +25,8 @@ const Cross = () => <Svg size={20}><path d="M6 6l12 12M18 6L6 18" /></Svg>;
 function left(ms, L) {
   const m = Math.max(1, Math.floor(ms / 60000));
   const d = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60), mn = m % 60;
-  if (d > 0) return L.t(`${d}j ${h}h`, `${d}d ${h}h`, `${d}d ${h}h`);
-  if (h > 0) return L.t(`${h}h ${mn}min`, `${h}h ${mn}m`, `${h}h ${mn}min`);
+  if (d > 0) return L.t(`${d}j ${h}h`, `${d}d ${h}h`, `${d}d ${h}h`, `${d}d ${h}h`);
+  if (h > 0) return L.t(`${h}h ${mn}min`, `${h}h ${mn}m`, `${h}h ${mn}min`, `${h}h ${mn}min`);
   return `${mn} min`;
 }
 
@@ -85,42 +85,42 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
   const h = proof?.hits;
   const badge = !h ? null : h.span === "day"
     ? h.ok === h.n
-      ? L.t(`Le modèle a correctement anticipé les ${h.n} matchs d'hier`, `The model called all ${h.n} of yesterday's games`, `El modelo acertó los ${h.n} partidos de ayer`)
-      : L.t(`Le modèle a correctement anticipé ${h.ok} matchs sur ${h.n} hier`, `The model correctly called ${h.ok} of ${h.n} games yesterday`, `El modelo acertó ${h.ok} de ${h.n} partidos ayer`)
-    : L.t(`Le modèle a correctement anticipé ${h.ok} matchs sur ${h.n} ces 7 derniers jours`, `The model correctly called ${h.ok} of ${h.n} games in the last 7 days`, `El modelo acertó ${h.ok} de ${h.n} partidos en los últimos 7 días`);
+      ? L.t(`Le modèle a correctement anticipé les ${h.n} matchs d'hier`, `The model called all ${h.n} of yesterday's games`, `El modelo acertó los ${h.n} partidos de ayer`, `O modelo acertou os ${h.n} jogos de ontem`)
+      : L.t(`Le modèle a correctement anticipé ${h.ok} matchs sur ${h.n} hier`, `The model correctly called ${h.ok} of ${h.n} games yesterday`, `El modelo acertó ${h.ok} de ${h.n} partidos ayer`, `O modelo acertou ${h.ok} de ${h.n} jogos ontem`)
+    : L.t(`Le modèle a correctement anticipé ${h.ok} matchs sur ${h.n} ces 7 derniers jours`, `The model correctly called ${h.ok} of ${h.n} games in the last 7 days`, `El modelo acertó ${h.ok} de ${h.n} partidos en los últimos 7 días`, `O modelo acertou ${h.ok} de ${h.n} jogos nos últimos 7 dias`);
   const crowd = proof?.members
-    ? { icon: <Users />, txt: L.t(`+${num(proof.members)} membres inscrits`, `+${num(proof.members)} registered members`, `+${num(proof.members)} miembros registrados`) }
+    ? { icon: <Users />, txt: L.t(`+${num(proof.members)} membres inscrits`, `+${num(proof.members)} registered members`, `+${num(proof.members)} miembros registrados`, `+${num(proof.members)} membros cadastrados`) }
     : proof?.analysed
-      ? { icon: <Bars />, txt: L.t(`+${num(proof.analysed)} matchs NBA analysés par le modèle`, `+${num(proof.analysed)} NBA games analyzed by the model`, `+${num(proof.analysed)} partidos NBA analizados por el modelo`) }
+      ? { icon: <Bars />, txt: L.t(`+${num(proof.analysed)} matchs NBA analysés par le modèle`, `+${num(proof.analysed)} NBA games analyzed by the model`, `+${num(proof.analysed)} partidos NBA analizados por el modelo`, `+${num(proof.analysed)} jogos da NBA analisados pelo modelo`) }
       : null;
 
   // Ce que contient vraiment l'analyse complète de Basketlog.
   // (Le score projeté et les probabilités de victoire sont visibles gratuitement : on ne les vend pas ici.)
   const items = [
-    ["📊", L.t("Probabilités détaillées", "Detailed probabilities", "Probabilidades detalladas")],
-    ["⚖️", L.t("Ce qui fait pencher la balance", "What tips the balance", "Lo que inclina la balanza")],
-    ["🔮", L.t("Tous les scénarios du match", "Every game scenario", "Todos los escenarios del partido")],
-    ["📝", L.t("L'argumentation complète du modèle", "The model's full reasoning", "La argumentación completa del modelo")],
+    ["📊", L.t("Probabilités détaillées", "Detailed probabilities", "Probabilidades detalladas", "Probabilidades detalhadas")],
+    ["⚖️", L.t("Ce qui fait pencher la balance", "What tips the balance", "Lo que inclina la balanza", "O que faz a balança pender")],
+    ["🔮", L.t("Tous les scénarios du match", "Every game scenario", "Todos los escenarios del partido", "Todos os cenários do jogo")],
+    ["📝", L.t("L'argumentation complète du modèle", "The model's full reasoning", "La argumentación completa del modelo", "A argumentação completa do modelo")],
     ["💡", league === "NBA"
-      ? L.t("Stats comparées, joueurs et infirmerie", "Stat comparison, players and injury report", "Estadísticas comparadas, jugadores y parte médico")
-      : L.t("Facteurs clés et stats comparées", "Key factors and stat comparison", "Factores clave y estadísticas comparadas")],
+      ? L.t("Stats comparées, joueurs et infirmerie", "Stat comparison, players and injury report", "Estadísticas comparadas, jugadores y parte médico", "Estatísticas comparadas, jogadores e boletim médico")
+      : L.t("Facteurs clés et stats comparées", "Key factors and stat comparison", "Factores clave y estadísticas comparadas", "Fatores-chave e estatísticas comparadas")],
   ];
 
   // Compte à rebours jusqu'au coup d'envoi (pas pour un match hypothétique ou déjà terminé).
   const start = match?.date ? new Date(match.date).getTime() : null;
   const live = match?.state === "in" || (match?.state === "pre" && start && start <= now);
   const clock = !match || match.hypothetical || !start || match.state === "post" ? null : live
-    ? { lead: `${match.home} vs ${match.away}`, big: L.t("Match en cours", "Game in progress", "Partido en curso") }
-    : { lead: L.t(`${match.home} vs ${match.away} commence dans`, `${match.home} vs ${match.away} starts in`, `${match.home} vs ${match.away} empieza en`), big: left(start - now, L) };
+    ? { lead: `${match.home} vs ${match.away}`, big: L.t("Match en cours", "Game in progress", "Partido en curso", "Jogo em andamento") }
+    : { lead: L.t(`${match.home} vs ${match.away} commence dans`, `${match.home} vs ${match.away} starts in`, `${match.home} vs ${match.away} empieza en`, `${match.home} x ${match.away} começa em`), big: left(start - now, L) };
 
   const foot = state !== "visitor" && tier === "starter"
-    ? L.t("Accès instantané avec Pro, analyses illimitées", "Instant access with Pro, unlimited analyses", "Acceso inmediato con Pro, análisis ilimitados")
-    : L.t("Accès instantané après l'abonnement", "Instant access once you subscribe", "Acceso inmediato al suscribirte");
+    ? L.t("Accès instantané avec Pro, analyses illimitées", "Instant access with Pro, unlimited analyses", "Acceso inmediato con Pro, análisis ilimitados", "Acesso imediato com o Pro, análises ilimitadas")
+    : L.t("Accès instantané après l'abonnement", "Instant access once you subscribe", "Acceso inmediato al suscribirte", "Acesso imediato ao assinar");
 
   return createPortal(
     <div className="modal ulk" role="dialog" aria-modal="true" aria-labelledby="ulk-title" onClick={(e) => e.target === e.currentTarget && tryClose()}>
       <div className="modal-box ulk-box" ref={boxRef} tabIndex={-1}>
-        <button type="button" className="ulk-x" onClick={tryClose} aria-label={L.t("Fermer", "Close", "Cerrar")}><Cross /></button>
+        <button type="button" className="ulk-x" onClick={tryClose} aria-label={L.t("Fermer", "Close", "Cerrar", "Fechar")}><Cross /></button>
         {pitch && offer ? (
           <ExitOfferBody
             offer={offer}
@@ -132,11 +132,11 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
         ) : (<>
         {badge && <div className="ulk-badge"><Trend /><span>{badge} 🔥</span></div>}
         {/* Espace insécable avant « ? » : sur un petit téléphone, le point d'interrogation ne part pas seul à la ligne. */}
-        <h3 id="ulk-title">{L.t("Tu veux voir l'analyse complète ?", "Want to see the full analysis?", "¿Quieres ver el análisis completo?")}</h3>
+        <h3 id="ulk-title">{L.t("Tu veux voir l'analyse complète ?", "Want to see the full analysis?", "¿Quieres ver el análisis completo?", "Quer ver a análise completa?")}</h3>
         {crowd && <p className="ulk-sub">{crowd.icon}{crowd.txt}</p>}
 
         <div className="ulk-list">
-          <div className="ulk-lbl">{L.t("Ce que tu vas débloquer", "What you'll unlock", "Lo que vas a desbloquear")}</div>
+          <div className="ulk-lbl">{L.t("Ce que tu vas débloquer", "What you'll unlock", "Lo que vas a desbloquear", "O que você vai desbloquear")}</div>
           {items.map(([e, t]) => (
             <div className="ulk-item" key={t}><span className="ulk-lock"><Lock /></span><span><span aria-hidden>{e}</span> {t}</span></div>
           ))}
@@ -149,7 +149,7 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
           </div>
         )}
 
-        <a href={href} className="btn-solid ulk-cta" onClick={onCta}>{L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo")}</a>
+        <a href={href} className="btn-solid ulk-cta" onClick={onCta}>{L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo", "Desbloquear a análise completa")}</a>
         <small className="ulk-foot">{foot}</small>
         </>)}
       </div>

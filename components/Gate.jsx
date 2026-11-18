@@ -93,8 +93,8 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
             {L.t(
               <>Analyse réduite <b>{used}/{limit}</b> aujourd&apos;hui</>,
               <>Reduced analysis <b>{used}/{limit}</b> today</>,
-              <>Análisis reducido <b>{used}/{limit}</b> hoy</>
-            )} · <Link href={L.href("/pro")} onClick={() => track("Clic Passer Pro", { source: "compteur" })}>{tier === "starter" ? L.t("Passer Pro", "Go Pro", "Hazte Pro") : L.t("Débloquer plus d'analyses", "Unlock more analyses", "Desbloquear más análisis")}</Link>
+              <>Análisis reducido <b>{used}/{limit}</b> hoy</>, <>Análise reduzida <b>{used}/{limit}</b> hoje</>
+            )} · <Link href={L.href("/pro")} onClick={() => track("Clic Passer Pro", { source: "compteur" })}>{tier === "starter" ? L.t("Passer Pro", "Go Pro", "Hazte Pro", "Assine o Pro") : L.t("Débloquer plus d'analyses", "Unlock more analyses", "Desbloquear más análisis", "Desbloquear mais análises")}</Link>
           </div>
         )}
         {children}
@@ -107,13 +107,13 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
   const contents = L.t(
     "L'analyse complète contient les probabilités exactes, l'argumentation du modèle, tous les scénarios, les stats comparées et l'infirmerie.",
     "The full analysis includes exact probabilities, the model's reasoning, every scenario, the stat comparison and the injury report.",
-    "El análisis completo incluye las probabilidades exactas, la argumentación del modelo, todos los escenarios, las estadísticas comparadas y el parte médico."
+    "El análisis completo incluye las probabilidades exactas, la argumentación del modelo, todos los escenarios, las estadísticas comparadas y el parte médico.", "A análise completa inclui as probabilidades exatas, a argumentação do modelo, todos os cenários, as estatísticas comparadas e o boletim médico."
   );
   const free = tier === "compte"; // compte gratuit : aucune analyse complète, comme Visifoot
 
   return (
     <div className="gated locked ar-locked">
-      <div className="ar-sec ar-lockhead"><h3>📈 {L.t("Probabilités exactes", "Exact probabilities", "Probabilidades exactas")}</h3></div>
+      <div className="ar-sec ar-lockhead"><h3>📈 {L.t("Probabilités exactes", "Exact probabilities", "Probabilidades exactas", "Probabilidades exatas")}</h3></div>
       <div className="gate-content" aria-hidden>
         <div className="card block ghost"><div className="gl w40" /><div className="gl" /><div className="gl" /><div className="gl w70" /></div>
         <div className="grid2">
@@ -132,35 +132,35 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
               {state === "available" ? (
                 // Abonné : l'analyse est incluse, on ne lui dit pas qu'il n'a accès qu'à une partie.
                 <h3>{left == null
-                  ? L.t("L'analyse complète est incluse dans ta formule", "The full analysis is included in your plan", "El análisis completo está incluido en tu plan")
-                  : L.t("Ton analyse Starter du jour est disponible", "Your daily Starter analysis is available", "Tu análisis Starter del día está disponible")}</h3>
+                  ? L.t("L'analyse complète est incluse dans ta formule", "The full analysis is included in your plan", "El análisis completo está incluido en tu plan", "A análise completa está incluída no seu plano")
+                  : L.t("Ton analyse Starter du jour est disponible", "Your daily Starter analysis is available", "Tu análisis Starter del día está disponible", "Sua análise Starter do dia está disponível")}</h3>
               ) : (
                 <>
-                  <h3>{L.t(`Tu n'as accès qu'à ${pctTxt} de l'analyse`, `You only have access to ${pctTxt} of the analysis`, `Solo tienes acceso al ${pctTxt} del análisis`)}</h3>
+                  <h3>{L.t(`Tu n'as accès qu'à ${pctTxt} de l'analyse`, `You only have access to ${pctTxt} of the analysis`, `Solo tienes acceso al ${pctTxt} del análisis`, `Você só tem acesso a ${pctTxt} da análise`)}</h3>
                   <div className="gate-meter"><i style={{ width: `${pct}%` }} /></div>
                 </>
               )}
               {state === "available" ? (
                 <>
                   <p>{left == null
-                    ? <>{contents} {L.t("Ta formule les débloque sur tous les matchs, sans limite.", "Your plan unlocks them on every game, with no limit.", "Tu plan los desbloquea en todos los partidos, sin límite.")}</>
-                    : L.t(`Ton analyse Starter du jour montre les probabilités exactes, le score projeté et les stats clés du match. Il te reste ${left} analyse aujourd'hui.`, `Your daily Starter analysis shows the exact probabilities, projected score and key stats. You have ${left} analysis left today.`, `Tu análisis Starter del día muestra las probabilidades exactas, el marcador proyectado y las estadísticas clave. Te queda ${left} análisis hoy.`)}</p>
-                  <button type="button" className="btn-solid" onClick={() => launch()}>🔓 {left == null ? L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo") : L.t("Débloquer mon analyse du jour", "Unlock my daily analysis", "Desbloquear mi análisis del día")}</button>
+                    ? <>{contents} {L.t("Ta formule les débloque sur tous les matchs, sans limite.", "Your plan unlocks them on every game, with no limit.", "Tu plan los desbloquea en todos los partidos, sin límite.", "Seu plano as desbloqueia em todos os jogos, sem limite.")}</>
+                    : L.t(`Ton analyse Starter du jour montre les probabilités exactes, le score projeté et les stats clés du match. Il te reste ${left} analyse aujourd'hui.`, `Your daily Starter analysis shows the exact probabilities, projected score and key stats. You have ${left} analysis left today.`, `Tu análisis Starter del día muestra las probabilidades exactas, el marcador proyectado y las estadísticas clave. Te queda ${left} análisis hoy.`, `Sua análise Starter do dia mostra as probabilidades exatas, o placar projetado e as estatísticas-chave. Resta ${left} análise hoje.`)}</p>
+                  <button type="button" className="btn-solid" onClick={() => launch()}>🔓 {left == null ? L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo", "Desbloquear a análise completa") : L.t("Débloquer mon analyse du jour", "Unlock my daily analysis", "Desbloquear mi análisis del día", "Desbloquear minha análise do dia")}</button>
                 </>
               ) : state === "visitor" ? (
                 <>
-                  <p>{contents} {L.t("Elle est incluse dans Pro et Lifetime ; Starter donne 1 analyse réduite par jour.", "It comes with Pro and Lifetime; Starter gives 1 reduced analysis per day.", "Está incluido en Pro y Lifetime; Starter da 1 análisis reducido al día.")}</p>
-                  <Link href={L.href("/pro")} className="btn-solid" onClick={() => { rememberHere(); track("Clic Passer Pro", { source: "visiteur" }); }}>🔓 {L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo")}</Link>
-                  <button type="button" className="gate-login" onClick={() => openAuth({ mode: "connexion", source: "analyse" })}>{L.t("Déjà abonné ? Se connecter", "Already subscribed? Log in", "¿Ya estás suscrito? Inicia sesión")}</button>
+                  <p>{contents} {L.t("Elle est incluse dans Pro et Lifetime ; Starter donne 1 analyse réduite par jour.", "It comes with Pro and Lifetime; Starter gives 1 reduced analysis per day.", "Está incluido en Pro y Lifetime; Starter da 1 análisis reducido al día.", "Está incluída no Pro e no Lifetime; o Starter dá 1 análise reduzida por dia.")}</p>
+                  <Link href={L.href("/pro")} className="btn-solid" onClick={() => { rememberHere(); track("Clic Passer Pro", { source: "visiteur" }); }}>🔓 {L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo", "Desbloquear a análise completa")}</Link>
+                  <button type="button" className="gate-login" onClick={() => openAuth({ mode: "connexion", source: "analyse" })}>{L.t("Déjà abonné ? Se connecter", "Already subscribed? Log in", "¿Ya estás suscrito? Inicia sesión", "Já é assinante? Entre")}</button>
                 </>
               ) : (
                 <>
                   <p>{contents} {tier === "starter"
-                    ? L.t("Ton analyse Starter du jour est utilisée : Pro rend les analyses complètes illimitées.", "Today's Starter analysis is used: Pro makes full analyses unlimited.", "Ya has usado tu análisis Starter de hoy: Pro hace los análisis completos ilimitados.")
-                    : L.t("Elle est incluse dans Pro et Lifetime ; Starter donne 1 analyse réduite par jour.", "It comes with Pro and Lifetime; Starter gives 1 reduced analysis per day.", "Está incluido en Pro y Lifetime; Starter da 1 análisis reducido al día.")}</p>
-                  <Link href={L.href("/pro")} className="btn-solid" onClick={() => { rememberHere(); track("Clic Passer Pro", { source: free ? "compte_gratuit" : "limite" }); }}>🔓 {L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo")}</Link>
-                  {!free && <small className="gate-reset">{L.t("Ou reviens demain : le compteur repart à minuit.", "Or come back tomorrow: the counter resets at midnight (Paris time).", "O vuelve mañana: el contador se reinicia a medianoche (hora de París).")}</small>}
-                  <a href={`/api/whop/login?next=${here}`} className="gate-login" onClick={() => track("Connexion Whop", { etape: "actualiser", source: "analyse_bloquee" })}>{L.t("Tu viens de payer ? Activer mon abonnement", "Just paid? Activate my subscription", "¿Acabas de pagar? Activar mi suscripción")}</a>
+                    ? L.t("Ton analyse Starter du jour est utilisée : Pro rend les analyses complètes illimitées.", "Today's Starter analysis is used: Pro makes full analyses unlimited.", "Ya has usado tu análisis Starter de hoy: Pro hace los análisis completos ilimitados.", "Você já usou sua análise Starter de hoje: o Pro deixa as análises completas ilimitadas.")
+                    : L.t("Elle est incluse dans Pro et Lifetime ; Starter donne 1 analyse réduite par jour.", "It comes with Pro and Lifetime; Starter gives 1 reduced analysis per day.", "Está incluido en Pro y Lifetime; Starter da 1 análisis reducido al día.", "Está incluída no Pro e no Lifetime; o Starter dá 1 análise reduzida por dia.")}</p>
+                  <Link href={L.href("/pro")} className="btn-solid" onClick={() => { rememberHere(); track("Clic Passer Pro", { source: free ? "compte_gratuit" : "limite" }); }}>🔓 {L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo", "Desbloquear a análise completa")}</Link>
+                  {!free && <small className="gate-reset">{L.t("Ou reviens demain : le compteur repart à minuit.", "Or come back tomorrow: the counter resets at midnight (Paris time).", "O vuelve mañana: el contador se reinicia a medianoche (hora de París).", "Ou volte amanhã: o contador zera à meia-noite (horário de Paris).")}</small>}
+                  <a href={`/api/whop/login?next=${here}`} className="gate-login" onClick={() => track("Connexion Whop", { etape: "actualiser", source: "analyse_bloquee" })}>{L.t("Tu viens de payer ? Activer mon abonnement", "Just paid? Activate my subscription", "¿Acabas de pagar? Activar mi suscripción", "Acabou de pagar? Ativar minha assinatura")}</a>
                 </>
               )}
             </>

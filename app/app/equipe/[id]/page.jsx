@@ -20,7 +20,7 @@ export async function generateMetadata({ params }) {
   const { id } = await params;
   const L = await getL();
   const t = teamById(id);
-  if (!t) return { title: L.t("Équipe – Basketlog", "Team – Basketlog", "Equipo – Basketlog"), robots: { index: false } };
+  if (!t) return { title: L.t("Équipe – Basketlog", "Team – Basketlog", "Equipo – Basketlog", "Time – Basketlog"), robots: { index: false } };
   // Prochain match et sa probabilité dans le titre et la description : plus parlant dans Google
   // (« Raptors vs Knicks », « 62 % ») que le titre générique, qui reste en secours.
   let nx = null;
@@ -40,26 +40,26 @@ export async function generateMetadata({ params }) {
     title: nx ? L.t(
       fitTitle(`Pronostic ${t.name} – ${nx.opp.short} (${d}) : prochain match et stats`, `Pronostic ${t.short} – ${nx.opp.short} (${d}) : prochain match et stats`, `Pronostic ${t.name} : prochains matchs et stats`),
       fitTitle(`${t.name} vs ${nx.opp.short} prediction (${d}): next game win probability`, `${t.short} vs ${nx.opp.short} prediction (${d}): win probability and stats`, `${t.name} predictions: next game win probability`),
-      fitTitle(`Pronóstico ${t.name} – ${nx.opp.short} (${d}): próximo partido y estadísticas`, `Pronóstico ${t.short} – ${nx.opp.short} (${d}): próximo partido y estadísticas`, `Pronóstico ${t.name}: próximos partidos y estadísticas`)
+      fitTitle(`Pronóstico ${t.name} – ${nx.opp.short} (${d}): próximo partido y estadísticas`, `Pronóstico ${t.short} – ${nx.opp.short} (${d}): próximo partido y estadísticas`, `Pronóstico ${t.name}: próximos partidos y estadísticas`), fitTitle(`Palpite ${t.name} x ${nx.opp.short} (${d}): próximo jogo e estatísticas`, `Palpite ${t.short} x ${nx.opp.short} (${d}): próximo jogo e estatísticas`, `Palpite ${t.name}: próximos jogos e estatísticas`)
     ) : L.t(
       fitTitle(`Pronostic ${t.name} : prochains matchs et stats – Basketlog`, `Pronostic ${t.name} : prochains matchs et stats`),
       fitTitle(`${t.name} predictions: next game win probability – Basketlog`, `${t.name} predictions: next game win probability`),
-      fitTitle(`Pronóstico ${t.name}: próximos partidos y estadísticas – Basketlog`, `Pronóstico ${t.name}: próximos partidos y estadísticas`)
+      fitTitle(`Pronóstico ${t.name}: próximos partidos y estadísticas – Basketlog`, `Pronóstico ${t.name}: próximos partidos y estadísticas`), fitTitle(`Palpite ${t.name}: próximos jogos e estatísticas – Basketlog`, `Palpite ${t.name}: próximos jogos e estatísticas`)
     ),
     description: nx && pTxt ? L.t(
       `${t.name} ${nx.home ? "reçoit" : "joue chez"} les ${nx.opp.short} le ${d} : ${pTxt} de chances de victoire selon le modèle Basketlog. Bilan, stats de la saison NBA, joueurs clés et calendrier.`,
       `${t.name} ${nx.home ? "host" : "visit"} the ${nx.opp.short} on ${d}: ${pTxt} win probability per the Basketlog model. Record, NBA season stats, key players and schedule.`,
-      `Los ${t.name} ${nx.home ? "reciben a" : "visitan a"} los ${nx.opp.short} el ${d}: ${pTxt} de probabilidades de victoria según el modelo de Basketlog. Balance, estadísticas de la temporada NBA, jugadores clave y calendario.`
+      `Los ${t.name} ${nx.home ? "reciben a" : "visitan a"} los ${nx.opp.short} el ${d}: ${pTxt} de probabilidades de victoria según el modelo de Basketlog. Balance, estadísticas de la temporada NBA, jugadores clave y calendario.`, `O ${t.name} ${nx.home ? "recebe o" : "visita o"} ${nx.opp.short} em ${d}: ${pTxt} de probabilidade de vitória segundo o modelo do Basketlog. Campanha, estatísticas da temporada da NBA, jogadores-chave e calendário.`
     ) : L.t(
       `${t.name} : bilan, stats de la saison NBA, joueurs clés, calendrier et pronostic Basketlog pour chaque prochain match.`,
-      `${t.name}: record, NBA season stats, key players, schedule and a Basketlog prediction for every upcoming game.`, `${t.name}: balance, estadísticas de la temporada NBA, jugadores clave, calendario y un pronóstico de Basketlog para cada próximo partido.`
+      `${t.name}: record, NBA season stats, key players, schedule and a Basketlog prediction for every upcoming game.`, `${t.name}: balance, estadísticas de la temporada NBA, jugadores clave, calendario y un pronóstico de Basketlog para cada próximo partido.`, `${t.name}: campanha, estatísticas da temporada da NBA, jogadores-chave, calendário e um palpite do Basketlog para cada próximo jogo.`
     ),
     path: `/app/equipe/${t.id}`,
     L,
   });
 }
 
-const catLabel = (c, L) => L.t({ Points: "pts / match", Rebounds: "rebonds", Assists: "passes" }, { Points: "pts / game", Rebounds: "rebounds", Assists: "assists" }, { Points: "pts / partido", Rebounds: "rebotes", Assists: "asistencias" })[c] || c;
+const catLabel = (c, L) => L.t({ Points: "pts / match", Rebounds: "rebonds", Assists: "passes" }, { Points: "pts / game", Rebounds: "rebounds", Assists: "assists" }, { Points: "pts / partido", Rebounds: "rebotes", Assists: "asistencias" }, { Points: "pts / jogo", Rebounds: "rebotes", Assists: "assistências" })[c] || c;
 const ord = (n) => { const m = n % 100; return `${n}${m >= 11 && m <= 13 ? "th" : ["th", "st", "nd", "rd"][n % 10] || "th"}`; };
 const toVD = (s) => (s ? s.replace(/^W/, "V").replace(/^L/, "D") : s);
 const toWL = (s) => (s ? s.replace(/^V/, "W").replace(/^D/, "L") : s);
@@ -70,7 +70,7 @@ export default async function TeamPage({ params }) {
   const team = teamById(id);
   if (!team) notFound();
   const dfmt = (iso, o) => fmtDate(L, iso, o);
-  const confName = team.conf === "E" ? L.t("Est", "East", "Este") : L.t("Ouest", "West", "Oeste");
+  const confName = team.conf === "E" ? L.t("Est", "East", "Este", "Leste") : L.t("Ouest", "West", "Oeste", "Oeste");
 
   const [std, stats, sched, roster, up] = await Promise.all([
     conferenceStandings(), getTeamStats(team.id), getTeamSchedule(team.id), getRoster(team.id, L.lang), upcomingAnalyses(7),
@@ -93,19 +93,19 @@ export default async function TeamPage({ params }) {
   const sz = seasonForDate(nbaToday());
   const seasonLabel = `${sz - 1}-${String(sz).slice(2)}`;
   const kpis = [
-    [L.t("Bilan", "Record", "Balance"), `${me.wins ?? 0}-${me.losses ?? 0}`],
-    [L.t("Classement", "Standing", "Clasificación"), rank ? L.t(`${rank === 1 ? "1re" : `${rank}e`} ${confName}`, `${ord(rank)} ${confName}`, `${rank}.º ${confName}`) : "–"],
-    [L.t("Points / match", "Points / game", "Puntos / partido"), numOf(stats?.ppg, L)],
-    [L.t("Adresse à 3 pts", "3-point %", "% de triples"), stats?.threePct != null ? (L.en ? `${stats.threePct.toFixed(1)}%` : `${stats.threePct.toFixed(1).replace(".", ",")}\u202f%`) : "–"],
-    [L.t("Rebonds / match", "Rebounds / game", "Rebotes / partido"), numOf(stats?.reb, L)],
-    [L.t("Passes / match", "Assists / game", "Asistencias / partido"), numOf(stats?.ast, L)],
-    [L.t("Écart / match", "Margin / game", "Diferencia / partido"), me.gp && me.diff != null ? `${me.diff > 0 ? "+" : ""}${numOf(me.diff, L)}` : "–"],
-    [L.t("Saison passée", "Last season", "Temporada pasada"), me.prev || "–"],
+    [L.t("Bilan", "Record", "Balance", "Campanha"), `${me.wins ?? 0}-${me.losses ?? 0}`],
+    [L.t("Classement", "Standing", "Clasificación", "Classificação"), rank ? L.t(`${rank === 1 ? "1re" : `${rank}e`} ${confName}`, `${ord(rank)} ${confName}`, `${rank}.º ${confName}`, `${rank}.º no ${confName}`) : "–"],
+    [L.t("Points / match", "Points / game", "Puntos / partido", "Pontos / jogo"), numOf(stats?.ppg, L)],
+    [L.t("Adresse à 3 pts", "3-point %", "% de triples", "% de 3 pontos"), stats?.threePct != null ? (L.en ? `${stats.threePct.toFixed(1)}%` : `${stats.threePct.toFixed(1).replace(".", ",")}\u202f%`) : "–"],
+    [L.t("Rebonds / match", "Rebounds / game", "Rebotes / partido", "Rebotes / jogo"), numOf(stats?.reb, L)],
+    [L.t("Passes / match", "Assists / game", "Asistencias / partido", "Assistências / jogo"), numOf(stats?.ast, L)],
+    [L.t("Écart / match", "Margin / game", "Diferencia / partido", "Saldo / jogo"), me.gp && me.diff != null ? `${me.diff > 0 ? "+" : ""}${numOf(me.diff, L)}` : "–"],
+    [L.t("Saison passée", "Last season", "Temporada pasada", "Temporada passada"), me.prev || "–"],
   ];
 
   // Questions-réponses (« will the lakers win tonight », « lakers next game », « lakers record ») : visibles et en FAQPage.
   const pc = (p) => (L.en ? `${Math.round(p * 100)}%` : `${Math.round(p * 100)}\u202f%`);
-  const when = (g) => `${dfmt(g.date, { weekday: "long", month: "long", day: "numeric" })} ${L.t("à", "at", "a las")} ${fmtTime(L, g.date)} ${L.tzLabel}`;
+  const when = (g) => `${dfmt(g.date, { weekday: "long", month: "long", day: "numeric" })} ${L.t("à", "at", "a las", "às")} ${fmtTime(L, g.date)} ${L.tzLabel}`;
   const oppOf = (g) => (g.home.id === team.id ? g.away : g.home);
   const mineOf = (g) => (probs[g.id] == null ? null : g.home.id === team.id ? probs[g.id] : 1 - probs[g.id]);
   const withP = next.filter((g) => mineOf(g) != null);
@@ -113,58 +113,58 @@ export default async function TeamPage({ params }) {
   const faq = [];
   if (nextG) {
     faq.push({
-      q: L.t(`Les ${team.short} vont-ils gagner leur prochain match ?`, `Will the ${team.short} win their next game?`, `¿Ganarán los ${team.short} su próximo partido?`),
+      q: L.t(`Les ${team.short} vont-ils gagner leur prochain match ?`, `Will the ${team.short} win their next game?`, `¿Ganarán los ${team.short} su próximo partido?`, `O ${team.short} vai vencer o próximo jogo?`),
       a: nextMine != null
         ? L.t(`Les ${team.short} affrontent les ${nextOpp.short} ${when(nextG)} (${nextHome ? "à domicile" : "à l'extérieur"}). Le modèle Basketlog leur donne ${pc(nextMine)} de chances de victoire : ${nextMine >= 0.5 ? "ils partent favoris" : "ils ne partent pas favoris"}.`,
             `The ${team.short} play the ${nextOpp.short} on ${when(nextG)} (${nextHome ? "at home" : "on the road"}). The Basketlog model gives them ${/^(8\d?|11|18)$/.test(String(Math.round(nextMine * 100))) ? "an" : "a"} ${pc(nextMine)} chance to win, so they are ${nextMine >= 0.5 ? "the favorite" : "the underdog"}.`,
-            `Los ${team.short} se enfrentan a los ${nextOpp.short} el ${when(nextG)} (${nextHome ? "en casa" : "a domicilio"}). El modelo de Basketlog les da un ${pc(nextMine)} de probabilidades de victoria: ${nextMine >= 0.5 ? "parten como favoritos" : "no parten como favoritos"}.`)
-        : L.t(`Les ${team.short} affrontent les ${nextOpp.short} ${when(nextG)}. Le pronostic Basketlog est publié quelques jours avant le match.`, `The ${team.short} play the ${nextOpp.short} on ${when(nextG)}. The Basketlog prediction is published a few days before the game.`, `Los ${team.short} se enfrentan a los ${nextOpp.short} el ${when(nextG)}. El pronóstico de Basketlog se publica unos días antes del partido.`),
+            `Los ${team.short} se enfrentan a los ${nextOpp.short} el ${when(nextG)} (${nextHome ? "en casa" : "a domicilio"}). El modelo de Basketlog les da un ${pc(nextMine)} de probabilidades de victoria: ${nextMine >= 0.5 ? "parten como favoritos" : "no parten como favoritos"}.`, `O ${team.short} enfrenta o ${nextOpp.short} em ${when(nextG)} (${nextHome ? "em casa" : "fora de casa"}). O modelo do Basketlog dá ${pc(nextMine)} de probabilidade de vitória: ${nextMine >= 0.5 ? "é o favorito" : "não é o favorito"}.`)
+        : L.t(`Les ${team.short} affrontent les ${nextOpp.short} ${when(nextG)}. Le pronostic Basketlog est publié quelques jours avant le match.`, `The ${team.short} play the ${nextOpp.short} on ${when(nextG)}. The Basketlog prediction is published a few days before the game.`, `Los ${team.short} se enfrentan a los ${nextOpp.short} el ${when(nextG)}. El pronóstico de Basketlog se publica unos días antes del partido.`, `O ${team.short} enfrenta o ${nextOpp.short} em ${when(nextG)}. O palpite do Basketlog é publicado alguns dias antes do jogo.`),
     });
     faq.push({
-      q: L.t(`Quels sont les prochains matchs des ${team.short} ?`, `When do the ${team.short} play next?`, `¿Cuándo juegan los próximos partidos los ${team.short}?`),
+      q: L.t(`Quels sont les prochains matchs des ${team.short} ?`, `When do the ${team.short} play next?`, `¿Cuándo juegan los próximos partidos los ${team.short}?`, `Quando são os próximos jogos do ${team.short}?`),
       a: next.slice(0, 3).map((g) => `${g.home.id === team.id ? "vs" : "@"} ${oppOf(g).short}, ${dfmt(g.date, { weekday: "short", month: "short", day: "numeric" })}${mineOf(g) != null ? ` (${pc(mineOf(g))})` : ""}`).join(" · ") + ".",
     });
   }
   if (me.gp) faq.push({
-    q: L.t(`Quel est le bilan des ${team.short} cette saison ?`, `What is the ${team.name} record this season?`, `¿Cuál es el balance de los ${team.short} esta temporada?`),
+    q: L.t(`Quel est le bilan des ${team.short} cette saison ?`, `What is the ${team.name} record this season?`, `¿Cuál es el balance de los ${team.short} esta temporada?`, `Qual é a campanha do ${team.short} nesta temporada?`),
     a: L.t(`${me.wins}-${me.losses}${rank ? `, ${rank === 1 ? "1re" : `${rank}e`} de la conférence ${confName}` : ""}${me.last10 ? `, ${me.last10} sur les 10 derniers matchs` : ""}${me.diff != null ? `, écart moyen de ${me.diff > 0 ? "+" : ""}${numOf(me.diff, L)} points par match` : ""}.`,
       `${me.wins}-${me.losses}${rank ? `, ${ord(rank)} in the ${confName}ern Conference` : ""}${me.last10 ? `, ${me.last10} over the last 10 games` : ""}${me.diff != null ? `, with an average margin of ${me.diff > 0 ? "+" : ""}${numOf(me.diff, L)} points per game` : ""}.`,
-      `${me.wins}-${me.losses}${rank ? `, ${rank}.º de la Conferencia ${confName}` : ""}${me.last10 ? `, ${me.last10} en los últimos 10 partidos` : ""}${me.diff != null ? `, con una diferencia media de ${me.diff > 0 ? "+" : ""}${numOf(me.diff, L)} puntos por partido` : ""}.`),
+      `${me.wins}-${me.losses}${rank ? `, ${rank}.º de la Conferencia ${confName}` : ""}${me.last10 ? `, ${me.last10} en los últimos 10 partidos` : ""}${me.diff != null ? `, con una diferencia media de ${me.diff > 0 ? "+" : ""}${numOf(me.diff, L)} puntos por partido` : ""}.`, `${me.wins}-${me.losses}${rank ? `, ${rank}.º da Conferência ${confName}` : ""}${me.last10 ? `, ${me.last10} nos últimos 10 jogos` : ""}${me.diff != null ? `, com saldo médio de ${me.diff > 0 ? "+" : ""}${numOf(me.diff, L)} pontos por jogo` : ""}.`),
   });
   if (withP.length >= 2) faq.push({
-    q: L.t(`Dans combien de leurs prochains matchs les ${team.short} sont-ils favoris ?`, `How many of their upcoming games are the ${team.short} favored in?`, `¿En cuántos de sus próximos partidos son favoritos los ${team.short}?`),
-    a: L.t(`D'après le modèle Basketlog, les ${team.short} sont favoris dans ${favN} de leurs ${withP.length} prochains matchs.`, `According to the Basketlog model, the ${team.short} are favored in ${favN} of their next ${withP.length} games.`, `Según el modelo de Basketlog, los ${team.short} son favoritos en ${favN} de sus próximos ${withP.length} partidos.`),
+    q: L.t(`Dans combien de leurs prochains matchs les ${team.short} sont-ils favoris ?`, `How many of their upcoming games are the ${team.short} favored in?`, `¿En cuántos de sus próximos partidos son favoritos los ${team.short}?`, `Em quantos dos próximos jogos o ${team.short} é favorito?`),
+    a: L.t(`D'après le modèle Basketlog, les ${team.short} sont favoris dans ${favN} de leurs ${withP.length} prochains matchs.`, `According to the Basketlog model, the ${team.short} are favored in ${favN} of their next ${withP.length} games.`, `Según el modelo de Basketlog, los ${team.short} son favoritos en ${favN} de sus próximos ${withP.length} partidos.`, `Segundo o modelo do Basketlog, o ${team.short} é favorito em ${favN} dos seus próximos ${withP.length} jogos.`),
   });
 
   return (
     <main className="app-page">
       <AppTabs active="classement" />
       {faq.length > 0 && <JsonLd data={{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) }} />}
-      <Link href={L.href("/app/classement")} className="back">← {L.t("Classement", "Standings", "Clasificación")}</Link>
+      <Link href={L.href("/app/classement")} className="back">← {L.t("Classement", "Standings", "Clasificación", "Classificação")}</Link>
       <div className="card match-hero team-hero">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={sized(team.logo, 330)} alt="" />
         <div>
-          <span className="tag hot">{L.t(`Conférence ${confName}`, `${confName}ern Conference`, `Conferencia ${confName}`)}</span>
-          <h1>{L.t(`Pronostics ${team.name}`, `${team.name} predictions`, `Pronósticos ${team.name}`)}</h1>
-          <p className="team-rec">{streak ? L.t(`Série en cours : ${streak}`, `Current streak: ${streak}`, `Racha actual: ${streak}`) : L.t(`Saison ${seasonLabel}`, `${seasonLabel} season`, `Temporada ${seasonLabel}`)}{me.last10 ? L.t(` · 10 derniers : ${me.last10}`, ` · Last 10: ${me.last10}`, ` · Últimos 10: ${me.last10}`) : ""}</p>
+          <span className="tag hot">{L.t(`Conférence ${confName}`, `${confName}ern Conference`, `Conferencia ${confName}`, `Conferência ${confName}`)}</span>
+          <h1>{L.t(`Pronostics ${team.name}`, `${team.name} predictions`, `Pronósticos ${team.name}`, `Palpites ${team.name}`)}</h1>
+          <p className="team-rec">{streak ? L.t(`Série en cours : ${streak}`, `Current streak: ${streak}`, `Racha actual: ${streak}`, `Sequência atual: ${streak}`) : L.t(`Saison ${seasonLabel}`, `${seasonLabel} season`, `Temporada ${seasonLabel}`, `Temporada ${seasonLabel}`)}{me.last10 ? L.t(` · 10 derniers : ${me.last10}`, ` · Last 10: ${me.last10}`, ` · Últimos 10: ${me.last10}`, ` · Últimos 10: ${me.last10}`) : ""}</p>
         </div>
-        <Link href={L.href(`/app?team=${team.id}`)} className="btn-solid">{L.t("Analyser un duel", "Analyze a matchup", "Analizar un duelo")}</Link>
+        <Link href={L.href(`/app?team=${team.id}`)} className="btn-solid">{L.t("Analyser un duel", "Analyze a matchup", "Analizar un duelo", "Analisar um duelo")}</Link>
       </div>
 
       {nextG && (
         // Prochain match en tête : répond à « heat next game prediction » / « pronostic prochain match ».
         <Link href={L.href(nbaPath(nextG, nbaDateOf(nextG.date)))} className="card block next-game">
-          <h2>{L.t("Prochain match", "Next game", "Próximo partido")}</h2>
+          <h2>{L.t("Prochain match", "Next game", "Próximo partido", "Próximo jogo")}</h2>
           <p className="narr">
             <b>{nextHome ? `${team.short} vs ${nextOpp.short || nextOpp.abbr}` : `${team.short} @ ${nextOpp.short || nextOpp.abbr}`}</b>
             {" · "}{dfmt(nextG.date, { weekday: "long", day: "numeric", month: "long" })} · {fmtTime(L, nextG.date)}
-            {nextMine != null ? <>{" · "}<b>{L.t(`${Math.round(nextMine * 100)}\u202f% de chances de victoire`, `${Math.round(nextMine * 100)}% win probability`, `${Math.round(nextMine * 100)}\u202f% de probabilidad de victoria`)}</b></> : null}
-            {" → "}{L.t("voir l'analyse", "see the full prediction", "ver el análisis")}
+            {nextMine != null ? <>{" · "}<b>{L.t(`${Math.round(nextMine * 100)}\u202f% de chances de victoire`, `${Math.round(nextMine * 100)}% win probability`, `${Math.round(nextMine * 100)}\u202f% de probabilidad de victoria`, `${Math.round(nextMine * 100)} % de probabilidade de vitória`)}</b></> : null}
+            {" → "}{L.t("voir l'analyse", "see the full prediction", "ver el análisis", "ver a análise")}
           </p>
         </Link>
       )}
-      <Crumbs L={L} items={[[L.t("Accueil", "Home", "Inicio"), "/"], [L.t("Classement NBA", "NBA standings", "Clasificación NBA"), "/app/classement"], [L.t(`Pronostic ${team.name}`, `${team.name} predictions`, `Pronóstico ${team.name}`), `/app/equipe/${team.id}`]]} />
+      <Crumbs L={L} items={[[L.t("Accueil", "Home", "Inicio", "Início"), "/"], [L.t("Classement NBA", "NBA standings", "Clasificación NBA", "Classificação NBA"), "/app/classement"], [L.t(`Pronostic ${team.name}`, `${team.name} predictions`, `Pronóstico ${team.name}`, `Palpite ${team.name}`), `/app/equipe/${team.id}`]]} />
       <JsonLd data={{
         "@context": "https://schema.org", "@type": "SportsTeam", name: team.name, sport: "Basketball", logo: team.logo,
         memberOf: { "@type": "SportsOrganization", name: "NBA" }, url: `${SITE}${L.href(`/app/equipe/${team.id}`)}`,
@@ -175,13 +175,13 @@ export default async function TeamPage({ params }) {
       </div>
 
       <div className="card block">
-        <h2>{L.t("En bref", "At a glance", "En resumen")}</h2>
+        <h2>{L.t("En bref", "At a glance", "En resumen", "Resumo")}</h2>
         <p className="narr">{teamSummary({ team, me: { ...me, streak: streak || null }, rank, conf: team.conf, next, probs, stats, L }).join(" ")}</p>
       </div>
 
       {leaders.length > 0 && (
         <div className="card block">
-          <h2>{L.t("Joueurs clés", "Key players", "Jugadores clave")}</h2>
+          <h2>{L.t("Joueurs clés", "Key players", "Jugadores clave", "Jogadores-chave")}</h2>
           <div className="lead3">
             {leaders.map((p) => (
               <div className="pl-row" key={p.cat}>
@@ -197,7 +197,7 @@ export default async function TeamPage({ params }) {
 
       <div className="grid2">
         <div className="card block">
-          <h2>{L.t("Prochains matchs", "Upcoming games", "Próximos partidos")}</h2>
+          <h2>{L.t("Prochains matchs", "Upcoming games", "Próximos partidos", "Próximos jogos")}</h2>
           {next.length ? next.map((g) => {
             const home = g.home.id === team.id;
             const opp = home ? g.away : g.home;
@@ -208,13 +208,13 @@ export default async function TeamPage({ params }) {
                 <span className="d">{dfmt(g.date, { day: "numeric", month: "short" })}</span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <span className="t">{home ? "vs" : "@"} {opp.logo && <img src={opp.logo} alt="" />}{opp.short || opp.abbr}</span>
-                <span className="s">{mine != null ? L.t(`${Math.round(mine * 100)}\u202f% de victoire`, `${Math.round(mine * 100)}% to win`, `${Math.round(mine * 100)}\u202f% de victoria`) : fmtTime(L, g.date)}</span>
+                <span className="s">{mine != null ? L.t(`${Math.round(mine * 100)}\u202f% de victoire`, `${Math.round(mine * 100)}% to win`, `${Math.round(mine * 100)}\u202f% de victoria`, `${Math.round(mine * 100)} % de vitória`) : fmtTime(L, g.date)}</span>
               </Link>
             );
-          }) : <p className="team-rec">{L.t("Aucun match à venir.", "No upcoming games.", "No hay partidos próximos.")}</p>}
+          }) : <p className="team-rec">{L.t("Aucun match à venir.", "No upcoming games.", "No hay partidos próximos.", "Nenhum jogo próximo.")}</p>}
         </div>
         <div className="card block">
-          <h2>{L.t("Derniers résultats", "Recent results", "Últimos resultados")}</h2>
+          <h2>{L.t("Derniers résultats", "Recent results", "Últimos resultados", "Últimos resultados")}</h2>
           {past.length ? past.map((g) => {
             const home = g.home.id === team.id;
             const me2 = home ? g.home : g.away, opp = home ? g.away : g.home;
@@ -223,22 +223,22 @@ export default async function TeamPage({ params }) {
               <Link key={g.id} href={L.href(nbaPath(g, nbaDateOf(g.date)))} className="h2h-row tl">
                 <span className="d">{dfmt(g.date, { day: "numeric", month: "short" })}</span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <span className="t">{home ? "vs" : "@"} {opp.logo && <img src={opp.logo} alt="" />}{opp.short || opp.abbr}{g.type === "pre" ? <small className="team-rec"> · {L.t("présaison", "preseason", "pretemporada")}</small> : null}</span>
-                <span className={`s ${win ? "pos" : "neg"}`}>{win ? L.t("V", "W", "V") : L.t("D", "L", "D")} {me2.score}-{opp.score}</span>
+                <span className="t">{home ? "vs" : "@"} {opp.logo && <img src={opp.logo} alt="" />}{opp.short || opp.abbr}{g.type === "pre" ? <small className="team-rec"> · {L.t("présaison", "preseason", "pretemporada", "pré-temporada")}</small> : null}</span>
+                <span className={`s ${win ? "pos" : "neg"}`}>{win ? L.t("V", "W", "V", "V") : L.t("D", "L", "D", "D")} {me2.score}-{opp.score}</span>
               </Link>
             );
-          }) : <p className="team-rec">{L.t("Pas encore de match joué.", "No games played yet.", "Todavía no se ha jugado ningún partido.")}</p>}
+          }) : <p className="team-rec">{L.t("Pas encore de match joué.", "No games played yet.", "Todavía no se ha jugado ningún partido.", "Nenhum jogo disputado ainda.")}</p>}
         </div>
       </div>
 
       {stats && (
         <div className="card block">
-          <h2>{L.t("Statistiques de la saison", "Season stats", "Estadísticas de la temporada")}</h2>
+          <h2>{L.t("Statistiques de la saison", "Season stats", "Estadísticas de la temporada", "Estatísticas da temporada")}</h2>
           <div className="statgrid">
             {[
-              [L.t("Adresse aux tirs", "Field goal %", "% de tiros de campo"), stats.fgPct, "%"], [L.t("Adresse à 3 pts", "3-point %", "% de triples"), stats.threePct, "%"], [L.t("3 pts réussis / match", "3-pointers made / game", "Triples anotados / partido"), stats.threeMade, ""],
-              [L.t("Lancers francs", "Free throw %", "% de tiros libres"), stats.ftPct, "%"], [L.t("Rebonds offensifs", "Offensive rebounds", "Rebotes ofensivos"), stats.oreb, ""], [L.t("Interceptions", "Steals", "Robos"), stats.stl, ""],
-              [L.t("Contres", "Blocks", "Tapones"), stats.blk, ""], [L.t("Balles perdues", "Turnovers", "Pérdidas"), stats.tov, ""], [L.t("Matchs joués", "Games played", "Partidos jugados"), stats.gp, ""],
+              [L.t("Adresse aux tirs", "Field goal %", "% de tiros de campo", "% de arremessos de quadra"), stats.fgPct, "%"], [L.t("Adresse à 3 pts", "3-point %", "% de triples", "% de 3 pontos"), stats.threePct, "%"], [L.t("3 pts réussis / match", "3-pointers made / game", "Triples anotados / partido", "Bolas de 3 convertidas / jogo"), stats.threeMade, ""],
+              [L.t("Lancers francs", "Free throw %", "% de tiros libres", "% de lances livres"), stats.ftPct, "%"], [L.t("Rebonds offensifs", "Offensive rebounds", "Rebotes ofensivos", "Rebotes ofensivos"), stats.oreb, ""], [L.t("Interceptions", "Steals", "Robos", "Roubos de bola"), stats.stl, ""],
+              [L.t("Contres", "Blocks", "Tapones", "Tocos"), stats.blk, ""], [L.t("Balles perdues", "Turnovers", "Pérdidas", "Desperdícios"), stats.tov, ""], [L.t("Matchs joués", "Games played", "Partidos jugados", "Jogos disputados"), stats.gp, ""],
             ].filter(([, v]) => v != null).map(([l, v, u]) => (
               <div key={l}><span>{l}</span><b>{Number.isInteger(v) ? v : numOf(v, L)}{u && (L.en ? u : `\u202f${u}`)}</b></div>
             ))}
@@ -248,7 +248,7 @@ export default async function TeamPage({ params }) {
 
       {roster.length > 0 && (
         <div className="card block">
-          <h2>{L.t("Effectif", "Roster", "Plantilla")}</h2>
+          <h2>{L.t("Effectif", "Roster", "Plantilla", "Elenco")}</h2>
           <div className="roster">
             {roster.map((p) => (
               <div className="rp" key={p.id}>
@@ -264,14 +264,14 @@ export default async function TeamPage({ params }) {
 
       {faq.length > 0 && (
         <section className="card block match-faq">
-          <h2>{L.t(`${team.short} : l'essentiel`, `${team.short}: quick answers`, `${team.short}: lo esencial`)}</h2>
+          <h2>{L.t(`${team.short} : l'essentiel`, `${team.short}: quick answers`, `${team.short}: lo esencial`, `${team.short}: o essencial`)}</h2>
           {faq.map((f) => (
             <div key={f.q} className="mfaq-item">
               <h3>{f.q}</h3>
               <p>{f.a}</p>
             </div>
           ))}
-          <p className="mfaq-more"><Link href={L.href("/app/power-rankings")}>{L.t("Power ranking NBA →", "NBA power rankings →", "Power ranking NBA →")}</Link></p>
+          <p className="mfaq-more"><Link href={L.href("/app/power-rankings")}>{L.t("Power ranking NBA →", "NBA power rankings →", "Power ranking NBA →", "Power ranking NBA →")}</Link></p>
         </section>
       )}
     </main>

@@ -49,12 +49,12 @@ export default function PaymentReturn() {
   return (
     <div className="pay-return" role="status">
       <p>
-        <b>{L.t("Tu viens de payer ta formule ?", "Just paid for your plan?", "¿Acabas de pagar tu plan?")}</b>{" "}
-        {L.t("Active-la sur ton compte : connecte-toi à Whop avec le compte utilisé pour le paiement.", "Activate it on your account: log in to Whop with the account you paid with.", "Actívalo en tu cuenta: inicia sesión en Whop con la cuenta con la que pagaste.")}
+        <b>{L.t("Tu viens de payer ta formule ?", "Just paid for your plan?", "¿Acabas de pagar tu plan?", "Acabou de pagar seu plano?")}</b>{" "}
+        {L.t("Active-la sur ton compte : connecte-toi à Whop avec le compte utilisé pour le paiement.", "Activate it on your account: log in to Whop with the account you paid with.", "Actívalo en tu cuenta: inicia sesión en Whop con la cuenta con la que pagaste.", "Ative-o na sua conta: entre na Whop com a conta que você usou para pagar.")}
       </p>
       <div className="pay-return-actions">
-        <a className="btn-solid" href={`/api/whop/login?next=${encodeURIComponent(here)}`} onClick={() => track("Connexion Whop", { etape: "actualiser", source: "bandeau_paiement" })}>{L.t("Activer mon abonnement", "Activate my subscription", "Activar mi suscripción")}</a>
-        <button type="button" className="pay-return-x" onClick={() => { clearFlag(); setFlag(null); }}>{L.t("Plus tard", "Later", "Más tarde")}</button>
+        <a className="btn-solid" href={`/api/whop/login?next=${encodeURIComponent(here)}`} onClick={() => track("Connexion Whop", { etape: "actualiser", source: "bandeau_paiement" })}>{L.t("Activer mon abonnement", "Activate my subscription", "Activar mi suscripción", "Ativar minha assinatura")}</a>
+        <button type="button" className="pay-return-x" onClick={() => { clearFlag(); setFlag(null); }}>{L.t("Plus tard", "Later", "Más tarde", "Mais tarde")}</button>
       </div>
     </div>
   );

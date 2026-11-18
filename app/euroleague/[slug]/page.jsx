@@ -17,10 +17,23 @@ export async function generateMetadata({ params }) {
   const L = await getL();
   const ctx = await elContext();
   const g = findGame(ctx, slug);
-  if (!g) return { title: L.t("Match EuroLeague – Basketlog", "EuroLeague game – Basketlog", "Partido de la Euroliga – Basketlog"), robots: { index: false } };
+  if (!g) return { title: L.t("Match EuroLeague – Basketlog", "EuroLeague game – Basketlog", "Partido de la Euroliga – Basketlog", "Jogo da Euroliga – Basketlog"), robots: { index: false } };
   const before = g.played ? elTable(ctx.games.filter((x) => x.played && new Date(x.date) < new Date(g.date))) : ctx.cur;
   const a = elAnalyze(g, before, ctx.prev);
   const done = g.played && g.home.score != null;
+  if (L.pt) return pageMeta({
+    title: fitTitle(
+      `Palpite ${g.away.name} x ${g.home.name} (${dayShort(g.date, L)}): Euroliga – Basketlog`,
+      `Palpite ${g.away.name} x ${g.home.name} (${dayShort(g.date, L)}) – Basketlog`,
+      `Palpite ${g.away.name} x ${g.home.name} (${dayShort(g.date, L)})`,
+      `Palpite ${g.away.short} x ${g.home.short} (${dayShort(g.date, L)}): análise Euroliga – Basketlog`
+    ),
+    description: done
+      ? `${g.away.name} x ${g.home.name}, ${dayLong(g.date, L)}: resultado final ${g.away.score}-${g.home.score}. O palpite do Basketlog antes do jogo e sua análise da Euroliga.`
+      : `${g.away.name} x ${g.home.name}, ${dayLong(g.date, L)}: ${a.fav.team.name}, favorito com ${pctTxt(Math.max(a.pHome, a.pAway), L)}. Placar projetado, fase e cenários deste jogo da Euroliga.`,
+    path: elPath(g),
+    L,
+  });
   if (L.es) return pageMeta({
     title: fitTitle(
       `Pronóstico ${g.away.name} – ${g.home.name} (${dayShort(g.date, L)}): Euroliga – Basketlog`,

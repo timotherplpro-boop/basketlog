@@ -23,7 +23,7 @@ const withAi = (lang) => ([n, r, f]) => {
 
 export async function generateMetadata() {
   const L = await getL();
-  if (L.es) return pageMeta({ title: "Política de privacidad – Basketlog", description: "Qué datos recoge Basketlog, por qué, con qué proveedores, cuánto tiempo se conservan y cómo ejercer tus derechos (RGPD).", path: "/confidentialite", L });
+  if (L.es || L.pt) return pageMeta({ title: "Política de privacidad – Basketlog", description: "Qué datos recoge Basketlog, por qué, con qué proveedores, cuánto tiempo se conservan y cómo ejercer tus derechos (RGPD).", path: "/confidentialite", L });
   return L.en
     ? pageMeta({ title: "Privacy policy – Basketlog", description: "What data Basketlog collects, why, with which providers, how long it is kept and how to exercise your rights (GDPR).", path: "/confidentialite", L })
     : pageMeta({ title: "Politique de confidentialité – Basketlog", description: "Quelles données Basketlog collecte, pourquoi, avec quels prestataires, combien de temps elles sont conservées et comment exercer tes droits (RGPD).", path: "/confidentialite" });
@@ -333,5 +333,5 @@ function ConfidentialiteEs({ L }) {
 
 export default async function ConfidentialitePage() {
   const L = await getL();
-  return L.es ? <ConfidentialiteEs L={L} /> : L.en ? <ConfidentialiteEn L={L} /> : <ConfidentialiteFr />;
+  return L.es || L.pt ? <ConfidentialiteEs L={L} /> : L.en ? <ConfidentialiteEn L={L} /> : <ConfidentialiteFr />;
 }

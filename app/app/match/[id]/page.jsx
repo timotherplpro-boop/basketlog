@@ -13,7 +13,7 @@ export async function generateMetadata({ params, searchParams }) {
   const sp = (await searchParams) || {};
   const L = await getL();
   const found = await findAnalysis(id, sp.d);
-  if (!found) return { title: L.t("Match introuvable – Basketlog", "Game not found – Basketlog", "Partido no encontrado – Basketlog"), robots: { index: false } };
+  if (!found) return { title: L.t("Match introuvable – Basketlog", "Game not found – Basketlog", "Partido no encontrado – Basketlog", "Jogo não encontrado – Basketlog"), robots: { index: false } };
   return matchMeta(found.a, found.date, L, nbaPath(found.a.game, found.date));
 }
 

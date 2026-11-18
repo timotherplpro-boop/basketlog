@@ -16,7 +16,7 @@ export default function LangSelect({ className = "" }) {
       <span>{LANG_NAMES[L.lang]}</span>
       <svg viewBox="0 0 12 12" aria-hidden><path d="M1.5 3.6l4.5 4.5 4.5-4.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
       <select
-        aria-label={L.t("Langue", "Language", "Idioma")}
+        aria-label={L.t("Langue", "Language", "Idioma", "Idioma")}
         value={L.lang}
         onChange={(e) => { if (e.target.value !== L.lang) location.href = switchPath(path, e.target.value); }}
       >

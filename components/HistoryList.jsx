@@ -14,7 +14,7 @@ export default function HistoryList({ list, L }) {
   return (
     <div className="panel hist">
       <div className="hist-head">
-        <div className="panel-label">{L.t(`${list.length} ANALYSE${list.length > 1 ? "S" : ""}`, `${list.length} ANALYS${list.length > 1 ? "ES" : "IS"}`, `${list.length} ANÁLISIS`)}</div>
+        <div className="panel-label">{L.t(`${list.length} ANALYSE${list.length > 1 ? "S" : ""}`, `${list.length} ANALYS${list.length > 1 ? "ES" : "IS"}`, `${list.length} ANÁLISIS`, `${list.length} ANÁLISES`)}</div>
       </div>
       {groups.map((g) => (
         <div key={g.k}>
@@ -33,8 +33,8 @@ export default function HistoryList({ list, L }) {
                   <b>{i.home?.short || "?"}</b>
                 </span>
                 <span className="hist-meta">
-                  <span className="tag">{i.league === "EL" ? L.t("EuroLeague", "EuroLeague", "Euroliga") : "NBA"}</span>
-                  <span>{i.date ? fmtDate(L, i.date, { weekday: "short", day: "numeric", month: "short" }) : L.t("match hypothétique", "hypothetical game", "partido hipotético")}</span>
+                  <span className="tag">{i.league === "EL" ? L.t("EuroLeague", "EuroLeague", "Euroliga", "Euroliga") : "NBA"}</span>
+                  <span>{i.date ? fmtDate(L, i.date, { weekday: "short", day: "numeric", month: "short" }) : L.t("match hypothétique", "hypothetical game", "partido hipotético", "jogo hipotético")}</span>
                 </span>
               </Link>
             );

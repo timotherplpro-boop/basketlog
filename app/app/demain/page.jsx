@@ -16,7 +16,7 @@ export async function generateMetadata() {
   const d = tomorrow();
   const base = await matchsMeta({ searchParams: Promise.resolve({ d }) });
   return pageMeta({
-    title: L.t(`Pronostic NBA demain (${short(d, L)}) : probabilités de chaque match`, `NBA predictions tomorrow (${short(d, L)}): win probabilities for every game`, `Pronósticos NBA mañana (${short(d, L)}): probabilidades de cada partido`),
+    title: L.t(`Pronostic NBA demain (${short(d, L)}) : probabilités de chaque match`, `NBA predictions tomorrow (${short(d, L)}): win probabilities for every game`, `Pronósticos NBA mañana (${short(d, L)}): probabilidades de cada partido`, `Palpites NBA amanhã (${short(d, L)}): probabilidades de cada jogo`),
     description: base.description,
     path: "/app/demain",
     L,

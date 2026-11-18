@@ -55,7 +55,7 @@ function Combo({ teams, value, onChange, placeholder, exclude, L }) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={t.logo} alt={t.name} />
               {t.name}
-              <small>{t.conf === "E" ? L.t("Est", "East", "Este") : L.t("Ouest", "West", "Oeste")}</small>
+              <small>{t.conf === "E" ? L.t("Est", "East", "Este", "Leste") : L.t("Ouest", "West", "Oeste", "Oeste")}</small>
             </button>
           ))}
         </div>
@@ -103,17 +103,17 @@ export default function DuelForm({ teams, initialHome, initialAway }) {
   return (
     <>
     <form className="panel" onSubmit={go}>
-      <div className="panel-label">{L.t("MATCH À ANALYSER", "GAME TO ANALYZE", "PARTIDO A ANALIZAR")}</div>
+      <div className="panel-label">{L.t("MATCH À ANALYSER", "GAME TO ANALYZE", "PARTIDO A ANALIZAR", "JOGO A ANALISAR")}</div>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {home ? <img key={home.id} className="duel-crest" src={home.logo} alt={home.name} /> : <span className="duel-crest ph" aria-hidden />}
-      <Combo teams={teams} value={home} onChange={setHome} exclude={away?.id} L={L} placeholder={L.t("Cherche une équipe (ex : Lakers, Celtics)", "Search a team (e.g. Lakers, Celtics)", "Busca un equipo (p. ej., Lakers, Celtics)")} />
+      <Combo teams={teams} value={home} onChange={setHome} exclude={away?.id} L={L} placeholder={L.t("Cherche une équipe (ex : Lakers, Celtics)", "Search a team (e.g. Lakers, Celtics)", "Busca un equipo (p. ej., Lakers, Celtics)", "Busque um time (ex.: Lakers, Celtics)")} />
       <div className="vs-sep">vs</div>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {away ? <img key={away.id} className="duel-crest" src={away.logo} alt={away.name} /> : <span className="duel-crest ph" aria-hidden />}
-      <Combo teams={teams} value={away} onChange={setAway} exclude={home?.id} L={L} placeholder={L.t("Cherche une équipe (ex : Knicks, Warriors)", "Search a team (e.g. Knicks, Warriors)", "Busca un equipo (p. ej., Knicks, Warriors)")} />
-      <p className="home-hint">{L.t("S'ils se jouent dans les 3 prochaines semaines, tu tombes sur le vrai match. Sinon, la 1re équipe reçoit.", "If they meet in the next 3 weeks, you land on the real game. Otherwise, the first team plays at home.", "Si se enfrentan en las próximas 3 semanas, verás el partido real. Si no, el primer equipo juega en casa.")}</p>
+      <Combo teams={teams} value={away} onChange={setAway} exclude={home?.id} L={L} placeholder={L.t("Cherche une équipe (ex : Knicks, Warriors)", "Search a team (e.g. Knicks, Warriors)", "Busca un equipo (p. ej., Knicks, Warriors)", "Busque um time (ex.: Knicks, Warriors)")} />
+      <p className="home-hint">{L.t("S'ils se jouent dans les 3 prochaines semaines, tu tombes sur le vrai match. Sinon, la 1re équipe reçoit.", "If they meet in the next 3 weeks, you land on the real game. Otherwise, the first team plays at home.", "Si se enfrentan en las próximas 3 semanas, verás el partido real. Si no, el primer equipo juega en casa.", "Se eles se enfrentarem nas próximas 3 semanas, você verá o jogo real. Se não, o primeiro time joga em casa.")}</p>
       <button className={`btn-solid ${run.running ? "an-busy" : ""}`} disabled={!home || !away || run.running}>
-        {run.running ? <><span className="an-spin" aria-hidden />{L.t("Analyse en cours…", "Analysis in progress…", "Análisis en curso…")} {pctLabel(run.p, L)}</> : L.t("Analyser le match", "Analyze the game", "Analizar el partido")}
+        {run.running ? <><span className="an-spin" aria-hidden />{L.t("Analyse en cours…", "Analysis in progress…", "Análisis en curso…", "Análise em andamento…")} {pctLabel(run.p, L)}</> : L.t("Analyser le match", "Analyze the game", "Analizar el partido", "Analisar o jogo")}
       </button>
     </form>
     {run.running && <div className="panel an-card"><AnalysisProgress p={run.p} league="NBA" /></div>}

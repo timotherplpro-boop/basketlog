@@ -15,10 +15,10 @@ export async function generateMetadata({ searchParams }) {
   const sp = (await searchParams) || {};
   const L = await getL();
   const meta = pageMeta({
-    title: L.t("Analyse de match NBA : choisis deux équipes – Basketlog", "NBA game analysis: pick two teams – Basketlog", "Análisis de partidos NBA: elige dos equipos – Basketlog"),
+    title: L.t("Analyse de match NBA : choisis deux équipes – Basketlog", "NBA game analysis: pick two teams – Basketlog", "Análisis de partidos NBA: elige dos equipos – Basketlog", "Análise de jogos da NBA: escolha dois times – Basketlog"),
     description: L.t(
       "Choisis deux équipes NBA et obtiens le pronostic du match : probabilités de victoire, score projeté, forme, absences et fatigue. Prochains matchs de la semaine.",
-      "Pick two NBA teams and get the game prediction: win probabilities, projected score, form, injuries and fatigue. This week's upcoming games.", "Elige dos equipos de la NBA y obtén el pronóstico del partido: probabilidades de victoria, marcador proyectado, forma, bajas y cansancio. Los próximos partidos de la semana."
+      "Pick two NBA teams and get the game prediction: win probabilities, projected score, form, injuries and fatigue. This week's upcoming games.", "Elige dos equipos de la NBA y obtén el pronóstico del partido: probabilidades de victoria, marcador proyectado, forma, bajas y cansancio. Los próximos partidos de la semana.", "Escolha dois times da NBA e veja o palpite do jogo: probabilidades de vitória, placar projetado, fase, desfalques e cansaço. Os próximos jogos da semana."
     ),
     path: "/app",
     L,
@@ -49,9 +49,9 @@ export default async function AnalysePage({ searchParams }) {
     <main className="app-page">
       <AppTabs active="analyse" />
       <div className="app-head">
-        <h1>{L.t("Analyse de match", "Game analysis", "Análisis de partido")}</h1>
-        <p>{L.t("Entre les équipes que tu veux analyser", "Between the teams you want to analyze", "Entre los equipos que quieres analizar")}</p>
-        <p className="note">{L.t("Notre modèle croise niveau, forme, absences et fatigue pour chaque pronostic.", "Our model combines strength, form, injuries and fatigue for every prediction.", "Nuestro modelo combina nivel, forma, bajas y cansancio en cada pronóstico.")}</p>
+        <h1>{L.t("Analyse de match", "Game analysis", "Análisis de partido", "Análise de jogo")}</h1>
+        <p>{L.t("Entre les équipes que tu veux analyser", "Between the teams you want to analyze", "Entre los equipos que quieres analizar", "Entre os times que você quer analisar")}</p>
+        <p className="note">{L.t("Notre modèle croise niveau, forme, absences et fatigue pour chaque pronostic.", "Our model combines strength, form, injuries and fatigue for every prediction.", "Nuestro modelo combina nivel, forma, bajas y cansancio en cada pronóstico.", "Nosso modelo combina nível, fase, desfalques e cansaço em cada palpite.")}</p>
       </div>
       <DuelForm teams={TEAMS} initialHome={home} initialAway={away} key={`${home?.id || ""}-${away?.id || ""}`} />
       {duel ? (
@@ -60,25 +60,25 @@ export default async function AnalysePage({ searchParams }) {
           <p className="disclaimer">{L.t(
             "Probabilités estimées par le modèle Basketlog à partir des données publiques disponibles. Elles ne constituent ni une certitude ni un conseil de pari.",
             "Probabilities estimated by the Basketlog model from available public data. They are neither a certainty nor betting advice.",
-            "Probabilidades estimadas por el modelo de Basketlog a partir de los datos públicos disponibles. No constituyen ni una certeza ni un consejo de apuestas."
+            "Probabilidades estimadas por el modelo de Basketlog a partir de los datos públicos disponibles. No constituyen ni una certeza ni un consejo de apuestas.", "Probabilidades estimadas pelo modelo do Basketlog a partir dos dados públicos disponíveis. Não são nem uma certeza nem uma recomendação de aposta."
           )}</p>
         </div>
       ) : (
         <>
           {sure.length > 0 && (
-            <UpcomingList games={sure} L={L} className="sure-panel" title={<><span className="dot" />{L.t("Confiance très élevée", "Very high confidence", "Confianza muy alta")}</>}>
+            <UpcomingList games={sure} L={L} className="sure-panel" title={<><span className="dot" />{L.t("Confiance très élevée", "Very high confidence", "Confianza muy alta", "Confiança muito alta")}</>}>
               <p className="su-note">
                 {rec && rec.n >= RECORD_MIN
                   ? L.t(
                     `Favoris à 88 % et plus. À ce niveau : ${rec.ok} pronostics justes sur ${rec.n} en NBA depuis la saison ${seasonLabel(rec.since)} (${pctOf(rec.ok / rec.n, L)}). `,
                     `Favorites at 88%+. At this level: ${rec.ok} of ${rec.n} NBA picks right since the ${seasonLabel(rec.since)} season (${pctOf(rec.ok / rec.n, L)}). `,
-                    `Favoritos al 88 % o más. En este nivel: ${rec.ok} pronósticos acertados de ${rec.n} en la NBA desde la temporada ${seasonLabel(rec.since)} (${pctOf(rec.ok / rec.n, L)}). `)
-                  : L.t("Favoris à 88 % et plus. ", "Favorites at 88%+. ", "Favoritos al 88 % o más. ")}
-                <Link href={L.href("/app/bilan")}>{L.t("Voir le bilan", "See the track record", "Ver el balance")}</Link>
+                    `Favoritos al 88 % o más. En este nivel: ${rec.ok} pronósticos acertados de ${rec.n} en la NBA desde la temporada ${seasonLabel(rec.since)} (${pctOf(rec.ok / rec.n, L)}). `, `Favoritos a 88 % ou mais. Neste nível: ${rec.ok} palpites certos de ${rec.n} na NBA desde a temporada ${seasonLabel(rec.since)} (${pctOf(rec.ok / rec.n, L)}). `)
+                  : L.t("Favoris à 88 % et plus. ", "Favorites at 88%+. ", "Favoritos al 88 % o más. ", "Favoritos a 88 % ou mais. ")}
+                <Link href={L.href("/app/bilan")}>{L.t("Voir le bilan", "See the track record", "Ver el balance", "Ver o desempenho")}</Link>
               </p>
             </UpcomingList>
           )}
-          <UpcomingList games={list} L={L} title={home ? `${L.t("Prochains matchs", "Upcoming games", "Próximos partidos")} · ${home.short}` : L.t("Prochains matchs", "Upcoming games", "Próximos partidos")} />
+          <UpcomingList games={list} L={L} title={home ? `${L.t("Prochains matchs", "Upcoming games", "Próximos partidos", "Próximos jogos")} · ${home.short}` : L.t("Prochains matchs", "Upcoming games", "Próximos partidos", "Próximos jogos")} />
         </>
       )}
     </main>

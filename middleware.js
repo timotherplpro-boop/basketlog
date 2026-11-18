@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 // Versions anglaise (/en/...) et espagnole (/es/...) : même page que /..., dans la langue demandée (en-tête x-bl-lang).
 export function middleware(req) {
   const { pathname } = req.nextUrl;
-  const m = pathname.match(/^\/(en|es)(?=\/|$)/);
+  const m = pathname.match(/^\/(en|es|pt)(?=\/|$)/);
   const lang = m ? m[1] : "fr";
   const headers = new Headers(req.headers);
   headers.set("x-bl-lang", lang);

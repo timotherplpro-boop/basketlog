@@ -72,29 +72,29 @@ function whopMessage(t, w, code) {
   const why = describeProblems(w.problems, t) || w.detail || "";
   switch (w.kind) {
     case "nokey":
-      return t("La clé API de Whop n'est pas configurée sur le site : crée le code à la main (guide ci-dessous).", "Whop's API key isn't set up on the site: create the code by hand (guide below).", "La clave API de Whop no está configurada en el sitio: crea el código a mano (guía de abajo).");
+      return t("La clé API de Whop n'est pas configurée sur le site : crée le code à la main (guide ci-dessous).", "Whop's API key isn't set up on the site: create the code by hand (guide below).", "La clave API de Whop no está configurada en el sitio: crea el código a mano (guía de abajo).", "La clave API de Whop no está configurada en el sitio: crea el código a mano (guía de abajo).");
     case "scope":
       return t(
         "Whop a refusé : la clé API du site n'a pas la permission de gérer les codes promo. Sur la page des clés API de Whop, ajoute à la clé « promo_code:create », « promo_code:update » et « promo_code:basic:read » (ou donne-lui le rôle Admin), puis clique sur « Créer chez Whop ».",
         "Whop refused: the site's API key isn't allowed to manage promo codes. On Whop's API keys page, give the key “promo_code:create”, “promo_code:update” and “promo_code:basic:read” (or the Admin role), then click “Create in Whop”.",
-        "Whop lo ha rechazado: la clave API del sitio no tiene permiso para gestionar códigos promocionales. En la página de claves API de Whop, añade a la clave «promo_code:create», «promo_code:update» y «promo_code:basic:read» (o el rol de administrador) y pulsa «Crear en Whop»."
+        "Whop lo ha rechazado: la clave API del sitio no tiene permiso para gestionar códigos promocionales. En la página de claves API de Whop, añade a la clave «promo_code:create», «promo_code:update» y «promo_code:basic:read» (o el rol de administrador) y pulsa «Crear en Whop».", "Whop lo ha rechazado: la clave API del sitio no tiene permiso para gestionar códigos promocionales. En la página de claves API de Whop, añade a la clave «promo_code:create», «promo_code:update» y «promo_code:basic:read» (o el rol de administrador) y pulsa «Crear en Whop»."
       );
     case "differs":
       return t(
         `Le code${c} existe déjà chez Whop avec d'autres réglages (${why}). Whop ne permet pas de les modifier : choisis un autre nom de code ici, ou supprime celui de Whop puis clique sur « Créer chez Whop ».`,
         `The code${c} already exists in Whop with other settings (${why}). Whop doesn't allow editing them: pick another code name here, or delete the one in Whop and then click “Create in Whop”.`,
-        `El código${c} ya existe en Whop con otros ajustes (${why}). Whop no permite modificarlos: elige otro nombre de código aquí, o elimina el de Whop y pulsa «Crear en Whop».`
+        `El código${c} ya existe en Whop con otros ajustes (${why}). Whop no permite modificarlos: elige otro nombre de código aquí, o elimina el de Whop y pulsa «Crear en Whop».`, `El código${c} ya existe en Whop con otros ajustes (${why}). Whop no permite modificarlos: elige otro nombre de código aquí, o elimina el de Whop y pulsa «Crear en Whop».`
       );
     case "conflict":
-      return t(`Whop refuse de créer le code${c} (il existe déjà ou son nom est réservé) : choisis un autre nom de code.`, `Whop refuses to create the code${c} (it already exists or its name is reserved): pick another code name.`, `Whop se niega a crear el código${c} (ya existe o su nombre está reservado): elige otro nombre de código.`);
+      return t(`Whop refuse de créer le code${c} (il existe déjà ou son nom est réservé) : choisis un autre nom de code.`, `Whop refuses to create the code${c} (it already exists or its name is reserved): pick another code name.`, `Whop se niega a crear el código${c} (ya existe o su nombre está reservado): elige otro nombre de código.`, `Whop se niega a crear el código${c} (ya existe o su nombre está reservado): elige otro nombre de código.`);
     case "invalid":
-      return t(`Whop a refusé ce code ou cette remise${why ? ` (${why})` : ""} : choisis-en un autre.`, `Whop refused this code or discount${why ? ` (${why})` : ""}: pick another one.`, `Whop ha rechazado este código o descuento${why ? ` (${why})` : ""}: elige otro.`);
+      return t(`Whop a refusé ce code ou cette remise${why ? ` (${why})` : ""} : choisis-en un autre.`, `Whop refused this code or discount${why ? ` (${why})` : ""}: pick another one.`, `Whop ha rechazado este código o descuento${why ? ` (${why})` : ""}: elige otro.`, `Whop ha rechazado este código o descuento${why ? ` (${why})` : ""}: elige otro.`);
     case "mismatch":
       return w.deactivated
-        ? t(`Whop a enregistré autre chose que prévu (${why}) : par sécurité, le code${c} a été désactivé chez Whop. Aucun client ne peut l'utiliser.`, `Whop saved something other than expected (${why}): as a safety measure, the code${c} was deactivated in Whop. No customer can use it.`, `Whop ha guardado algo distinto de lo previsto (${why}): por seguridad, el código${c} se ha desactivado en Whop. Ningún cliente puede usarlo.`)
-        : t(`Whop a enregistré autre chose que prévu (${why}) et le code${c} n'a pas pu être désactivé : désactive-le tout de suite chez Whop.`, `Whop saved something other than expected (${why}) and the code${c} couldn't be deactivated: deactivate it in Whop right away.`, `Whop ha guardado algo distinto de lo previsto (${why}) y el código${c} no se ha podido desactivar: desactívalo en Whop ahora mismo.`);
+        ? t(`Whop a enregistré autre chose que prévu (${why}) : par sécurité, le code${c} a été désactivé chez Whop. Aucun client ne peut l'utiliser.`, `Whop saved something other than expected (${why}): as a safety measure, the code${c} was deactivated in Whop. No customer can use it.`, `Whop ha guardado algo distinto de lo previsto (${why}): por seguridad, el código${c} se ha desactivado en Whop. Ningún cliente puede usarlo.`, `Whop ha guardado algo distinto de lo previsto (${why}): por seguridad, el código${c} se ha desactivado en Whop. Ningún cliente puede usarlo.`)
+        : t(`Whop a enregistré autre chose que prévu (${why}) et le code${c} n'a pas pu être désactivé : désactive-le tout de suite chez Whop.`, `Whop saved something other than expected (${why}) and the code${c} couldn't be deactivated: deactivate it in Whop right away.`, `Whop ha guardado algo distinto de lo previsto (${why}) y el código${c} no se ha podido desactivar: desactívalo en Whop ahora mismo.`, `Whop ha guardado algo distinto de lo previsto (${why}) y el código${c} no se ha podido desactivar: desactívalo en Whop ahora mismo.`);
     default:
-      return t("Whop ne répond pas pour le moment : réessaie dans un instant avec « Créer chez Whop ».", "Whop isn't responding right now: try again in a moment with “Create in Whop”.", "Whop no responde por el momento: vuelve a intentarlo en un instante con «Crear en Whop».");
+      return t("Whop ne répond pas pour le moment : réessaie dans un instant avec « Créer chez Whop ».", "Whop isn't responding right now: try again in a moment with “Create in Whop”.", "Whop no responde por el momento: vuelve a intentarlo en un instante con «Crear en Whop».", "Whop no responde por el momento: vuelve a intentarlo en un instante con «Crear en Whop».");
   }
 }
 
@@ -123,10 +123,10 @@ export async function POST(req) {
   const body = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
   const { t } = mk(LANGS.includes(body.lang) ? body.lang : "fr");
   const msg = {
-    pct: () => t("Remise invalide : choisis un nombre entier entre 1 et 90 %.", "Invalid discount: pick a whole number between 1 and 90%.", "Descuento no válido: elige un número entero entre 1 y 90 %."),
-    code: () => t("Code invalide : 3 à 24 lettres ou chiffres, sans espace ni accent.", "Invalid code: 3 to 24 letters or digits, no spaces or accents.", "Código no válido: de 3 a 24 letras o cifras, sin espacios ni acentos."),
-    taken: () => t("Ce code existe déjà : choisis-en un autre.", "That code already exists: pick another one.", "Ese código ya existe: elige otro."),
-    off: () => t("Les codes promo ne sont pas encore activés dans la base de données (script supabase/codes-promo.sql à lancer une fois).", "Promo codes aren't enabled in the database yet (run the supabase/codes-promo.sql script once).", "Los códigos promocionales aún no están activados en la base de datos (hay que ejecutar una vez el script supabase/codes-promo.sql)."),
+    pct: () => t("Remise invalide : choisis un nombre entier entre 1 et 90 %.", "Invalid discount: pick a whole number between 1 and 90%.", "Descuento no válido: elige un número entero entre 1 y 90 %.", "Descuento no válido: elige un número entero entre 1 y 90 %."),
+    code: () => t("Code invalide : 3 à 24 lettres ou chiffres, sans espace ni accent.", "Invalid code: 3 to 24 letters or digits, no spaces or accents.", "Código no válido: de 3 a 24 letras o cifras, sin espacios ni acentos.", "Código no válido: de 3 a 24 letras o cifras, sin espacios ni acentos."),
+    taken: () => t("Ce code existe déjà : choisis-en un autre.", "That code already exists: pick another one.", "Ese código ya existe: elige otro.", "Ese código ya existe: elige otro."),
+    off: () => t("Les codes promo ne sont pas encore activés dans la base de données (script supabase/codes-promo.sql à lancer une fois).", "Promo codes aren't enabled in the database yet (run the supabase/codes-promo.sql script once).", "Los códigos promocionales aún no están activados en la base de datos (hay que ejecutar una vez el script supabase/codes-promo.sql).", "Los códigos promocionales aún no están activados en la base de datos (hay que ejecutar una vez el script supabase/codes-promo.sql)."),
   };
 
   // Résultat chez Whop pour l'écran : en cas d'échec, la phrase est déjà dans la langue de l'écran.
@@ -134,14 +134,14 @@ export async function POST(req) {
   const shownAll = (rows) => rows.map((r) => (r.whop ? { ...r, whop: shown(r.whop, r.code) } : r));
 
   const s = decodeSession(req.cookies.get(COOKIE)?.value);
-  if (!s?.uid) return err(t("Connecte-toi avec ton compte admin.", "Log in with your admin account.", "Inicia sesión con tu cuenta de administrador."), 401);
+  if (!s?.uid) return err(t("Connecte-toi avec ton compte admin.", "Log in with your admin account.", "Inicia sesión con tu cuenta de administrador.", "Inicia sesión con tu cuenta de administrador."), 401);
   let role = null;
   try {
     role = await getRole(s.uid);
   } catch {
-    return err(t("Base momentanément injoignable, réessaie dans un instant.", "The database is temporarily unreachable, please try again in a moment.", "La base de datos no está accesible por el momento, inténtalo de nuevo en un instante."), 503);
+    return err(t("Base momentanément injoignable, réessaie dans un instant.", "The database is temporarily unreachable, please try again in a moment.", "La base de datos no está accesible por el momento, inténtalo de nuevo en un instante.", "La base de datos no está accesible por el momento, inténtalo de nuevo en un instante."), 503);
   }
-  if (role !== "admin") return err(t("Réservé aux admins.", "Admins only.", "Reservado a los administradores."), 403);
+  if (role !== "admin") return err(t("Réservé aux admins.", "Admins only.", "Reservado a los administradores.", "Reservado a los administradores."), 403);
 
   // Aperçu d'une formule : la session devient celle d'un client de cette formule (ou redevient admin).
   if (body.action === "apercu") {
@@ -157,7 +157,7 @@ export async function POST(req) {
       delete next.admin;
     }
     const value = encodeSession(next);
-    if (!value) return err(t("Session impossible à mettre à jour.", "Couldn't update the session.", "No se ha podido actualizar la sesión."), 500);
+    if (!value) return err(t("Session impossible à mettre à jour.", "Couldn't update the session.", "No se ha podido actualizar la sesión.", "No se ha podido actualizar la sesión."), 500);
     const res = NextResponse.json({ ok: true, preview: tier }, { headers: { "Cache-Control": "no-store" } });
     res.cookies.set(COOKIE, value, cookieOptions);
     return res;
@@ -169,7 +169,7 @@ export async function POST(req) {
       case "avis_publier":
       case "avis_retirer":
       case "avis_supprimer": {
-        if (!UUID.test(String(body.id || ""))) return err(t("Avis introuvable.", "Review not found.", "Opinión no encontrada."));
+        if (!UUID.test(String(body.id || ""))) return err(t("Avis introuvable.", "Review not found.", "Opinión no encontrada.", "Opinión no encontrada."));
         await dbRpc("basketlog_admin_avis", { p_id: body.id, p_action: body.action.slice(5) });
         revalidateTag("avis"); // le site affiche tout de suite la liste à jour
         break;
@@ -200,13 +200,13 @@ export async function POST(req) {
             created = wanted ? await setPromo({ inv: res.code, nom: note, pct, code: wanted }) : await proposePromo({ inv: res.code, nom: note, pct });
             if (!created) {
               extra.promoError = wanted
-                ? t(`Le lien est créé, mais le code ${wanted} vient d'être pris : choisis-en un autre dans la liste ci-dessous.`, `The link is created, but the code ${wanted} was just taken: pick another one in the list below.`, `El enlace está creado, pero el código ${wanted} acaba de ser ocupado: elige otro en la lista de abajo.`)
-                : t("Le lien est créé, mais aucun code promo libre n'a été trouvé : ajoute-en un dans la liste ci-dessous.", "The link is created, but no free promo code was found: add one in the list below.", "El enlace está creado, pero no se ha encontrado ningún código promocional libre: añade uno en la lista de abajo.");
+                ? t(`Le lien est créé, mais le code ${wanted} vient d'être pris : choisis-en un autre dans la liste ci-dessous.`, `The link is created, but the code ${wanted} was just taken: pick another one in the list below.`, `El enlace está creado, pero el código ${wanted} acaba de ser ocupado: elige otro en la lista de abajo.`, `El enlace está creado, pero el código ${wanted} acaba de ser ocupado: elige otro en la lista de abajo.`)
+                : t("Le lien est créé, mais aucun code promo libre n'a été trouvé : ajoute-en un dans la liste ci-dessous.", "The link is created, but no free promo code was found: add one in the list below.", "El enlace está creado, pero no se ha encontrado ningún código promocional libre: añade uno en la lista de abajo.", "El enlace está creado, pero no se ha encontrado ningún código promocional libre: añade uno en la lista de abajo.");
             }
           } catch (e) {
             extra.promoError = promoNotInstalled(e)
               ? msg.off()
-              : t("Le lien est créé, mais le code promo n'a pas pu l'être : ajoute-le dans la liste ci-dessous.", "The link is created, but the promo code couldn't be: add it in the list below.", "El enlace está creado, pero no se ha podido crear el código promocional: añádelo en la lista de abajo.");
+              : t("Le lien est créé, mais le code promo n'a pas pu l'être : ajoute-le dans la liste ci-dessous.", "The link is created, but the promo code couldn't be: add it in the list below.", "El enlace está creado, pero no se ha podido crear el código promocional: añádelo en la lista de abajo.", "El enlace está creado, pero no se ha podido crear el código promocional: añádelo en la lista de abajo.");
           }
           if (created) {
             const { id, ...pub } = created;
@@ -218,24 +218,24 @@ export async function POST(req) {
         break;
       }
       case "annuler_invitation": {
-        if (!CODE.test(String(body.code || ""))) return err(t("Invitation introuvable.", "Invitation not found.", "Invitación no encontrada."));
+        if (!CODE.test(String(body.code || ""))) return err(t("Invitation introuvable.", "Invitation not found.", "Invitación no encontrada.", "Invitación no encontrada."));
         await dbRpc("basketlog_admin_annuler", { p_code: body.code });
         extra = { supprimes: shownAll(await closePromo({ p_uid: null, p_inv_code: body.code })) };
         break;
       }
       case "retirer_acces": {
         const uid = String(body.uid || "");
-        if (!uid || uid.length > 80) return err(t("Compte introuvable.", "Account not found.", "Cuenta no encontrada."));
-        if (uid === s.uid) return err(t("Tu ne peux pas retirer ton propre accès admin.", "You can't remove your own admin access.", "No puedes retirar tu propio acceso de administrador."));
+        if (!uid || uid.length > 80) return err(t("Compte introuvable.", "Account not found.", "Cuenta no encontrada.", "Cuenta no encontrada."));
+        if (uid === s.uid) return err(t("Tu ne peux pas retirer ton propre accès admin.", "You can't remove your own admin access.", "No puedes retirar tu propio acceso de administrador.", "No puedes retirar tu propio acceso de administrador."));
         const res = await dbRpc("basketlog_admin_retirer", { p_uid: uid });
-        if (res?.reason === "dernier_admin") return err(t("Il faut garder au moins un admin.", "At least one admin must remain.", "Debe quedar al menos un administrador."));
+        if (res?.reason === "dernier_admin") return err(t("Il faut garder au moins un admin.", "At least one admin must remain.", "Debe quedar al menos un administrador.", "Debe quedar al menos un administrador."));
         extra = { supprimes: res?.ok ? shownAll(await closePromo({ p_uid: uid, p_inv_code: null })) : [] };
         break;
       }
       // Code promo d'un créateur : création ou modification (code et remise), répercutée chez Whop.
       case "promo_definir": {
         const target = promoTarget(body);
-        if (!target) return err(t("Créateur introuvable.", "Creator not found.", "Creador no encontrado."));
+        if (!target) return err(t("Créateur introuvable.", "Creator not found.", "Creador no encontrado.", "Creador no encontrado."));
         const pct = cleanPct(body.pct);
         if (pct == null) return err(msg.pct());
         const code = String(body.code ?? "").trim().toUpperCase();
@@ -260,22 +260,22 @@ export async function POST(req) {
       }
       // « Ce code existe chez Whop » : simple repère pour l'admin (liaison automatique indisponible), rien n'est envoyé à Whop.
       case "promo_whop": {
-        if (!UUID.test(String(body.id || ""))) return err(t("Code promo introuvable.", "Promo code not found.", "Código promocional no encontrado."));
+        if (!UUID.test(String(body.id || ""))) return err(t("Code promo introuvable.", "Promo code not found.", "Código promocional no encontrado.", "Código promocional no encontrado."));
         await dbRpc("basketlog_admin_promo_whop", { p_id: body.id, p_ok: body.ok === true });
         break;
       }
       // « Créer chez Whop » : crée le code là-bas, ou vérifie qu'il y existe avec la bonne remise (puis le note comme prêt).
       case "promo_sync": {
-        if (!UUID.test(String(body.id || ""))) return err(t("Code promo introuvable.", "Promo code not found.", "Código promocional no encontrado."));
+        if (!UUID.test(String(body.id || ""))) return err(t("Code promo introuvable.", "Promo code not found.", "Código promocional no encontrado.", "Código promocional no encontrado."));
         const list = await dbRpc("basketlog_admin_promos");
         const p = Array.isArray(list) ? list.find((x) => x.id === body.id) : null;
-        if (!p) return err(t("Code promo introuvable.", "Promo code not found.", "Código promocional no encontrado."), 404);
+        if (!p) return err(t("Code promo introuvable.", "Promo code not found.", "Código promocional no encontrado.", "Código promocional no encontrado."), 404);
         extra = { promo: { code: p.code, pct: p.pct }, whop: shown(await whopSync({ id: p.id, code: p.code, pct: p.pct }), p.code) };
         break;
       }
       case "promo_supprimer": {
         const target = promoTarget(body);
-        if (!target) return err(t("Créateur introuvable.", "Creator not found.", "Creador no encontrado."));
+        if (!target) return err(t("Créateur introuvable.", "Creator not found.", "Creador no encontrado.", "Creador no encontrado."));
         const res = await dbRpc("basketlog_admin_promo_off", { p_uid: target.uid, p_inv_code: target.inv });
         extra = { supprimes: shownAll(await retireAll(Array.isArray(res?.supprimes) ? res.supprimes : [])) };
         break;
@@ -283,12 +283,12 @@ export async function POST(req) {
       case "lister":
         break;
       default:
-        return err(t("Action inconnue.", "Unknown action.", "Acción desconocida."));
+        return err(t("Action inconnue.", "Unknown action.", "Acción desconocida.", "Acción desconocida."));
     }
     const data = await adminData();
     return NextResponse.json({ ok: true, data, ...extra }, { headers: { "Cache-Control": "no-store" } });
   } catch (e) {
     if (String(body.action).startsWith("promo_") && promoNotInstalled(e)) return err(msg.off(), 503);
-    return err(t("L'action n'a pas pu être enregistrée. Réessaie dans un instant.", "The action couldn't be saved. Please try again in a moment.", "No se ha podido guardar la acción. Inténtalo de nuevo en un instante."), 502);
+    return err(t("L'action n'a pas pu être enregistrée. Réessaie dans un instant.", "The action couldn't be saved. Please try again in a moment.", "No se ha podido guardar la acción. Inténtalo de nuevo en un instante.", "No se ha podido guardar la acción. Inténtalo de nuevo en un instante."), 502);
   }
 }

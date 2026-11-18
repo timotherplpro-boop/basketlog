@@ -58,7 +58,7 @@ export function InstallButton({ className = "linklike", source = "bouton", icon 
   if (!mode) return null;
   return (
     <button type="button" className={className} onClick={() => install(mode, source)}>
-      {icon && <PhoneIcon />}{L.t("Installer l'appli", "Install the app", "Instalar la app")}
+      {icon && <PhoneIcon />}{L.t("Installer l'appli", "Install the app", "Instalar la app", "Instalar o app")}
     </button>
   );
 }
@@ -84,7 +84,7 @@ export function InstallPlatforms({ source = "en_tete", box = false, className = 
   useEffect(() => { setInApp(isStandalone()); }, []);
   if (inApp) return null;
   const buttons = [["ios", "iPhone", IconIPhone], ["android", "Android", IconAndroid]].map(([platform, name, Icon]) => {
-    const label = L.t(`Installer l'appli Basketlog sur ${name}`, `Install the Basketlog app on ${name}`, `Instalar la app de Basketlog en ${name}`);
+    const label = L.t(`Installer l'appli Basketlog sur ${name}`, `Install the Basketlog app on ${name}`, `Instalar la app de Basketlog en ${name}`, `Instalar o app do Basketlog no ${name}`);
     return (
       <button key={platform} type="button" className="nav-sq nav-store" aria-label={label} title={label} onClick={() => install(mode, source, platform)}>
         <Icon />
@@ -164,63 +164,63 @@ export default function InstallApp() {
         <li>Toca el botón <b>Compartir</b> <ShareIcon /> en la barra de Safari.</li>
         <li>Desliza y elige <b>Añadir a pantalla de inicio</b>.</li>
         <li>Toca <b>Añadir</b>: Basketlog aparece junto a tus apps.</li>
-      </>
+      </>, <><li>Toque no botão <b>Compartilhar</b> <ShareIcon /> na barra do Safari.</li><li>Role e escolha <b>Adicionar à Tela de Início</b>.</li><li>Toque em <b>Adicionar</b>: o Basketlog aparece junto com seus apps.</li></>
     ),
     android: L.t(
       <><b>Android</b> : ouvre le menu <b>⋮</b> de Chrome, puis <b>Installer l&apos;application</b> (ou <b>Ajouter à l&apos;écran d&apos;accueil</b>).</>,
       <><b>Android</b>: open Chrome&apos;s <b>⋮</b> menu, then <b>Install app</b> (or <b>Add to Home screen</b>).</>,
-      <><b>Android</b>: abre el menú <b>⋮</b> de Chrome y elige <b>Instalar aplicación</b> (o <b>Añadir a pantalla de inicio</b>).</>
+      <><b>Android</b>: abre el menú <b>⋮</b> de Chrome y elige <b>Instalar aplicación</b> (o <b>Añadir a pantalla de inicio</b>).</>, <><b>Android</b>: abra o menu <b>⋮</b> do Chrome e escolha <b>Instalar app</b> (ou <b>Adicionar à tela inicial</b>).</>
     ),
     iphone: L.t(
       <><b>iPhone</b> : dans Safari, touche <b>Partager</b> <ShareIcon /> puis <b>Sur l&apos;écran d&apos;accueil</b>.</>,
       <><b>iPhone</b>: in Safari, tap <b>Share</b> <ShareIcon /> then <b>Add to Home Screen</b>.</>,
-      <><b>iPhone</b>: en Safari, toca <b>Compartir</b> <ShareIcon /> y luego <b>Añadir a pantalla de inicio</b>.</>
+      <><b>iPhone</b>: en Safari, toca <b>Compartir</b> <ShareIcon /> y luego <b>Añadir a pantalla de inicio</b>.</>, <><b>iPhone</b>: no Safari, toque em <b>Compartilhar</b> <ShareIcon /> e depois em <b>Adicionar à Tela de Início</b>.</>
     ),
   };
 
   return (
     <>
       {banner && mode && (
-        <div className="install-banner" role="dialog" aria-label={L.t("Installer l'appli Basketlog", "Install the Basketlog app", "Instalar la app de Basketlog")}>
+        <div className="install-banner" role="dialog" aria-label={L.t("Installer l'appli Basketlog", "Install the Basketlog app", "Instalar la app de Basketlog", "Instalar o app do Basketlog")}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/icons/icon-192.png" alt="" width={44} height={44} />
           <div className="ib-text">
-            <b>{L.t("Basketlog sur ton écran d'accueil", "Basketlog on your home screen", "Basketlog en tu pantalla de inicio")}</b>
-            <span>{L.t("Les pronostics du soir en un geste, comme une vraie appli. Gratuit.", "Tonight's predictions in one tap, like a real app. Free.", "Los pronósticos de la noche en un toque, como una app de verdad. Gratis.")}</span>
+            <b>{L.t("Basketlog sur ton écran d'accueil", "Basketlog on your home screen", "Basketlog en tu pantalla de inicio", "Basketlog na sua tela inicial")}</b>
+            <span>{L.t("Les pronostics du soir en un geste, comme une vraie appli. Gratuit.", "Tonight's predictions in one tap, like a real app. Free.", "Los pronósticos de la noche en un toque, como una app de verdad. Gratis.", "Os palpites da noite em um toque, como um app de verdade. Grátis.")}</span>
           </div>
-          <button type="button" className="ib-go" onClick={() => { setBanner(false); install(mode, "banniere"); }}>{L.t("Installer", "Install", "Instalar")}</button>
-          <button type="button" className="ib-x" onClick={close} aria-label={L.t("Fermer", "Close", "Cerrar")}>×</button>
+          <button type="button" className="ib-go" onClick={() => { setBanner(false); install(mode, "banniere"); }}>{L.t("Installer", "Install", "Instalar", "Instalar")}</button>
+          <button type="button" className="ib-x" onClick={close} aria-label={L.t("Fermer", "Close", "Cerrar", "Fechar")}>×</button>
         </div>
       )}
       {sheet && (
         <div className="modal" role="dialog" aria-modal="true" aria-labelledby="install-title" onClick={(e) => e.target === e.currentTarget && setSheet(null)}>
           <div className="modal-box ios-sheet" ref={sheetRef} tabIndex={-1}>
-            <button className="modal-x" onClick={() => setSheet(null)} aria-label={L.t("Fermer", "Close", "Cerrar")}>×</button>
+            <button className="modal-x" onClick={() => setSheet(null)} aria-label={L.t("Fermer", "Close", "Cerrar", "Fechar")}>×</button>
             {sheet === "ios" ? (
               <>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/icons/icon-192.png" alt="" width={64} height={64} className="ios-icon" />
-                <h3 id="install-title">{L.t("Installer Basketlog sur ton iPhone", "Install Basketlog on your iPhone", "Instala Basketlog en tu iPhone")}</h3>
+                <h3 id="install-title">{L.t("Installer Basketlog sur ton iPhone", "Install Basketlog on your iPhone", "Instala Basketlog en tu iPhone", "Instale o Basketlog no seu iPhone")}</h3>
                 <ol>{steps.ios}</ol>
               </>
             ) : (
               <>
                 {mobile
                   ? /* eslint-disable-next-line @next/next/no-img-element */ <img src="/icons/icon-192.png" alt="" width={64} height={64} className="ios-icon" />
-                  : /* eslint-disable-next-line @next/next/no-img-element */ <img src={`/qr/${L.lang}.svg`} alt={L.t("QR code vers Basketlog", "QR code to Basketlog", "Código QR de Basketlog")} width={168} height={168} className="qr" />}
+                  : /* eslint-disable-next-line @next/next/no-img-element */ <img src={`/qr/${L.lang}.svg`} alt={L.t("QR code vers Basketlog", "QR code to Basketlog", "Código QR de Basketlog", "QR code do Basketlog")} width={168} height={168} className="qr" />}
                 <h3 id="install-title">{plat === "ios"
-                  ? L.t("Basketlog sur ton iPhone", "Basketlog on your iPhone", "Basketlog en tu iPhone")
+                  ? L.t("Basketlog sur ton iPhone", "Basketlog on your iPhone", "Basketlog en tu iPhone", "Basketlog no seu iPhone")
                   : plat === "android"
-                    ? L.t("Basketlog sur ton téléphone Android", "Basketlog on your Android phone", "Basketlog en tu móvil Android")
-                    : L.t("Basketlog sur ton téléphone", "Basketlog on your phone", "Basketlog en tu móvil")}</h3>
+                    ? L.t("Basketlog sur ton téléphone Android", "Basketlog on your Android phone", "Basketlog en tu móvil Android", "Basketlog no seu celular Android")
+                    : L.t("Basketlog sur ton téléphone", "Basketlog on your phone", "Basketlog en tu móvil", "Basketlog no seu celular")}</h3>
                 <p className="modal-sub">
                   {plat
                     ? (mobile
-                      ? L.t(`Pas besoin ${plat === "ios" ? "de l'App Store" : "de Google Play"} : l'appli s'installe directement depuis le navigateur, gratuitement.`, `No ${plat === "ios" ? "App Store" : "Google Play"} needed: the app installs straight from your browser, for free.`, `No hace falta ${plat === "ios" ? "el App Store" : "Google Play"}: la app se instala directamente desde el navegador, gratis.`)
-                      : L.t(`Pas besoin ${plat === "ios" ? "de l'App Store" : "de Google Play"} : scanne ce code avec ton ${plat === "ios" ? "iPhone" : "téléphone Android"}, puis installe l'appli depuis le navigateur. C'est gratuit.`, `No ${plat === "ios" ? "App Store" : "Google Play"} needed: scan this code with your ${plat === "ios" ? "iPhone" : "Android phone"}, then install the app from the browser. It's free.`, `No hace falta ${plat === "ios" ? "el App Store" : "Google Play"}: escanea este código con tu ${plat === "ios" ? "iPhone" : "móvil Android"} y luego instala la app desde el navegador. Es gratis.`))
+                      ? L.t(`Pas besoin ${plat === "ios" ? "de l'App Store" : "de Google Play"} : l'appli s'installe directement depuis le navigateur, gratuitement.`, `No ${plat === "ios" ? "App Store" : "Google Play"} needed: the app installs straight from your browser, for free.`, `No hace falta ${plat === "ios" ? "el App Store" : "Google Play"}: la app se instala directamente desde el navegador, gratis.`, `Não precisa ${plat === "ios" ? "da App Store" : "do Google Play"}: o app é instalado direto pelo navegador, grátis.`)
+                      : L.t(`Pas besoin ${plat === "ios" ? "de l'App Store" : "de Google Play"} : scanne ce code avec ton ${plat === "ios" ? "iPhone" : "téléphone Android"}, puis installe l'appli depuis le navigateur. C'est gratuit.`, `No ${plat === "ios" ? "App Store" : "Google Play"} needed: scan this code with your ${plat === "ios" ? "iPhone" : "Android phone"}, then install the app from the browser. It's free.`, `No hace falta ${plat === "ios" ? "el App Store" : "Google Play"}: escanea este código con tu ${plat === "ios" ? "iPhone" : "móvil Android"} y luego instala la app desde el navegador. Es gratis.`, `Não precisa ${plat === "ios" ? "da App Store" : "do Google Play"}: escaneie este código com seu ${plat === "ios" ? "iPhone" : "celular Android"} e depois instale o app pelo navegador. É grátis.`))
                     : mobile
-                      ? L.t("L'appli s'installe directement depuis le navigateur, gratuitement, sans passer par un store.", "The app installs straight from your browser, for free, without any app store.", "La app se instala directamente desde el navegador, gratis, sin pasar por ninguna tienda.")
-                      : L.t("Scanne ce code avec ton téléphone, puis installe l'appli depuis le navigateur : c'est gratuit et sans store.", "Scan this code with your phone, then install the app from the browser: it's free and needs no app store.", "Escanea este código con tu móvil y luego instala la app desde el navegador: es gratis y sin tiendas.")}
+                      ? L.t("L'appli s'installe directement depuis le navigateur, gratuitement, sans passer par un store.", "The app installs straight from your browser, for free, without any app store.", "La app se instala directamente desde el navegador, gratis, sin pasar por ninguna tienda.", "O app é instalado direto pelo navegador, grátis, sem passar por nenhuma loja.")
+                      : L.t("Scanne ce code avec ton téléphone, puis installe l'appli depuis le navigateur : c'est gratuit et sans store.", "Scan this code with your phone, then install the app from the browser: it's free and needs no app store.", "Escanea este código con tu móvil y luego instala la app desde el navegador: es gratis y sin tiendas.", "Escaneie este código com seu celular e depois instale o app pelo navegador: é grátis e sem lojas.")}
                 </p>
                 <ul className="install-steps">
                   {plat !== "android" && <li>{steps.iphone}</li>}
@@ -228,7 +228,7 @@ export default function InstallApp() {
                 </ul>
               </>
             )}
-            <button className="btn-solid" onClick={() => setSheet(null)}>{L.t("J'ai compris", "Got it", "Entendido")}</button>
+            <button className="btn-solid" onClick={() => setSheet(null)}>{L.t("J'ai compris", "Got it", "Entendido", "Entendi")}</button>
           </div>
         </div>
       )}

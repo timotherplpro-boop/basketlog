@@ -39,22 +39,22 @@ const Cross = () => (
 // applique elle-même le code).
 export function ExitOfferBody({ offer, href, onAccept, onDecline, titleId = "exo-title" }) {
   const L = useL();
-  const cta = L.t("Profiter de la remise", "Claim the discount", "Aprovechar el descuento");
+  const cta = L.t("Profiter de la remise", "Claim the discount", "Aprovechar el descuento", "Aproveitar o desconto");
   return (
     <div className="exo">
-      <span className="exo-eyebrow">{L.t("Avant de partir", "Before you go", "Antes de irte")}</span>
+      <span className="exo-eyebrow">{L.t("Avant de partir", "Before you go", "Antes de irte", "Antes de você ir")}</span>
       <h3 id={titleId}>{offerLine(L, pctOf(offer.pct / 100, L), offer.mois)}</h3>
       <p className="exo-sub">
-        {L.t("Un coup de pouce pour te lancer. Le code ", "A little help to get you started. Code ", "Un empujón para empezar. El código ")}
+        {L.t("Un coup de pouce pour te lancer. Le code ", "A little help to get you started. Code ", "Un empujón para empezar. El código ", "Um empurrãozinho para começar. O código ")}
         <b className="exo-code">{offer.code}</b>
         {href
-          ? L.t(" s'applique tout seul sur la page des formules.", " is applied automatically on the plans page.", " se aplica solo en la página de planes.")
-          : L.t(" s'applique en un clic sur les prix.", " is applied in one click on the prices.", " se aplica con un clic en los precios.")}
+          ? L.t(" s'applique tout seul sur la page des formules.", " is applied automatically on the plans page.", " se aplica solo en la página de planes.", " é aplicado sozinho na página de planos.")
+          : L.t(" s'applique en un clic sur les prix.", " is applied in one click on the prices.", " se aplica con un clic en los precios.", " é aplicado com um clique nos preços.")}
       </p>
       {href
         ? <a href={href} className="btn-solid exo-cta" onClick={onAccept}>{cta}</a>
         : <button type="button" className="btn-solid exo-cta" onClick={onAccept}>{cta}</button>}
-      <button type="button" className="exo-no" onClick={onDecline}>{L.t("Non merci", "No thanks", "No, gracias")}</button>
+      <button type="button" className="exo-no" onClick={onDecline}>{L.t("Non merci", "No thanks", "No, gracias", "Não, obrigado")}</button>
     </div>
   );
 }
@@ -111,7 +111,7 @@ export function ProExitIntent({ enabled, onApply }) {
   return createPortal(
     <div className="modal exo-modal" role="dialog" aria-modal="true" aria-labelledby="exo-title" onClick={(e) => e.target === e.currentTarget && decline()}>
       <div className="modal-box exo-box" ref={box} tabIndex={-1}>
-        <button type="button" className="ulk-x" onClick={decline} aria-label={L.t("Fermer", "Close", "Cerrar")}><Cross /></button>
+        <button type="button" className="ulk-x" onClick={decline} aria-label={L.t("Fermer", "Close", "Cerrar", "Fechar")}><Cross /></button>
         <ExitOfferBody offer={offer} onAccept={accept} onDecline={decline} />
       </div>
     </div>,

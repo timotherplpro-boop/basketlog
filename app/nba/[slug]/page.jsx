@@ -30,20 +30,20 @@ export async function generateMetadata({ params }) {
   const pair = parsePair(slug);
   if (pair) {
     const { x, y } = pair;
-    const vs = L.t(`${x.short} – ${y.short}`, `${x.short} vs ${y.short}`, `${x.short} – ${y.short}`);
+    const vs = L.t(`${x.short} – ${y.short}`, `${x.short} vs ${y.short}`, `${x.short} – ${y.short}`, `${x.short} x ${y.short}`);
     return pageMeta({
-      title: L.t(`Pronostic ${vs} : prochaine rencontre et bilan de la saison`, `${vs} prediction: next game win probability and season series`, `Pronóstico ${vs}: próximo partido y serie de la temporada`),
+      title: L.t(`Pronostic ${vs} : prochaine rencontre et bilan de la saison`, `${vs} prediction: next game win probability and season series`, `Pronóstico ${vs}: próximo partido y serie de la temporada`, `Palpite ${vs}: próximo jogo e confrontos da temporada`),
       description: L.t(
         `${x.name} – ${y.name} : probabilité de victoire et score projeté de la prochaine rencontre, et toutes les rencontres de la saison avec le pronostic Basketlog et le résultat.`,
         `${x.name} vs ${y.name}: win probability and projected score for the next game, plus every meeting this season with the Basketlog prediction and the result.`,
-        `${x.name} – ${y.name}: probabilidad de victoria y marcador proyectado del próximo partido, y todos los partidos de la temporada con el pronóstico de Basketlog y el resultado.`
+        `${x.name} – ${y.name}: probabilidad de victoria y marcador proyectado del próximo partido, y todos los partidos de la temporada con el pronóstico de Basketlog y el resultado.`, `${x.name} x ${y.name}: probabilidade de vitória e placar projetado do próximo jogo, e todos os jogos da temporada com o palpite do Basketlog e o resultado.`
       ),
       path: `/nba/${pair.canonical}`,
       L,
     });
   }
   const found = await findBySlug(slug);
-  if (!found) return { title: L.t("Match introuvable – Basketlog", "Game not found – Basketlog", "Partido no encontrado – Basketlog"), robots: { index: false } };
+  if (!found) return { title: L.t("Match introuvable – Basketlog", "Game not found – Basketlog", "Partido no encontrado – Basketlog", "Jogo não encontrado – Basketlog"), robots: { index: false } };
   return matchMeta(found.a, found.date, L, nbaPath(found.a.game, found.date));
 }
 

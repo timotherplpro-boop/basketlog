@@ -40,22 +40,22 @@ export default function ReviewForm({ label, className = "btn-white" }) {
       });
       const j = await res.json();
       if (j.ok) { setState({ status: "done", error: "" }); track("Avis envoyé", { note }); }
-      else setState({ status: "idle", error: j.error || L.t("Une erreur est survenue.", "Something went wrong.", "Se ha producido un error.") });
+      else setState({ status: "idle", error: j.error || L.t("Une erreur est survenue.", "Something went wrong.", "Se ha producido un error.", "Ocorreu um erro.") });
     } catch {
-      setState({ status: "idle", error: L.t("Connexion impossible, réessaie.", "Couldn't connect, please try again.", "No se ha podido conectar, inténtalo de nuevo.") });
+      setState({ status: "idle", error: L.t("Connexion impossible, réessaie.", "Couldn't connect, please try again.", "No se ha podido conectar, inténtalo de nuevo.", "Não foi possível conectar, tente novamente.") });
     }
   }
 
   if (!status) return null; // formule en cours de vérification
   // Admin : lien vers la relecture des avis. Créateur partenaire : pas d'avis (accès offert).
-  if (status.role === "admin") return <p className="reviews-only"><a href={L.href("/app/admin")}>{L.t("Relire les avis (admin)", "Review submissions (admin)", "Revisar las opiniones (admin)")}</a></p>;
+  if (status.role === "admin") return <p className="reviews-only"><a href={L.href("/app/admin")}>{L.t("Relire les avis (admin)", "Review submissions (admin)", "Revisar las opiniones (admin)", "Revisar las opiniones (admin)")}</a></p>;
   if (status.role) return null;
   if (!PAYANTES.includes(status.tier)) {
     // Visiteur ou compte gratuit : pas de formulaire, avis réservés aux abonnés.
     return (
       <p className="reviews-only">
-        {L.t("Les avis sont réservés aux abonnés.", "Reviews are reserved for subscribers.", "Las opiniones están reservadas a los suscriptores.")}{" "}
-        <a href={L.href("/pro")}>{L.t("Voir les formules", "See the plans", "Ver los planes")}</a>
+        {L.t("Les avis sont réservés aux abonnés.", "Reviews are reserved for subscribers.", "Las opiniones están reservadas a los suscriptores.", "As avaliações são reservadas aos assinantes.")}{" "}
+        <a href={L.href("/pro")}>{L.t("Voir les formules", "See the plans", "Ver los planes", "Ver os planos")}</a>
       </p>
     );
   }
@@ -64,34 +64,34 @@ export default function ReviewForm({ label, className = "btn-white" }) {
 
   return (
     <>
-      <button type="button" className={className} onClick={() => { openedAt.current = Date.now(); setOpen(true); setState({ status: "idle", error: "" }); }}>{label || L.t("Donner mon avis", "Leave a review", "Dar mi opinión")}</button>
+      <button type="button" className={className} onClick={() => { openedAt.current = Date.now(); setOpen(true); setState({ status: "idle", error: "" }); }}>{label || L.t("Donner mon avis", "Leave a review", "Dar mi opinión", "Dar minha avaliação")}</button>
       {open && (
         <div className="modal" role="dialog" aria-modal="true" aria-labelledby="avis-title" onClick={(e) => e.target === e.currentTarget && setOpen(false)}>
           <div className="modal-box" ref={boxRef} tabIndex={-1}>
-            <button className="modal-x" onClick={() => setOpen(false)} aria-label={L.t("Fermer", "Close", "Cerrar")}>×</button>
+            <button className="modal-x" onClick={() => setOpen(false)} aria-label={L.t("Fermer", "Close", "Cerrar", "Fechar")}>×</button>
             {state.status === "done" ? (
               <div className="modal-done">
                 <span className="ball big-ball" aria-hidden />
-                <h3 id="avis-title">{L.t("Merci pour ton avis !", "Thanks for your review!", "¡Gracias por tu opinión!")}</h3>
-                <p>{L.t("Il sera affiché sur Basketlog dès qu'il aura été relu.", "It will appear on Basketlog once it has been reviewed.", "Se mostrará en Basketlog en cuanto la hayamos revisado.")}</p>
-                <button className="btn-solid" onClick={() => setOpen(false)}>{L.t("Fermer", "Close", "Cerrar")}</button>
+                <h3 id="avis-title">{L.t("Merci pour ton avis !", "Thanks for your review!", "¡Gracias por tu opinión!", "Obrigado pela sua avaliação!")}</h3>
+                <p>{L.t("Il sera affiché sur Basketlog dès qu'il aura été relu.", "It will appear on Basketlog once it has been reviewed.", "Se mostrará en Basketlog en cuanto la hayamos revisado.", "Ela será exibida no Basketlog assim que a revisarmos.")}</p>
+                <button className="btn-solid" onClick={() => setOpen(false)}>{L.t("Fermer", "Close", "Cerrar", "Fechar")}</button>
               </div>
             ) : (
               <form onSubmit={submit}>
-                <h3 id="avis-title">{L.t("Ton avis sur Basketlog", "Your review of Basketlog", "Tu opinión sobre Basketlog")}</h3>
-                <p className="modal-sub">{L.t("Il sera publié avec ton prénom après relecture.", "It will be published with your first name after review.", "Se publicará con tu nombre tras una revisión.")} <a href={L.href("/confidentialite")} target="_blank" rel="noopener">{L.t("Tes données", "Your data", "Tus datos")}</a></p>
-                <div className="stars" role="radiogroup" aria-label={L.t("Note", "Rating", "Nota")} onMouseLeave={() => setHover(0)}>
+                <h3 id="avis-title">{L.t("Ton avis sur Basketlog", "Your review of Basketlog", "Tu opinión sobre Basketlog", "Sua avaliação sobre o Basketlog")}</h3>
+                <p className="modal-sub">{L.t("Il sera publié avec ton prénom après relecture.", "It will be published with your first name after review.", "Se publicará con tu nombre tras una revisión.", "Será publicada com seu nome após uma revisão.")} <a href={L.href("/confidentialite")} target="_blank" rel="noopener">{L.t("Tes données", "Your data", "Tus datos", "Seus dados")}</a></p>
+                <div className="stars" role="radiogroup" aria-label={L.t("Note", "Rating", "Nota", "Nota")} onMouseLeave={() => setHover(0)}>
                   {[1, 2, 3, 4, 5].map((n) => (
-                    <button type="button" key={n} role="radio" aria-checked={note === n} aria-label={L.t(`${n} étoile${n > 1 ? "s" : ""}`, `${n} star${n > 1 ? "s" : ""}`, `${n} estrella${n > 1 ? "s" : ""}`)}
+                    <button type="button" key={n} role="radio" aria-checked={note === n} aria-label={L.t(`${n} étoile${n > 1 ? "s" : ""}`, `${n} star${n > 1 ? "s" : ""}`, `${n} estrella${n > 1 ? "s" : ""}`, `${n} estrela${n > 1 ? "s" : ""}`)}
                       className={(hover || note) >= n ? "on" : ""} onMouseEnter={() => setHover(n)} onClick={() => setNote(n)}>★</button>
                   ))}
                 </div>
-                <label>{L.t("Prénom", "First name", "Nombre")}<input name="prenom" required minLength={2} maxLength={40} defaultValue={firstName} placeholder={L.t("Ex : Karim", "E.g. Jordan", "P. ej.: Javier")} autoComplete="given-name" /></label>
-                <label><span>{L.t("Qui es-tu ?", "Who are you?", "¿Quién eres?")} <small>{L.t("(facultatif)", "(optional)", "(opcional)")}</small></span><input name="profil" maxLength={60} placeholder={L.t("Ex : Fan des Celtics depuis 2008", "E.g. Celtics fan since 2008", "P. ej.: fan de los Celtics desde 2008")} /></label>
-                <label>{L.t("Ton avis", "Your review", "Tu opinión")}<textarea name="texte" required minLength={15} maxLength={500} rows={4} placeholder={L.t("Qu'est-ce que Basketlog t'apporte ?", "What does Basketlog do for you?", "¿Qué te aporta Basketlog?")} /></label>
+                <label>{L.t("Prénom", "First name", "Nombre", "Nome")}<input name="prenom" required minLength={2} maxLength={40} defaultValue={firstName} placeholder={L.t("Ex : Karim", "E.g. Jordan", "P. ej.: Javier", "Ex.: João")} autoComplete="given-name" /></label>
+                <label><span>{L.t("Qui es-tu ?", "Who are you?", "¿Quién eres?", "Quem é você?")} <small>{L.t("(facultatif)", "(optional)", "(opcional)", "(opcional)")}</small></span><input name="profil" maxLength={60} placeholder={L.t("Ex : Fan des Celtics depuis 2008", "E.g. Celtics fan since 2008", "P. ej.: fan de los Celtics desde 2008", "Ex.: torcedor do Celtics desde 2008")} /></label>
+                <label>{L.t("Ton avis", "Your review", "Tu opinión", "Sua avaliação")}<textarea name="texte" required minLength={15} maxLength={500} rows={4} placeholder={L.t("Qu'est-ce que Basketlog t'apporte ?", "What does Basketlog do for you?", "¿Qué te aporta Basketlog?", "O que o Basketlog traz para você?")} /></label>
                 <input name="site" tabIndex={-1} autoComplete="off" className="hp" aria-hidden="true" />
                 {state.error && <p className="modal-err">{state.error}</p>}
-                <button className="btn-solid" disabled={!note || state.status === "sending"}>{state.status === "sending" ? L.t("Envoi…", "Sending…", "Enviando…") : note ? L.t("Envoyer mon avis", "Send my review", "Enviar mi opinión") : L.t("Choisis une note", "Pick a rating", "Elige una nota")}</button>
+                <button className="btn-solid" disabled={!note || state.status === "sending"}>{state.status === "sending" ? L.t("Envoi…", "Sending…", "Enviando…", "Enviando…") : note ? L.t("Envoyer mon avis", "Send my review", "Enviar mi opinión", "Enviar minha avaliação") : L.t("Choisis une note", "Pick a rating", "Elige una nota", "Escolha uma nota")}</button>
               </form>
             )}
           </div>

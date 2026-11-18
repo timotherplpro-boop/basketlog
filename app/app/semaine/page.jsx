@@ -23,11 +23,11 @@ export async function generateMetadata() {
   const L = await getL();
   const r = range(L);
   return pageMeta({
-    title: L.t(`Pronostics NBA de la semaine (${r}) : bilan et plus gros favoris`, `NBA predictions this week (${r}): model record and biggest favorites`, `Pronósticos NBA de la semana (${r}): balance y grandes favoritos`),
+    title: L.t(`Pronostics NBA de la semaine (${r}) : bilan et plus gros favoris`, `NBA predictions this week (${r}): model record and biggest favorites`, `Pronósticos NBA de la semana (${r}): balance y grandes favoritos`, `Palpites NBA da semana (${r}): desempenho e grandes favoritos`),
     description: L.t(
       "Les pronostics NBA de la semaine par le modèle Basketlog : bilan des 7 derniers jours (réussites et ratés), et les plus gros favoris des 7 prochains jours avec leurs probabilités.",
       "This week's NBA predictions from the Basketlog model: the last 7 days' record (hits and misses) and the biggest favorites of the next 7 days with their win probabilities.",
-      "Los pronósticos NBA de la semana según el modelo de Basketlog: balance de los últimos 7 días (aciertos y fallos) y los grandes favoritos de los próximos 7 días con sus probabilidades."
+      "Los pronósticos NBA de la semana según el modelo de Basketlog: balance de los últimos 7 días (aciertos y fallos) y los grandes favoritos de los próximos 7 días con sus probabilidades.", "Os palpites NBA da semana segundo o modelo do Basketlog: desempenho dos últimos 7 dias (acertos e erros) e os grandes favoritos dos próximos 7 dias com suas probabilidades."
     ),
     path: "/app/semaine",
     L,
@@ -51,44 +51,44 @@ export default async function WeekPage() {
   const ld = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: L.t("Plus gros favoris NBA de la semaine", "Biggest NBA favorites this week", "Grandes favoritos NBA de la semana"),
+    name: L.t("Plus gros favoris NBA de la semaine", "Biggest NBA favorites this week", "Grandes favoritos NBA de la semana", "Grandes favoritos NBA da semana"),
     itemListElement: ahead.map((u, i) => ({ "@type": "ListItem", position: i + 1, url: `${SITE}${L.href(nbaPath(u, u.d))}` })),
   };
 
   return (
     <main className="app-page wide">
       <JsonLd data={ahead.length ? ld : null} />
-      <Crumbs L={L} items={[[L.t("Accueil", "Home", "Inicio"), "/"], [L.t("Pronostics NBA de ce soir", "NBA predictions tonight", "Pronósticos NBA de hoy"), "/app/matchs"], [L.t("Pronostics NBA de la semaine", "NBA predictions this week", "Pronósticos NBA de la semana"), "/app/semaine"]]} />
+      <Crumbs L={L} items={[[L.t("Accueil", "Home", "Inicio", "Início"), "/"], [L.t("Pronostics NBA de ce soir", "NBA predictions tonight", "Pronósticos NBA de hoy", "Palpites NBA de hoje"), "/app/matchs"], [L.t("Pronostics NBA de la semaine", "NBA predictions this week", "Pronósticos NBA de la semana", "Palpites NBA da semana"), "/app/semaine"]]} />
       <AppTabs active="analyse" />
       <div className="app-head">
-        <h1>{L.t("Pronostics NBA de la semaine", "NBA predictions this week", "Pronósticos NBA de la semana")}</h1>
+        <h1>{L.t("Pronostics NBA de la semaine", "NBA predictions this week", "Pronósticos NBA de la semana", "Palpites NBA da semana")}</h1>
         <p>{L.t(
           `Semaine du ${range(L)}. Chaque pronostic est enregistré avant le match puis comparé au score final : les ratés restent affichés.`,
           `Week of ${range(L)}. Every pick is saved before tip-off and compared with the final score: misses stay on the record.`,
-          `Semana del ${range(L)}. Cada pronóstico se guarda antes del partido y se compara con el resultado final: los fallos se quedan a la vista.`
+          `Semana del ${range(L)}. Cada pronóstico se guarda antes del partido y se compara con el resultado final: los fallos se quedan a la vista.`, `Semana de ${range(L)}. Cada palpite é salvo antes do jogo e comparado com o resultado final: os erros ficam à vista.`
         )}</p>
       </div>
 
       {week.length > 0 && (
         <section className="card block">
-          <h2>{L.t("Les 7 derniers jours", "The last 7 days", "Los últimos 7 días")}</h2>
+          <h2>{L.t("Les 7 derniers jours", "The last 7 days", "Los últimos 7 días", "Os últimos 7 dias")}</h2>
           <p className="big-stat">{L.t(
             <>Le favori du modèle a gagné <b>{ok} matchs sur {week.length}</b> ({pctOf(ok / week.length, L)}).</>,
             <>The model&apos;s favorite won <b>{ok} of {week.length} games</b> ({pctOf(ok / week.length, L)}).</>,
-            <>El favorito del modelo ganó <b>{ok} de {week.length} partidos</b> ({pctOf(ok / week.length, L)}).</>
+            <>El favorito del modelo ganó <b>{ok} de {week.length} partidos</b> ({pctOf(ok / week.length, L)}).</>, <>O favorito do modelo venceu <b>{ok} de {week.length} jogos</b> ({pctOf(ok / week.length, L)}).</>
           )}</p>
           <div className="grid2">
             <div>
-              <h3>✅ {L.t("Meilleurs pronostics", "Best calls", "Mejores pronósticos")}</h3>
+              <h3>✅ {L.t("Meilleurs pronostics", "Best calls", "Mejores pronósticos", "Melhores palpites")}</h3>
               <ul className="wk-list">{best.map((p) => (
                 <li key={p.id}><Link href={L.href(nbaPath(p, p.d))}>{line(p)}</Link> <span className="mono">· {favTeam(p).short} {pctOf(fav(p), L)}</span></li>
               ))}</ul>
             </div>
             <div>
-              <h3>❌ {L.t("Plus grosses surprises", "Biggest upsets", "Mayores sorpresas")}</h3>
+              <h3>❌ {L.t("Plus grosses surprises", "Biggest upsets", "Mayores sorpresas", "Maiores surpresas")}</h3>
               {misses.length ? <ul className="wk-list">{misses.map((p) => (
                 <li key={p.id}><Link href={L.href(nbaPath(p, p.d))}>{line(p)}</Link> <span className="mono">· {favTeam(p).short} {pctOf(fav(p), L)}</span></li>
-              ))}</ul> : <p>{L.t("Aucun raté cette semaine.", "No misses this week.", "Ningún fallo esta semana.")}</p>}
+              ))}</ul> : <p>{L.t("Aucun raté cette semaine.", "No misses this week.", "Ningún fallo esta semana.", "Nenhum erro nesta semana.")}</p>}
             </div>
           </div>
         </section>
@@ -96,10 +96,10 @@ export default async function WeekPage() {
 
       {ahead.length > 0 && (
         <section className="card block">
-          <h2>{L.t("Plus gros favoris des 7 prochains jours", "Biggest favorites of the next 7 days", "Grandes favoritos de los próximos 7 días")}</h2>
+          <h2>{L.t("Plus gros favoris des 7 prochains jours", "Biggest favorites of the next 7 days", "Grandes favoritos de los próximos 7 días", "Grandes favoritos dos próximos 7 dias")}</h2>
           <ul className="wk-list">{ahead.map((u) => (
             <li key={u.id}>
-              <Link href={L.href(nbaPath(u, u.d))}>{L.t(`Pronostic ${u.away.short} – ${u.home.short}`, `${u.away.short} vs ${u.home.short} prediction`, `Pronóstico ${u.away.short} – ${u.home.short}`)}</Link>
+              <Link href={L.href(nbaPath(u, u.d))}>{L.t(`Pronostic ${u.away.short} – ${u.home.short}`, `${u.away.short} vs ${u.home.short} prediction`, `Pronóstico ${u.away.short} – ${u.home.short}`, `Palpite ${u.away.short} x ${u.home.short}`)}</Link>
               <span className="mono"> · {dayOf(u.date)} · {favTeam(u).short} {pctOf(fav(u), L)}</span>
             </li>
           ))}</ul>
@@ -107,9 +107,9 @@ export default async function WeekPage() {
       )}
 
       <p className="note">
-        <Link href={L.href("/app/matchs")}>{L.t("Pronostics NBA de ce soir", "NBA predictions tonight", "Pronósticos NBA de hoy")}</Link>{" · "}
-        <Link href={L.href("/app/power-rankings")}>{L.t("Power ranking NBA", "NBA power rankings", "Power ranking NBA")}</Link>{" · "}
-        <Link href={L.href("/app/bilan")}>{L.t("Bilan complet du modèle", "Full model track record", "Balance completo del modelo")}</Link>
+        <Link href={L.href("/app/matchs")}>{L.t("Pronostics NBA de ce soir", "NBA predictions tonight", "Pronósticos NBA de hoy", "Palpites NBA de hoje")}</Link>{" · "}
+        <Link href={L.href("/app/power-rankings")}>{L.t("Power ranking NBA", "NBA power rankings", "Power ranking NBA", "Power ranking NBA")}</Link>{" · "}
+        <Link href={L.href("/app/bilan")}>{L.t("Bilan complet du modèle", "Full model track record", "Balance completo del modelo", "Desempenho completo do modelo")}</Link>
       </p>
     </main>
   );

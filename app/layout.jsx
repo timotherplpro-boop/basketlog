@@ -35,7 +35,7 @@ export async function generateMetadata() {
   const description = L.t(
     "Analyse basket et pronostics NBA, EuroLeague pour chaque match : probabilités de victoire gratuites, score projeté, absences, forme. Taux de réussite public.",
     "NBA and EuroLeague predictions for every game: free win probabilities, projected score, injuries, form and scenarios. Public track record.",
-    "Pronósticos de la NBA y la Euroliga para cada partido: probabilidades de victoria gratis, marcador proyectado, bajas, forma y escenarios. Balance público."
+    "Pronósticos de la NBA y la Euroliga para cada partido: probabilidades de victoria gratis, marcador proyectado, bajas, forma y escenarios. Balance público.", "Palpites da NBA e da Euroliga para cada jogo: probabilidades de vitória grátis, placar projetado, desfalques, fase e cenários. Desempenho público."
   );
   return {
     metadataBase: new URL(SITE),
@@ -91,7 +91,7 @@ export default async function RootLayout({ children }) {
         <meta name="msvalidate.01" content={BING_SITE_VERIFICATION} />
         <link rel="preconnect" href="https://images.unsplash.com" />
         {/* Appli installable : manifeste et icônes dans le <head> dès le premier octet (requis par Chrome et Safari) */}
-        <link rel="manifest" href={L.t("/manifest.webmanifest", "/manifest-en.webmanifest", "/manifest-es.webmanifest")} />
+        <link rel="manifest" href={L.t("/manifest.webmanifest", "/manifest-en.webmanifest", "/manifest-es.webmanifest", "/manifest-pt.webmanifest")} />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

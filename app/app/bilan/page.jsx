@@ -13,10 +13,10 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata() {
   const L = await getL();
   return pageMeta({
-    title: L.t("Bilan des pronostics NBA : taux de réussite réel – Basketlog", "NBA prediction track record: real accuracy – Basketlog", "Balance de pronósticos NBA: porcentaje de acierto real – Basketlog"),
+    title: L.t("Bilan des pronostics NBA : taux de réussite réel – Basketlog", "NBA prediction track record: real accuracy – Basketlog", "Balance de pronósticos NBA: porcentaje de acierto real – Basketlog", "Desempenho dos palpites NBA: taxa de acerto real – Basketlog"),
     description: L.t(
       "Chaque pronostic Basketlog comparé au score final, match par match. Taux de réussite NBA et EuroLeague, calibration et niveau de confiance.",
-      "Every Basketlog prediction compared with the final score, game by game. NBA and EuroLeague accuracy, calibration and confidence levels.", "Cada pronóstico de Basketlog comparado con el resultado final, partido a partido. Acierto en la NBA y la Euroliga, calibración y niveles de confianza."
+      "Every Basketlog prediction compared with the final score, game by game. NBA and EuroLeague accuracy, calibration and confidence levels.", "Cada pronóstico de Basketlog comparado con el resultado final, partido a partido. Acierto en la NBA y la Euroliga, calibración y niveles de confianza.", "Cada palpite do Basketlog comparado com o resultado final, jogo a jogo. Acerto na NBA e na Euroliga, calibração e níveis de confiança."
     ),
     path: "/app/bilan",
     L,
@@ -40,7 +40,7 @@ function Row({ p, href, L }) {
         <span className={`t ${favHome ? "fav" : ""}`}>{/* eslint-disable-next-line @next/next/no-img-element */}{p.home.logo && <img src={p.home.logo} alt="" />}{p.home.abbr}</span>
       </span>
       <span className="bl-pick">{fav.abbr} {pf}{L.en ? "%" : " %"}</span>
-      <span className="bl-res" role="img" aria-label={p.ok ? L.t("Pronostic correct", "Correct prediction", "Pronóstico acertado") : L.t("Pronostic raté", "Missed prediction", "Pronóstico fallado")}>{p.ok ? "✓" : "✗"}</span>
+      <span className="bl-res" role="img" aria-label={p.ok ? L.t("Pronostic correct", "Correct prediction", "Pronóstico acertado", "Palpite certo") : L.t("Pronostic raté", "Missed prediction", "Pronóstico fallado", "Palpite errado")}>{p.ok ? "✓" : "✗"}</span>
     </Link>
   );
 }
@@ -49,7 +49,7 @@ export default async function BilanPage({ searchParams }) {
   const sp = await searchParams;
   const L = await getL();
   const pct = (x) => (x == null ? "–" : `${Math.round(x * 100)}${L.en ? "%" : " %"}`);
-  const of = (a, b) => L.t(`${a} sur ${b}`, `${a} of ${b}`, `${a} de ${b}`);
+  const of = (a, b) => L.t(`${a} sur ${b}`, `${a} of ${b}`, `${a} de ${b}`, `${a} de ${b}`);
   const season = seasonForDate(nbaToday());
   const elYear = Number(currentSeasonCode().slice(1));
   const label = (y) => `${y - 1}-${String(y).slice(2)}`;
@@ -77,19 +77,19 @@ export default async function BilanPage({ searchParams }) {
   }
 
   const tabs = [
-    ["pub", L.t("Pronostics publiés", "Published picks", "Pronósticos publicados")],
-    ["nba", `NBA ${label(season)} (${L.t("recalculé", "recalculated", "recalculado")})`],
-    ["past", `NBA ${label(season - 1)} (${L.t("test", "backtest", "prueba")})`],
-    ["el", L.t("EuroLeague", "EuroLeague", "Euroliga")],
+    ["pub", L.t("Pronostics publiés", "Published picks", "Pronósticos publicados", "Palpites publicados")],
+    ["nba", `NBA ${label(season)} (${L.t("recalculé", "recalculated", "recalculado", "recalculado")})`],
+    ["past", `NBA ${label(season - 1)} (${L.t("test", "backtest", "prueba", "teste")})`],
+    ["el", L.t("EuroLeague", "EuroLeague", "Euroliga", "Euroliga")],
   ];
 
   return (
     <main className="app-page wide">
       <AppTabs active="bilan" />
       <div className="app-head">
-        <h1>{L.t("Bilan du modèle", "Model track record", "Balance del modelo")}</h1>
-        <p>{L.t("Chaque pronostic comparé au score final. Les bons comme les ratés.", "Every prediction compared with the final score. The hits and the misses.", "Cada pronóstico comparado con el resultado final. Los aciertos y los fallos.")}</p>
-        <p className="note">{L.t("Pas de chiffres choisis à la main : tout est recalculé automatiquement.", "No hand-picked numbers: everything is recalculated automatically.", "Sin cifras elegidas a dedo: todo se recalcula automáticamente.")}</p>
+        <h1>{L.t("Bilan du modèle", "Model track record", "Balance del modelo", "Desempenho do modelo")}</h1>
+        <p>{L.t("Chaque pronostic comparé au score final. Les bons comme les ratés.", "Every prediction compared with the final score. The hits and the misses.", "Cada pronóstico comparado con el resultado final. Los aciertos y los fallos.", "Cada palpite comparado com o resultado final. Os acertos e os erros.")}</p>
+        <p className="note">{L.t("Pas de chiffres choisis à la main : tout est recalculé automatiquement.", "No hand-picked numbers: everything is recalculated automatically.", "Sin cifras elegidas a dedo: todo se recalcula automáticamente.", "Sem números escolhidos a dedo: tudo é recalculado automaticamente.")}</p>
       </div>
 
       <div className="bl-tabs" role="tablist">
@@ -99,31 +99,31 @@ export default async function BilanPage({ searchParams }) {
       </div>
 
       {!picks ? (
-        <div className="card block empty">{L.t("Données momentanément indisponibles. Réessaie dans quelques minutes.", "Data temporarily unavailable. Please try again in a few minutes.", "Datos no disponibles por el momento. Vuelve a intentarlo en unos minutos.")}</div>
+        <div className="card block empty">{L.t("Données momentanément indisponibles. Réessaie dans quelques minutes.", "Data temporarily unavailable. Please try again in a few minutes.", "Datos no disponibles por el momento. Vuelve a intentarlo en unos minutos.", "Dados indisponíveis no momento. Tente novamente em alguns minutos.")}</div>
       ) : !s.n ? (
         <div className="card block empty">{view === "pub"
           ? L.t(
             `Le suivi des pronostics publiés a commencé le ${since}. ${pending ? `${pending} pronostic${pending > 1 ? "s" : ""} enregistré${pending > 1 ? "s" : ""} avant le match, en attente du résultat.` : ""} Les premiers résultats apparaîtront ici après les matchs.`,
             `Tracking of published picks started on ${since}. ${pending ? `${pending} pick${pending > 1 ? "s" : ""} recorded before tip-off, waiting for the result.` : ""} The first results will show up here after the games.`,
-            `El seguimiento de los pronósticos publicados empezó el ${since}. ${pending ? `${pending} pronóstico${pending > 1 ? "s" : ""} guardado${pending > 1 ? "s" : ""} antes del partido, a la espera del resultado.` : ""} Los primeros resultados aparecerán aquí después de los partidos.`)
-          : L.t("Aucun match terminé pour l'instant sur cette période.", "No completed games yet for this period.", "Todavía no hay partidos terminados en este periodo.")}</div>
+            `El seguimiento de los pronósticos publicados empezó el ${since}. ${pending ? `${pending} pronóstico${pending > 1 ? "s" : ""} guardado${pending > 1 ? "s" : ""} antes del partido, a la espera del resultado.` : ""} Los primeros resultados aparecerán aquí después de los partidos.`, `O acompanhamento dos palpites publicados começou em ${since}. ${pending ? `${pending} palpite${pending > 1 ? "s" : ""} salvo${pending > 1 ? "s" : ""} antes do jogo, aguardando o resultado.` : ""} Os primeiros resultados aparecerão aqui depois dos jogos.`)
+          : L.t("Aucun match terminé pour l'instant sur cette période.", "No completed games yet for this period.", "Todavía no hay partidos terminados en este periodo.", "Ainda não há jogos encerrados neste período.")}</div>
       ) : (
         <>
           {view === "pub" && <p className="note" style={{ textAlign: "center", margin: "0 0 12px" }}>{L.t(
             `Depuis le ${since} · ${pending} pronostic${pending > 1 ? "s" : ""} en attente du résultat`,
             `Since ${since} · ${pending} pick${pending > 1 ? "s" : ""} waiting for the result`,
-            `Desde el ${since} · ${pending} pronóstico${pending > 1 ? "s" : ""} a la espera del resultado`)}</p>}
+            `Desde el ${since} · ${pending} pronóstico${pending > 1 ? "s" : ""} a la espera del resultado`, `Desde ${since} · ${pending} palpite${pending > 1 ? "s" : ""} aguardando o resultado`)}</p>}
           <div className="kpis kpis8">
-            <div className="card kpi bl-hero"><span>{L.t("Bons pronostics", "Correct predictions", "Pronósticos acertados")}</span><strong>{pct(s.pct)}</strong><small>{L.t(`${s.ok} sur ${s.n} matchs`, `${s.ok} of ${s.n} games`, `${s.ok} de ${s.n} partidos`)}</small></div>
-            <div className="card kpi"><span>{L.t("7 derniers jours", "Last 7 days", "Últimos 7 días")}</span><strong>{week.n ? pct(week.pct) : "–"}</strong><small>{week.n ? of(week.ok, week.n) : L.t("pas de match", "no games", "sin partidos")}</small></div>
-            <div className="card kpi"><span>{L.t("Confiance très élevée", "Very high confidence", "Confianza muy alta")}</span><strong>{strong.n ? pct(strong.ok / strong.n) : "–"}</strong><small>{strong.n ? L.t(`${strong.ok} sur ${strong.n} · favoris à 88 % et plus`, `${strong.ok} of ${strong.n} · favorites at 88%+`, `${strong.ok} de ${strong.n} · favoritos al 88 % o más`) : L.t("aucun match à ce niveau pour l'instant", "no game at this level yet", "ningún partido en este nivel por ahora")}</small></div>
-            <div className="card kpi"><span>{L.t("Erreur moyenne sur l'écart", "Average margin error", "Error medio en la diferencia")}</span><strong>{s.mae != null ? (L.en ? `${s.mae.toFixed(1)} pts` : `${s.mae.toFixed(1).replace(".", ",")} pts`) : "–"}</strong><small>{L.t("score projeté vs réel", "projected vs actual score", "marcador proyectado vs. real")}</small></div>
+            <div className="card kpi bl-hero"><span>{L.t("Bons pronostics", "Correct predictions", "Pronósticos acertados", "Palpites certos")}</span><strong>{pct(s.pct)}</strong><small>{L.t(`${s.ok} sur ${s.n} matchs`, `${s.ok} of ${s.n} games`, `${s.ok} de ${s.n} partidos`, `${s.ok} de ${s.n} jogos`)}</small></div>
+            <div className="card kpi"><span>{L.t("7 derniers jours", "Last 7 days", "Últimos 7 días", "Últimos 7 dias")}</span><strong>{week.n ? pct(week.pct) : "–"}</strong><small>{week.n ? of(week.ok, week.n) : L.t("pas de match", "no games", "sin partidos", "sem jogos")}</small></div>
+            <div className="card kpi"><span>{L.t("Confiance très élevée", "Very high confidence", "Confianza muy alta", "Confiança muito alta")}</span><strong>{strong.n ? pct(strong.ok / strong.n) : "–"}</strong><small>{strong.n ? L.t(`${strong.ok} sur ${strong.n} · favoris à 88 % et plus`, `${strong.ok} of ${strong.n} · favorites at 88%+`, `${strong.ok} de ${strong.n} · favoritos al 88 % o más`, `${strong.ok} de ${strong.n} · favoritos a 88 % ou mais`) : L.t("aucun match à ce niveau pour l'instant", "no game at this level yet", "ningún partido en este nivel por ahora", "nenhum jogo neste nível por enquanto")}</small></div>
+            <div className="card kpi"><span>{L.t("Erreur moyenne sur l'écart", "Average margin error", "Error medio en la diferencia", "Erro médio na diferença")}</span><strong>{s.mae != null ? (L.en ? `${s.mae.toFixed(1)} pts` : `${s.mae.toFixed(1).replace(".", ",")} pts`) : "–"}</strong><small>{L.t("score projeté vs réel", "projected vs actual score", "marcador proyectado vs. real", "placar projetado vs. real")}</small></div>
           </div>
 
           <div className="grid2">
             <div className="card block">
-              <h2>{L.t("Selon le niveau de confiance", "By confidence level", "Según el nivel de confianza")}</h2>
-              <p className="team-rec" style={{ marginTop: 0 }}>{L.t("Plus la confiance est haute, plus le favori doit gagner souvent.", "The higher the confidence, the more often the favorite should win.", "Cuanto mayor es la confianza, más a menudo debe ganar el favorito.")}</p>
+              <h2>{L.t("Selon le niveau de confiance", "By confidence level", "Según el nivel de confianza", "Por nível de confiança")}</h2>
+              <p className="team-rec" style={{ marginTop: 0 }}>{L.t("Plus la confiance est haute, plus le favori doit gagner souvent.", "The higher the confidence, the more often the favorite should win.", "Cuanto mayor es la confianza, más a menudo debe ganar el favorito.", "Quanto maior a confiança, mais vezes o favorito deve vencer.")}</p>
               {s.byConf.map((c) => (
                 <div className="bl-bar" key={c.label}>
                   <span className="n">{confText(c.label, L)}</span>
@@ -133,24 +133,24 @@ export default async function BilanPage({ searchParams }) {
               ))}
             </div>
             <div className="card block">
-              <h2>{L.t("Calibration", "Calibration", "Calibración")}</h2>
-              <p className="team-rec" style={{ marginTop: 0 }}>{L.t("Quand Basketlog annonce 70 %, le favori doit gagner environ 7 fois sur 10.", "When Basketlog says 70%, the favorite should win about 7 times out of 10.", "Cuando Basketlog anuncia un 70 %, el favorito debe ganar unas 7 veces de cada 10.")}</p>
+              <h2>{L.t("Calibration", "Calibration", "Calibración", "Calibração")}</h2>
+              <p className="team-rec" style={{ marginTop: 0 }}>{L.t("Quand Basketlog annonce 70 %, le favori doit gagner environ 7 fois sur 10.", "When Basketlog says 70%, the favorite should win about 7 times out of 10.", "Cuando Basketlog anuncia un 70 %, el favorito debe ganar unas 7 veces de cada 10.", "Quando o Basketlog anuncia 70 %, o favorito deve vencer cerca de 7 vezes em cada 10.")}</p>
               {s.buckets.map((b) => (
                 <div className="bl-cal" key={b.lo}>
                   <span className="n">{Math.round(b.lo * 100)}-{Math.round(b.hi * 100)}{L.en ? "%" : " %"}</span>
                   <div className="track">
-                    {b.avg != null && <i className="pred" style={{ left: `${b.avg * 100}%` }} title={L.t("Probabilité annoncée", "Stated probability", "Probabilidad anunciada")} />}
+                    {b.avg != null && <i className="pred" style={{ left: `${b.avg * 100}%` }} title={L.t("Probabilité annoncée", "Stated probability", "Probabilidad anunciada", "Probabilidade anunciada")} />}
                     <div style={{ width: `${b.n ? (b.ok / b.n) * 100 : 0}%` }} />
                   </div>
                   <span className="v mono">{b.n ? pct(b.ok / b.n) : "–"} <small>({b.n})</small></span>
                 </div>
               ))}
-              <p className="bl-legend"><span className="sw" /> {L.t("victoires réelles du favori", "favorite's actual wins", "victorias reales del favorito")} <span className="sw pred" /> {L.t("probabilité annoncée", "stated probability", "probabilidad anunciada")}</p>
+              <p className="bl-legend"><span className="sw" /> {L.t("victoires réelles du favori", "favorite's actual wins", "victorias reales del favorito", "vitórias reais do favorito")} <span className="sw pred" /> {L.t("probabilité annoncée", "stated probability", "probabilidad anunciada", "probabilidade anunciada")}</p>
             </div>
           </div>
 
           <div className="card block">
-            <h2>{L.t("Derniers résultats", "Recent results", "Últimos resultados")} <span className="tag">{L.t(`${s.n} matchs`, `${s.n} games`, `${s.n} partidos`)}</span></h2>
+            <h2>{L.t("Derniers résultats", "Recent results", "Últimos resultados", "Últimos resultados")} <span className="tag">{L.t(`${s.n} matchs`, `${s.n} games`, `${s.n} partidos`, `${s.n} jogos`)}</span></h2>
             {groups.map((g) => (
               <div key={g.k}>
                 <div className="up-day">{g.k}</div>
@@ -162,7 +162,11 @@ export default async function BilanPage({ searchParams }) {
       )}
 
       <div className="card block bl-method">
-        {view === "pub" ? (L.es ? (<>
+        {view === "pub" ? (L.pt ? (<>
+          <h2>Como este desempenho é calculado</h2>
+          <p>Cada palpite é salvo <b>antes do início do jogo</b>, exatamente como aparece no Basketlog (desfalques incluídos): vale a última versão antes do jogo. Depois ele é comparado com o resultado final. Nada é recalculado depois.</p>
+          <p>O acompanhamento começou em {since}. As outras abas mostram o modelo recalculado em temporadas inteiras, para avaliá-lo em mais jogos.</p>
+        </>) : L.es ? (<>
           <h2>Cómo se calcula este balance</h2>
           <p>Cada pronóstico se guarda <b>antes del salto inicial</b>, tal y como aparece en Basketlog (bajas incluidas): cuenta la última versión anterior al partido. Después se compara con el resultado final. No se recalcula nada a posteriori.</p>
           <p>El seguimiento empezó el {since}. Las otras pestañas muestran el modelo recalculado sobre temporadas enteras, para juzgarlo en más partidos.</p>
@@ -174,7 +178,12 @@ export default async function BilanPage({ searchParams }) {
           <h2>Comment ce bilan est calculé</h2>
           <p>Chaque pronostic est enregistré <b>avant le coup d&apos;envoi</b>, tel qu&apos;il est affiché sur Basketlog (absences comprises) : c&apos;est la dernière version d&apos;avant-match qui compte. Il est ensuite comparé au score final. Rien n&apos;est recalculé après coup.</p>
           <p>Le suivi a commencé le {since}. Les autres onglets montrent le modèle recalculé sur des saisons entières, pour le juger sur plus de matchs.</p>
-        </>)) : L.es ? (<>
+        </>)) : L.pt ? (<>
+          <h2>Como este desempenho é calculado</h2>
+          <p>Para cada jogo encerrado, rodamos de novo o modelo do Basketlog <b>só com os resultados conhecidos antes do início do jogo</b> e comparamos o favorito apontado com o vencedor real. Nenhuma informação do futuro é usada.</p>
+          <p>Os desfalques não entram neste desempenho, porque nem sempre se conhece a lista exata antes do jogo. Os palpites mostrados antes dos jogos levam os desfalques em conta: por isso são um pouco mais bem informados do que este desempenho.</p>
+          <p>A aba {label(season - 1)} é um teste sobre uma temporada inteira já disputada, para avaliar o modelo em mais de 1.000 jogos.</p>
+        </>) : L.es ? (<>
           <h2>Cómo se calcula este balance</h2>
           <p>Para cada partido terminado, volvemos a ejecutar el modelo de Basketlog <b>solo con los resultados conocidos antes del salto inicial</b> y comparamos el favorito señalado con el ganador real. No se usa ninguna información del futuro.</p>
           <p>Las bajas no se incluyen en este balance, porque no siempre se conoce la lista exacta antes del partido. Los pronósticos que se muestran antes de los partidos sí las tienen en cuenta: por eso están algo mejor informados que este balance.</p>
@@ -192,7 +201,7 @@ export default async function BilanPage({ searchParams }) {
           <p>L&apos;onglet « Pronostics publiés » montre, lui, les pronostics enregistrés avant chaque match depuis le {since}.</p>
         </>)}
       </div>
-      <p className="disclaimer">{L.t("Basketlog n'est pas un service de paris. Un bon taux de réussite passé ne garantit pas les résultats futurs.", "Basketlog is not a betting service. A good past track record does not guarantee future results.", "Basketlog no es un servicio de apuestas. Un buen porcentaje de acierto en el pasado no garantiza resultados futuros.")}</p>
+      <p className="disclaimer">{L.t("Basketlog n'est pas un service de paris. Un bon taux de réussite passé ne garantit pas les résultats futurs.", "Basketlog is not a betting service. A good past track record does not guarantee future results.", "Basketlog no es un servicio de apuestas. Un buen porcentaje de acierto en el pasado no garantiza resultados futuros.", "O Basketlog não é um serviço de apostas. Uma boa taxa de acerto no passado não garante resultados futuros.")}</p>
     </main>
   );
 }

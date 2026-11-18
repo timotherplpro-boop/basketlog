@@ -11,7 +11,7 @@ import { useL } from "./LangProvider";
 
 export default function PayCheckout({ plan, planName, priceText, perText, code = "" }) {
   const L = useL();
-  const lang = L.en ? "en" : L.es ? "es" : "fr";
+  const lang = L.en ? "en" : L.es ? "es" : L.pt ? "pt" : "fr";
   const [error, setError] = useState(null);
   const started = useRef(false);
 
@@ -37,26 +37,26 @@ export default function PayCheckout({ plan, planName, priceText, perText, code =
       <div className="pay-sum">
         <span className="pay-plan">{planName}</span>
         <b>{priceText}</b><span className="pay-per">{perText}</span>
-        {code && <small className="pay-code">{L.t(`Code ${code} appliqué au paiement`, `Code ${code} applied at checkout`, `Código ${code} aplicado al pago`)}</small>}
+        {code && <small className="pay-code">{L.t(`Code ${code} appliqué au paiement`, `Code ${code} applied at checkout`, `Código ${code} aplicado al pago`, `Código ${code} aplicado ao pagamento`)}</small>}
       </div>
       {error ? (
         <div className="pay-err" role="alert">
           <p>{error === "config"
-            ? L.t("Le paiement n'est pas disponible pour le moment. Reviens très bientôt.", "Payment isn't available right now. Please come back soon.", "El pago no está disponible por ahora. Vuelve muy pronto.")
+            ? L.t("Le paiement n'est pas disponible pour le moment. Reviens très bientôt.", "Payment isn't available right now. Please come back soon.", "El pago no está disponible por ahora. Vuelve muy pronto.", "O pagamento não está disponível no momento. Volte em breve.")
             : error === "trop"
-              ? L.t("Trop d'essais. Attends quelques minutes avant de réessayer.", "Too many attempts. Wait a few minutes before trying again.", "Demasiados intentos. Espera unos minutos antes de volver a intentarlo.")
-              : L.t("Le paiement n'a pas pu s'ouvrir. Réessaie dans un instant.", "The checkout couldn't open. Please try again in a moment.", "El pago no se ha podido abrir. Inténtalo de nuevo en un instante.")}</p>
-          <button type="button" className="btn-solid" onClick={() => window.location.reload()}>{L.t("Réessayer", "Try again", "Reintentar")}</button>
+              ? L.t("Trop d'essais. Attends quelques minutes avant de réessayer.", "Too many attempts. Wait a few minutes before trying again.", "Demasiados intentos. Espera unos minutos antes de volver a intentarlo.", "Tentativas demais. Espere alguns minutos antes de tentar novamente.")
+              : L.t("Le paiement n'a pas pu s'ouvrir. Réessaie dans un instant.", "The checkout couldn't open. Please try again in a moment.", "El pago no se ha podido abrir. Inténtalo de nuevo en un instante.", "Não foi possível abrir o pagamento. Tente novamente em instantes.")}</p>
+          <button type="button" className="btn-solid" onClick={() => window.location.reload()}>{L.t("Réessayer", "Try again", "Reintentar", "Tentar novamente")}</button>
         </div>
       ) : (
-        <div className="pay-loading" aria-busy="true">{L.t("Ouverture du paiement sécurisé…", "Opening secure checkout…", "Abriendo el pago seguro…")}</div>
+        <div className="pay-loading" aria-busy="true">{L.t("Ouverture du paiement sécurisé…", "Opening secure checkout…", "Abriendo el pago seguro…", "Abrindo o pagamento seguro…")}</div>
       )}
       <p className="pay-safe">🔒 {L.t(
         "Paiement sécurisé par Whop (carte, Apple Pay, Google Pay). Pas de compte à créer : ton accès s'ouvre dès le paiement.",
         "Secure payment by Whop (card, Apple Pay, Google Pay). No account to create: your access opens as soon as you pay.",
-        "Pago seguro con Whop (tarjeta, Apple Pay, Google Pay). Sin cuenta que crear: tu acceso se abre en cuanto pagas."
+        "Pago seguro con Whop (tarjeta, Apple Pay, Google Pay). Sin cuenta que crear: tu acceso se abre en cuanto pagas.", "Pagamento seguro com a Whop (cartão, Apple Pay, Google Pay). Sem conta para criar: seu acesso é liberado assim que você paga."
       )}</p>
-      <p className="pay-back"><Link href={L.href("/pro")}>{L.t("← Changer de formule", "← Change plan", "← Cambiar de plan")}</Link></p>
+      <p className="pay-back"><Link href={L.href("/pro")}>{L.t("← Changer de formule", "← Change plan", "← Cambiar de plan", "← Trocar de plano")}</Link></p>
     </div>
   );
 }

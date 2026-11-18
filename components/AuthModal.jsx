@@ -141,18 +141,18 @@ export default function AuthModal({ initial, googleOn = false, onClose }) {
       const r = await call({ action: "oubli", email }).catch(() => ({ ok: false }));
       setBusy(null);
       if (r.ok) { setSent(r.message || ""); track("Mot de passe oublié", { etape: "demandé" }); }
-      else setError({ text: r.error || L.t("Réessaie dans un instant.", "Please try again in a moment.", "Inténtalo de nuevo en un instante."), field: r.field });
+      else setError({ text: r.error || L.t("Réessaie dans un instant.", "Please try again in a moment.", "Inténtalo de nuevo en un instante.", "Tente novamente em instantes."), field: r.field });
       return;
     }
     if (mode === "inscription" && mdp.length < 6) {
-      setError({ text: L.t("Ton mot de passe doit faire au moins 6 caractères.", "Your password must be at least 6 characters.", "Tu contraseña debe tener al menos 6 caracteres."), field: "mdp" });
+      setError({ text: L.t("Ton mot de passe doit faire au moins 6 caractères.", "Your password must be at least 6 characters.", "Tu contraseña debe tener al menos 6 caracteres.", "Sua senha deve ter pelo menos 6 caracteres."), field: "mdp" });
       return;
     }
     setBusy("form");
     const r = await call({ action: mode, email, mdp, site }).catch(() => ({ ok: false }));
     if (r.ok) { finish(mode === "inscription" ? "nouveau" : "retour", "email"); return; }
     setBusy(null);
-    setError({ text: r.error || L.t("Le service ne répond pas, réessaie dans un instant.", "The service isn't responding, please try again in a moment.", "El servicio no responde, inténtalo de nuevo en un instante."), field: r.field, existe: r.existe });
+    setError({ text: r.error || L.t("Le service ne répond pas, réessaie dans un instant.", "The service isn't responding, please try again in a moment.", "El servicio no responde, inténtalo de nuevo en un instante.", "O serviço não está respondendo, tente novamente em instantes."), field: r.field, existe: r.existe });
     if (mode === "inscription" && r.existe) track("Inscription refusée", { raison: r.google ? "compte_google" : "deja_inscrit" });
   };
 
@@ -162,15 +162,15 @@ export default function AuthModal({ initial, googleOn = false, onClose }) {
 
   const fromMatch = source === "analyse" || source === "formulaire";
   const toPay = initial?.then === "paiement";
-  const title = mode === "inscription" ? L.t("Créer un compte", "Create an account", "Crear una cuenta")
-    : mode === "connexion" ? L.t("Se connecter", "Log in", "Iniciar sesión")
-      : L.t("Mot de passe oublié", "Forgot password", "¿Has olvidado tu contraseña?");
+  const title = mode === "inscription" ? L.t("Créer un compte", "Create an account", "Crear una cuenta", "Criar uma conta")
+    : mode === "connexion" ? L.t("Se connecter", "Log in", "Iniciar sesión", "Entrar")
+      : L.t("Mot de passe oublié", "Forgot password", "¿Has olvidado tu contraseña?", "Esqueceu sua senha?");
   const sub = mode === "inscription"
-    ? toPay ? L.t("Crée ton compte gratuit, puis règle ta formule : elle sera reliée à ce compte.", "Create your free account, then pay for your plan: it will be linked to this account.", "Crea tu cuenta gratis y luego paga tu plan: quedará vinculado a esta cuenta.")
-      : fromMatch ? L.t("Inscris-toi gratuitement pour voir l'analyse du match", "Sign up for free to see the game analysis", "Regístrate gratis para ver el análisis del partido")
-        : L.t("Inscris-toi gratuitement pour accéder aux analyses", "Sign up for free to access the analyses", "Regístrate gratis para acceder a los análisis")
-    : mode === "connexion" ? L.t("Connecte-toi pour retrouver tes analyses", "Log in to get back to your analyses", "Inicia sesión para volver a tus análisis")
-      : L.t("Entre ton adresse e-mail : on t'envoie un lien pour choisir un nouveau mot de passe.", "Enter your email: we'll send you a link to choose a new password.", "Introduce tu correo: te enviaremos un enlace para elegir una nueva contraseña.");
+    ? toPay ? L.t("Crée ton compte gratuit, puis règle ta formule : elle sera reliée à ce compte.", "Create your free account, then pay for your plan: it will be linked to this account.", "Crea tu cuenta gratis y luego paga tu plan: quedará vinculado a esta cuenta.", "Crie sua conta grátis e depois pague seu plano: ele ficará vinculado a esta conta.")
+      : fromMatch ? L.t("Inscris-toi gratuitement pour voir l'analyse du match", "Sign up for free to see the game analysis", "Regístrate gratis para ver el análisis del partido", "Cadastre-se grátis para ver a análise do jogo")
+        : L.t("Inscris-toi gratuitement pour accéder aux analyses", "Sign up for free to access the analyses", "Regístrate gratis para acceder a los análisis", "Cadastre-se grátis para acessar as análises")
+    : mode === "connexion" ? L.t("Connecte-toi pour retrouver tes analyses", "Log in to get back to your analyses", "Inicia sesión para volver a tus análisis", "Faça login para voltar às suas análises")
+      : L.t("Entre ton adresse e-mail : on t'envoie un lien pour choisir un nouveau mot de passe.", "Enter your email: we'll send you a link to choose a new password.", "Introduce tu correo: te enviaremos un enlace para elegir una nueva contraseña.", "Digite seu e-mail: enviaremos um link para você escolher uma nova senha.");
   const errFor = (f) => (error && error.field === f ? error.text : null);
   const whopHref = `/api/whop/login?next=${encodeURIComponent(initial?.next || (typeof location !== "undefined" ? location.pathname + location.search : "/app"))}`;
 
@@ -183,44 +183,44 @@ export default function AuthModal({ initial, googleOn = false, onClose }) {
         {mode !== "oubli" && googleOn && (
           <>
             <a className="auth-google" href={googleHref()} onClick={onGoogle} aria-disabled={!!busy} aria-busy={busy === "google"}>
-              <GoogleG /> {busy === "google" ? L.t("Ouverture de Google…", "Opening Google…", "Abriendo Google…") : L.t("Continuer avec Google", "Continue with Google", "Continuar con Google")}
+              <GoogleG /> {busy === "google" ? L.t("Ouverture de Google…", "Opening Google…", "Abriendo Google…", "Abrindo o Google…") : L.t("Continuer avec Google", "Continue with Google", "Continuar con Google", "Continuar com o Google")}
             </a>
             {inApp && (
               <p className="auth-hint">{L.t(
                 `Dans l'appli ${inApp === "app" ? "que tu utilises" : inApp}, Google peut refuser la connexion : inscris-toi plutôt avec ton e-mail ci-dessous.`,
                 `Inside the ${inApp === "app" ? "app you're using" : `${inApp} app`}, Google may refuse to sign you in: use your email below instead.`,
-                `Dentro de la app ${inApp === "app" ? "que usas" : `de ${inApp}`}, Google puede rechazar el inicio de sesión: usa mejor tu correo aquí abajo.`
+                `Dentro de la app ${inApp === "app" ? "que usas" : `de ${inApp}`}, Google puede rechazar el inicio de sesión: usa mejor tu correo aquí abajo.`, `Dentro do app ${inApp === "app" ? "que você usa" : `do ${inApp}`}, o Google pode recusar o login: prefira usar seu e-mail aqui embaixo.`
               )}</p>
             )}
             {error?.google && <p className="auth-err" role="alert">{error.text}</p>}
-            <div className="auth-or"><span>{L.t("ou", "or", "o")}</span></div>
+            <div className="auth-or"><span>{L.t("ou", "or", "o", "ou")}</span></div>
           </>
         )}
 
         {sent !== null ? (
           <div className="auth-sent" role="status">
             <p>{sent}</p>
-            <button type="button" className="auth-link" onClick={() => switchTo("connexion")}>{L.t("Retour à la connexion", "Back to log in", "Volver a iniciar sesión")}</button>
+            <button type="button" className="auth-link" onClick={() => switchTo("connexion")}>{L.t("Retour à la connexion", "Back to log in", "Volver a iniciar sesión", "Voltar para o login")}</button>
           </div>
         ) : (
           <form className="auth-form" onSubmit={onSubmit} noValidate>
-            <label className="vh" htmlFor="auth-email">{L.t("Adresse e-mail", "Email address", "Correo electrónico")}</label>
+            <label className="vh" htmlFor="auth-email">{L.t("Adresse e-mail", "Email address", "Correo electrónico", "E-mail")}</label>
             <input
               id="auth-email" name="email" type="email" inputMode="email" autoComplete="email" autoCapitalize="none" spellCheck={false}
-              placeholder={L.t("E-mail", "Email", "Correo electrónico")} value={email} onChange={(e) => setEmail(e.target.value)}
+              placeholder={L.t("E-mail", "Email", "Correo electrónico", "E-mail")} value={email} onChange={(e) => setEmail(e.target.value)}
               aria-invalid={!!errFor("email")} required maxLength={254}
             />
             {errFor("email") && <p className="auth-err" role="alert">{errFor("email")}</p>}
             {mode !== "oubli" && (
               <>
-                <label className="vh" htmlFor="auth-mdp">{L.t("Mot de passe", "Password", "Contraseña")}</label>
+                <label className="vh" htmlFor="auth-mdp">{L.t("Mot de passe", "Password", "Contraseña", "Senha")}</label>
                 <div className="auth-pw">
                   <input
                     id="auth-mdp" name="password" type={show ? "text" : "password"} autoComplete={mode === "inscription" ? "new-password" : "current-password"}
-                    placeholder={mode === "inscription" ? L.t("Mot de passe (min. 6 caractères)", "Password (min. 6 characters)", "Contraseña (mín. 6 caracteres)") : L.t("Mot de passe", "Password", "Contraseña")}
+                    placeholder={mode === "inscription" ? L.t("Mot de passe (min. 6 caractères)", "Password (min. 6 characters)", "Contraseña (mín. 6 caracteres)", "Senha (mín. 6 caracteres)") : L.t("Mot de passe", "Password", "Contraseña", "Senha")}
                     value={mdp} onChange={(e) => setMdp(e.target.value)} aria-invalid={!!errFor("mdp")} required minLength={mode === "inscription" ? 6 : undefined} maxLength={200}
                   />
-                  <button type="button" className="auth-eye" onClick={() => setShow(!show)} aria-label={show ? L.t("Masquer le mot de passe", "Hide password", "Ocultar la contraseña") : L.t("Afficher le mot de passe", "Show password", "Mostrar la contraseña")} aria-pressed={show}><Eye off={show} /></button>
+                  <button type="button" className="auth-eye" onClick={() => setShow(!show)} aria-label={show ? L.t("Masquer le mot de passe", "Hide password", "Ocultar la contraseña", "Ocultar a senha") : L.t("Afficher le mot de passe", "Show password", "Mostrar la contraseña", "Mostrar a senha")} aria-pressed={show}><Eye off={show} /></button>
                 </div>
                 {errFor("mdp") && <p className="auth-err" role="alert">{errFor("mdp")}</p>}
               </>
@@ -228,30 +228,30 @@ export default function AuthModal({ initial, googleOn = false, onClose }) {
             <input className="auth-hp" name="site" tabIndex={-1} autoComplete="off" aria-hidden="true" defaultValue="" />
             {error && !error.google && !error.field && <p className="auth-err" role="alert">{error.text}</p>}
             {error?.existe && mode === "inscription" && (
-              <button type="button" className="auth-link" onClick={() => switchTo("connexion")}>{L.t("Me connecter avec cette adresse", "Log in with this email", "Iniciar sesión con este correo")}</button>
+              <button type="button" className="auth-link" onClick={() => switchTo("connexion")}>{L.t("Me connecter avec cette adresse", "Log in with this email", "Iniciar sesión con este correo", "Entrar com este e-mail")}</button>
             )}
             <button type="submit" className="auth-submit" disabled={!!busy} aria-busy={busy === "form"}>
               {busy === "form" ? <span className="auth-spin" aria-hidden /> : mode === "inscription" ? <Mail /> : null}
-              {mode === "inscription" ? L.t("S'inscrire", "Sign up", "Registrarse")
-                : mode === "connexion" ? L.t("Se connecter", "Log in", "Iniciar sesión")
-                  : L.t("Recevoir le lien", "Send me the link", "Recibir el enlace")}
+              {mode === "inscription" ? L.t("S'inscrire", "Sign up", "Registrarse", "Cadastrar-se")
+                : mode === "connexion" ? L.t("Se connecter", "Log in", "Iniciar sesión", "Entrar")
+                  : L.t("Recevoir le lien", "Send me the link", "Recibir el enlace", "Receber o link")}
             </button>
           </form>
         )}
 
         <div className="auth-links">
           {mode === "inscription" && (
-            <button type="button" className="auth-link" onClick={() => switchTo("connexion")}>{L.t("Déjà un compte ? Se connecter", "Already have an account? Log in", "¿Ya tienes cuenta? Inicia sesión")}</button>
+            <button type="button" className="auth-link" onClick={() => switchTo("connexion")}>{L.t("Déjà un compte ? Se connecter", "Already have an account? Log in", "¿Ya tienes cuenta? Inicia sesión", "Já tem conta? Entre")}</button>
           )}
           {mode === "connexion" && (
             <>
-              <button type="button" className="auth-link auth-link-quiet" onClick={() => switchTo("oubli")}>{L.t("Mot de passe oublié ?", "Forgot password?", "¿Has olvidado tu contraseña?")}</button>
-              <button type="button" className="auth-link" onClick={() => switchTo("inscription")}>{L.t("Pas encore de compte ? S'inscrire", "No account yet? Sign up", "¿Aún no tienes cuenta? Regístrate")}</button>
-              <a className="auth-link auth-link-quiet" href={whopHref} onClick={() => { done.current = true; track("Connexion Whop", { etape: "clic", source: `fenetre_${source}` }); }}>{L.t("Abonné avec Whop ? Se connecter avec Whop", "Subscribed through Whop? Log in with Whop", "¿Suscrito con Whop? Inicia sesión con Whop")}</a>
+              <button type="button" className="auth-link auth-link-quiet" onClick={() => switchTo("oubli")}>{L.t("Mot de passe oublié ?", "Forgot password?", "¿Has olvidado tu contraseña?", "Esqueceu sua senha?")}</button>
+              <button type="button" className="auth-link" onClick={() => switchTo("inscription")}>{L.t("Pas encore de compte ? S'inscrire", "No account yet? Sign up", "¿Aún no tienes cuenta? Regístrate", "Ainda não tem conta? Cadastre-se")}</button>
+              <a className="auth-link auth-link-quiet" href={whopHref} onClick={() => { done.current = true; track("Connexion Whop", { etape: "clic", source: `fenetre_${source}` }); }}>{L.t("Abonné avec Whop ? Se connecter avec Whop", "Subscribed through Whop? Log in with Whop", "¿Suscrito con Whop? Inicia sesión con Whop", "Assinou pela Whop? Entre com a Whop")}</a>
             </>
           )}
           {mode === "oubli" && sent === null && (
-            <button type="button" className="auth-link" onClick={() => switchTo("connexion")}>{L.t("Retour à la connexion", "Back to log in", "Volver a iniciar sesión")}</button>
+            <button type="button" className="auth-link" onClick={() => switchTo("connexion")}>{L.t("Retour à la connexion", "Back to log in", "Volver a iniciar sesión", "Voltar para o login")}</button>
           )}
         </div>
 
@@ -259,11 +259,11 @@ export default function AuthModal({ initial, googleOn = false, onClose }) {
           <p className="auth-legal">{L.t(
             <>En t&apos;inscrivant, tu acceptes les <Link href="/cgu" target="_blank">CGU</Link> et la <Link href="/confidentialite" target="_blank">politique de confidentialité</Link>.</>,
             <>By signing up, you accept the <Link href={L.href("/cgu")} target="_blank">Terms of Use</Link> and the <Link href={L.href("/confidentialite")} target="_blank">Privacy Policy</Link>.</>,
-            <>Al registrarte, aceptas las <Link href={L.href("/cgu")} target="_blank">Condiciones de uso</Link> y la <Link href={L.href("/confidentialite")} target="_blank">Política de privacidad</Link>.</>
+            <>Al registrarte, aceptas las <Link href={L.href("/cgu")} target="_blank">Condiciones de uso</Link> y la <Link href={L.href("/confidentialite")} target="_blank">Política de privacidad</Link>.</>, <>Ao se cadastrar, você aceita os <Link href={L.href("/cgu")} target="_blank">Termos de uso</Link> e a <Link href={L.href("/confidentialite")} target="_blank">Política de privacidade</Link>.</>
           )}</p>
         )}
 
-        <button type="button" className="auth-close" onClick={close}>{L.t("Fermer", "Close", "Cerrar")}</button>
+        <button type="button" className="auth-close" onClick={close}>{L.t("Fermer", "Close", "Cerrar", "Fechar")}</button>
       </div>
     </div>,
     document.body

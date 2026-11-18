@@ -19,14 +19,14 @@ export default function FormToggle({ home, away, splits }) {
   return (
     <>
       <div className="ar-fsides">
-        <Side t={home.team} label={home.label} split={L.t(`À domicile : ${splits.home || "–"}`, `At home: ${splits.home || "–"}`, `En casa: ${splits.home || "–"}`)} />
-        <Side t={away.team} label={away.label} split={L.t(`À l'extérieur : ${splits.away || "–"}`, `On the road: ${splits.away || "–"}`, `Fuera: ${splits.away || "–"}`)} />
+        <Side t={home.team} label={home.label} split={L.t(`À domicile : ${splits.home || "–"}`, `At home: ${splits.home || "–"}`, `En casa: ${splits.home || "–"}`, `Em casa: ${splits.home || "–"}`)} />
+        <Side t={away.team} label={away.label} split={L.t(`À l'extérieur : ${splits.away || "–"}`, `On the road: ${splits.away || "–"}`, `Fuera: ${splits.away || "–"}`, `Fora: ${splits.away || "–"}`)} />
       </div>
       {(splits.home || splits.away) && (
         <button type="button" className="ar-ftoggle" onClick={() => setLoc(!loc)}>
           {loc
-            ? L.t("Voir la forme globale", "See overall form", "Ver la forma global")
-            : L.t("Voir la forme à domicile et à l'extérieur", "See home and road form", "Ver la forma en casa y fuera")}
+            ? L.t("Voir la forme globale", "See overall form", "Ver la forma global", "Ver a fase geral")
+            : L.t("Voir la forme à domicile et à l'extérieur", "See home and road form", "Ver la forma en casa y fuera", "Ver a fase em casa e fora")}
         </button>
       )}
     </>

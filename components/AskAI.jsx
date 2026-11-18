@@ -18,7 +18,7 @@ export default function AskAI({ target, tier, limit = null, used = 0 }) {
   const suggestions = L.t(
     ["Pourquoi ce favori ?", "Le match peut-il être serré ?", "Qu'est-ce qui peut faire basculer le match ?"],
     ["Why is this team favored?", "Could this be a close game?", "What could swing this game?"],
-    ["¿Por qué este favorito?", "¿Puede ser un partido igualado?", "¿Qué puede cambiar el partido?"]
+    ["¿Por qué este favorito?", "¿Puede ser un partido igualado?", "¿Qué puede cambiar el partido?"], ["Por que este favorito?", "Pode ser um jogo equilibrado?", "O que pode mudar o jogo?"]
   );
 
   const send = async (e) => {
@@ -42,17 +42,17 @@ export default function AskAI({ target, tier, limit = null, used = 0 }) {
       } else if (j.error === "limite") {
         setCount(j.used ?? limit ?? count);
         setErr(tier === "pro"
-          ? L.t("Ta question du jour est déjà utilisée. Lifetime rend les questions illimitées.", "Today's question is already used. Lifetime makes questions unlimited.", "Ya has usado tu pregunta de hoy. Lifetime hace las preguntas ilimitadas.")
-          : L.t("Tu as atteint la limite d'usage raisonnable pour aujourd'hui. Reviens demain.", "You've reached today's fair-use limit. Come back tomorrow.", "Has alcanzado el límite de uso razonable de hoy. Vuelve mañana."));
+          ? L.t("Ta question du jour est déjà utilisée. Lifetime rend les questions illimitées.", "Today's question is already used. Lifetime makes questions unlimited.", "Ya has usado tu pregunta de hoy. Lifetime hace las preguntas ilimitadas.", "Você já usou sua pergunta de hoje. O Lifetime deixa as perguntas ilimitadas.")
+          : L.t("Tu as atteint la limite d'usage raisonnable pour aujourd'hui. Reviens demain.", "You've reached today's fair-use limit. Come back tomorrow.", "Has alcanzado el límite de uso razonable de hoy. Vuelve mañana.", "Você atingiu o limite de uso razoável de hoje. Volte amanhã."));
       } else if (j.error === "connexion") {
-        setErr(L.t("Connecte-toi pour poser ta question.", "Log in to ask your question.", "Inicia sesión para hacer tu pregunta."));
+        setErr(L.t("Connecte-toi pour poser ta question.", "Log in to ask your question.", "Inicia sesión para hacer tu pregunta.", "Faça login para fazer sua pergunta."));
       } else if (j.error === "formule") {
-        setErr(L.t("Les questions à l'IA sont incluses dans Pro et Lifetime.", "AI questions come with Pro and Lifetime.", "Las preguntas a la IA están incluidas en Pro y Lifetime."));
+        setErr(L.t("Les questions à l'IA sont incluses dans Pro et Lifetime.", "AI questions come with Pro and Lifetime.", "Las preguntas a la IA están incluidas en Pro y Lifetime.", "As perguntas à IA estão incluídas no Pro e no Lifetime."));
       } else {
-        setErr(L.t("L'IA ne peut pas répondre pour le moment. Réessaie dans un instant.", "The AI can't answer right now. Please try again in a moment.", "La IA no puede responder ahora mismo. Vuelve a intentarlo en un momento."));
+        setErr(L.t("L'IA ne peut pas répondre pour le moment. Réessaie dans un instant.", "The AI can't answer right now. Please try again in a moment.", "La IA no puede responder ahora mismo. Vuelve a intentarlo en un momento.", "A IA não pode responder agora. Tente novamente em instantes."));
       }
     } catch {
-      setErr(L.t("Connexion impossible. Réessaie dans un instant.", "Connection failed. Please try again in a moment.", "No hay conexión. Vuelve a intentarlo en un momento."));
+      setErr(L.t("Connexion impossible. Réessaie dans un instant.", "Connection failed. Please try again in a moment.", "No hay conexión. Vuelve a intentarlo en un momento.", "Sem conexão. Tente novamente em instantes."));
     } finally {
       setBusy(false);
     }
@@ -60,11 +60,11 @@ export default function AskAI({ target, tier, limit = null, used = 0 }) {
 
   return (
     <div className="card block ask">
-      <h2>💬 {L.t("Questions personnelles à l'IA", "Personal questions to the AI", "Preguntas personales a la IA")}</h2>
-      <p className="ask-sub">{L.t("Pose ta question sur ce match : l'IA te répond à partir des données de l'analyse.", "Ask anything about this game: the AI answers from the analysis data.", "Pregunta lo que quieras sobre este partido: la IA responde a partir de los datos del análisis.")}</p>
+      <h2>💬 {L.t("Questions personnelles à l'IA", "Personal questions to the AI", "Preguntas personales a la IA", "Perguntas pessoais à IA")}</h2>
+      <p className="ask-sub">{L.t("Pose ta question sur ce match : l'IA te répond à partir des données de l'analyse.", "Ask anything about this game: the AI answers from the analysis data.", "Pregunta lo que quieras sobre este partido: la IA responde a partir de los datos del análisis.", "Pergunte o que quiser sobre este jogo: a IA responde a partir dos dados da análise.")}</p>
       <div className="ask-quota">{limit == null
-        ? L.t("Questions illimitées", "Unlimited questions", "Preguntas ilimitadas")
-        : L.t(`${Math.min(count, limit)}/${limit} question aujourd'hui`, `${Math.min(count, limit)}/${limit} question today`, `${Math.min(count, limit)}/${limit} pregunta hoy`)}</div>
+        ? L.t("Questions illimitées", "Unlimited questions", "Preguntas ilimitadas", "Perguntas ilimitadas")
+        : L.t(`${Math.min(count, limit)}/${limit} question aujourd'hui`, `${Math.min(count, limit)}/${limit} question today`, `${Math.min(count, limit)}/${limit} pregunta hoy`, `${Math.min(count, limit)}/${limit} pergunta hoje`)}</div>
 
       {thread.map((t, i) => (
         <div className="ask-turn" key={i}>
@@ -80,8 +80,8 @@ export default function AskAI({ target, tier, limit = null, used = 0 }) {
             onChange={(e) => setQ(e.target.value)}
             maxLength={300}
             rows={2}
-            placeholder={L.t("Ex. : l'absence d'un titulaire change-t-elle le pronostic ?", "E.g. does a starter's absence change the prediction?", "Ej.: ¿la baja de un titular cambia el pronóstico?")}
-            aria-label={L.t("Ta question", "Your question", "Tu pregunta")}
+            placeholder={L.t("Ex. : l'absence d'un titulaire change-t-elle le pronostic ?", "E.g. does a starter's absence change the prediction?", "Ej.: ¿la baja de un titular cambia el pronóstico?", "Ex.: o desfalque de um titular muda o palpite?")}
+            aria-label={L.t("Ta question", "Your question", "Tu pregunta", "Sua pergunta")}
           />
           {!thread.length && (
             <div className="ask-chips">
@@ -89,18 +89,18 @@ export default function AskAI({ target, tier, limit = null, used = 0 }) {
             </div>
           )}
           <button className="btn-solid" disabled={busy || q.trim().length < 3}>
-            {busy ? <><span className="an-spin" aria-hidden />{L.t("L'IA réfléchit…", "The AI is thinking…", "La IA está pensando…")}</> : L.t("Demander à l'IA", "Ask the AI", "Preguntar a la IA")}
+            {busy ? <><span className="an-spin" aria-hidden />{L.t("L'IA réfléchit…", "The AI is thinking…", "La IA está pensando…", "A IA está pensando…")}</> : L.t("Demander à l'IA", "Ask the AI", "Preguntar a la IA", "Perguntar à IA")}
           </button>
         </form>
       ) : (
         <div className="ask-limit">
-          {L.t("Ta question du jour est utilisée : reviens demain, ou passe à ", "Today's question is used: come back tomorrow, or switch to ", "Ya has usado tu pregunta de hoy: vuelve mañana o pásate a ")}
+          {L.t("Ta question du jour est utilisée : reviens demain, ou passe à ", "Today's question is used: come back tomorrow, or switch to ", "Ya has usado tu pregunta de hoy: vuelve mañana o pásate a ", "Você já usou sua pergunta de hoje: volte amanhã ou passe para o ")}
           <Link href={L.href("/pro")}>Lifetime</Link>
-          {L.t(" pour des questions illimitées.", " for unlimited questions.", " para preguntas ilimitadas.")}
+          {L.t(" pour des questions illimitées.", " for unlimited questions.", " para preguntas ilimitadas.", " para ter perguntas ilimitadas.")}
         </div>
       )}
       {err && <p className="ask-err" role="alert">{err}</p>}
-      <small className="ask-note">{L.t("Réponses rédigées par l'IA à partir des données Basketlog. Ce ne sont pas des conseils de pari.", "Answers written by the AI from Basketlog data. They are not betting advice.", "Respuestas redactadas por la IA a partir de los datos de Basketlog. No son consejos de apuestas.")}</small>
+      <small className="ask-note">{L.t("Réponses rédigées par l'IA à partir des données Basketlog. Ce ne sont pas des conseils de pari.", "Answers written by the AI from Basketlog data. They are not betting advice.", "Respuestas redactadas por la IA a partir de los datos de Basketlog. No son consejos de apuestas.", "Respostas redigidas pela IA a partir dos dados do Basketlog. Não são recomendações de aposta.")}</small>
     </div>
   );
 }

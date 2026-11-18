@@ -40,19 +40,19 @@ export default function AnalysisProgress({ p, league = "NBA" }) {
   const L = useL();
   const steps = league === "EL"
     ? [
-      L.t("Récupération des derniers résultats", "Fetching the latest results", "Recopilando los últimos resultados"),
-      L.t("Comparaison du niveau des deux équipes", "Comparing both teams' strength", "Comparando el nivel de los dos equipos"),
-      L.t("Prise en compte de l'avantage du terrain", "Factoring in home-court advantage", "Teniendo en cuenta la ventaja de jugar en casa"),
-      L.t("Simulation des scénarios du match", "Simulating game scenarios", "Simulando los escenarios del partido"),
-      L.t("Rédaction de l'analyse", "Writing the analysis", "Redactando el análisis"),
+      L.t("Récupération des derniers résultats", "Fetching the latest results", "Recopilando los últimos resultados", "Reunindo os últimos resultados"),
+      L.t("Comparaison du niveau des deux équipes", "Comparing both teams' strength", "Comparando el nivel de los dos equipos", "Comparando o nível dos dois times"),
+      L.t("Prise en compte de l'avantage du terrain", "Factoring in home-court advantage", "Teniendo en cuenta la ventaja de jugar en casa", "Levando em conta a vantagem de jogar em casa"),
+      L.t("Simulation des scénarios du match", "Simulating game scenarios", "Simulando los escenarios del partido", "Simulando os cenários do jogo"),
+      L.t("Rédaction de l'analyse", "Writing the analysis", "Redactando el análisis", "Redigindo a análise"),
     ]
     : [
-      L.t("Récupération des derniers résultats", "Fetching the latest results", "Recopilando los últimos resultados"),
-      L.t("Comparaison du niveau des deux équipes", "Comparing both teams' strength", "Comparando el nivel de los dos equipos"),
-      L.t("Prise en compte des absences", "Factoring in injuries", "Teniendo en cuenta las bajas"),
-      L.t("Fatigue et avantage du terrain", "Fatigue and home-court advantage", "Cansancio y ventaja de jugar en casa"),
-      L.t("Simulation des scénarios du match", "Simulating game scenarios", "Simulando los escenarios del partido"),
-      L.t("Rédaction de l'analyse", "Writing the analysis", "Redactando el análisis"),
+      L.t("Récupération des derniers résultats", "Fetching the latest results", "Recopilando los últimos resultados", "Reunindo os últimos resultados"),
+      L.t("Comparaison du niveau des deux équipes", "Comparing both teams' strength", "Comparando el nivel de los dos equipos", "Comparando o nível dos dois times"),
+      L.t("Prise en compte des absences", "Factoring in injuries", "Teniendo en cuenta las bajas", "Levando em conta os desfalques"),
+      L.t("Fatigue et avantage du terrain", "Fatigue and home-court advantage", "Cansancio y ventaja de jugar en casa", "Cansaço e vantagem de jogar em casa"),
+      L.t("Simulation des scénarios du match", "Simulating game scenarios", "Simulando los escenarios del partido", "Simulando os cenários do jogo"),
+      L.t("Rédaction de l'analyse", "Writing the analysis", "Redactando el análisis", "Redigindo a análise"),
     ];
   const v = Math.max(0, Math.min(100, p || 0));
   const done = v >= 100;
@@ -67,8 +67,8 @@ export default function AnalysisProgress({ p, league = "NBA" }) {
         </svg>
         <b>{pctLabel(v, L)}</b>
       </div>
-      <div className="an-title">{done ? L.t("Analyse prête", "Analysis ready", "Análisis listo") : L.t("Analyse en cours…", "Analysis in progress…", "Análisis en curso…")}</div>
-      <div className="an-step"><span className="an-dot" aria-hidden />{done ? L.t("Ouverture de l'analyse", "Opening the analysis", "Abriendo el análisis") : step}…</div>
+      <div className="an-title">{done ? L.t("Analyse prête", "Analysis ready", "Análisis listo", "Análise pronta") : L.t("Analyse en cours…", "Analysis in progress…", "Análisis en curso…", "Análise em andamento…")}</div>
+      <div className="an-step"><span className="an-dot" aria-hidden />{done ? L.t("Ouverture de l'analyse", "Opening the analysis", "Abriendo el análisis", "Abrindo a análise") : step}…</div>
       <div className="an-bar"><i style={{ width: `${v}%` }} /></div>
     </div>
   );

@@ -11,14 +11,15 @@ export const revalidate = 3600; // régénéré chaque heure, avec les matchs à
 
 const u = (path, priority, changeFrequency, lastModified = new Date()) => ({ path, lastModified, changeFrequency, priority });
 
-// Chaque page existe en français (adresse actuelle), en anglais (/en) et en espagnol (/es), liées par hreflang.
+// Chaque page existe en français (adresse actuelle), en anglais (/en), en espagnol (/es) et en portugais du Brésil (/pt), liées par hreflang.
 const both = ({ path, ...rest }) => {
   const fr = `${SITE}${path}`;
   const en = `${SITE}/en${path}`;
   const es = `${SITE}/es${path}`;
-  const alternates = { languages: { fr, en, es, "x-default": en } }; // x-default : anglais (visiteurs ni francophones ni hispanophones)
+  const pt = `${SITE}/pt${path}`;
+  const alternates = { languages: { fr, en, es, "pt-BR": pt, "x-default": en } }; // x-default : anglais (visiteurs d'une autre langue)
   const p2 = Math.round(rest.priority * 0.9 * 100) / 100;
-  return [{ url: fr, ...rest, alternates }, { url: en, ...rest, priority: p2, alternates }, { url: es, ...rest, priority: p2, alternates }];
+  return [{ url: fr, ...rest, alternates }, { url: en, ...rest, priority: p2, alternates }, { url: es, ...rest, priority: p2, alternates }, { url: pt, ...rest, priority: p2, alternates }];
 };
 
 export default async function sitemap() {

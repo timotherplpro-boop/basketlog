@@ -56,14 +56,14 @@ export default function SourceAsk() {
   const choice = SOURCE_CHOICES.find((s) => s.id === pick);
 
   return (
-    <div className="src-ask" role="dialog" aria-label={L.t("Une question rapide", "A quick question", "Una pregunta rápida")}>
+    <div className="src-ask" role="dialog" aria-label={L.t("Une question rapide", "A quick question", "Una pregunta rápida", "Uma pergunta rápida")}>
       {thanks ? (
-        <p className="src-thanks" role="status">{L.t("Merci ! Bonnes analyses 🏀", "Thanks! Enjoy the analyses 🏀", "¡Gracias! Buenos análisis 🏀")}</p>
+        <p className="src-thanks" role="status">{L.t("Merci ! Bonnes analyses 🏀", "Thanks! Enjoy the analyses 🏀", "¡Gracias! Buenos análisis 🏀", "Obrigado! Boas análises 🏀")}</p>
       ) : (
         <>
-          <button type="button" className="src-x" onClick={skip} aria-label={L.t("Fermer", "Close", "Cerrar")}>×</button>
-          <strong className="src-title">{L.t("Une dernière question", "One last question", "Una última pregunta")}</strong>
-          <p className="src-q">{L.t("Comment as-tu connu Basketlog ?", "How did you hear about Basketlog?", "¿Cómo conociste Basketlog?")}</p>
+          <button type="button" className="src-x" onClick={skip} aria-label={L.t("Fermer", "Close", "Cerrar", "Fechar")}>×</button>
+          <strong className="src-title">{L.t("Une dernière question", "One last question", "Una última pregunta", "Uma última pergunta")}</strong>
+          <p className="src-q">{L.t("Comment as-tu connu Basketlog ?", "How did you hear about Basketlog?", "¿Cómo conociste Basketlog?", "Como você conheceu o Basketlog?")}</p>
           <div className="src-chips">
             {SOURCE_CHOICES.map((s) => (
               <button
@@ -77,16 +77,16 @@ export default function SourceAsk() {
           </div>
           {choice && (
             <form className="src-form" onSubmit={(e) => { e.preventDefault(); send(choice.id, name); }}>
-              <label className="vh" htmlFor="src-name">{L.t("Quel créateur ?", "Which creator?", "¿Qué creador?")}</label>
+              <label className="vh" htmlFor="src-name">{L.t("Quel créateur ?", "Which creator?", "¿Qué creador?", "Qual criador?")}</label>
               <input
                 id="src-name"
                 value={name}
                 maxLength={40}
                 autoComplete="off"
-                placeholder={L.t("Quel créateur ? (facultatif)", "Which creator? (optional)", "¿Qué creador? (opcional)")}
+                placeholder={L.t("Quel créateur ? (facultatif)", "Which creator? (optional)", "¿Qué creador? (opcional)", "Qual criador? (opcional)")}
                 onChange={(e) => setName(e.target.value)}
               />
-              <button type="submit">{L.t("Envoyer", "Send", "Enviar")}</button>
+              <button type="submit">{L.t("Envoyer", "Send", "Enviar", "Enviar")}</button>
             </form>
           )}
         </>

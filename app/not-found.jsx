@@ -4,7 +4,7 @@ import { getL } from "../lib/lang-server";
 // Titre de l'onglet sur une page introuvable (au lieu du titre général du site).
 export async function generateMetadata() {
   const L = await getL();
-  return { title: L.t("Page introuvable – Basketlog", "Page not found – Basketlog", "Página no encontrada – Basketlog"), robots: { index: false, follow: true } };
+  return { title: L.t("Page introuvable – Basketlog", "Page not found – Basketlog", "Página no encontrada – Basketlog", "Página não encontrada – Basketlog"), robots: { index: false, follow: true } };
 }
 
 export default async function NotFound() {
@@ -12,8 +12,8 @@ export default async function NotFound() {
   return (
     <main className="nf">
       <h1 className="t-hero">Air <span className="accent">ball.</span></h1>
-      <p className="lead" style={{ margin: "24px auto 30px", maxWidth: 460 }}>{L.t("Ce match est introuvable ou n'est plus au programme.", "This game can't be found or is no longer scheduled.", "Este partido no se encuentra o ya no está programado.")}</p>
-      <Link href={L.href("/app")} className="btn-ball"><span className="ball" aria-hidden /><span className="pill">{L.t("Analyser un match", "Analyze a game", "Analizar un partido")}</span></Link>
+      <p className="lead" style={{ margin: "24px auto 30px", maxWidth: 460 }}>{L.t("Ce match est introuvable ou n'est plus au programme.", "This game can't be found or is no longer scheduled.", "Este partido no se encuentra o ya no está programado.", "Este jogo não foi encontrado ou não está mais programado.")}</p>
+      <Link href={L.href("/app")} className="btn-ball"><span className="ball" aria-hidden /><span className="pill">{L.t("Analyser un match", "Analyze a game", "Analizar un partido", "Analisar um jogo")}</span></Link>
     </main>
   );
 }

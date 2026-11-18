@@ -8,23 +8,23 @@ export const dynamic = "force-dynamic";
 // tout de suite : l'accès complet s'ouvre sans attendre la prochaine vérification.
 export async function POST(req) {
   const body = await req.json().catch(() => ({}));
-  const t = (fr, en, es) => (body.lang === "en" ? en : body.lang === "es" ? es : fr);
+  const t = (fr, en, es, pt) => (body.lang === "en" ? en : body.lang === "es" ? es : body.lang === "pt" ? pt : fr);
   const s = decodeSession(req.cookies.get(COOKIE)?.value);
-  if (!s?.uid) return NextResponse.json({ ok: false, error: t("Connecte-toi d'abord.", "Please log in first.", "Inicia sesión primero.") }, { status: 401 });
+  if (!s?.uid) return NextResponse.json({ ok: false, error: t("Connecte-toi d'abord.", "Please log in first.", "Inicia sesión primero.", "Faça login primeiro.") }, { status: 401 });
   const code = String(body.code || "");
-  if (!/^[0-9a-f]{20}$/.test(code)) return NextResponse.json({ ok: false, error: t("Lien d'invitation introuvable.", "Invitation link not found.", "Enlace de invitación no encontrado.") }, { status: 400 });
+  if (!/^[0-9a-f]{20}$/.test(code)) return NextResponse.json({ ok: false, error: t("Lien d'invitation introuvable.", "Invitation link not found.", "Enlace de invitación no encontrado.", "Link de convite não encontrado.") }, { status: 400 });
 
   let r;
   try {
     r = await dbRpc("basketlog_claim", { p_code: code, p_uid: s.uid, p_nom: s.name || null });
   } catch {
-    return NextResponse.json({ ok: false, error: t("Activation impossible pour le moment, réessaie dans un instant.", "Activation isn't possible right now, please try again in a moment.", "No se puede activar por ahora, inténtalo de nuevo en un momento.") }, { status: 502 });
+    return NextResponse.json({ ok: false, error: t("Activation impossible pour le moment, réessaie dans un instant.", "Activation isn't possible right now, please try again in a moment.", "No se puede activar por ahora, inténtalo de nuevo en un momento.", "Não é possível ativar agora, tente novamente em um momento.") }, { status: 502 });
   }
   if (!r?.ok) {
     const why = {
-      utilisee: t("Ce lien a déjà été utilisé par un autre compte.", "This link has already been used by another account.", "Otra cuenta ya ha usado este enlace."),
-      expiree: t("Ce lien a expiré. Demande un nouveau lien.", "This link has expired. Ask for a new one.", "Este enlace ha caducado. Pide uno nuevo."),
-    }[r?.reason] || t("Lien d'invitation introuvable.", "Invitation link not found.", "Enlace de invitación no encontrado.");
+      utilisee: t("Ce lien a déjà été utilisé par un autre compte.", "This link has already been used by another account.", "Otra cuenta ya ha usado este enlace.", "Outra conta já usou este link."),
+      expiree: t("Ce lien a expiré. Demande un nouveau lien.", "This link has expired. Ask for a new one.", "Este enlace ha caducado. Pide uno nuevo.", "Este link expirou. Peça um novo."),
+    }[r?.reason] || t("Lien d'invitation introuvable.", "Invitation link not found.", "Enlace de invitación no encontrado.", "Link de convite não encontrado.");
     return NextResponse.json({ ok: false, error: why }, { status: 400 });
   }
 

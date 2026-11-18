@@ -7,7 +7,7 @@ export default function PreviewBar({ tier }) {
   const L = useL();
   const t = L.t;
   const [busy, setBusy] = useState(false);
-  const names = { compte: t("Compte gratuit", "Free account", "Cuenta gratuita"), starter: "Starter", pro: "Pro", lifetime: "Lifetime" };
+  const names = { compte: t("Compte gratuit", "Free account", "Cuenta gratuita", "Cuenta gratuita"), starter: "Starter", pro: "Pro", lifetime: "Lifetime" };
   async function exit() {
     setBusy(true);
     try {
@@ -18,9 +18,9 @@ export default function PreviewBar({ tier }) {
   }
   return (
     <div className="preview-bar" role="status">
-      <span>{t("Aperçu client", "Customer preview", "Vista previa de cliente")}{L.fr ? " : " : ": "}<b>{names[tier] || tier}</b></span>
-      <a href={L.href("/app/admin") + "#formules"}>{t("Changer", "Change", "Cambiar")}</a>
-      <button type="button" onClick={exit} disabled={busy}>{busy ? t("Retour…", "Going back…", "Volviendo…") : t("Revenir en admin", "Back to admin", "Volver a admin")}</button>
+      <span>{t("Aperçu client", "Customer preview", "Vista previa de cliente", "Vista previa de cliente")}{L.fr ? " : " : ": "}<b>{names[tier] || tier}</b></span>
+      <a href={L.href("/app/admin") + "#formules"}>{t("Changer", "Change", "Cambiar", "Cambiar")}</a>
+      <button type="button" onClick={exit} disabled={busy}>{busy ? t("Retour…", "Going back…", "Volviendo…", "Volviendo…") : t("Revenir en admin", "Back to admin", "Volver a admin", "Volver a admin")}</button>
     </div>
   );
 }

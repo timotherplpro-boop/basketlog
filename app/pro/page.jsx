@@ -13,10 +13,10 @@ export async function generateMetadata() {
   const L = await getL();
   return pageMeta({
     // Résultats de recherche : euros pour les pages française et espagnole, dollars pour la page anglaise.
-    title: L.t(`Basketlog Pro : analyses NBA dès ${price("starter", "EUR", L)}/mois`, `Basketlog Pro: NBA analyses from ${price("starter", "USD", L)}/month`, `Basketlog Pro: análisis NBA desde ${price("starter", "EUR", L)}/mes`),
+    title: L.t(`Basketlog Pro : analyses NBA dès ${price("starter", "EUR", L)}/mois`, `Basketlog Pro: NBA analyses from ${price("starter", "USD", L)}/month`, `Basketlog Pro: análisis NBA desde ${price("starter", "EUR", L)}/mes`, `Basketlog Pro: análises NBA a partir de ${price("starter", "EUR", L)}/mês`),
     description: L.t(
       `Starter ${price("starter", "EUR", L)}/mois, Pro ${price("pro", "EUR", L)}/mois ou Lifetime ${price("lifetime", "EUR", L)} une seule fois : débloque les analyses des matchs NBA et EuroLeague. Paiement sécurisé par Whop.`,
-      `Starter ${price("starter", "USD", L)}/month, Pro ${price("pro", "USD", L)}/month or Lifetime ${price("lifetime", "USD", L)} one-time: unlock NBA and EuroLeague game analyses. Secure payment by Whop.`, `Starter ${price("starter", "EUR", L)}/mes, Pro ${price("pro", "EUR", L)}/mes o Lifetime ${price("lifetime", "EUR", L)} en un solo pago: desbloquea los análisis de los partidos de la NBA y la Euroliga. Pago seguro con Whop.`
+      `Starter ${price("starter", "USD", L)}/month, Pro ${price("pro", "USD", L)}/month or Lifetime ${price("lifetime", "USD", L)} one-time: unlock NBA and EuroLeague game analyses. Secure payment by Whop.`, `Starter ${price("starter", "EUR", L)}/mes, Pro ${price("pro", "EUR", L)}/mes o Lifetime ${price("lifetime", "EUR", L)} en un solo pago: desbloquea los análisis de los partidos de la NBA y la Euroliga. Pago seguro con Whop.`, `Starter ${price("starter", "EUR", L)}/mês, Pro ${price("pro", "EUR", L)}/mês ou Lifetime ${price("lifetime", "EUR", L)} em pagamento único: desbloqueie as análises dos jogos da NBA e da Euroliga. Pagamento seguro com a Whop.`
     ),
     path: "/pro",
     L,
@@ -47,7 +47,18 @@ export default async function ProPage({ searchParams }) {
     { q: "¿Qué es un análisis completo?", a: "La ficha detallada de un partido: marcador proyectado, factores, escenarios, estadísticas comparadas, jugadores a seguir, forma reciente, enfrentamientos y segunda opinión. Sin suscripción, ves gratis las probabilidades de victoria y las cifras clave de cada partido." },
     { q: "¿Basketlog es una web de apuestas?", a: "No. Basketlog es una herramienta de análisis estadístico para entender los partidos. No se puede apostar y ninguna probabilidad es una garantía." },
   ];
-  const faq = L.es ? faqEs : L.en
+  const gPt = g ? " (com o Google ou seu e-mail)" : "";
+  const faqPt = [
+    { q: "Como funciona o pagamento?", a: "O pagamento é feito pela Whop, uma plataforma de pagamento segura usada por milhares de criadores. O Basketlog nunca vê o seu cartão." },
+    { q: "Preciso criar uma conta?", a: `Não. Você escolhe seu plano e paga direto aqui, no Basketlog (formulário seguro da Whop): seu acesso é liberado assim que você paga, sem conta para criar. Se já tem uma conta do Basketlog${gPt}, entre antes de pagar e o plano é adicionado à sua conta. Pagou na antiga página da Whop? Clique em «Ativar minha assinatura».` },
+    { q: "Posso cancelar quando quiser?", a: "Sim. O Starter e o Pro são cancelados em poucos cliques pela página Minha conta deste site (basketlog-app.com/pt/app/compte), com uma confirmação antes de valer. Você mantém o acesso até o fim do período já pago. O Lifetime é um pagamento único: não há nada para cancelar." },
+    { q: "Como troco de plano?", a: "Pela página Minha conta (basketlog-app.com/pt/app/compte). Para subir de plano (Starter para Pro ou Lifetime, Pro para Lifetime), um clique em «Passar para…» leva você ao pagamento do novo plano na Whop; assim que o pagamento é confirmado, sua assinatura anterior termina sozinha no fim do período: você a mantém até lá, mas esse período, já pago, não é reembolsado. Nada é interrompido antes da confirmação do pagamento. Para passar a um plano mais barato, cancele sua assinatura em Minha conta e escolha o novo plano aqui quando o período terminar." },
+    { q: "Posso pedir reembolso?", a: "Um período iniciado não é reembolsado: ao assinar, você pede acesso imediato às suas análises e renuncia ao direito de arrependimento de 14 dias, como a lei permite para conteúdos digitais. Você pode cancelar a qualquer momento, sem custo, para não ser cobrado de novo. Se houver um problema técnico, escreva para nós e resolvemos. Os detalhes estão nas Condições de venda (/pt/cgv)." },
+    { q: "Qual a diferença entre Starter, Pro e Lifetime?", a: `O Starter dá 1 análise reduzida por dia (probabilidades exatas e estatísticas-chave). O Pro deixa as análises completas ilimitadas, com as notícias em tempo real${ai ? " e 1 pergunta por dia à IA" : ""}. O Lifetime oferece o mesmo que o Pro, para sempre, com um pagamento único de ${price("lifetime", cur, L)}${ai ? ", e perguntas à IA ilimitadas" : ""}. Sem assinatura, com a conta grátis incluída, você vê uma prévia de cada análise.` },
+    { q: "O que é uma análise completa?", a: "A ficha detalhada de um jogo: placar projetado, fatores, cenários, estatísticas comparadas, jogadores para acompanhar, fase recente, confrontos e segunda opinião. Sem assinatura, as probabilidades de vitória e os números-chave de cada jogo são grátis." },
+    { q: "O Basketlog é um site de apostas?", a: "Não. O Basketlog é uma ferramenta de análise estatística para entender os jogos. Não dá para apostar e nenhuma probabilidade é uma garantia." },
+  ];
+  const faq = L.pt ? faqPt : L.es ? faqEs : L.en
     ? [
         { q: "How does payment work?", a: "Payment is handled by Whop, a secure payment platform used by thousands of creators. Basketlog never sees your card." },
         { q: "Do I need to create an account?", a: `No. Pick your plan and pay right here on Basketlog (secure Whop form): your access opens as soon as you pay, with no account to create. Already have a Basketlog account${gEn}? Log in before paying and the plan is added to your account. Paid on the old Whop page? Click “Activate my subscription”.` },
@@ -72,12 +83,12 @@ export default async function ProPage({ searchParams }) {
     <main className="pro-page">
       <section className="pro-hero">
         <div className="pill-tag">Basketlog Pro</div>
-        <h1 className="t-80">{L.t("Choisis ton plan", "Choose your plan", "Elige tu plan")}</h1>
-        <p className="lead">{L.t("Accède à des analyses complètes et des pronostics détaillés", "Get full analyses and detailed predictions", "Accede a análisis completos y pronósticos detallados")}</p>
+        <h1 className="t-80">{L.t("Choisis ton plan", "Choose your plan", "Elige tu plan", "Escolha seu plano")}</h1>
+        <p className="lead">{L.t("Accède à des analyses complètes et des pronostics détaillés", "Get full analyses and detailed predictions", "Accede a análisis completos y pronósticos detallados", "Acesse análises completas e palpites detalhados")}</p>
       </section>
       <ProPlans embed={process.env.PAY_EMBED === "1" || sp?.paiement === "test"} checkout={checkout} cur={cur} loginReady={loginReady} ai={ai} switching={switching} notice={sp?.ok || sp?.bienvenue === "abonne" ? "ok" : sp?.bienvenue ? "compte" : sp?.erreur || ""} />
       <section className="pro-faq">
-        <h2 className="t-80" style={{ fontSize: "clamp(28px,4vw,40px)" }}>{L.t("Questions fréquentes", "FAQ", "Preguntas frecuentes")}</h2>
+        <h2 className="t-80" style={{ fontSize: "clamp(28px,4vw,40px)" }}>{L.t("Questions fréquentes", "FAQ", "Preguntas frecuentes", "Perguntas frequentes")}</h2>
         <Faq items={faq} />
       </section>
     </main>

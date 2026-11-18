@@ -6,7 +6,7 @@ import { getL } from "../../lib/lang-server";
 
 export async function generateMetadata() {
   const L = await getL();
-  if (L.es) return pageMeta({ title: "Aviso legal – Basketlog", description: "Aviso legal de Basketlog: editor, director de la publicación, alojamiento, propiedad intelectual y mediación de consumo.", path: "/mentions-legales", L });
+  if (L.es || L.pt) return pageMeta({ title: "Aviso legal – Basketlog", description: "Aviso legal de Basketlog: editor, director de la publicación, alojamiento, propiedad intelectual y mediación de consumo.", path: "/mentions-legales", L });
   return L.en
     ? pageMeta({ title: "Legal notice – Basketlog", description: "Basketlog legal notice: publisher, publication director, host, intellectual property and consumer mediation.", path: "/mentions-legales", L })
     : pageMeta({ title: "Mentions légales – Basketlog", description: "Mentions légales du site Basketlog : éditeur, directeur de la publication, hébergeur, propriété intellectuelle et médiation de la consommation.", path: "/mentions-legales" });
@@ -144,5 +144,5 @@ function MentionsLegalesEs({ L }) {
 
 export default async function MentionsLegalesPage() {
   const L = await getL();
-  return L.es ? <MentionsLegalesEs L={L} /> : L.en ? <MentionsLegalesEn L={L} /> : <MentionsLegalesFr />;
+  return L.es || L.pt ? <MentionsLegalesEs L={L} /> : L.en ? <MentionsLegalesEn L={L} /> : <MentionsLegalesFr />;
 }

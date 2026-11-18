@@ -10,20 +10,20 @@ const LEGAL_ES = { "/mentions-legales": "Aviso legal", "/cgu": "Condiciones de u
 // Pied de page du site. Version compacte dans l'espace membre : mentions légales et avertissements seulement.
 export default function SiteFooter({ L, compact = false }) {
   const legal = (
-    <nav className="foot-links foot-legal" aria-label={L.t("Informations légales", "Legal information", "Información legal")}>
-      {LEGAL_PAGES.map(([href, label]) => <Link key={href} href={L.href(href)}>{L.t(label, LEGAL_EN[href], LEGAL_ES[href])}</Link>)}
+    <nav className="foot-links foot-legal" aria-label={L.t("Informations légales", "Legal information", "Información legal", "Informações legais")}>
+      {LEGAL_PAGES.map(([href, label]) => <Link key={href} href={L.href(href)}>{L.t(label, LEGAL_EN[href], LEGAL_ES[href], LEGAL_ES[href])}</Link>)}
       {/* Fonction de résiliation visible de toutes les pages (résiliation en ligne), qui mène à « Mon compte ». */}
-      <Link href={L.href("/app/compte")}>{L.t("Résilier mon abonnement", "Cancel my subscription", "Cancelar mi suscripción")}</Link>
+      <Link href={L.href("/app/compte")}>{L.t("Résilier mon abonnement", "Cancel my subscription", "Cancelar mi suscripción", "Cancelar minha assinatura")}</Link>
       <CookieSettingsButton />
       {!compact && <InstallButton source="pied_de_page" />}
       {!compact && <LangSwitch />}
     </nav>
   );
-  const notBetting = L.t("Analyses statistiques, pas un service de paris. Les probabilités sont des estimations, jamais des certitudes. Réservé aux 18 ans et plus.", "Statistical analysis, not a betting service. Probabilities are estimates, never certainties. For adults 18 and over.", "Análisis estadístico, no un servicio de apuestas. Las probabilidades son estimaciones, nunca certezas. Solo para mayores de 18 años.");
+  const notBetting = L.t("Analyses statistiques, pas un service de paris. Les probabilités sont des estimations, jamais des certitudes. Réservé aux 18 ans et plus.", "Statistical analysis, not a betting service. Probabilities are estimates, never certainties. For adults 18 and over.", "Análisis estadístico, no un servicio de apuestas. Las probabilidades son estimaciones, nunca certezas. Solo para mayores de 18 años.", "Análise estatística, não um serviço de apostas. As probabilidades são estimativas, nunca certezas. Somente para maiores de 18 anos.");
   const gambling = L.t(
     <>Les jeux d&apos;argent comportent des risques : endettement, dépendance… Appelle le {LEGAL.jeu.tel} ({LEGAL.jeu.nom}, appel non surtaxé).</>,
     <>Gambling involves risks such as debt and addiction. If you need help in the US, call 1-800-GAMBLER (National Problem Gambling Helpline); in France, {LEGAL.jeu.tel} ({LEGAL.jeu.nom}).</>,
-    <>El juego conlleva riesgos como el endeudamiento o la adicción. En España puedes pedir ayuda en jugarbien.es; en Francia, en el {LEGAL.jeu.tel} ({LEGAL.jeu.nom}).</>
+    <>El juego conlleva riesgos como el endeudamiento o la adicción. En España puedes pedir ayuda en jugarbien.es; en Francia, en el {LEGAL.jeu.tel} ({LEGAL.jeu.nom}).</>, <>Apostas envolvem riscos como endividamento e dependência. Se precisar de ajuda, procure o CVV (188) ou o Jogadores Anônimos; na França, ligue para {LEGAL.jeu.tel} ({LEGAL.jeu.nom}).</>
   );
 
   if (compact) {
@@ -39,32 +39,32 @@ export default function SiteFooter({ L, compact = false }) {
     <footer>
       <div className="foot">
         <Link href={L.href("/")} className="logo"><span className="ball" aria-hidden /> Basketlog</Link>
-        <nav className="foot-links" aria-label={L.t("Liens du site", "Site links", "Enlaces del sitio")}>
-          <Link href={L.href("/pronostic-basket")}>{L.t("Pronostic basket", "Basketball predictions", "Pronósticos de baloncesto")}</Link>
-          <Link href={L.href("/analyse-basket")}>{L.t("Analyse basket", "Basketball analysis", "Análisis de baloncesto")}</Link>
-          <Link href={L.href("/app/matchs")}>{L.t("Pronostics NBA du jour", "Today's NBA predictions", "Pronósticos NBA de hoy")}</Link>
-          <Link href={L.href("/app/classement")}>{L.t("Classement NBA", "NBA standings", "Clasificación NBA")}</Link>
-          <Link href={L.href("/app/euroleague")}>{L.t("Pronostics EuroLeague", "EuroLeague predictions", "Pronósticos Euroliga")}</Link>
-          <Link href={L.href("/app/bilan")}>{L.t("Taux de réussite", "Track record", "Porcentaje de acierto")}</Link>
-          <Link href={L.href("/methode")}>{L.t("Méthode", "Methodology", "Metodología")}</Link>
+        <nav className="foot-links" aria-label={L.t("Liens du site", "Site links", "Enlaces del sitio", "Links do site")}>
+          <Link href={L.href("/pronostic-basket")}>{L.t("Pronostic basket", "Basketball predictions", "Pronósticos de baloncesto", "Palpites de basquete")}</Link>
+          <Link href={L.href("/analyse-basket")}>{L.t("Analyse basket", "Basketball analysis", "Análisis de baloncesto", "Análise de basquete")}</Link>
+          <Link href={L.href("/app/matchs")}>{L.t("Pronostics NBA du jour", "Today's NBA predictions", "Pronósticos NBA de hoy", "Palpites NBA de hoje")}</Link>
+          <Link href={L.href("/app/classement")}>{L.t("Classement NBA", "NBA standings", "Clasificación NBA", "Classificação NBA")}</Link>
+          <Link href={L.href("/app/euroleague")}>{L.t("Pronostics EuroLeague", "EuroLeague predictions", "Pronósticos Euroliga", "Palpites Euroliga")}</Link>
+          <Link href={L.href("/app/bilan")}>{L.t("Taux de réussite", "Track record", "Porcentaje de acierto", "Taxa de acerto")}</Link>
+          <Link href={L.href("/methode")}>{L.t("Méthode", "Methodology", "Metodología", "Metodologia")}</Link>
           <Link href={L.href("/pro")}>Basketlog Pro</Link>
-          <Link href={L.href("/avis")}>{L.t("Avis", "Reviews", "Opiniones")}</Link>
-          <Link href={L.href("/widget")}>{L.t("Widget pour votre site", "Widget for your site", "Widget para tu web")}</Link>
+          <Link href={L.href("/avis")}>{L.t("Avis", "Reviews", "Opiniones", "Avaliações")}</Link>
+          <Link href={L.href("/widget")}>{L.t("Widget pour votre site", "Widget for your site", "Widget para tu web", "Widget para o seu site")}</Link>
           {/* Comptes officiels (mêmes adresses que sameAs dans app/layout.jsx) : liens visibles pour que Google
               relie ces pages au nom « Basketlog » et les découvre depuis le site. */}
-          <a href="https://x.com/Basketlog" target="_blank" rel="me noopener">{L.t("Basketlog sur X", "Basketlog on X", "Basketlog en X")}</a>
-          <a href="https://www.youtube.com/@basketlog" target="_blank" rel="me noopener">{L.t("Basketlog sur YouTube", "Basketlog on YouTube", "Basketlog en YouTube")}</a>
-          <a href="https://www.tiktok.com/@basketlog" target="_blank" rel="me noopener">{L.t("Basketlog sur TikTok", "Basketlog on TikTok", "Basketlog en TikTok")}</a>
-          <a href="https://bsky.app/profile/basketlog.bsky.social" target="_blank" rel="me noopener">{L.t("Basketlog sur Bluesky", "Basketlog on Bluesky", "Basketlog en Bluesky")}</a>
-          <a href="https://www.instagram.com/basketlog_app/" target="_blank" rel="me noopener">{L.t("Basketlog sur Instagram", "Basketlog on Instagram", "Basketlog en Instagram")}</a>
-          <a href="https://www.facebook.com/profile.php?id=61596281440513" target="_blank" rel="me noopener">{L.t("Basketlog sur Facebook", "Basketlog on Facebook", "Basketlog en Facebook")}</a>
-          <a href="https://www.linkedin.com/company/basketlog" target="_blank" rel="me noopener">{L.t("Basketlog sur LinkedIn", "Basketlog on LinkedIn", "Basketlog en LinkedIn")}</a>
-          <a href="https://t.me/basketlog" target="_blank" rel="me noopener">{L.t("Basketlog sur Telegram", "Basketlog on Telegram", "Basketlog en Telegram")}</a>
+          <a href="https://x.com/Basketlog" target="_blank" rel="me noopener">{L.t("Basketlog sur X", "Basketlog on X", "Basketlog en X", "Basketlog no X")}</a>
+          <a href="https://www.youtube.com/@basketlog" target="_blank" rel="me noopener">{L.t("Basketlog sur YouTube", "Basketlog on YouTube", "Basketlog en YouTube", "Basketlog no YouTube")}</a>
+          <a href="https://www.tiktok.com/@basketlog" target="_blank" rel="me noopener">{L.t("Basketlog sur TikTok", "Basketlog on TikTok", "Basketlog en TikTok", "Basketlog no TikTok")}</a>
+          <a href="https://bsky.app/profile/basketlog.bsky.social" target="_blank" rel="me noopener">{L.t("Basketlog sur Bluesky", "Basketlog on Bluesky", "Basketlog en Bluesky", "Basketlog no Bluesky")}</a>
+          <a href="https://www.instagram.com/basketlog_app/" target="_blank" rel="me noopener">{L.t("Basketlog sur Instagram", "Basketlog on Instagram", "Basketlog en Instagram", "Basketlog no Instagram")}</a>
+          <a href="https://www.facebook.com/profile.php?id=61596281440513" target="_blank" rel="me noopener">{L.t("Basketlog sur Facebook", "Basketlog on Facebook", "Basketlog en Facebook", "Basketlog no Facebook")}</a>
+          <a href="https://www.linkedin.com/company/basketlog" target="_blank" rel="me noopener">{L.t("Basketlog sur LinkedIn", "Basketlog on LinkedIn", "Basketlog en LinkedIn", "Basketlog no LinkedIn")}</a>
+          <a href="https://t.me/basketlog" target="_blank" rel="me noopener">{L.t("Basketlog sur Telegram", "Basketlog on Telegram", "Basketlog en Telegram", "Basketlog no Telegram")}</a>
         </nav>
         {legal}
         <div>{notBetting}</div>
         <div>{gambling}</div>
-        <div>{L.t("Données : flux publics NBA et EuroLeague · Photos : Unsplash", "Data: public NBA and EuroLeague feeds · Photos: Unsplash", "Datos: fuentes públicas de la NBA y la Euroliga · Fotos: Unsplash")} · © {new Date().getFullYear()} Basketlog</div>
+        <div>{L.t("Données : flux publics NBA et EuroLeague · Photos : Unsplash", "Data: public NBA and EuroLeague feeds · Photos: Unsplash", "Datos: fuentes públicas de la NBA y la Euroliga · Fotos: Unsplash", "Dados: fontes públicas da NBA e da Euroliga · Fotos: Unsplash")} · © {new Date().getFullYear()} Basketlog</div>
       </div>
     </footer>
   );

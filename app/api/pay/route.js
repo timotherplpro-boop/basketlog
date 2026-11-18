@@ -17,7 +17,7 @@ export const maxDuration = 15;
 export async function POST(req) {
   let body = {};
   try { body = await req.json(); } catch {}
-  const lang = body?.lang === "en" || body?.lang === "es" ? body.lang : "fr";
+  const lang = ["en", "es", "pt"].includes(body?.lang) ? body.lang : "fr";
   const L = mk(lang);
   const no = (status, error) => NextResponse.json({ ok: false, error }, { status, headers: { "Cache-Control": "no-store" } });
   if (!sameOrigin(req.headers)) return no(403, "refus");

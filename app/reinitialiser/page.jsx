@@ -7,8 +7,8 @@ export async function generateMetadata() {
   const L = await getL();
   return {
     ...pageMeta({
-      title: L.t("Nouveau mot de passe", "New password", "Nueva contraseña"),
-      description: L.t("Choisis un nouveau mot de passe pour ton compte Basketlog.", "Choose a new password for your Basketlog account.", "Elige una nueva contraseña para tu cuenta de Basketlog."),
+      title: L.t("Nouveau mot de passe", "New password", "Nueva contraseña", "Nova senha"),
+      description: L.t("Choisis un nouveau mot de passe pour ton compte Basketlog.", "Choose a new password for your Basketlog account.", "Elige una nueva contraseña para tu cuenta de Basketlog.", "Escolha uma nova senha para sua conta do Basketlog."),
       path: "/reinitialiser",
       noindex: true,
       L,

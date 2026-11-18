@@ -10,8 +10,8 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata() {
   const L = await getL();
   return pageMeta({
-    title: L.t("Historique de tes analyses – Basketlog", "Your analysis history – Basketlog", "Historial de tus análisis – Basketlog"),
-    description: L.t("Les analyses de matchs que tu as lancées sur Basketlog.", "The game analyses you have run on Basketlog.", "Los análisis de partidos que has realizado en Basketlog."),
+    title: L.t("Historique de tes analyses – Basketlog", "Your analysis history – Basketlog", "Historial de tus análisis – Basketlog", "Histórico das suas análises – Basketlog"),
+    description: L.t("Les analyses de matchs que tu as lancées sur Basketlog.", "The game analyses you have run on Basketlog.", "Los análisis de partidos que has realizado en Basketlog.", "As análises de jogos que você fez no Basketlog."),
     path: "/app/historique",
     noindex: true,
     L,
@@ -27,32 +27,32 @@ export default async function HistoriquePage() {
     <main className="app-page">
       <AppTabs />
       <div className="app-head">
-        <h1>{L.t("Historique", "History", "Historial")}</h1>
-        <p>{L.t("Les analyses complètes que tu as lancées", "The full analyses you have run", "Los análisis completos que has realizado")}</p>
-        <p className="note">{L.t("Liées à ton compte : tu les retrouves sur tous tes appareils.", "Linked to your account: you'll find them on all your devices.", "Vinculados a tu cuenta: los encontrarás en todos tus dispositivos.")}</p>
+        <h1>{L.t("Historique", "History", "Historial", "Histórico")}</h1>
+        <p>{L.t("Les analyses complètes que tu as lancées", "The full analyses you have run", "Los análisis completos que has realizado", "As análises completas que você fez")}</p>
+        <p className="note">{L.t("Liées à ton compte : tu les retrouves sur tous tes appareils.", "Linked to your account: you'll find them on all your devices.", "Vinculados a tu cuenta: los encontrarás en todos tus dispositivos.", "Vinculadas à sua conta: você as encontra em todos os seus dispositivos.")}</p>
       </div>
       {!m ? (
         <div className="panel hist-empty">
-          <b>{L.t("Connecte-toi pour retrouver tes analyses", "Log in to find your analyses", "Inicia sesión para encontrar tus análisis")}</b>
-          <p>{L.t("Les analyses que tu lances avec Starter, Pro ou Lifetime s'affichent ici, sur tous tes appareils.", "The analyses you run with Starter, Pro or Lifetime show up here, on all your devices.", "Los análisis que lanzas con Starter, Pro o Lifetime aparecen aquí, en todos tus dispositivos.")}</p>
-          <Link href={L.href("/pro")} className="btn-solid">{L.t("Voir les formules", "See the plans", "Ver los planes")}</Link>
-          <AuthButton mode="connexion" source="historique" next={L.href("/app/historique")} className="comp-more">{L.t("Déjà un compte ? Se connecter", "Already have an account? Log in", "¿Ya tienes cuenta? Inicia sesión")} →</AuthButton>
+          <b>{L.t("Connecte-toi pour retrouver tes analyses", "Log in to find your analyses", "Inicia sesión para encontrar tus análisis", "Faça login para encontrar suas análises")}</b>
+          <p>{L.t("Les analyses que tu lances avec Starter, Pro ou Lifetime s'affichent ici, sur tous tes appareils.", "The analyses you run with Starter, Pro or Lifetime show up here, on all your devices.", "Los análisis que lanzas con Starter, Pro o Lifetime aparecen aquí, en todos tus dispositivos.", "As análises que você abre com Starter, Pro ou Lifetime aparecem aqui, em todos os seus dispositivos.")}</p>
+          <Link href={L.href("/pro")} className="btn-solid">{L.t("Voir les formules", "See the plans", "Ver los planes", "Ver os planos")}</Link>
+          <AuthButton mode="connexion" source="historique" next={L.href("/app/historique")} className="comp-more">{L.t("Déjà un compte ? Se connecter", "Already have an account? Log in", "¿Ya tienes cuenta? Inicia sesión", "Já tem conta? Entre")} →</AuthButton>
         </div>
       ) : list === null ? (
-        <div className="panel hist-empty"><p>{L.t("Historique momentanément indisponible. Réessaie dans quelques minutes.", "History temporarily unavailable. Please try again in a few minutes.", "Historial no disponible por el momento. Vuelve a intentarlo en unos minutos.")}</p></div>
+        <div className="panel hist-empty"><p>{L.t("Historique momentanément indisponible. Réessaie dans quelques minutes.", "History temporarily unavailable. Please try again in a few minutes.", "Historial no disponible por el momento. Vuelve a intentarlo en unos minutos.", "Histórico indisponível no momento. Tente novamente em alguns minutos.")}</p></div>
       ) : !list.length && m.tier === "compte" ? (
         <div className="panel hist-empty">
-          <b>{L.t("Aucune analyse complète pour l'instant", "No full analyses yet", "Todavía no hay análisis completos")}</b>
-          <p>{L.t("Avec le compte gratuit, tu vois l'aperçu de chaque analyse. Les analyses sont incluses dans Starter (1 par jour), Pro et Lifetime (illimitées), et s'affichent ici.", "With the free account, you see a preview of every analysis. Analyses come with Starter (1 a day), Pro and Lifetime (unlimited), and show up here.", "Con la cuenta gratis, ves un avance de cada análisis. Los análisis están incluidos en Starter (1 al día), Pro y Lifetime (ilimitados), y aparecen aquí.")}</p>
-          <Link href={L.href("/pro")} className="btn-solid">{L.t("Voir les formules", "See the plans", "Ver los planes")}</Link>
-          <Link href={L.href("/app")} className="comp-more">{L.t("Analyser un match", "Analyze a game", "Analizar un partido")} →</Link>
+          <b>{L.t("Aucune analyse complète pour l'instant", "No full analyses yet", "Todavía no hay análisis completos", "Ainda não há análises completas")}</b>
+          <p>{L.t("Avec le compte gratuit, tu vois l'aperçu de chaque analyse. Les analyses sont incluses dans Starter (1 par jour), Pro et Lifetime (illimitées), et s'affichent ici.", "With the free account, you see a preview of every analysis. Analyses come with Starter (1 a day), Pro and Lifetime (unlimited), and show up here.", "Con la cuenta gratis, ves un avance de cada análisis. Los análisis están incluidos en Starter (1 al día), Pro y Lifetime (ilimitados), y aparecen aquí.", "Com a conta grátis, você vê uma prévia de cada análise. As análises estão incluídas no Starter (1 por dia), no Pro e no Lifetime (ilimitadas), e aparecem aqui.")}</p>
+          <Link href={L.href("/pro")} className="btn-solid">{L.t("Voir les formules", "See the plans", "Ver los planes", "Ver os planos")}</Link>
+          <Link href={L.href("/app")} className="comp-more">{L.t("Analyser un match", "Analyze a game", "Analizar un partido", "Analisar um jogo")} →</Link>
         </div>
       ) : !list.length ? (
         <div className="panel hist-empty">
-          <b>{L.t("Aucune analyse pour l'instant", "No analyses yet", "Todavía no hay análisis")}</b>
-          <p>{L.t("Lance l'analyse complète d'un match : elle apparaîtra ici pour que tu la retrouves facilement.", "Run a game's full analysis: it will show up here so you can find it again easily.", "Lanza el análisis completo de un partido: aparecerá aquí para que lo encuentres fácilmente.")}</p>
-          <Link href={L.href("/app")} className="btn-solid">{L.t("Analyser un match", "Analyze a game", "Analizar un partido")}</Link>
-          <Link href={L.href("/app/matchs")} className="comp-more">{L.t("Voir les matchs du jour", "See today's games", "Ver los partidos de hoy")} →</Link>
+          <b>{L.t("Aucune analyse pour l'instant", "No analyses yet", "Todavía no hay análisis", "Ainda não há análises")}</b>
+          <p>{L.t("Lance l'analyse complète d'un match : elle apparaîtra ici pour que tu la retrouves facilement.", "Run a game's full analysis: it will show up here so you can find it again easily.", "Lanza el análisis completo de un partido: aparecerá aquí para que lo encuentres fácilmente.", "Abra a análise completa de um jogo: ela aparecerá aqui para você encontrá-la facilmente.")}</p>
+          <Link href={L.href("/app")} className="btn-solid">{L.t("Analyser un match", "Analyze a game", "Analizar un partido", "Analisar um jogo")}</Link>
+          <Link href={L.href("/app/matchs")} className="comp-more">{L.t("Voir les matchs du jour", "See today's games", "Ver los partidos de hoy", "Ver os jogos de hoje")} →</Link>
         </div>
       ) : (
         <HistoryList list={list} L={L} />

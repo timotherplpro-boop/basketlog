@@ -6,16 +6,16 @@ import { usePathname, useRouter } from "next/navigation";
 export default function Error({ reset }) {
   const router = useRouter();
   const path = usePathname() || "";
-  const lang = /^\/en(\/|$)/.test(path) ? "en" : /^\/es(\/|$)/.test(path) ? "es" : "fr";
-  const t = (fr, en, es) => (lang === "en" ? en : lang === "es" ? es : fr);
+  const lang = /^\/en(\/|$)/.test(path) ? "en" : /^\/es(\/|$)/.test(path) ? "es" : /^\/pt(\/|$)/.test(path) ? "pt" : "fr";
+  const t = (fr, en, es, pt) => (lang === "en" ? en : lang === "es" ? es : lang === "pt" ? pt : fr);
   return (
     <main className="app-page" style={{ minHeight: "60vh", display: "grid", placeItems: "center", textAlign: "center", padding: "48px 16px" }}>
       <div style={{ maxWidth: 460 }}>
-        <h1 style={{ fontSize: 26, marginBottom: 10 }}>{t("Données momentanément indisponibles", "Data temporarily unavailable", "Datos no disponibles por el momento")}</h1>
+        <h1 style={{ fontSize: 26, marginBottom: 10 }}>{t("Données momentanément indisponibles", "Data temporarily unavailable", "Datos no disponibles por el momento", "Dados indisponíveis no momento")}</h1>
         <p className="team-rec" style={{ marginBottom: 22 }}>
-          {t("Cette page n'a pas pu se charger : une de nos sources de données ne répond pas pour l'instant. Réessaie dans un instant.", "This page couldn't load: one of our data sources isn't responding right now. Please try again in a moment.", "Esta página no se ha podido cargar: una de nuestras fuentes de datos no responde por ahora. Vuelve a intentarlo en un momento.")}
+          {t("Cette page n'a pas pu se charger : une de nos sources de données ne répond pas pour l'instant. Réessaie dans un instant.", "This page couldn't load: one of our data sources isn't responding right now. Please try again in a moment.", "Esta página no se ha podido cargar: una de nuestras fuentes de datos no responde por ahora. Vuelve a intentarlo en un momento.", "Esta página não pôde ser carregada: uma das nossas fontes de dados não está respondendo agora. Tente novamente em instantes.")}
         </p>
-        <button type="button" className="btn-solid" onClick={() => startTransition(() => { router.refresh(); reset(); })}>{t("Réessayer", "Try again", "Reintentar")}</button>
+        <button type="button" className="btn-solid" onClick={() => startTransition(() => { router.refresh(); reset(); })}>{t("Réessayer", "Try again", "Reintentar", "Tentar novamente")}</button>
       </div>
     </main>
   );

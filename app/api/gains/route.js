@@ -36,14 +36,14 @@ function tooMany(uid) {
 function messages(lang) {
   const { t } = mk(lang);
   return {
-    login: t("Connecte-toi pour voir tes gains.", "Log in to see your earnings.", "Inicia sesión para ver tus ganancias."),
-    gone: t("Ce compte n'existe plus. Reconnecte-toi.", "This account no longer exists. Please log in again.", "Esta cuenta ya no existe. Vuelve a iniciar sesión."),
-    many: t("Trop de demandes, réessaie dans quelques minutes.", "Too many requests, please try again in a few minutes.", "Demasiadas solicitudes, inténtalo de nuevo en unos minutos."),
-    forbidden: t("Cette rubrique est réservée aux créateurs.", "This section is reserved for creators.", "Esta sección está reservada a los creadores."),
-    notReady: t("Cette fonction sera activée très bientôt.", "This feature will be turned on very soon.", "Esta función se activará muy pronto."),
-    dbDown: t("Base momentanément injoignable, réessaie dans un instant.", "The database is temporarily unreachable, please try again in a moment.", "La base de datos no está accesible por el momento, inténtalo de nuevo en un instante."),
-    whopDown: t("Whop ne répond pas pour le moment, réessaie dans un instant.", "Whop isn't responding right now, please try again in a moment.", "Whop no responde por ahora, inténtalo de nuevo en un instante."),
-    whopNoKey: t("Le service d'abonnement n'est pas configuré sur le site : écris-nous à contact@basketlog-app.com.", "The subscription service isn't set up on the site: write to us at contact@basketlog-app.com.", "El servicio de suscripción no está configurado en el sitio: escríbenos a contact@basketlog-app.com."),
+    login: t("Connecte-toi pour voir tes gains.", "Log in to see your earnings.", "Inicia sesión para ver tus ganancias.", "Faça login para ver seus ganhos."),
+    gone: t("Ce compte n'existe plus. Reconnecte-toi.", "This account no longer exists. Please log in again.", "Esta cuenta ya no existe. Vuelve a iniciar sesión.", "Esta conta não existe mais. Faça login novamente."),
+    many: t("Trop de demandes, réessaie dans quelques minutes.", "Too many requests, please try again in a few minutes.", "Demasiadas solicitudes, inténtalo de nuevo en unos minutos.", "Solicitações demais, tente novamente em alguns minutos."),
+    forbidden: t("Cette rubrique est réservée aux créateurs.", "This section is reserved for creators.", "Esta sección está reservada a los creadores.", "Esta seção é reservada aos criadores."),
+    notReady: t("Cette fonction sera activée très bientôt.", "This feature will be turned on very soon.", "Esta función se activará muy pronto.", "Esta função será ativada muito em breve."),
+    dbDown: t("Base momentanément injoignable, réessaie dans un instant.", "The database is temporarily unreachable, please try again in a moment.", "La base de datos no está accesible por el momento, inténtalo de nuevo en un instante.", "O banco de dados não está acessível no momento, tente novamente em instantes."),
+    whopDown: t("Whop ne répond pas pour le moment, réessaie dans un instant.", "Whop isn't responding right now, please try again in a moment.", "Whop no responde por ahora, inténtalo de nuevo en un instante.", "A Whop não está respondendo agora, tente novamente em instantes."),
+    whopNoKey: t("Le service d'abonnement n'est pas configuré sur le site : écris-nous à contact@basketlog-app.com.", "The subscription service isn't set up on the site: write to us at contact@basketlog-app.com.", "El servicio de suscripción no está configurado en el sitio: escríbenos a contact@basketlog-app.com.", "O serviço de assinatura não está configurado no site: escreva para contact@basketlog-app.com."),
   };
 }
 

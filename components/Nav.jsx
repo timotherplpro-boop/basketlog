@@ -32,8 +32,8 @@ export default function Nav() {
   const space = L.href("/app");
   const account = {
     href: connected ? space : `${space}?connexion=1`,
-    label: L.t("Connexion", "Login", "Iniciar sesión"),
-    title: connected ? L.t("Tu es connecté : ouvrir ton espace", "You're logged in: open your space", "Has iniciado sesión: abrir tu espacio") : undefined,
+    label: L.t("Connexion", "Login", "Iniciar sesión", "Entrar"),
+    title: connected ? L.t("Tu es connecté : ouvrir ton espace", "You're logged in: open your space", "Has iniciado sesión: abrir tu espacio", "Você está conectado: abrir seu espaço") : undefined,
   };
   const onAccount = (e) => {
     if (connected) return;
@@ -42,16 +42,16 @@ export default function Nav() {
     track("Clic connexion", { source: "menu" });
     openAuth({ mode: "connexion", source: "menu", next: space });
   };
-  const menuLabel = open ? L.t("Fermer le menu", "Close menu", "Cerrar el menú") : L.t("Ouvrir le menu", "Open menu", "Abrir el menú");
+  const menuLabel = open ? L.t("Fermer le menu", "Close menu", "Cerrar el menú", "Fechar o menu") : L.t("Ouvrir le menu", "Open menu", "Abrir el menú", "Abrir o menu");
 
   const links = [
-    ["/app", L.t("Analyser un match", "Analyze a game", "Analizar un partido")],
-    ["/app/matchs", L.t("Matchs du jour", "Today's games", "Partidos de hoy")],
-    ["/app/classement", L.t("Classement NBA", "NBA standings", "Clasificación NBA")],
-    ["/app/euroleague", L.t("EuroLeague", "EuroLeague", "Euroliga")],
-    ["/app/bilan", L.t("Bilan du modèle", "Model track record", "Balance del modelo")],
+    ["/app", L.t("Analyser un match", "Analyze a game", "Analizar un partido", "Analisar um jogo")],
+    ["/app/matchs", L.t("Matchs du jour", "Today's games", "Partidos de hoy", "Jogos de hoje")],
+    ["/app/classement", L.t("Classement NBA", "NBA standings", "Clasificación NBA", "Classificação NBA")],
+    ["/app/euroleague", L.t("EuroLeague", "EuroLeague", "Euroliga", "Euroliga")],
+    ["/app/bilan", L.t("Bilan du modèle", "Model track record", "Balance del modelo", "Desempenho do modelo")],
     ["/pro", "Basketlog Pro"],
-    ["/avis", L.t("Avis", "Reviews", "Opiniones")],
+    ["/avis", L.t("Avis", "Reviews", "Opiniones", "Avaliações")],
   ];
 
   return (
@@ -78,7 +78,7 @@ export default function Nav() {
         <div className="mm-panel" onClick={(e) => e.target.closest("a") && setOpen(false)}>
           <div className="mm-top">
             <Link href={L.href("/")} className="logo"><span className="ball" aria-hidden /> Basketlog</Link>
-            <button type="button" className="mm-x" onClick={() => setOpen(false)} aria-label={L.t("Fermer le menu", "Close menu", "Cerrar el menú")}>
+            <button type="button" className="mm-x" onClick={() => setOpen(false)} aria-label={L.t("Fermer le menu", "Close menu", "Cerrar el menú", "Fechar o menu")}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M5 5l14 14M19 5L5 19" /></svg>
             </button>
           </div>
@@ -87,9 +87,9 @@ export default function Nav() {
             <a href={account.href} className="nav-cta" onClick={onAccount} title={account.title}><Chevrons />{account.label}</a>
             <InstallPlatforms source="menu" box />
           </div>
-          <nav className="mm-links" aria-label={L.t("Pages du site", "Site pages", "Páginas del sitio")}>
+          <nav className="mm-links" aria-label={L.t("Pages du site", "Site pages", "Páginas del sitio", "Páginas do site")}>
             {links.map(([href, label]) => <Link key={href} href={L.href(href)}>{label}</Link>)}
-            <Link href={`${L.href("/")}#faq`}>{L.t("Questions fréquentes", "FAQ", "Preguntas frecuentes")}</Link>
+            <Link href={`${L.href("/")}#faq`}>{L.t("Questions fréquentes", "FAQ", "Preguntas frecuentes", "Perguntas frequentes")}</Link>
           </nav>
         </div>
       </div>

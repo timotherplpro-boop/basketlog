@@ -7,8 +7,8 @@ export async function generateMetadata() {
   const L = await getL();
   return {
     ...pageMeta({
-      title: L.t("Confirme ton inscription à la newsletter", "Confirm your newsletter signup", "Confirma tu suscripción a la newsletter"),
-      description: L.t("Confirme ton adresse e-mail pour recevoir la newsletter du dimanche de Basketlog.", "Confirm your email address to receive Basketlog's Sunday newsletter.", "Confirma tu correo para recibir la newsletter del domingo de Basketlog."),
+      title: L.t("Confirme ton inscription à la newsletter", "Confirm your newsletter signup", "Confirma tu suscripción a la newsletter", "Confirme sua inscrição na newsletter"),
+      description: L.t("Confirme ton adresse e-mail pour recevoir la newsletter du dimanche de Basketlog.", "Confirm your email address to receive Basketlog's Sunday newsletter.", "Confirma tu correo para recibir la newsletter del domingo de Basketlog.", "Confirme seu e-mail para receber a newsletter de domingo do Basketlog."),
       path: "/newsletter/confirmer",
       noindex: true,
       L,

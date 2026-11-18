@@ -11,16 +11,16 @@ export default function LegalDoc({ title, path, intro, children, L = mk("fr") })
     <main className="app-page prose-page legal">
       <div className="app-head">
         <h1>{title}</h1>
-        <p>{L.t(`Dernière mise à jour : ${LEGAL.updated}`, `Last updated: ${LEGAL.updatedEn || LEGAL.updated}`, `Última actualización: ${LEGAL.updatedEs || LEGAL.updated}`)}</p>
+        <p>{L.t(`Dernière mise à jour : ${LEGAL.updated}`, `Last updated: ${LEGAL.updatedEn || LEGAL.updated}`, `Última actualización: ${LEGAL.updatedEs || LEGAL.updated}`, `Última actualización: ${LEGAL.updatedEs || LEGAL.updated}`)}</p>
       </div>
-      <nav className="legal-nav" aria-label={L.t("Documents légaux", "Legal documents", "Documentos legales")}>
+      <nav className="legal-nav" aria-label={L.t("Documents légaux", "Legal documents", "Documentos legales", "Documentos legais")}>
         {LEGAL_PAGES.map(([href, label]) => (
-          <Link key={href} href={L.href(href)} className={href === path ? "on" : ""} aria-current={href === path ? "page" : undefined}>{L.t(label, LEGAL_EN[href], LEGAL_ES[href])}</Link>
+          <Link key={href} href={L.href(href)} className={href === path ? "on" : ""} aria-current={href === path ? "page" : undefined}>{L.t(label, LEGAL_EN[href], LEGAL_ES[href], LEGAL_ES[href])}</Link>
         ))}
       </nav>
       {intro && <p className="legal-intro">{intro}</p>}
       {children}
-      <p className="legal-contact">{L.t("Une question ? Écris-nous à", "Any questions? Email us at", "¿Alguna pregunta? Escríbenos a")} <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>.</p>
+      <p className="legal-contact">{L.t("Une question ? Écris-nous à", "Any questions? Email us at", "¿Alguna pregunta? Escríbenos a", "Alguma dúvida? Escreva para")} <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>.</p>
     </main>
   );
 }

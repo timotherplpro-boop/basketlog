@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata() {
   const L = await getL();
   return {
-    title: L.t("Admin – Basketlog", "Admin – Basketlog", "Administración – Basketlog"),
+    title: L.t("Admin – Basketlog", "Admin – Basketlog", "Administración – Basketlog", "Administración – Basketlog"),
     robots: { index: false, follow: false },
   };
 }
@@ -46,8 +46,8 @@ export default async function AdminPage() {
   return (
     <main className="app-page wide">
       <div className="app-head">
-        <h1>{L.t("Admin", "Admin", "Administración")}</h1>
-        <p>{L.t("Avis, formules, créateurs et état du site.", "Reviews, plans, creators and site status.", "Opiniones, planes, creadores y estado del sitio.")}</p>
+        <h1>{L.t("Admin", "Admin", "Administración", "Administración")}</h1>
+        <p>{L.t("Avis, formules, créateurs et état du site.", "Reviews, plans, creators and site status.", "Opiniones, planes, creadores y estado del sitio.", "Opiniones, planes, creadores y estado del sitio.")}</p>
       </div>
       <AdminNav active="gestion" />
       <AdminPanel initial={data} me={s.uid} preview={s.preview || null} health={health} />

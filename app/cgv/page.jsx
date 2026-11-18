@@ -11,7 +11,7 @@ const FR = {}, EN = { en: true }, ES = { es: true };
 
 export async function generateMetadata() {
   const L = await getL();
-  if (L.es) return pageMeta({ title: "Condiciones de venta – Basketlog", description: "Condiciones de venta de Basketlog Starter, Pro y Lifetime: precios, pago, renovación, cancelación, desistimiento y reembolsos.", path: "/cgv", L });
+  if (L.es || L.pt) return pageMeta({ title: "Condiciones de venta – Basketlog", description: "Condiciones de venta de Basketlog Starter, Pro y Lifetime: precios, pago, renovación, cancelación, desistimiento y reembolsos.", path: "/cgv", L });
   return L.en
     ? pageMeta({ title: "Terms of sale – Basketlog", description: "Terms of sale for Basketlog Starter, Pro and Lifetime: prices, payment, renewal, cancellation, withdrawal and refunds.", path: "/cgv", L })
     : pageMeta({ title: "Conditions générales de vente (CGV) – Basketlog", description: "Conditions générales de vente des abonnements Basketlog Starter, Pro et Lifetime : prix, paiement, renouvellement, résiliation, rétractation et remboursement.", path: "/cgv" });
@@ -289,5 +289,5 @@ function CGVEs({ L }) {
 
 export default async function CGVPage() {
   const L = await getL();
-  return L.es ? <CGVEs L={L} /> : L.en ? <CGVEn L={L} /> : <CGVFr />;
+  return L.es || L.pt ? <CGVEs L={L} /> : L.en ? <CGVEn L={L} /> : <CGVFr />;
 }

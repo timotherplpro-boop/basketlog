@@ -51,7 +51,7 @@ export function pendingText(T, email) {
 export function useNewsletterError(error) {
   const { t } = useL();
   if (!error) return "";
-  return error === NETWORK ? t("Connexion impossible, réessaie.", "Couldn't connect, please try again.", "No se ha podido conectar, inténtalo de nuevo.") : error;
+  return error === NETWORK ? t("Connexion impossible, réessaie.", "Couldn't connect, please try again.", "No se ha podido conectar, inténtalo de nuevo.", "Não foi possível conectar, tente novamente.") : error;
 }
 
 // Message quand l'état de la newsletter ne peut pas être lu (problem : "email", "down").

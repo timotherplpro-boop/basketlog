@@ -26,7 +26,7 @@ export async function GET(req) {
   const next = safeNext(req.cookies.get(PAY_NEXT_COOKIE)?.value);
   // Langue : paramètre l, sinon celle de la page d'où vient le visiteur.
   const l = u.searchParams.get("l") || (next || "").match(/^\/(en|es)(?=\/|$|\?)/)?.[1];
-  const pre = l === "en" || l === "es" ? `/${l}` : "";
+  const pre = l === "en" || l === "es" || l === "pt" ? `/${l}` : "";
   const go = (path, clear = false) => {
     const r = NextResponse.redirect(`${SITE}${path}`);
     if (clear) {

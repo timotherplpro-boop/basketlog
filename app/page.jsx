@@ -36,7 +36,7 @@ export async function generateMetadata() {
     title: homeTitle(L, aiReady()),
     description: L.t(
       "Analyse basket et pronostics NBA, EuroLeague pour chaque match : probabilités de victoire gratuites, score projeté, absences, forme. Taux de réussite public.",
-      "NBA and EuroLeague predictions for every game: free win probabilities, projected score, injuries, form and scenarios. Public track record.", "Pronósticos de la NBA y la Euroliga para cada partido: probabilidades de victoria gratis, marcador proyectado, bajas, forma y escenarios. Balance público."
+      "NBA and EuroLeague predictions for every game: free win probabilities, projected score, injuries, form and scenarios. Public track record.", "Pronósticos de la NBA y la Euroliga para cada partido: probabilidades de victoria gratis, marcador proyectado, bajas, forma y escenarios. Balance público.", "Palpites da NBA e da Euroliga para cada jogo: probabilidades de vitória grátis, placar projetado, desfalques, fase e cenários. Desempenho público."
     ),
     path: "/",
     L,
@@ -50,6 +50,7 @@ const HERO = {
   fr: { words: ["Prédis", "chaque", "match", "avant", "qu’il", "ne"], accent: "commence." },
   en: { words: ["Predict", "every", "game", "before", "it"], accent: "starts." },
   es: { words: ["Predice", "cada", "partido", "antes", "de", "que"], accent: "comience." },
+  pt: { words: ["Preveja", "cada", "jogo", "antes", "que", "ele"], accent: "comece." },
 };
 
 const StarIcon = () => (
@@ -145,14 +146,14 @@ export default async function Home() {
   const strongTitle = L.t(
     `Saison ${seasonLabel(season - 1)} testée en entier et saison ${seasonLabel(season)} en cours : chaque match est recalculé avec les seuls résultats connus avant lui.`,
     `Full ${seasonLabel(season - 1)} season backtest plus the current ${seasonLabel(season)} season: every game is recalculated using only results known before it.`,
-    `Temporada ${seasonLabel(season - 1)} probada entera y temporada ${seasonLabel(season)} en curso: cada partido se recalcula solo con los resultados conocidos antes de él.`
+    `Temporada ${seasonLabel(season - 1)} probada entera y temporada ${seasonLabel(season)} en curso: cada partido se recalcula solo con los resultados conocidos antes de él.`, `Temporada ${seasonLabel(season - 1)} testada inteira e temporada ${seasonLabel(season)} em andamento: cada jogo é recalculado só com os resultados conhecidos antes dele.`
   );
   // Badge : vrai nombre de membres Whop dès qu'il est parlant, sinon vrai nombre de matchs passés au crible.
   const memShown = members > 0 ? plusFloor(members, memberStep(members)) : 0;
   const analysed = plusFloor(Math.max(1301, stats?.n || 0), 100); // la saison testée compte à elle seule plus de 1 300 matchs
   const badgeTxt = memShown >= MEMBERS_MIN
-    ? L.t(`+${num(memShown)} membres inscrits`, `+${num(memShown)} registered members`, `+${num(memShown)} miembros registrados`)
-    : L.t(`+${num(analysed)} matchs NBA analysés`, `+${num(analysed)} NBA games analyzed`, `+${num(analysed)} partidos NBA analizados`);
+    ? L.t(`+${num(memShown)} membres inscrits`, `+${num(memShown)} registered members`, `+${num(memShown)} miembros registrados`, `+${num(memShown)} membros cadastrados`)
+    : L.t(`+${num(analysed)} matchs NBA analysés`, `+${num(analysed)} NBA games analyzed`, `+${num(analysed)} partidos NBA analizados`, `+${num(analysed)} jogos da NBA analisados`);
   const hero = HERO[L.lang];
   const cards = pre.slice(0, 12);
   // Logos avec le nom de l'équipe en texte alternatif (lu par les moteurs de recherche et les lecteurs d'écran).
@@ -170,7 +171,16 @@ export default async function Home() {
     { q: "6. ¿Las opiniones que se muestran son reales?", a: "Sí. Solo los suscriptores Starter, Pro y Lifetime pueden dar su opinión (una por cuenta, con el botón «Dar mi opinión»): sus opiniones llevan la mención «Suscriptor verificado». Las opiniones sin esta mención se enviaron cuando el formulario estaba abierto a todos. Cada opinión se publica tal cual tras una simple revisión antispam. No escribimos ninguna nosotros." },
     { q: "7. ¿Cuál es el porcentaje de acierto de Basketlog?", a: "Todo es público en la página Balance (/es/app/bilan): cada pronóstico se compara con el resultado final, partido a partido, con el detalle por nivel de confianza. El modelo se recalcula solo con los resultados conocidos antes de cada partido, sin hacer trampa con el futuro. Los datos proceden de las fuentes oficiales de la NBA y la Euroliga, actualizadas continuamente." },
   ];
-  const faq = L.es ? faqEs : L.en ? [
+  const faqPt = [
+    { q: "1. O que é o Basketlog?", a: "O Basketlog (numa palavra só) é um site de análise de basquete: para cada jogo da NBA e da Euroliga, ele dá as probabilidades de vitória, o placar projetado e os fatores-chave (nível dos times, fase, desfalques, cansaço), calculados por um modelo estatístico. O site é basketlog-app.com e o app é instalado pelo navegador." },
+    { q: "2. O Basketlog é grátis?", a: `As probabilidades de vitória de todos os jogos são grátis, sem cadastro, e cada análise mostra grátis a fase recente, um resumo rápido, o cenário n.º 1 e a confiança do modelo. A análise completa (argumentação do modelo, todos os cenários, estatísticas comparadas, jogadores, boletim médico, notícias em tempo real) está incluída no Pro a ${price("pro", cur, L)}/mês (ilimitado) ou no Lifetime a ${price("lifetime", cur, L)} em pagamento único; o Starter a ${price("starter", cur, L)}/mês dá 1 análise reduzida por dia (probabilidades exatas e estatísticas-chave). Tudo está na página Pro (/pt/pro).` },
+    { q: "3. Como funcionam as análises?", a: "O modelo parte do nível real de cada time (saldo de pontos, ataque, defesa, temporada passada) e depois acrescenta a vantagem de jogar em casa, o cansaço dos back-to-backs e os desfalques. A margem esperada é convertida em probabilidade de vitória e em cenários. Todos os detalhes estão na página Metodologia (/pt/methode)." },
+    { q: "4. Dá para apostar no Basketlog?", a: "Não. O Basketlog é uma ferramenta de análise para entender melhor os jogos. Aqui não se aceitam apostas e nenhuma probabilidade é uma garantia." },
+    { q: "5. Quais competições são cobertas?", a: "A NBA (as 30 franquias, com estatísticas de arremesso, jogadores-chave, fase recente e confrontos) e a Euroliga (os 20 clubes, com probabilidades, fase e classificação). Outras ligas virão depois." },
+    { q: "6. As avaliações exibidas são reais?", a: "Sim. Só os assinantes Starter, Pro e Lifetime podem dar sua avaliação (uma por conta, pelo botão «Dar minha avaliação»): elas trazem a menção «Assinante verificado». As avaliações sem essa menção foram enviadas quando o formulário estava aberto a todos. Cada avaliação é publicada como está, após uma simples verificação antispam. Não escrevemos nenhuma." },
+    { q: "7. Qual é a taxa de acerto do Basketlog?", a: "Tudo é público na página Desempenho (/pt/app/bilan): cada palpite é comparado com o resultado final, jogo a jogo, com o detalhe por nível de confiança. O modelo é recalculado só com os resultados conhecidos antes de cada jogo, sem trapacear com o futuro. Os dados vêm das fontes oficiais da NBA e da Euroliga, atualizadas continuamente." },
+  ];
+  const faq = L.pt ? faqPt : L.es ? faqEs : L.en ? [
     { q: "1. What is Basketlog?", a: "Basketlog (one word) is a basketball analysis website: for every NBA and EuroLeague game, it gives win probabilities, the projected score and the key factors (team strength, form, injuries, fatigue), computed by a statistical model. The site is basketlog-app.com, and the app installs from your browser." },
     { q: "2. Is Basketlog free?", a: `Win probabilities for every game are free, no sign-up needed, and every analysis shows recent form, a quick summary, the #1 scenario and the model's confidence for free. The full analysis (the model's reasoning, every scenario, stat comparison, players, injury report, real-time news) comes with Pro at ${price("pro", cur, L)}/month (unlimited) or Lifetime at ${price("lifetime", cur, L)} one-time; Starter at ${price("starter", cur, L)}/month gives 1 reduced analysis per day (exact probabilities and key stats). Everything is on the Pro page (/en/pro).` },
     { q: "3. How do the analyses work?", a: "The model starts from each team's real strength (point differential, offense, defense, last season), then adds home-court advantage, back-to-back fatigue and injuries. The expected margin is converted into a win probability and scenarios. All the details are on the Methodology page (/en/methode)." },
@@ -223,7 +233,7 @@ export default async function Home() {
           <p className="lead rise" style={{ "--d": "650ms" }}>{L.t(
             "Basketlog réunit probabilités, statistiques avancées et scénarios de match pour anticiper les résultats et mieux comprendre le jeu.",
             "Basketlog brings together probabilities, advanced statistics and game scenarios to anticipate outcomes and better understand the game.",
-            "Basketlog reúne probabilidades, estadísticas avanzadas y escenarios de partido para anticipar los resultados y comprender mejor el juego."
+            "Basketlog reúne probabilidades, estadísticas avanzadas y escenarios de partido para anticipar los resultados y comprender mejor el juego.", "O Basketlog reúne probabilidades, estatísticas avançadas e cenários de jogo para antecipar os resultados e entender melhor o jogo."
           )}</p>
           <div className="rise" style={{ "--d": "800ms", width: "100%", display: "flex", justifyContent: "center" }}><TeamSearch games={up.map(({ a, ...r }) => r)} /></div>
           <p className="proof rise" style={{ "--d": "950ms" }}>
@@ -231,18 +241,18 @@ export default async function Home() {
               <Link href={L.href("/app/bilan")} title={strongTitle}>{L.t(
                 <><b>{strong.txt}</b> de précision sur nos <b>{num(strong.n)}</b>&nbsp;favoris à&nbsp;70&nbsp;%&nbsp;et&nbsp;plus</>,
                 <><b>{strong.txt}</b> accuracy on our <b>{num(strong.n)}</b>&nbsp;favorites at&nbsp;70%+</>,
-                <><b>{strong.txt}</b> de precisión en nuestros <b>{num(strong.n)}</b>&nbsp;favoritos al&nbsp;70&nbsp;%&nbsp;o&nbsp;más</>
+                <><b>{strong.txt}</b> de precisión en nuestros <b>{num(strong.n)}</b>&nbsp;favoritos al&nbsp;70&nbsp;%&nbsp;o&nbsp;más</>, <><b>{strong.txt}</b> de precisão nos nossos <b>{num(strong.n)}</b>&nbsp;favoritos a&nbsp;70&nbsp;%&nbsp;ou&nbsp;mais</>
               )}</Link>
             ) : acc.n >= 5 ? (
               <Link href={L.href("/app/bilan")}>{L.t(
                 <><b>{accTxt}</b> de précision sur les <b>{acc.n}</b> matchs analysés la semaine dernière</>,
                 <><b>{accTxt}</b> accuracy on <b>{acc.n}</b> games analyzed last week</>,
-                <><b>{accTxt}</b> de precisión en los <b>{acc.n}</b> partidos analizados la semana pasada</>
+                <><b>{accTxt}</b> de precisión en los <b>{acc.n}</b> partidos analizados la semana pasada</>, <><b>{accTxt}</b> de precisão nos <b>{acc.n}</b> jogos analisados na semana passada</>
               )}</Link>
             ) : L.t(
               <><b>{up.length}</b> matchs NBA à analyser cette semaine</>,
               <><b>{up.length}</b> NBA games to analyze this week</>,
-              <><b>{up.length}</b> partidos de la NBA para analizar esta semana</>
+              <><b>{up.length}</b> partidos de la NBA para analizar esta semana</>, <><b>{up.length}</b> jogos da NBA para analisar nesta semana</>
             )}
           </p>
         </div>
@@ -261,7 +271,7 @@ export default async function Home() {
                 <span>
                   <small>BASKETLOG</small>
                   <b>🏀 {g.home.short} - {g.away.short}</b>
-                  <span>{L.t("Victoire", "Win", "Victoria")} {fav.abbr} {pct(Math.max(g.pHome, 1 - g.pHome))}{L.en ? "%" : "\u202f%"} 🔥</span>
+                  <span>{L.t("Victoire", "Win", "Victoria", "Vitória")} {fav.abbr} {pct(Math.max(g.pHome, 1 - g.pHome))}{L.en ? "%" : "\u202f%"} 🔥</span>
                 </span>
                 <time>{shortDay(g.date, L)}</time>
               </Link>
@@ -275,7 +285,7 @@ export default async function Home() {
         {L.t(
           <h2 className="t-sec reveal">{nTeams > 30 ? `${nTeams} équipes` : "Les 30 franchises"}<br /><span className="accent">{nTeams > 30 ? "NBA et EuroLeague" : "NBA couvertes"}</span></h2>,
           <h2 className="t-sec reveal">{nTeams > 30 ? `${nTeams} NBA and` : "All 30 NBA"}<br /><span className="accent">{nTeams > 30 ? "EuroLeague teams" : "franchises covered"}</span></h2>,
-          <h2 className="t-sec reveal">{nTeams > 30 ? `${nTeams} equipos` : "Las 30 franquicias"}<br /><span className="accent">{nTeams > 30 ? "NBA y Euroliga" : "NBA cubiertas"}</span></h2>
+          <h2 className="t-sec reveal">{nTeams > 30 ? `${nTeams} equipos` : "Las 30 franquicias"}<br /><span className="accent">{nTeams > 30 ? "NBA y Euroliga" : "NBA cubiertas"}</span></h2>, <h2 className="t-sec reveal">{nTeams > 30 ? `${nTeams} times` : "As 30 franquias"}<br /><span className="accent">{nTeams > 30 ? "NBA e Euroliga" : "da NBA cobertas"}</span></h2>
         )}
         <div className="marquee reveal" style={{ "--d": "150ms" }}>
           <div className="marquee-track">
@@ -299,15 +309,15 @@ export default async function Home() {
             <p className="lead reveal" style={{ "--d": "120ms" }}>{L.t(
               <>Le score projeté par notre modèle pour {big.away.short} @ {big.home.short} ({shortDay(big.date, L)}). Niveau, forme, absences et fatigue : tout est pris en compte.</>,
               <>The score our model projects for {big.away.short} @ {big.home.short} ({shortDay(big.date, L)}). Strength, form, injuries and fatigue: everything is factored in.</>,
-              <>El marcador que proyecta nuestro modelo para {big.away.short} @ {big.home.short} ({shortDay(big.date, L)}). Nivel, forma, bajas y cansancio: todo se tiene en cuenta.</>
+              <>El marcador que proyecta nuestro modelo para {big.away.short} @ {big.home.short} ({shortDay(big.date, L)}). Nivel, forma, bajas y cansancio: todo se tiene en cuenta.</>, <>O placar que nosso modelo projeta para {big.away.short} @ {big.home.short} ({shortDay(big.date, L)}). Nível, fase, desfalques e cansaço: tudo é levado em conta.</>
             )}</p>
             <div className="stats3">
-              <div className="stat reveal" style={{ "--d": "150ms" }}><strong><SlotNumber value={pct(big.pHome)} suffix={L.en ? "%" : "\u202f%"} /></strong><span>{L.t(`Victoire ${big.home.short}`, `${big.home.short} win`, `Victoria ${big.home.short}`)}</span></div>
-              <div className="stat reveal" style={{ "--d": "300ms" }}><strong><SlotNumber value={pct(big.close)} suffix={L.en ? "%" : "\u202f%"} /></strong><span>{L.t("Match serré", "Close game", "Partido igualado")}</span></div>
-              <div className="stat reveal" style={{ "--d": "450ms" }}><strong><SlotNumber value={pct(1 - big.pHome)} suffix={L.en ? "%" : "\u202f%"} /></strong><span>{L.t(`Victoire ${big.away.short}`, `${big.away.short} win`, `Victoria ${big.away.short}`)}</span></div>
+              <div className="stat reveal" style={{ "--d": "150ms" }}><strong><SlotNumber value={pct(big.pHome)} suffix={L.en ? "%" : "\u202f%"} /></strong><span>{L.t(`Victoire ${big.home.short}`, `${big.home.short} win`, `Victoria ${big.home.short}`, `Vitória ${big.home.short}`)}</span></div>
+              <div className="stat reveal" style={{ "--d": "300ms" }}><strong><SlotNumber value={pct(big.close)} suffix={L.en ? "%" : "\u202f%"} /></strong><span>{L.t("Match serré", "Close game", "Partido igualado", "Jogo equilibrado")}</span></div>
+              <div className="stat reveal" style={{ "--d": "450ms" }}><strong><SlotNumber value={pct(1 - big.pHome)} suffix={L.en ? "%" : "\u202f%"} /></strong><span>{L.t(`Victoire ${big.away.short}`, `${big.away.short} win`, `Victoria ${big.away.short}`, `Vitória ${big.away.short}`)}</span></div>
             </div>
-            <div className="reveal" style={{ "--d": "500ms" }}><BallButton href={L.href(nbaPath(big, big.d))}>{L.t("Analyse prête", "Analysis ready", "Análisis listo")}</BallButton></div>
-            <p className="demo-note reveal" style={{ "--d": "600ms" }}>{L.t(`Probabilités gratuites pour tous les matchs · analyses dès ${price("starter", cur, L)}/mois`, `Free probabilities for every game · analyses from ${price("starter", cur, L)}/month`, `Probabilidades gratis para todos los partidos · análisis desde ${price("starter", cur, L)}/mes`)}</p>
+            <div className="reveal" style={{ "--d": "500ms" }}><BallButton href={L.href(nbaPath(big, big.d))}>{L.t("Analyse prête", "Analysis ready", "Análisis listo", "Análise pronta")}</BallButton></div>
+            <p className="demo-note reveal" style={{ "--d": "600ms" }}>{L.t(`Probabilités gratuites pour tous les matchs · analyses dès ${price("starter", cur, L)}/mois`, `Free probabilities for every game · analyses from ${price("starter", cur, L)}/month`, `Probabilidades gratis para todos los partidos · análisis desde ${price("starter", cur, L)}/mes`, `Probabilidades grátis para todos os jogos · análises a partir de ${price("starter", cur, L)}/mês`)}</p>
           </div>
         </section>
       )}
@@ -320,15 +330,15 @@ export default async function Home() {
             : /* eslint-disable-next-line @next/next/no-img-element */
               ["13", "2", "9", "25", "18"].map((id) => <img key={id} src={teamById(id).logo} alt={teamById(id).name} />)}
         </div>
-        <h2 className="t-80 reveal">{L.t("Ce que pensent les utilisateurs de Basketlog", "What Basketlog users think", "Lo que piensan los usuarios de Basketlog")}</h2>
+        <h2 className="t-80 reveal">{L.t("Ce que pensent les utilisateurs de Basketlog", "What Basketlog users think", "Lo que piensan los usuarios de Basketlog", "O que os usuários pensam do Basketlog")}</h2>
         <p className="lead reveal" style={{ "--d": "120ms" }}>
           {reviews.count
             ? L.t(
               <>{reviews.count} avis · note moyenne {reviews.avg.toFixed(1).replace(".", ",")}/5. Publiés tels quels, après simple relecture ; les avis d&apos;abonnés portent la mention « Abonné vérifié ».</>,
               <>{reviews.count} review{reviews.count > 1 ? "s" : ""} · average rating {reviews.avg.toFixed(1)}/5. Published as is, after a simple check; reviews from subscribers carry a “Verified subscriber” label.</>,
-              <>{reviews.count} {reviews.count > 1 ? "opiniones" : "opinión"} · nota media {reviews.avg.toFixed(1).replace(".", ",")}/5. Publicadas tal cual, tras una simple revisión; las de suscriptores llevan la mención «Suscriptor verificado».</>
+              <>{reviews.count} {reviews.count > 1 ? "opiniones" : "opinión"} · nota media {reviews.avg.toFixed(1).replace(".", ",")}/5. Publicadas tal cual, tras una simple revisión; las de suscriptores llevan la mención «Suscriptor verificado».</>, <>{reviews.count} {reviews.count > 1 ? "avaliações" : "avaliação"} · nota média {reviews.avg.toFixed(1).replace(".", ",")}/5. Publicadas como estão, após uma simples revisão; as de assinantes trazem a menção «Assinante verificado».</>
             )
-            : L.t("Les avis de nos abonnés, publiés tels quels après relecture.", "Reviews from our subscribers, published as is after a check.", "Las opiniones de nuestros suscriptores, publicadas tal cual tras una revisión.")}
+            : L.t("Les avis de nos abonnés, publiés tels quels après relecture.", "Reviews from our subscribers, published as is after a check.", "Las opiniones de nuestros suscriptores, publicadas tal cual tras una revisión.", "As avaliações dos nossos assinantes, publicadas como estão após uma revisão.")}
         </p>
 
         <div className="arc reveal" style={{ "--d": "150ms" }} aria-hidden>
@@ -345,9 +355,9 @@ export default async function Home() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <div><img src={g.home.logo} alt={g.home.name} /><b>{g.home.abbr}</b></div>
                   </div>
-                  <div className="ap">{pct(Math.max(g.pHome, 1 - g.pHome))}{L.en ? "%" : "\u202f%"}<small>{L.t(`victoire ${(g.pHome >= 0.5 ? g.home : g.away).short}`, `${(g.pHome >= 0.5 ? g.home : g.away).short} win`, `victoria ${(g.pHome >= 0.5 ? g.home : g.away).short}`)}</small></div>
+                  <div className="ap">{pct(Math.max(g.pHome, 1 - g.pHome))}{L.en ? "%" : "\u202f%"}<small>{L.t(`victoire ${(g.pHome >= 0.5 ? g.home : g.away).short}`, `${(g.pHome >= 0.5 ? g.home : g.away).short} win`, `victoria ${(g.pHome >= 0.5 ? g.home : g.away).short}`, `vitória ${(g.pHome >= 0.5 ? g.home : g.away).short}`)}</small></div>
                   <div className="abar"><i style={{ width: `${(1 - g.pHome) * 100}%` }} /></div>
-                  <div className="arow"><span>{L.t("Score projeté", "Projected score", "Marcador proyectado")}</span><b>{Math.round(g.awayPts)}-{Math.round(g.homePts)}</b></div>
+                  <div className="arow"><span>{L.t("Score projeté", "Projected score", "Marcador proyectado", "Placar projetado")}</span><b>{Math.round(g.awayPts)}-{Math.round(g.homePts)}</b></div>
                   <div className="arow"><span>Total</span><b>{Math.round(g.total)}</b></div>
                 </div>
               );
@@ -356,7 +366,7 @@ export default async function Home() {
           <div className="arc-fade" />
         </div>
 
-        <div className="reveal"><BallButton href={L.href("/app/matchs")}>{L.t("Analyse prête", "Analysis ready", "Análisis listo")}</BallButton></div>
+        <div className="reveal"><BallButton href={L.href("/app/matchs")}>{L.t("Analyse prête", "Analysis ready", "Análisis listo", "Análise pronta")}</BallButton></div>
 
         <ReviewCards reviews={reviews.list} L={L} />
       </section>
@@ -367,13 +377,13 @@ export default async function Home() {
       {/* ================= SOURCES ================= */}
       <section className="sources">
         <div className="sources-bg" aria-hidden />
-        <span className="pill-badge plain reveal">{L.t("+1 230 matchs par saison", "1,230+ games per season", "+1230 partidos por temporada")}</span>
+        <span className="pill-badge plain reveal">{L.t("+1 230 matchs par saison", "1,230+ games per season", "+1230 partidos por temporada", "+1230 jogos por temporada")}</span>
         {L.t(
           <h2 className="t-sec reveal" style={{ "--d": "100ms" }}>Nous analysons<br />chaque match NBA</h2>,
           <h2 className="t-sec reveal" style={{ "--d": "100ms" }}>We analyze<br />every NBA game</h2>,
-          <h2 className="t-sec reveal" style={{ "--d": "100ms" }}>Analizamos<br />cada partido de la NBA</h2>
+          <h2 className="t-sec reveal" style={{ "--d": "100ms" }}>Analizamos<br />cada partido de la NBA</h2>, <h2 className="t-sec reveal" style={{ "--d": "100ms" }}>Analisamos<br />cada jogo da NBA</h2>
         )}
-        <p className="lead reveal" style={{ "--d": "200ms" }}>{L.t("Calendrier, scores, stats de tirs, joueurs clés, classements et infirmerie : les données NBA et EuroLeague sont croisées en continu pour prédire chaque match.", "Schedule, scores, shooting stats, key players, standings and injury reports: NBA and EuroLeague data is cross-checked continuously to predict every game.", "Calendario, resultados, estadísticas de tiro, jugadores clave, clasificaciones y parte médico: los datos de la NBA y la Euroliga se cruzan continuamente para predecir cada partido.")}{" "}<Link href={L.href("/analyse-basket")} className="sources-link">{L.t("Voir comment se fait l'analyse basket", "See how every game is analyzed", "Ver cómo se hace el análisis de baloncesto")}</Link></p>
+        <p className="lead reveal" style={{ "--d": "200ms" }}>{L.t("Calendrier, scores, stats de tirs, joueurs clés, classements et infirmerie : les données NBA et EuroLeague sont croisées en continu pour prédire chaque match.", "Schedule, scores, shooting stats, key players, standings and injury reports: NBA and EuroLeague data is cross-checked continuously to predict every game.", "Calendario, resultados, estadísticas de tiro, jugadores clave, clasificaciones y parte médico: los datos de la NBA y la Euroliga se cruzan continuamente para predecir cada partido.", "Calendário, resultados, estatísticas de arremesso, jogadores-chave, classificações e boletim médico: os dados da NBA e da Euroliga são cruzados continuamente para prever cada jogo.")}{" "}<Link href={L.href("/analyse-basket")} className="sources-link">{L.t("Voir comment se fait l'analyse basket", "See how every game is analyzed", "Ver cómo se hace el análisis de baloncesto", "Ver como a análise de basquete é feita")}</Link></p>
         <div className="marquee">
           <div className="marquee-track" style={{ animationDirection: "reverse", animationDuration: "65s" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -385,8 +395,8 @@ export default async function Home() {
       {/* ================= FAQ ================= */}
       <section className="faq" id="faq">
         <div className="faq-in">
-          <h2 className="t-sec reveal">{L.t("Questions fréquentes", "FAQ", "Preguntas frecuentes")}</h2>
-          <p className="lead reveal" style={{ "--d": "100ms" }}>{L.t("Une réponse claire à toutes vos questions sur Basketlog.", "Clear answers to all your questions about Basketlog.", "Una respuesta clara a todas tus preguntas sobre Basketlog.")}</p>
+          <h2 className="t-sec reveal">{L.t("Questions fréquentes", "FAQ", "Preguntas frecuentes", "Perguntas frequentes")}</h2>
+          <p className="lead reveal" style={{ "--d": "100ms" }}>{L.t("Une réponse claire à toutes vos questions sur Basketlog.", "Clear answers to all your questions about Basketlog.", "Una respuesta clara a todas tus preguntas sobre Basketlog.", "Uma resposta clara para todas as suas perguntas sobre o Basketlog.")}</p>
           <div className="reveal" style={{ "--d": "200ms" }}><Faq items={faq} /></div>
         </div>
       </section>

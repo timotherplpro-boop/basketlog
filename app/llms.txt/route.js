@@ -43,7 +43,7 @@ export async function GET() {
     `- [EuroLeague predictions](${SITE}/en/app/euroleague)`,
     `- [Methodology](${SITE}/en/methode)`,
     `- [Free NBA widget for websites](${SITE}/en/widget)`,
-    `- Spanish: [Pronósticos NBA hoy](${SITE}/es/app/matchs) · French: [Pronostics NBA ce soir](${SITE}/app/matchs)`,
+    `- Spanish: [Pronósticos NBA hoy](${SITE}/es/app/matchs) · Portuguese (Brazil): [Palpites NBA hoje](${SITE}/pt/app/matchs) · French: [Pronostics NBA ce soir](${SITE}/app/matchs)`,
     "",
   ];
   if (s && s.n) {

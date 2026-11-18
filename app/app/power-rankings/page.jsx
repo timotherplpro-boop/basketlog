@@ -16,11 +16,11 @@ export async function generateMetadata() {
   const L = await getL();
   const my = monthYear(L);
   return pageMeta({
-    title: L.t(`Power ranking NBA (${my}) : les 30 équipes classées par le modèle`, `NBA power rankings (${my}): all 30 teams ranked by our model`, `Power ranking NBA (${my}): los 30 equipos según nuestro modelo`),
+    title: L.t(`Power ranking NBA (${my}) : les 30 équipes classées par le modèle`, `NBA power rankings (${my}): all 30 teams ranked by our model`, `Power ranking NBA (${my}): los 30 equipos según nuestro modelo`, `Power ranking NBA (${my}): os 30 times segundo nosso modelo`),
     description: L.t(
       "Les 30 équipes NBA classées par leur vraie force selon le modèle Basketlog : écart de points attendu face à une équipe moyenne et chances de la battre. Mis à jour chaque jour.",
       "All 30 NBA teams ranked by true strength according to the Basketlog model: expected point margin against an average team and the chance to beat it. Updated daily.",
-      "Los 30 equipos de la NBA ordenados por su fuerza real según el modelo de Basketlog: diferencia de puntos esperada ante un equipo medio y probabilidad de ganarle. Actualizado cada día."
+      "Los 30 equipos de la NBA ordenados por su fuerza real según el modelo de Basketlog: diferencia de puntos esperada ante un equipo medio y probabilidad de ganarle. Actualizado cada día.", "Os 30 times da NBA ordenados pela força real segundo o modelo do Basketlog: saldo de pontos esperado contra um time médio e probabilidade de vencê-lo. Atualizado todo dia."
     ),
     path: "/app/power-rankings",
     L,
@@ -36,16 +36,16 @@ export default async function PowerRankingsPage() {
     <main className="app-page wide">
       <AppTabs active="classement" />
       <div className="app-head">
-        <h1>{L.t("Power ranking NBA", "NBA power rankings", "Power ranking NBA")}</h1>
+        <h1>{L.t("Power ranking NBA", "NBA power rankings", "Power ranking NBA", "Power ranking NBA")}</h1>
         <p>{L.t(
           `Les 30 équipes classées par le modèle Basketlog, ${monthYear(L)}. La force est l'écart de points attendu face à une équipe moyenne sur terrain neutre (sans les absences du jour).`,
           `All 30 teams ranked by the Basketlog model, ${monthYear(L)}. Strength is the expected point margin against an average team on a neutral court (before today's injuries).`,
-          `Los 30 equipos según el modelo de Basketlog, ${monthYear(L)}. La fuerza es la diferencia de puntos esperada ante un equipo medio en campo neutral (sin las bajas del día).`
+          `Los 30 equipos según el modelo de Basketlog, ${monthYear(L)}. La fuerza es la diferencia de puntos esperada ante un equipo medio en campo neutral (sin las bajas del día).`, `Os 30 times segundo o modelo do Basketlog, ${monthYear(L)}. A força é o saldo de pontos esperado contra um time médio em quadra neutra (sem os desfalques do dia).`
         )}</p>
       </div>
       <div className="panel">
         <table className="std-table">
-          <thead><tr><th>#</th><th>{L.t("Équipe", "Team", "Equipo")}</th><th>{L.t("V-D", "W-L", "V-D")}</th><th>{L.t("Force", "Strength", "Fuerza")}</th><th>{L.t("vs équipe moyenne", "vs average team", "vs equipo medio")}</th></tr></thead>
+          <thead><tr><th>#</th><th>{L.t("Équipe", "Team", "Equipo", "Time")}</th><th>{L.t("V-D", "W-L", "V-D", "V-D")}</th><th>{L.t("Force", "Strength", "Fuerza", "Força")}</th><th>{L.t("vs équipe moyenne", "vs average team", "vs equipo medio", "vs time médio")}</th></tr></thead>
           <tbody>
             {rows.map((r, i) => (
               <tr key={r.team.id}>
@@ -68,14 +68,14 @@ export default async function PowerRankingsPage() {
         </table>
       </div>
       <p className="team-rec">
-        {L.t("Comment c'est calculé : ", "How it's calculated: ", "Cómo se calcula: ")}
-        <Link href={L.href("/methode")}>{L.t("la méthode Basketlog", "the Basketlog method", "el método de Basketlog")}</Link>
+        {L.t("Comment c'est calculé : ", "How it's calculated: ", "Cómo se calcula: ", "Como é calculado: ")}
+        <Link href={L.href("/methode")}>{L.t("la méthode Basketlog", "the Basketlog method", "el método de Basketlog", "a metodologia do Basketlog")}</Link>
         {" · "}
-        <Link href={L.href("/app/matchs")}>{L.t("pronostics NBA du soir", "tonight's NBA predictions", "pronósticos NBA de hoy")}</Link>
+        <Link href={L.href("/app/matchs")}>{L.t("pronostics NBA du soir", "tonight's NBA predictions", "pronósticos NBA de hoy", "palpites NBA de hoje")}</Link>
       </p>
       <JsonLd data={{
         "@context": "https://schema.org", "@type": "ItemList",
-        name: L.t("Power ranking NBA", "NBA power rankings", "Power ranking NBA"),
+        name: L.t("Power ranking NBA", "NBA power rankings", "Power ranking NBA", "Power ranking NBA"),
         itemListElement: rows.map((r, i) => ({ "@type": "ListItem", position: i + 1, name: r.team.name, url: `${SITE}${L.href(`/app/equipe/${r.team.id}`)}` })),
       }} />
     </main>

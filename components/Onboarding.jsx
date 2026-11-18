@@ -77,12 +77,12 @@ export default function Onboarding() {
   return createPortal(
     <div className="modal onb" role="dialog" aria-modal="true" aria-labelledby="onb-title" onClick={(e) => e.target === e.currentTarget && skip()}>
       <div className="modal-box onb-box" ref={box} tabIndex={-1}>
-        <button type="button" className="ulk-x" onClick={skip} aria-label={L.t("Fermer", "Close", "Cerrar")}><Cross /></button>
+        <button type="button" className="ulk-x" onClick={skip} aria-label={L.t("Fermer", "Close", "Cerrar", "Fechar")}><Cross /></button>
         <div className="onb-dots" aria-hidden><i className="on" /><i className={step === 1 ? "on" : ""} /></div>
         {step === 0 ? (
           <>
-            <h3 id="onb-title">{L.t("Bienvenue ! Qu'est-ce que tu suis ?", "Welcome! What do you follow?", "¡Bienvenido! ¿Qué sigues?")}</h3>
-            <p className="onb-sub">{L.t("Deux touches, et on te montre les bons matchs.", "Two taps, and we'll show you the right games.", "Dos toques y te mostramos los partidos adecuados.")}</p>
+            <h3 id="onb-title">{L.t("Bienvenue ! Qu'est-ce que tu suis ?", "Welcome! What do you follow?", "¡Bienvenido! ¿Qué sigues?", "Bem-vindo! O que você acompanha?")}</h3>
+            <p className="onb-sub">{L.t("Deux touches, et on te montre les bons matchs.", "Two taps, and we'll show you the right games.", "Dos toques y te mostramos los partidos adecuados.", "Dois toques e mostramos os jogos certos para você.")}</p>
             <div className="onb-leagues">
               {LEAGUES.map((l) => (
                 <button type="button" key={l.id} className="onb-opt" onClick={() => pick(l.id)}>{labelOf(l, L)}</button>
@@ -91,18 +91,18 @@ export default function Onboarding() {
           </>
         ) : (
           <>
-            <h3 id="onb-title">{L.t("Ton équipe NBA ?", "Your NBA team?", "¿Tu equipo de la NBA?")}</h3>
-            <p className="onb-sub">{L.t("On t'affiche ses prochains matchs.", "We'll show you their next games.", "Te mostramos sus próximos partidos.")}</p>
+            <h3 id="onb-title">{L.t("Ton équipe NBA ?", "Your NBA team?", "¿Tu equipo de la NBA?", "Seu time da NBA?")}</h3>
+            <p className="onb-sub">{L.t("On t'affiche ses prochains matchs.", "We'll show you their next games.", "Te mostramos sus próximos partidos.", "Mostramos os próximos jogos dele.")}</p>
             <div className="onb-teams">
               {teams.map((t) => (
                 <button type="button" key={t.id} className="onb-opt onb-team" onClick={() => finish(league, t.id)}>{t.short}</button>
               ))}
             </div>
-            <button type="button" className="onb-link" onClick={() => finish(league, null)}>{L.t("Pas d'équipe en particulier", "No team in particular", "Ningún equipo en particular")}</button>
-            <button type="button" className="onb-link" onClick={() => setStep(0)}>{L.t("← Retour", "← Back", "← Volver")}</button>
+            <button type="button" className="onb-link" onClick={() => finish(league, null)}>{L.t("Pas d'équipe en particulier", "No team in particular", "Ningún equipo en particular", "Nenhum time em especial")}</button>
+            <button type="button" className="onb-link" onClick={() => setStep(0)}>{L.t("← Retour", "← Back", "← Volver", "← Voltar")}</button>
           </>
         )}
-        <button type="button" className="onb-skip" onClick={skip}>{L.t("Passer", "Skip", "Saltar")}</button>
+        <button type="button" className="onb-skip" onClick={skip}>{L.t("Passer", "Skip", "Saltar", "Pular")}</button>
       </div>
     </div>,
     document.body

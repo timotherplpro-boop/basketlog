@@ -56,7 +56,7 @@ export default function WelcomeToast() {
       const t = setTimeout(() => window.dispatchEvent(new Event(ONBOARDING_EVENT)), 700);
       return () => clearTimeout(t);
     }
-    setMsg({ text: MSG[k][L.en ? 1 : L.es ? 2 : 0], warn: WARN.has(k) });
+    setMsg({ text: MSG[k][L.en ? 1 : L.es || L.pt ? 2 : 0], warn: WARN.has(k) });
     const timers = [setTimeout(() => setMsg(null), WARN.has(k) ? 12000 : 6000)];
     // Abonnement activé : une question sur la source (components/SourceAsk.jsx), une fois le message de bienvenue passé.
     if (k === "abonne") timers.push(setTimeout(() => window.dispatchEvent(new Event(SOURCE_EVENT)), 3500));

@@ -6,7 +6,7 @@ import { getL } from "../../lib/lang-server";
 
 export async function generateMetadata() {
   const L = await getL();
-  if (L.es) return pageMeta({ title: "Condiciones de uso – Basketlog", description: "Condiciones de uso de Basketlog: descripción del servicio, edad mínima, advertencia sobre los pronósticos, normas de uso y responsabilidad.", path: "/cgu", L });
+  if (L.es || L.pt) return pageMeta({ title: "Condiciones de uso – Basketlog", description: "Condiciones de uso de Basketlog: descripción del servicio, edad mínima, advertencia sobre los pronósticos, normas de uso y responsabilidad.", path: "/cgu", L });
   return L.en
     ? pageMeta({ title: "Terms of use – Basketlog", description: "Basketlog terms of use: description of the service, minimum age, disclaimer about predictions, rules of use and liability.", path: "/cgu", L })
     : pageMeta({ title: "Conditions générales d'utilisation (CGU) – Basketlog", description: "Conditions générales d'utilisation de Basketlog : description du service, âge minimum, avertissement sur les pronostics, règles d'usage et responsabilité.", path: "/cgu" });
@@ -235,5 +235,5 @@ function CGUEs({ L }) {
 
 export default async function CGUPage() {
   const L = await getL();
-  return L.es ? <CGUEs L={L} /> : L.en ? <CGUEn L={L} /> : <CGUFr />;
+  return L.es || L.pt ? <CGUEs L={L} /> : L.en ? <CGUEn L={L} /> : <CGUFr />;
 }

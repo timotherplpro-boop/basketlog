@@ -9,8 +9,8 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata() {
   const L = await getL();
   return pageMeta({
-    title: L.t("Mon compte – Basketlog", "My account – Basketlog", "Mi cuenta – Basketlog"),
-    description: L.t("Ton nom, ton abonnement et tes données Basketlog.", "Your name, subscription and Basketlog data.", "Tu nombre, tu suscripción y tus datos de Basketlog."),
+    title: L.t("Mon compte – Basketlog", "My account – Basketlog", "Mi cuenta – Basketlog", "Minha conta – Basketlog"),
+    description: L.t("Ton nom, ton abonnement et tes données Basketlog.", "Your name, subscription and Basketlog data.", "Tu nombre, tu suscripción y tus datos de Basketlog.", "Seu nome, sua assinatura e seus dados do Basketlog."),
     path: "/app/compte",
     noindex: true,
     L,
@@ -25,15 +25,15 @@ export default async function ComptePage() {
   return (
     <main className="app-page">
       <div className="app-head">
-        <h1>{L.t("Mon compte", "My account", "Mi cuenta")}</h1>
-        <p>{L.t("Ton nom, ton abonnement et tes données, directement ici.", "Your name, subscription and data, right here.", "Tu nombre, tu suscripción y tus datos, directamente aquí.")}</p>
+        <h1>{L.t("Mon compte", "My account", "Mi cuenta", "Minha conta")}</h1>
+        <p>{L.t("Ton nom, ton abonnement et tes données, directement ici.", "Your name, subscription and data, right here.", "Tu nombre, tu suscripción y tus datos, directamente aquí.", "Seu nome, sua assinatura e seus dados, direto aqui.")}</p>
       </div>
       {!m ? (
         <div className="panel hist-empty">
-          <b>{L.t("Connecte-toi pour gérer ton compte", "Log in to manage your account", "Inicia sesión para gestionar tu cuenta")}</b>
-          <p>{L.t("Tu pourras y choisir ton nom, résilier ou reprendre ton abonnement et supprimer ton compte.", "You'll be able to choose your name, cancel or resume your subscription and delete your account.", "Podrás elegir tu nombre, cancelar o reanudar tu suscripción y eliminar tu cuenta.")}</p>
-          <AuthButton mode="connexion" source="mon_compte" next={L.href("/app/compte")} className="btn-solid">{L.t("Se connecter", "Log in", "Iniciar sesión")}</AuthButton>
-          <Link href={L.href("/pro")} className="comp-more">{L.t("Voir les formules", "See the plans", "Ver los planes")} →</Link>
+          <b>{L.t("Connecte-toi pour gérer ton compte", "Log in to manage your account", "Inicia sesión para gestionar tu cuenta", "Faça login para gerenciar sua conta")}</b>
+          <p>{L.t("Tu pourras y choisir ton nom, résilier ou reprendre ton abonnement et supprimer ton compte.", "You'll be able to choose your name, cancel or resume your subscription and delete your account.", "Podrás elegir tu nombre, cancelar o reanudar tu suscripción y eliminar tu cuenta.", "Você poderá escolher seu nome, cancelar ou retomar sua assinatura e excluir sua conta.")}</p>
+          <AuthButton mode="connexion" source="mon_compte" next={L.href("/app/compte")} className="btn-solid">{L.t("Se connecter", "Log in", "Iniciar sesión", "Entrar")}</AuthButton>
+          <Link href={L.href("/pro")} className="comp-more">{L.t("Voir les formules", "See the plans", "Ver los planes", "Ver os planos")} →</Link>
         </div>
       ) : (
         <AccountPanel />

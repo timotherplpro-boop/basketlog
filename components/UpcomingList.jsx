@@ -7,8 +7,8 @@ const parts = (iso, L) => [fmtDate(L, iso, { day: "2-digit", month: "2-digit" })
 
 // Liste des matchs façon "Prochains matchs", regroupés par jour (heure de Paris).
 export default function UpcomingList({ games, title, grouped = true, href = (g) => nbaPath(g, g.d), L = mk("fr"), className = "", children = null }) {
-  if (title === undefined) title = L.t("Prochains matchs", "Upcoming games", "Próximos partidos");
-  if (!games.length) return <div className="empty">{L.t("Aucun match au programme.", "No games scheduled.", "No hay partidos programados.")}</div>;
+  if (title === undefined) title = L.t("Prochains matchs", "Upcoming games", "Próximos partidos", "Próximos jogos");
+  if (!games.length) return <div className="empty">{L.t("Aucun match au programme.", "No games scheduled.", "No hay partidos programados.", "Nenhum jogo programado.")}</div>;
   const groups = [];
   for (const g of games) {
     const k = grouped ? day(g.date, L) : "";
@@ -29,8 +29,8 @@ export default function UpcomingList({ games, title, grouped = true, href = (g) 
             const done = g.state === "post" && g.home.score != null;
             const sure = !done && !g.postponed && g.confidence === "Très élevée"; // mis en avant (orange)
             return (
-              <Link key={g.id} href={L.href(href(g))} className={`up-row${sure ? " sure" : ""}`} title={sure ? L.t("Confiance très élevée : favori à 88 % et plus", "Very high confidence: favorite at 88%+", "Confianza muy alta: favorito al 88 % o más") : undefined} style={{ animationDelay: `${Math.min(n++, 12) * 50}ms` }}>
-                <div className="when">{d}<b>{g.live ? <span className="live">LIVE</span> : g.postponed === "canceled" ? L.t("ANNULÉ", "CANCELED", "CANCELADO") : g.postponed ? L.t("REPORTÉ", "POSTPONED", "APLAZADO") : done ? L.t("FIN", "FINAL", "FINAL") : h}</b></div>
+              <Link key={g.id} href={L.href(href(g))} className={`up-row${sure ? " sure" : ""}`} title={sure ? L.t("Confiance très élevée : favori à 88 % et plus", "Very high confidence: favorite at 88%+", "Confianza muy alta: favorito al 88 % o más", "Confiança muito alta: favorito a 88 % ou mais") : undefined} style={{ animationDelay: `${Math.min(n++, 12) * 50}ms` }}>
+                <div className="when">{d}<b>{g.live ? <span className="live">LIVE</span> : g.postponed === "canceled" ? L.t("ANNULÉ", "CANCELED", "CANCELADO", "CANCELADO") : g.postponed ? L.t("REPORTÉ", "POSTPONED", "APLAZADO", "ADIADO") : done ? L.t("FIN", "FINAL", "FINAL", "FINAL") : h}</b></div>
                 <div className="m">
                   <span className="t">
                     <span className={!favHome ? "fav" : ""}>{g.away.short}</span>

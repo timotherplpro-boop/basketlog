@@ -16,7 +16,7 @@ export default function TeamSearch({ games }) {
   const box = useRef(null);
   const [focus, setFocus] = useState(false);
   // Texte d'aide fixe, comme Visifoot.
-  const ph = L.t("Recherchez l'une des équipes (par exemple, les Lakers)", "Search for one of the teams (for example, the Lakers)", "Busca uno de los equipos (por ejemplo, los Lakers)");
+  const ph = L.t("Recherchez l'une des équipes (par exemple, les Lakers)", "Search for one of the teams (for example, the Lakers)", "Busca uno de los equipos (por ejemplo, los Lakers)", "Busque um dos times (por exemplo, o Lakers)");
 
   useEffect(() => {
     const close = (e) => box.current && !box.current.contains(e.target) && setOpen(false);
@@ -40,8 +40,8 @@ export default function TeamSearch({ games }) {
         onChange={(e) => { setQ(e.target.value); setOpen(true); }}
         onFocus={() => { setOpen(true); setFocus(true); }}
         onBlur={() => setFocus(false)}
-        placeholder={focus ? L.t("Tape le nom d'une équipe", "Type a team name", "Escribe el nombre de un equipo") : ph}
-        aria-label={L.t("Rechercher une équipe NBA", "Search an NBA team", "Buscar un equipo de la NBA")}
+        placeholder={focus ? L.t("Tape le nom d'une équipe", "Type a team name", "Escribe el nombre de un equipo", "Digite o nome de um time") : ph}
+        aria-label={L.t("Rechercher une équipe NBA", "Search an NBA team", "Buscar un equipo de la NBA", "Buscar um time da NBA")}
         autoComplete="off"
       /></div>
       {open && q.trim().length >= 2 && (
@@ -58,11 +58,11 @@ export default function TeamSearch({ games }) {
                   <img src={g.home.logo} alt={g.home.name} width={26} height={26} />
                   <b>{g.home.short}</b>
                 </span>
-                <span className="search-when">{g.live ? L.t("● En direct", "● Live", "● En directo") : when(g.date, L)}</span>
+                <span className="search-when">{g.live ? L.t("● En direct", "● Live", "● En directo", "● Ao vivo") : when(g.date, L)}</span>
               </Link>
             ))
           ) : (
-            <div className="search-empty">{L.t(<>Aucun match à venir cette semaine pour « {q} ».</>, <>No upcoming games this week for “{q}”.</>, <>No hay partidos esta semana para «{q}».</>)} <Link href={L.href("/app")} style={{ color: "var(--orange-2)" }}>{L.t("Analyser un duel →", "Analyze a matchup →", "Analizar un duelo →")}</Link></div>
+            <div className="search-empty">{L.t(<>Aucun match à venir cette semaine pour « {q} ».</>, <>No upcoming games this week for “{q}”.</>, <>No hay partidos esta semana para «{q}».</>, <>Nenhum jogo nesta semana para «{q}».</>)} <Link href={L.href("/app")} style={{ color: "var(--orange-2)" }}>{L.t("Analyser un duel →", "Analyze a matchup →", "Analizar un duelo →", "Analisar um duelo →")}</Link></div>
           )}
         </div>
       )}

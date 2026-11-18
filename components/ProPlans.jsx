@@ -30,45 +30,45 @@ const PLANS = (L, ai, cur, promo = null) => {
   const show = (id) => (pct ? money(discounted(PRICES[cur][id], pct), cur, L) : price(id, cur, L));
   const was = (id) => (pct ? price(id, cur, L) : null);
   const limited = pct > 0 && mois >= 1;
-  const per = !limited ? L.t("/mois", "/month", "/mes")
-    : mois === 1 ? L.t("le 1er mois", "first month", "el primer mes")
-    : L.t(`/mois pendant ${mois} mois`, `/month for ${mois} months`, `/mes durante ${mois} meses`);
+  const per = !limited ? L.t("/mois", "/month", "/mes", "/mês")
+    : mois === 1 ? L.t("le 1er mois", "first month", "el primer mes", "o primeiro mês")
+    : L.t(`/mois pendant ${mois} mois`, `/month for ${mois} months`, `/mes durante ${mois} meses`, `/mês durante ${mois} meses`);
   const sep = limited && mois === 1 ? " " : ""; // « 11,19 € le 1er mois » mais « 11,19 €/mois »
-  const then = (id) => (limited ? L.t(`puis ${price(id, cur, L)}/mois`, `then ${price(id, cur, L)}/month`, `luego ${price(id, cur, L)}/mes`) : null);
+  const then = (id) => (limited ? L.t(`puis ${price(id, cur, L)}/mois`, `then ${price(id, cur, L)}/month`, `luego ${price(id, cur, L)}/mes`, `depois ${price(id, cur, L)}/mês`) : null);
   return [
   {
-    id: "starter", name: "Starter", icon: "bolt", price: show("starter"), old: was("starter"), per, then: then("starter"), sub: ai ? L.t("Pour découvrir l'IA", "To discover the AI", "Para descubrir la IA") : L.t("Pour découvrir les analyses", "To try the analyses", "Para descubrir los análisis"), cta: `${L.t("Débloquer", "Unlock", "Desbloquear")} - ${show("starter")}${sep}${per}`,
+    id: "starter", name: "Starter", icon: "bolt", price: show("starter"), old: was("starter"), per, then: then("starter"), sub: ai ? L.t("Pour découvrir l'IA", "To discover the AI", "Para descubrir la IA", "Para conhecer a IA") : L.t("Pour découvrir les analyses", "To try the analyses", "Para descubrir los análisis", "Para conhecer as análises"), cta: `${L.t("Débloquer", "Unlock", "Desbloquear", "Desbloquear")} - ${show("starter")}${sep}${per}`,
     items: [
-      ["ok", L.t("1 analyse par jour", "1 analysis per day", "1 análisis al día")],
-      ["ok", L.t("Analyse réduite", "Reduced analysis", "Análisis reducido")],
-      ["ok", L.t("Stats clés", "Key stats", "Estadísticas clave")],
-      ["ok", L.t("Probabilités exactes 1x/jour", "Exact probabilities 1x/day", "Probabilidades exactas 1x/día")],
-      ai && ["no", L.t("Questions personnelles à l'IA", "Personal questions to the AI", "Preguntas personales a la IA")],
+      ["ok", L.t("1 analyse par jour", "1 analysis per day", "1 análisis al día", "1 análise por dia")],
+      ["ok", L.t("Analyse réduite", "Reduced analysis", "Análisis reducido", "Análise reduzida")],
+      ["ok", L.t("Stats clés", "Key stats", "Estadísticas clave", "Estatísticas-chave")],
+      ["ok", L.t("Probabilités exactes 1x/jour", "Exact probabilities 1x/day", "Probabilidades exactas 1x/día", "Probabilidades exatas 1x/dia")],
+      ai && ["no", L.t("Questions personnelles à l'IA", "Personal questions to the AI", "Preguntas personales a la IA", "Perguntas pessoais à IA")],
     ].filter(Boolean),
   },
   {
-    id: "pro", name: "Pro", icon: "crown", price: show("pro"), old: was("pro"), per, then: then("pro"), sub: L.t("Pour les passionnés de basket", "For basketball fans", "Para los apasionados del baloncesto"), badge: L.t("Populaire", "Popular", "Popular"),
-    trial: PRO_TRIAL_DAYS ? L.t(`${PRO_TRIAL_DAYS} jours gratuits, puis ${show("pro")}${sep}${per}. Résiliable à tout moment.`, `${PRO_TRIAL_DAYS} days free, then ${show("pro")}${sep}${per}. Cancel anytime.`, `${PRO_TRIAL_DAYS} días gratis, luego ${show("pro")}${sep}${per}. Cancela cuando quieras.`) : null,
-    ctaTrial: PRO_TRIAL_DAYS ? L.t(`Essai gratuit ${PRO_TRIAL_DAYS} jours`, `Start ${PRO_TRIAL_DAYS}-day free trial`, `Prueba gratis ${PRO_TRIAL_DAYS} días`) : null,
-    cta: `${L.t("Débloquer", "Unlock", "Desbloquear")} - ${show("pro")}${sep}${per}`,
+    id: "pro", name: "Pro", icon: "crown", price: show("pro"), old: was("pro"), per, then: then("pro"), sub: L.t("Pour les passionnés de basket", "For basketball fans", "Para los apasionados del baloncesto", "Para os apaixonados por basquete"), badge: L.t("Populaire", "Popular", "Popular", "Popular"),
+    trial: PRO_TRIAL_DAYS ? L.t(`${PRO_TRIAL_DAYS} jours gratuits, puis ${show("pro")}${sep}${per}. Résiliable à tout moment.`, `${PRO_TRIAL_DAYS} days free, then ${show("pro")}${sep}${per}. Cancel anytime.`, `${PRO_TRIAL_DAYS} días gratis, luego ${show("pro")}${sep}${per}. Cancela cuando quieras.`, `${PRO_TRIAL_DAYS} dias grátis, depois ${show("pro")}${sep}${per}. Cancele quando quiser.`) : null,
+    ctaTrial: PRO_TRIAL_DAYS ? L.t(`Essai gratuit ${PRO_TRIAL_DAYS} jours`, `Start ${PRO_TRIAL_DAYS}-day free trial`, `Prueba gratis ${PRO_TRIAL_DAYS} días`, `Teste grátis por ${PRO_TRIAL_DAYS} dias`) : null,
+    cta: `${L.t("Débloquer", "Unlock", "Desbloquear", "Desbloquear")} - ${show("pro")}${sep}${per}`,
     items: [
-      ["ok", L.t("Analyses illimitées", "Unlimited analyses", "Análisis ilimitados")],
-      ["ok", L.t("Analyse complète détaillée", "Detailed full analysis", "Análisis completo detallado")],
-      ["ok", L.t("Scénarios probables détaillés", "Detailed likely scenarios", "Escenarios probables detallados")],
-      ["ok", L.t("Analyse basée sur les statistiques", "Stats-based analysis", "Análisis basado en las estadísticas")],
-      ["ok", L.t("Actualités en temps réel", "Real-time news", "Noticias en tiempo real")],
-      ai && ["ai", L.t("Questions personnelles à l'IA", "Personal questions to the AI", "Preguntas personales a la IA"), L.t("(1 question/jour)", "(1 question/day)", "(1 pregunta/día)")],
+      ["ok", L.t("Analyses illimitées", "Unlimited analyses", "Análisis ilimitados", "Análises ilimitadas")],
+      ["ok", L.t("Analyse complète détaillée", "Detailed full analysis", "Análisis completo detallado", "Análise completa detalhada")],
+      ["ok", L.t("Scénarios probables détaillés", "Detailed likely scenarios", "Escenarios probables detallados", "Cenários prováveis detalhados")],
+      ["ok", L.t("Analyse basée sur les statistiques", "Stats-based analysis", "Análisis basado en las estadísticas", "Análise baseada nas estatísticas")],
+      ["ok", L.t("Actualités en temps réel", "Real-time news", "Noticias en tiempo real", "Notícias em tempo real")],
+      ai && ["ai", L.t("Questions personnelles à l'IA", "Personal questions to the AI", "Preguntas personales a la IA", "Perguntas pessoais à IA"), L.t("(1 question/jour)", "(1 question/day)", "(1 pregunta/día)", "(1 pergunta/dia)")],
     ].filter(Boolean),
   },
   {
-    id: "lifetime", name: "Lifetime", icon: "infinity", price: show("lifetime"), old: was("lifetime"), per: L.t("une seule fois", "one-time", "pago único"), sub: L.t(`Économise +${money(100, cur, L)}/an vs mensuel`, `Save ${money(100, cur, L)}+/year vs monthly`, `Ahorra +${money(100, cur, L)}/año frente al mensual`), badge: L.t("À vie", "Lifetime", "De por vida"), cta: L.t(`Débloquer - ${show("lifetime")}`, `Unlock - ${show("lifetime")}`, `Desbloquear - ${show("lifetime")}`),
+    id: "lifetime", name: "Lifetime", icon: "infinity", price: show("lifetime"), old: was("lifetime"), per: L.t("une seule fois", "one-time", "pago único", "pagamento único"), sub: L.t(`Économise +${money(100, cur, L)}/an vs mensuel`, `Save ${money(100, cur, L)}+/year vs monthly`, `Ahorra +${money(100, cur, L)}/año frente al mensual`, `Economize +${money(100, cur, L)}/ano em relação ao mensal`), badge: L.t("À vie", "Lifetime", "De por vida", "Vitalício"), cta: L.t(`Débloquer - ${show("lifetime")}`, `Unlock - ${show("lifetime")}`, `Desbloquear - ${show("lifetime")}`, `Desbloquear - ${show("lifetime")}`),
     items: [
-      ["ok", L.t("Analyses illimitées à vie", "Unlimited analyses for life", "Análisis ilimitados de por vida")],
-      ["ok", L.t("Analyse complète détaillée", "Detailed full analysis", "Análisis completo detallado")],
-      ["ok", L.t("Scénarios probables détaillés", "Detailed likely scenarios", "Escenarios probables detallados")],
-      ["ok", L.t("Plus jamais de paiement mensuel", "No more monthly payments", "Se acabaron los pagos mensuales")],
-      ["ok", L.t("Priorité nouvelles features", "Priority on new features", "Prioridad en nuevas funciones")],
-      ai && ["ai", L.t("Questions personnelles à l'IA illimitées", "Unlimited personal questions to the AI", "Preguntas personales a la IA ilimitadas")],
+      ["ok", L.t("Analyses illimitées à vie", "Unlimited analyses for life", "Análisis ilimitados de por vida", "Análises ilimitadas para sempre")],
+      ["ok", L.t("Analyse complète détaillée", "Detailed full analysis", "Análisis completo detallado", "Análise completa detalhada")],
+      ["ok", L.t("Scénarios probables détaillés", "Detailed likely scenarios", "Escenarios probables detallados", "Cenários prováveis detalhados")],
+      ["ok", L.t("Plus jamais de paiement mensuel", "No more monthly payments", "Se acabaron los pagos mensuales", "Chega de pagamentos mensais")],
+      ["ok", L.t("Priorité nouvelles features", "Priority on new features", "Prioridad en nuevas funciones", "Prioridade nas novas funções")],
+      ai && ["ai", L.t("Questions personnelles à l'IA illimitées", "Unlimited personal questions to the AI", "Preguntas personales a la IA ilimitadas", "Perguntas pessoais à IA ilimitadas")],
     ].filter(Boolean),
   },
   ];
@@ -100,12 +100,12 @@ function PayRetry({ L }) {
   useEffect(() => {
     try {
       const p = new URLSearchParams(window.location.search).get("payment");
-      const l = L.en ? "en" : L.es ? "es" : "fr";
+      const l = L.en ? "en" : L.es ? "es" : L.pt ? "pt" : "fr";
       setHref(p && /^pay_[A-Za-z0-9]{4,60}$/.test(p) ? `/api/pay/retour?payment=${encodeURIComponent(p)}&status=succeeded&l=${l}` : `/api/pay/retour?l=${l}`);
     } catch {}
   }, [L]);
   if (!href) return null;
-  return <> <a href={href} className="pro-login">{L.t("Vérifier mon paiement", "Check my payment", "Comprobar mi pago")}</a></>;
+  return <> <a href={href} className="pro-login">{L.t("Vérifier mon paiement", "Check my payment", "Comprobar mi pago", "Verificar meu pagamento")}</a></>;
 }
 
 export default function ProPlans({ checkout, loginReady, notice, ai = false, cur = "EUR", switching = false, embed = false }) {
@@ -191,18 +191,18 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
   const TIER_LABEL = L.t(
     { gratuit: "Gratuit", compte: "Compte gratuit", starter: "Starter", pro: "Pro", lifetime: "Lifetime" },
     { gratuit: "Free", compte: "Free account", starter: "Starter", pro: "Pro", lifetime: "Lifetime" },
-    { gratuit: "Gratis", compte: "Cuenta gratis", starter: "Starter", pro: "Pro", lifetime: "Lifetime" }
+    { gratuit: "Gratis", compte: "Cuenta gratis", starter: "Starter", pro: "Pro", lifetime: "Lifetime" }, { gratuit: "Grátis", compte: "Conta grátis", starter: "Starter", pro: "Pro", lifetime: "Lifetime" }
   );
   const n = NOTICES[notice];
 
   return (
     <>
-      {n && !payer && <div className={`pro-notice ${n[0]}`} role="status">{L.t(n[1], n[2], n[3])}{notice === "paiement_attente" && <PayRetry L={L} />}</div>}
+      {n && !payer && <div className={`pro-notice ${n[0]}`} role="status">{L.t(n[1], n[2], n[3], n[3])}{notice === "paiement_attente" && <PayRetry L={L} />}</div>}
       {payer && pro?.connected && (
         <div className="pro-notice good" role="status">{L.t(
           "Ton compte est prêt ! Coche la case ci-dessous, puis clique sur « Débloquer » pour payer ta formule.",
           "Your account is ready! Tick the box below, then click “Unlock” to pay for your plan.",
-          "¡Tu cuenta está lista! Marca la casilla de abajo y haz clic en «Desbloquear» para pagar tu plan."
+          "¡Tu cuenta está lista! Marca la casilla de abajo y haz clic en «Desbloquear» para pagar tu plan.", "Sua conta está pronta! Marque a caixa abaixo e clique em «Desbloquear» para pagar seu plano."
         )}</div>
       )}
       {switching && <SwitchWatch />}
@@ -217,35 +217,35 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
               {L.t(
                 `Code ${promo.code} appliqué : −${pctOf(promo.pct / 100, L)} ${promo.mois === 0 ? "sur ta formule" : promo.mois === 1 ? "sur ton premier paiement" : `sur tes ${promo.mois} premiers paiements`}.`,
                 `Code ${promo.code} applied: ${pctOf(promo.pct / 100, L)} off ${promo.mois === 0 ? "your plan" : promo.mois === 1 ? "your first payment" : `your first ${promo.mois} payments`}.`,
-                `Código ${promo.code} aplicado: −${pctOf(promo.pct / 100, L)} en ${promo.mois === 0 ? "tu plan" : promo.mois === 1 ? "tu primer pago" : `tus ${promo.mois} primeros pagos`}.`
+                `Código ${promo.code} aplicado: −${pctOf(promo.pct / 100, L)} en ${promo.mois === 0 ? "tu plan" : promo.mois === 1 ? "tu primer pago" : `tus ${promo.mois} primeros pagos`}.`, `Código ${promo.code} aplicado: −${pctOf(promo.pct / 100, L)} ${promo.mois === 0 ? "no seu plano" : promo.mois === 1 ? "no seu primeiro pagamento" : `nos seus ${promo.mois} primeiros pagamentos`}.`
               )}
-              <small>{L.t("Les prix ci-dessous sont indicatifs : le montant exact s'affiche sur la page de paiement.", "Prices below are indicative: the exact amount is shown on the checkout page.", "Los precios de abajo son orientativos: el importe exacto se muestra en la página de pago.")}</small>
+              <small>{L.t("Les prix ci-dessous sont indicatifs : le montant exact s'affiche sur la page de paiement.", "Prices below are indicative: the exact amount is shown on the checkout page.", "Los precios de abajo son orientativos: el importe exacto se muestra en la página de pago.", "Os preços abaixo são indicativos: o valor exato aparece na página de pagamento.")}</small>
             </span>
-            <button type="button" className="pro-promo-x" onClick={() => { setPromo(null); setPromoInput(""); setPromoOpen(false); setPromoState("idle"); }}>{L.t("Retirer", "Remove", "Quitar")}</button>
+            <button type="button" className="pro-promo-x" onClick={() => { setPromo(null); setPromoInput(""); setPromoOpen(false); setPromoState("idle"); }}>{L.t("Retirer", "Remove", "Quitar", "Remover")}</button>
           </div>
         ) : !promoOpen ? (
           <button type="button" className="pro-promo-toggle" aria-expanded="false" onClick={() => { setPromoOpen(true); setTimeout(() => document.getElementById("pro-promo-input")?.focus(), 0); }}>
-            {L.t("J'ai un code promo", "I have a promo code", "Tengo un código promocional")}
+            {L.t("J'ai un code promo", "I have a promo code", "Tengo un código promocional", "Tenho um código promocional")}
           </button>
         ) : (
           <>
             <form className="pro-promo-form" onSubmit={(e) => { e.preventDefault(); applyPromo(promoInput); }}>
-              <label className="vh" htmlFor="pro-promo-input">{L.t("Code promo", "Promo code", "Código promocional")}</label>
+              <label className="vh" htmlFor="pro-promo-input">{L.t("Code promo", "Promo code", "Código promocional", "Código promocional")}</label>
               <input
                 id="pro-promo-input"
                 value={promoInput}
                 onChange={(e) => { setPromoInput(cleanCode(e.target.value)); if (promoState !== "checking") setPromoState("idle"); }}
-                placeholder={L.t("CODE PROMO", "PROMO CODE", "CÓDIGO")}
+                placeholder={L.t("CODE PROMO", "PROMO CODE", "CÓDIGO", "CÓDIGO")}
                 maxLength={24}
                 autoComplete="off"
                 autoCapitalize="characters"
                 spellCheck={false}
                 aria-invalid={promoState === "invalid"}
               />
-              <button type="submit" disabled={promoState === "checking" || !promoInput}>{promoState === "checking" ? "…" : L.t("Appliquer", "Apply", "Aplicar")}</button>
+              <button type="submit" disabled={promoState === "checking" || !promoInput}>{promoState === "checking" ? "…" : L.t("Appliquer", "Apply", "Aplicar", "Aplicar")}</button>
             </form>
-            {promoState === "invalid" && <p className="pro-promo-msg" role="alert">{L.t("Ce code n'est pas valide ou n'est plus actif.", "This code isn't valid or is no longer active.", "Este código no es válido o ya no está activo.")}</p>}
-            {promoState === "down" && <p className="pro-promo-msg" role="alert">{L.t("Vérification impossible pour le moment, réessaie dans un instant.", "Couldn't check the code right now, please try again in a moment.", "No se ha podido comprobar el código por ahora, inténtalo de nuevo en un instante.")}</p>}
+            {promoState === "invalid" && <p className="pro-promo-msg" role="alert">{L.t("Ce code n'est pas valide ou n'est plus actif.", "This code isn't valid or is no longer active.", "Este código no es válido o ya no está activo.", "Este código não é válido ou não está mais ativo.")}</p>}
+            {promoState === "down" && <p className="pro-promo-msg" role="alert">{L.t("Vérification impossible pour le moment, réessaie dans un instant.", "Couldn't check the code right now, please try again in a moment.", "No se ha podido comprobar el código por ahora, inténtalo de nuevo en un instante.", "Não foi possível verificar o código agora, tente novamente em instantes.")}</p>}
           </>
         )}
       </div>
@@ -254,10 +254,10 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
         {L.t(
           <span>J&apos;accepte les <Link href="/cgv" target="_blank">CGV</Link> et les <Link href="/cgu" target="_blank">CGU</Link>, et je demande l&apos;accès immédiat à mes analyses : je reconnais perdre mon droit de rétractation de 14 jours.</span>,
           <span>I accept the <Link href={L.href("/cgv")} target="_blank">Terms of Sale</Link> and <Link href={L.href("/cgu")} target="_blank">Terms of Use</Link>, and I request immediate access to my analyses: I acknowledge that I lose my 14-day right of withdrawal.</span>,
-          <span>Acepto las <Link href={L.href("/cgv")} target="_blank">Condiciones de venta</Link> y las <Link href={L.href("/cgu")} target="_blank">Condiciones de uso</Link>, y pido el acceso inmediato a mis análisis: reconozco que pierdo mi derecho de desistimiento de 14 días.</span>
+          <span>Acepto las <Link href={L.href("/cgv")} target="_blank">Condiciones de venta</Link> y las <Link href={L.href("/cgu")} target="_blank">Condiciones de uso</Link>, y pido el acceso inmediato a mis análisis: reconozco que pierdo mi derecho de desistimiento de 14 días.</span>, <span>Aceito as <Link href={L.href("/cgv")} target="_blank">Condições de venda</Link> e os <Link href={L.href("/cgu")} target="_blank">Termos de uso</Link>, e peço o acesso imediato às minhas análises: reconheço que perco meu direito de arrependimento de 14 dias.</span>
         )}
       </label>
-      {nudge && !agree && <p className="pro-agree-hint" role="alert">{L.t("Coche la case ci-dessus pour continuer vers le paiement.", "Tick the box above to continue to checkout.", "Marca la casilla de arriba para continuar con el pago.")}</p>}
+      {nudge && !agree && <p className="pro-agree-hint" role="alert">{L.t("Coche la case ci-dessus pour continuer vers le paiement.", "Tick the box above to continue to checkout.", "Marca la casilla de arriba para continuar con el pago.", "Marque a caixa acima para continuar com o pagamento.")}</p>}
       <div className="plans">
         {PLANS(L, ai, cur, promo).map((p, i) => {
           const url = checkout[p.id];
@@ -266,7 +266,7 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
               {p.badge && <span className="plan-badge">{p.id === "pro" ? "⭐⭐ " : "∞∞ "}{p.badge}</span>}
               <h3><span className="plan-ic"><Icon name={p.icon} /></span>{p.name}</h3>
               <div className="plan-price">
-                {p.old && <s className="plan-old"><span className="vh">{L.t("Prix sans le code : ", "Price without the code: ", "Precio sin el código: ")}</span>{p.old}</s>}
+                {p.old && <s className="plan-old"><span className="vh">{L.t("Prix sans le code : ", "Price without the code: ", "Precio sin el código: ", "Preço sem o código: ")}</span>{p.old}</s>}
                 <b>{p.price}</b><span>{p.per}</span>
               </div>
               {p.then && <div className="plan-then">{p.then}</div>}
@@ -275,15 +275,15 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
               <ul>{p.items.map(([kind, text, extra]) => (
                 <li key={text} className={`pi pi-${kind}`}>
                   <span className="pi-ic"><ItemIcon kind={kind} /></span>
-                  <span>{kind === "no" && <span className="vh">{L.t("Non inclus : ", "Not included: ", "No incluido: ")}</span>}{kind === "ai" ? <b>{text}</b> : text}{extra ? <> {extra}</> : null}</span>
+                  <span>{kind === "no" && <span className="vh">{L.t("Non inclus : ", "Not included: ", "No incluido: ", "Não incluído: ")}</span>}{kind === "ai" ? <b>{text}</b> : text}{extra ? <> {extra}</> : null}</span>
                 </li>
               ))}</ul>
               {pro?.connected && current === p.id ? (
-                <span className="plan-cta plan-current">{L.t("Ta formule actuelle", "Your current plan", "Tu plan actual")}</span>
+                <span className="plan-cta plan-current">{L.t("Ta formule actuelle", "Your current plan", "Tu plan actual", "Seu plano atual")}</span>
               ) : url ? (
                 <a href={payHref(p.id)} className={`plan-cta plan-buy ${agree ? "" : "plan-wait"}`} aria-disabled={!agree} onClick={buy(p.id)}>{p.ctaTrial && trialOk ? p.ctaTrial : p.cta}</a>
               ) : (
-                <span className="plan-cta plan-soon">{L.t("Bientôt disponible", "Coming soon", "Próximamente")}</span>
+                <span className="plan-cta plan-soon">{L.t("Bientôt disponible", "Coming soon", "Próximamente", "Em breve")}</span>
               )}
             </article>
           );
@@ -293,37 +293,37 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
         {L.t(
           <>Starter et Pro sont sans engagement : tu arrêtes quand tu veux depuis la page Mon compte de ce site, et tu gardes l&apos;accès jusqu&apos;à la fin du mois payé. Une période commencée n&apos;est pas remboursée. Réservé aux 18 ans et plus. </>,
           <>Starter and Pro have no commitment: cancel anytime from the My account page on this site and keep access until the end of the paid month. A started period is not refunded. For adults 18 and over. </>,
-          <>Starter y Pro no tienen permanencia: cancelas cuando quieras desde la página Mi cuenta de este sitio y mantienes el acceso hasta el final del mes pagado. Un periodo empezado no se reembolsa. Solo para mayores de 18 años. </>
+          <>Starter y Pro no tienen permanencia: cancelas cuando quieras desde la página Mi cuenta de este sitio y mantienes el acceso hasta el final del mes pagado. Un periodo empezado no se reembolsa. Solo para mayores de 18 años. </>, <>Starter e Pro não têm fidelidade: você cancela quando quiser pela página Minha conta deste site e mantém o acesso até o fim do mês pago. Um período iniciado não é reembolsado. Somente para maiores de 18 anos. </>
         )}
-        <Link href={L.href("/cgv")}>{L.t("Conditions générales de vente", "Terms of Sale", "Condiciones generales de venta")}</Link>
+        <Link href={L.href("/cgv")}>{L.t("Conditions générales de vente", "Terms of Sale", "Condiciones generales de venta", "Condições gerais de venda")}</Link>
       </p>
-      <p className="pro-free">{L.t("Sans abonnement, les probabilités de victoire de tous les matchs restent gratuites.", "Without a subscription, win probabilities for every game stay free.", "Sin suscripción, las probabilidades de victoria de todos los partidos siguen siendo gratis.")} <Link href={L.href("/app/matchs")}>{L.t("Voir les matchs du jour", "See today's games", "Ver los partidos de hoy")}</Link></p>
+      <p className="pro-free">{L.t("Sans abonnement, les probabilités de victoire de tous les matchs restent gratuites.", "Without a subscription, win probabilities for every game stay free.", "Sin suscripción, las probabilidades de victoria de todos los partidos siguen siendo gratis.", "Sem assinatura, as probabilidades de vitória de todos os jogos continuam grátis.")} <Link href={L.href("/app/matchs")}>{L.t("Voir les matchs du jour", "See today's games", "Ver los partidos de hoy", "Ver os jogos de hoje")}</Link></p>
       <div className="pro-account">
         {pro?.connected ? (
           <p>
-            {pro.acct ? L.t("Connecté", "Logged in", "Conectado") : L.t("Connecté avec Whop", "Logged in with Whop", "Conectado con Whop")}{pro.name ? <> {L.t("en tant que", "as", "como")} <b>{pro.name}</b></> : ""} · {L.t("formule", "plan", "plan")} <b>{TIER_LABEL[current] || current}</b>
-            {(current === "compte" || current === "starter") && <>{" · "}<a href={`/api/whop/login?next=${encodeURIComponent(L.href("/pro"))}`} className="pro-login" onClick={() => track("Connexion Whop", { etape: "actualiser", source: "page_pro" })}>{pro.acct ? L.t("Tu viens de payer ? Activer mon abonnement", "Just paid? Activate my subscription", "¿Acabas de pagar? Activar mi suscripción") : L.t("Tu viens de t'abonner ? Actualiser mon accès", "Just subscribed? Refresh my access", "¿Te acabas de suscribir? Actualizar mi acceso")}</a></>}
-            {" · "}<Link href={L.href("/app/compte")}>{L.t("Gérer mon abonnement", "Manage my subscription", "Gestionar mi suscripción")}</Link>
-            {" · "}<a href={`/api/pro/logout?next=${encodeURIComponent(L.href("/pro"))}`}>{L.t("Se déconnecter", "Log out", "Cerrar sesión")}</a>
+            {pro.acct ? L.t("Connecté", "Logged in", "Conectado", "Conectado") : L.t("Connecté avec Whop", "Logged in with Whop", "Conectado con Whop", "Conectado com a Whop")}{pro.name ? <> {L.t("en tant que", "as", "como", "como")} <b>{pro.name}</b></> : ""} · {L.t("formule", "plan", "plan", "plano")} <b>{TIER_LABEL[current] || current}</b>
+            {(current === "compte" || current === "starter") && <>{" · "}<a href={`/api/whop/login?next=${encodeURIComponent(L.href("/pro"))}`} className="pro-login" onClick={() => track("Connexion Whop", { etape: "actualiser", source: "page_pro" })}>{pro.acct ? L.t("Tu viens de payer ? Activer mon abonnement", "Just paid? Activate my subscription", "¿Acabas de pagar? Activar mi suscripción", "Acabou de pagar? Ativar minha assinatura") : L.t("Tu viens de t'abonner ? Actualiser mon accès", "Just subscribed? Refresh my access", "¿Te acabas de suscribir? Actualizar mi acceso", "Acabou de assinar? Atualizar meu acesso")}</a></>}
+            {" · "}<Link href={L.href("/app/compte")}>{L.t("Gérer mon abonnement", "Manage my subscription", "Gestionar mi suscripción", "Gerenciar minha assinatura")}</Link>
+            {" · "}<a href={`/api/pro/logout?next=${encodeURIComponent(L.href("/pro"))}`}>{L.t("Se déconnecter", "Log out", "Cerrar sesión", "Sair")}</a>
           </p>
         ) : (
           <p>
-            {L.t("Pas de compte à créer : ton accès s'ouvre dès le paiement.", "No account needed: your access opens as soon as you pay.", "Sin cuenta que crear: tu acceso se abre en cuanto pagas.")}
-            {" · "}{L.t("Déjà abonné ?", "Already subscribed?", "¿Ya estás suscrito?")} <button type="button" className="pro-login" onClick={() => openAuth({ mode: "connexion", source: "page_pro" })}>{L.t("Me connecter", "Log in", "Iniciar sesión")}</button>
+            {L.t("Pas de compte à créer : ton accès s'ouvre dès le paiement.", "No account needed: your access opens as soon as you pay.", "Sin cuenta que crear: tu acceso se abre en cuanto pagas.", "Sem conta para criar: seu acesso é liberado assim que você paga.")}
+            {" · "}{L.t("Déjà abonné ?", "Already subscribed?", "¿Ya estás suscrito?", "Já é assinante?")} <button type="button" className="pro-login" onClick={() => openAuth({ mode: "connexion", source: "page_pro" })}>{L.t("Me connecter", "Log in", "Iniciar sesión", "Entrar")}</button>
           </p>
         )}
         {pro?.connected && pro.acct && (current === "compte" || current === "starter") && (
           <p className="pro-secure">{L.t(
             "Le paiement se fait ici, sur Basketlog (formulaire sécurisé Whop) : ta formule se débloque tout de suite sur ton compte. Tu as payé sur l'ancienne page Whop ? Clique sur « Activer mon abonnement ».",
             "You pay right here on Basketlog (secure Whop form): your plan unlocks on your account right away. Paid on the old Whop page? Click “Activate my subscription”.",
-            "El pago se hace aquí, en Basketlog (formulario seguro de Whop): tu plan se desbloquea enseguida en tu cuenta. ¿Pagaste en la antigua página de Whop? Haz clic en «Activar mi suscripción»."
+            "El pago se hace aquí, en Basketlog (formulario seguro de Whop): tu plan se desbloquea enseguida en tu cuenta. ¿Pagaste en la antigua página de Whop? Haz clic en «Activar mi suscripción».", "O pagamento é feito aqui, no Basketlog (formulário seguro da Whop): seu plano é desbloqueado na hora na sua conta. Pagou na antiga página da Whop? Clique em «Ativar minha assinatura»."
           )}</p>
         )}
-        <p className="pro-secure">{L.t("Tu peux arrêter ton abonnement à tout moment. Toutes nos analyses sont fournies à titre informatif uniquement.", "You can cancel your subscription anytime. All our analyses are provided for information only.", "Puedes cancelar tu suscripción en cualquier momento. Todos nuestros análisis se ofrecen solo a título informativo.")}</p>
+        <p className="pro-secure">{L.t("Tu peux arrêter ton abonnement à tout moment. Toutes nos analyses sont fournies à titre informatif uniquement.", "You can cancel your subscription anytime. All our analyses are provided for information only.", "Puedes cancelar tu suscripción en cualquier momento. Todos nuestros análisis se ofrecen solo a título informativo.", "Você pode cancelar sua assinatura a qualquer momento. Todas as nossas análises são oferecidas apenas a título informativo.")}</p>
         {pro?.connected && (current === "starter" || current === "pro") && (
-          <p className="pro-secure">{L.t("Déjà abonné ? Passe à une formule supérieure en un clic depuis", "Already subscribed? Switch to a higher plan in one click from", "¿Ya estás suscrito? Pasa a un plan superior con un clic desde")} <Link href={L.href("/app/compte")}>{L.t("Mon compte", "My account", "Mi cuenta")}</Link>{L.t(" : ton abonnement actuel s'arrête tout seul à la fin de sa période.", ": your current subscription stops by itself at the end of its period.", ": tu suscripción actual se detiene sola al final de su periodo.")}</p>
+          <p className="pro-secure">{L.t("Déjà abonné ? Passe à une formule supérieure en un clic depuis", "Already subscribed? Switch to a higher plan in one click from", "¿Ya estás suscrito? Pasa a un plan superior con un clic desde", "Já é assinante? Passe para um plano superior com um clique em")} <Link href={L.href("/app/compte")}>{L.t("Mon compte", "My account", "Mi cuenta", "Minha conta")}</Link>{L.t(" : ton abonnement actuel s'arrête tout seul à la fin de sa période.", ": your current subscription stops by itself at the end of its period.", ": tu suscripción actual se detiene sola al final de su periodo.", ": sua assinatura atual termina sozinha no fim do período.")}</p>
         )}
-        <p className="pro-secure">{L.t("Une question sur nos offres ?", "A question about our plans?", "¿Una pregunta sobre nuestros planes?")} <a href="mailto:contact@basketlog-app.com">contact@basketlog-app.com</a></p>
+        <p className="pro-secure">{L.t("Une question sur nos offres ?", "A question about our plans?", "¿Una pregunta sobre nuestros planes?", "Uma dúvida sobre nossos planos?")} <a href="mailto:contact@basketlog-app.com">contact@basketlog-app.com</a></p>
       </div>
     </>
   );

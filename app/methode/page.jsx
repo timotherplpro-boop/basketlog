@@ -10,10 +10,10 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata() {
   const L = await getL();
   return pageMeta({
-    title: L.t("Comment sont calculés les pronostics NBA de Basketlog – Méthode", "How Basketlog's NBA predictions are calculated – Methodology", "Cómo se calculan los pronósticos NBA de Basketlog – Metodología"),
+    title: L.t("Comment sont calculés les pronostics NBA de Basketlog – Méthode", "How Basketlog's NBA predictions are calculated – Methodology", "Cómo se calculan los pronósticos NBA de Basketlog – Metodología", "Como os palpites NBA do Basketlog são calculados – Metodologia"),
     description: L.t(
       "La méthode du modèle Basketlog : niveau des équipes, avantage du terrain, fatigue, absences, puis conversion en probabilité de victoire. Résultats vérifiés en public.",
-      "The Basketlog model's methodology: team strength, home-court advantage, fatigue, injuries, then conversion into a win probability. Results verified in public.", "La metodología del modelo de Basketlog: nivel de los equipos, ventaja de jugar en casa, cansancio, bajas y conversión en probabilidad de victoria. Resultados verificados en público."
+      "The Basketlog model's methodology: team strength, home-court advantage, fatigue, injuries, then conversion into a win probability. Results verified in public.", "La metodología del modelo de Basketlog: nivel de los equipos, ventaja de jugar en casa, cansancio, bajas y conversión en probabilidad de victoria. Resultados verificados en público.", "A metodologia do modelo do Basketlog: nível dos times, vantagem de jogar em casa, cansaço, desfalques e conversão em probabilidade de vitória. Resultados verificados em público."
     ),
     path: "/methode",
     L,
@@ -35,14 +35,79 @@ export default async function MethodePage() {
   const ld = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline: L.t("Comment Basketlog calcule ses pronostics NBA", "How Basketlog calculates its NBA predictions", "Cómo calcula Basketlog sus pronósticos NBA"),
-    description: L.t("Méthode du modèle statistique Basketlog et résultats vérifiés match par match.", "The Basketlog statistical model's methodology and results verified game by game.", "Metodología del modelo estadístico de Basketlog y resultados verificados partido a partido."),
+    headline: L.t("Comment Basketlog calcule ses pronostics NBA", "How Basketlog calculates its NBA predictions", "Cómo calcula Basketlog sus pronósticos NBA", "Como o Basketlog calcula seus palpites NBA"),
+    description: L.t("Méthode du modèle statistique Basketlog et résultats vérifiés match par match.", "The Basketlog statistical model's methodology and results verified game by game.", "Metodología del modelo estadístico de Basketlog y resultados verificados partido a partido.", "Metodologia do modelo estatístico do Basketlog e resultados verificados jogo a jogo."),
     inLanguage: L.hreflang,
     url: `${SITE}${L.href("/methode")}`,
     author: { "@id": `${SITE}/#organisation` },
     publisher: { "@id": `${SITE}/#organisation` },
     isPartOf: { "@id": `${SITE}/#site` },
   };
+
+  if (L.pt) return (
+    <main className="app-page prose-page">
+      <JsonLd data={ld} />
+      <div className="app-head">
+        <h1>Como o Basketlog calcula seus palpites NBA</h1>
+        <p>Um modelo estatístico simples, transparente e verificado em público, jogo após jogo.</p>
+      </div>
+
+      <div className="card block">
+        <h2>Em resumo</h2>
+        <p className="narr">
+          Para cada jogo, o Basketlog estima o saldo de pontos esperado entre os dois times e depois o converte em probabilidade de vitória.
+          O saldo parte do nível real de cada time, ao qual se somam a vantagem de jogar em casa, o cansaço e os desfalques.
+          {p.n > 0 && <> Testado na temporada {label(season - 1)} ({p.n} jogos), o modelo acertou o vencedor em <b>{pct(p.pct)}</b> dos casos{strong.n > 0 ? <>, e em <b>{pct(strong.ok / strong.n)}</b> dos casos quando dava pelo menos 70&nbsp;% ao favorito</> : null}.</>}
+          {s.n > 0 && <> Nesta temporada ({label(season)}), está em <b>{pct(s.pct)}</b> em {s.n} jogos encerrados.</>}
+        </p>
+      </div>
+
+      <div className="card block">
+        <h2>1. O nível de cada time</h2>
+        <p className="narr">
+          A base é o saldo médio de pontos por jogo: os pontos marcados menos os sofridos. É um dos indicadores mais confiáveis do nível real de um time da NBA, mais revelador do que a campanha de vitórias e derrotas.
+          No início da temporada, poucos jogos não bastam: o modelo mistura a temporada atual com a anterior, que conta como 12 jogos a mais. Quanto mais a temporada avança, mais pesa a temporada atual.
+          Por fim, esse saldo é aproximado em 15 % da média, porque os começos muito bons e muito ruins tendem a se moderar.
+        </p>
+      </div>
+
+      <div className="card block">
+        <h2>2. A vantagem de jogar em casa</h2>
+        <p className="narr">Jogar em casa vale cerca de 2,3 pontos na NBA atual (e 4 pontos na Euroliga, onde os ginásios pesam mais). Esse valor é somado ao time da casa.</p>
+      </div>
+
+      <div className="card block">
+        <h2>3. O cansaço dos back-to-backs</h2>
+        <p className="narr">Um time que jogou na noite anterior perde em média cerca de 1,6 ponto. Toda noite, o modelo verifica quais times jogam duas partidas em dois dias.</p>
+      </div>
+
+      <div className="card block">
+        <h2>4. Os desfalques</h2>
+        <p className="narr">O boletim médico é verificado antes de cada jogo. Cada desfalque é ponderado pela produção do jogador, além do que um reserva traria: uma estrela de 25 pontos por jogo tira cerca de 3 pontos do time, um titular de 14 pontos cerca de 1,5 ponto e um reserva quase nada. Um jogador em dúvida conta 40&nbsp;%, e o efeito total tem um teto de 5 pontos para não exagerar. Esses pesos foram ajustados em onze temporadas, comparando com os jogadores que realmente ficaram fora de cada jogo. Um jogador que está fora há muito tempo não é contado duas vezes: sua ausência já aparece nos resultados do time nesta temporada. Os desfalques só são levados em conta para os próximos jogos.</p>
+      </div>
+
+      <div className="card block">
+        <h2>5. Do saldo à probabilidade</h2>
+        <p className="narr">
+          O saldo esperado nunca se confirma exatamente: na NBA, o resultado final se afasta dele em média uma dúzia de pontos. Por isso o modelo usa uma distribuição normal centrada no saldo esperado, com desvio padrão de 12,3 pontos.
+          Daí ele tira a probabilidade de vitória de cada time e a de cada diferença possível: jogo equilibrado (5 pontos ou menos), vitória por 6 a 9 pontos ou vitória folgada (10 pontos ou mais).
+          O placar projetado combina o ataque de cada time com a defesa do adversário.
+          O nível de confiança acompanha a probabilidade do favorito: «Muito alta» a partir de 88&nbsp;%. Em onze temporadas da NBA recalculadas, esses favoritos venceram 91&nbsp;% dos jogos, com altos e baixos de uma temporada para outra. São raros: cerca de 3 jogos em cada 100.
+        </p>
+      </div>
+
+      <div className="card block">
+        <h2>6. Resultados verificados, sem trapacear com o futuro</h2>
+        <p className="narr">
+          Cada palpite é comparado com o resultado final na página <Link href={L.href("/app/bilan")}>Desempenho do modelo</Link>. Para os jogos passados, o modelo é recalculado só com os resultados conhecidos antes do jogo: ele nunca vê o futuro.
+          As probabilidades continuam sendo estimativas: um favorito a 70&nbsp;% perde cerca de três vezes em cada dez. O Basketlog é uma ferramenta de análise, não um serviço de apostas.
+        </p>
+        <p className="narr" style={{ marginTop: 12 }}>
+          <Link href={L.href("/app/matchs")}>Ver os palpites NBA de hoje</Link> · <Link href={L.href("/app/euroleague")}>Palpites Euroliga</Link> · <Link href={L.href("/app/bilan")}>Taxa de acerto</Link>
+        </p>
+      </div>
+    </main>
+  );
 
   if (L.es) return (
     <main className="app-page prose-page">

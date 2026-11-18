@@ -28,7 +28,7 @@ const Icon = ({ name }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>{I[name]}</svg>
 );
 
-const FLAG = { fr: "🇫🇷", en: "🇺🇸", es: "🇪🇸" };
+const FLAG = { fr: "🇫🇷", en: "🇺🇸", es: "🇪🇸", pt: "🇧🇷" };
 
 export default function AppShell({ session, ai = false, children }) {
   const L = useL();
@@ -62,35 +62,35 @@ export default function AppShell({ session, ai = false, children }) {
   const full = !unlimited && used >= limit; // compte gratuit : « 0 / 0 » et « Limite atteinte », comme Visifoot
   const role = pro ? pro.role || null : session?.role || null; // admin ou créateur invité : accès complet
   const plan = role === "admin" ? "Admin"
-    : role === "createur" ? L.t("Accès créateur", "Creator access", "Acceso de creador")
-    : { compte: L.t("Gratuit", "Free", "Gratis"), starter: "Starter", pro: "Pro", lifetime: "Lifetime" }[tier] || L.t("Gratuit", "Free", "Gratis");
+    : role === "createur" ? L.t("Accès créateur", "Creator access", "Acceso de creador", "Acesso de criador")
+    : { compte: L.t("Gratuit", "Free", "Gratis", "Grátis"), starter: "Starter", pro: "Pro", lifetime: "Lifetime" }[tier] || L.t("Gratuit", "Free", "Gratis", "Grátis");
 
   // Mêmes rubriques que Visifoot : Matchs, Compétitions, Historique, Pricing. Les matchs du jour et le bilan
   // restent accessibles par les onglets en haut des pages.
   const items = [
-    ["/app", "chart", L.t("Matchs", "Games", "Partidos"), p === "/app" || p.startsWith("/app/duel") || p.startsWith("/app/match/") || p.startsWith("/nba/") || p.startsWith("/app/matchs")],
-    ["/app/competitions", "trophy", L.t("Compétitions", "Competitions", "Competiciones"), ["/app/competitions", "/app/classement", "/app/euroleague", "/app/equipe"].some((x) => p.startsWith(x))],
-    ["/app/historique", "history", L.t("Historique", "History", "Historial"), p.startsWith("/app/historique")],
+    ["/app", "chart", L.t("Matchs", "Games", "Partidos", "Jogos"), p === "/app" || p.startsWith("/app/duel") || p.startsWith("/app/match/") || p.startsWith("/nba/") || p.startsWith("/app/matchs")],
+    ["/app/competitions", "trophy", L.t("Compétitions", "Competitions", "Competiciones", "Competições"), ["/app/competitions", "/app/classement", "/app/euroleague", "/app/equipe"].some((x) => p.startsWith(x))],
+    ["/app/historique", "history", L.t("Historique", "History", "Historial", "Histórico"), p.startsWith("/app/historique")],
   ];
 
   return (
     <div className={`shell ${open ? "sb-open" : ""}`}>
       <header className="sb-top">
         <Link href={L.href("/")} className="logo"><span className="ball" aria-hidden /> Basketlog</Link>
-        <button type="button" className={`burger ${open ? "open" : ""}`} onClick={() => setOpen(!open)} aria-label={open ? L.t("Fermer le menu", "Close menu", "Cerrar el menú") : L.t("Ouvrir le menu", "Open menu", "Abrir el menú")} aria-expanded={open}>
+        <button type="button" className={`burger ${open ? "open" : ""}`} onClick={() => setOpen(!open)} aria-label={open ? L.t("Fermer le menu", "Close menu", "Cerrar el menú", "Fechar o menu") : L.t("Ouvrir le menu", "Open menu", "Abrir el menú", "Abrir o menu")} aria-expanded={open}>
           <i /><i />
         </button>
       </header>
       <div className="sb-scrim" onClick={() => setOpen(false)} aria-hidden />
 
-      <aside className="sb" aria-label={L.t("Espace membre", "Member area", "Área de miembros")}>
+      <aside className="sb" aria-label={L.t("Espace membre", "Member area", "Área de miembros", "Área de membros")}>
         <div className="sb-brand">
           <Link href={L.href("/")} className="logo"><span className="ball" aria-hidden /> Basketlog</Link>
-          <small>{ai ? L.t("Analyse IA de matchs", "AI match analysis", "Análisis IA de partidos") : L.t("Analyse de matchs", "Match analysis", "Análisis de partidos")}</small>
+          <small>{ai ? L.t("Analyse IA de matchs", "AI match analysis", "Análisis IA de partidos", "Análise de jogos com IA") : L.t("Analyse de matchs", "Match analysis", "Análisis de partidos", "Análise de jogos")}</small>
         </div>
 
-        <nav className="sb-nav" aria-label={L.t("Analyse", "Analysis", "Análisis")}>
-          <div className="sb-label">{L.t("ANALYSE", "ANALYSIS", "ANÁLISIS")}</div>
+        <nav className="sb-nav" aria-label={L.t("Analyse", "Analysis", "Análisis", "Análises")}>
+          <div className="sb-label">{L.t("ANALYSE", "ANALYSIS", "ANÁLISIS", "ANÁLISES")}</div>
           {items.map(([href, icon, label, on]) => (
             <Link key={href} href={L.href(href)} className={`sb-item ${on ? "on" : ""}`} aria-current={on ? "page" : undefined}>
               <Icon name={icon} />{label}
@@ -106,33 +106,33 @@ export default function AppShell({ session, ai = false, children }) {
           )}
           {role === "createur" && (
             <Link href={L.href("/app/gains")} className={`sb-item ${p.startsWith("/app/gains") ? "on" : ""}`} aria-current={p.startsWith("/app/gains") ? "page" : undefined}>
-              <Icon name="money" />{L.t("Mes gains", "My earnings", "Mis ganancias")}
+              <Icon name="money" />{L.t("Mes gains", "My earnings", "Mis ganancias", "Meus ganhos")}
             </Link>
           )}
         </nav>
 
         <div className="sb-quota">
-          <div className="sb-q-head"><Icon name="bars" />{L.t("Analyses du jour", "Today's analyses", "Análisis de hoy")}</div>
-          <b className={full ? "full" : unlimited ? "free" : ""}>{unlimited ? L.t("Illimitées", "Unlimited", "Ilimitados") : `${Math.min(used, limit)} / ${limit}`}</b>
+          <div className="sb-q-head"><Icon name="bars" />{L.t("Analyses du jour", "Today's analyses", "Análisis de hoy", "Análises de hoje")}</div>
+          <b className={full ? "full" : unlimited ? "free" : ""}>{unlimited ? L.t("Illimitées", "Unlimited", "Ilimitados", "Ilimitadas") : `${Math.min(used, limit)} / ${limit}`}</b>
           <div className={`sb-bar ${full ? "full" : ""}`}><i style={{ width: unlimited || full ? "100%" : `${Math.min(used / limit, 1) * 100}%` }} /></div>
           {full ? (
             <Link href={L.href("/pro")} className="sb-q-note warn">
-              {L.t("Limite atteinte", "Limit reached", "Límite alcanzado")} • {L.t("Upgrade pour plus", "Upgrade for more", "Mejora tu plan para más")}
+              {L.t("Limite atteinte", "Limit reached", "Límite alcanzado", "Limite atingido")} • {L.t("Upgrade pour plus", "Upgrade for more", "Mejora tu plan para más", "Melhore seu plano para ter mais")}
             </Link>
           ) : unlimited ? (
-            <span className="sb-q-note">{role ? L.t("Accès complet : aucune limite", "Full access: no limit", "Acceso completo: sin límite") : L.t(`Formule ${plan} : aucune limite`, `${plan} plan: no limit`, `Plan ${plan}: sin límite`)}</span>
+            <span className="sb-q-note">{role ? L.t("Accès complet : aucune limite", "Full access: no limit", "Acceso completo: sin límite", "Acesso completo: sem limite") : L.t(`Formule ${plan} : aucune limite`, `${plan} plan: no limit`, `Plan ${plan}: sin límite`, `Plano ${plan}: sem limite`)}</span>
           ) : (
-            <span className="sb-q-note">{L.t(`${limit - used} analyse${limit - used > 1 ? "s" : ""} réduite${limit - used > 1 ? "s" : ""} restante${limit - used > 1 ? "s" : ""}`, `${limit - used} reduced analys${limit - used > 1 ? "es" : "is"} left`, `${limit - used} análisis reducido${limit - used > 1 ? "s" : ""} restante${limit - used > 1 ? "s" : ""}`)}</span>
+            <span className="sb-q-note">{L.t(`${limit - used} analyse${limit - used > 1 ? "s" : ""} réduite${limit - used > 1 ? "s" : ""} restante${limit - used > 1 ? "s" : ""}`, `${limit - used} reduced analys${limit - used > 1 ? "es" : "is"} left`, `${limit - used} análisis reducido${limit - used > 1 ? "s" : ""} restante${limit - used > 1 ? "s" : ""}`, `${limit - used} análise${limit - used > 1 ? "s" : ""} reduzida${limit - used > 1 ? "s" : ""} restante${limit - used > 1 ? "s" : ""}`)}</span>
           )}
         </div>
 
         <div className="sb-foot">
           <div className="sb-user">
             <Icon name="user" />
-            <div><b>{name || L.t("Mon compte", "My account", "Mi cuenta")}</b><small>{plan}</small></div>
+            <div><b>{name || L.t("Mon compte", "My account", "Mi cuenta", "Minha conta")}</b><small>{plan}</small></div>
           </div>
-          <Link href={L.href("/app/compte")} className={`sb-link ${p.startsWith("/app/compte") ? "on" : ""}`} aria-current={p.startsWith("/app/compte") ? "page" : undefined}><Icon name="sliders" />{L.t("Mon compte et abonnement", "My account and subscription", "Mi cuenta y suscripción")}</Link>
-          <a href={`/api/pro/logout?next=${encodeURIComponent(L.href("/"))}`} className="sb-link big"><Icon name="logout" />{L.t("Déconnexion", "Log out", "Cerrar sesión")}</a>
+          <Link href={L.href("/app/compte")} className={`sb-link ${p.startsWith("/app/compte") ? "on" : ""}`} aria-current={p.startsWith("/app/compte") ? "page" : undefined}><Icon name="sliders" />{L.t("Mon compte et abonnement", "My account and subscription", "Mi cuenta y suscripción", "Minha conta e assinatura")}</Link>
+          <a href={`/api/pro/logout?next=${encodeURIComponent(L.href("/"))}`} className="sb-link big"><Icon name="logout" />{L.t("Déconnexion", "Log out", "Cerrar sesión", "Sair")}</a>
           <a href="mailto:contact@basketlog-app.com" className="sb-link"><Icon name="mail" />Support</a>
           <div className="sb-link sb-lang"><Icon name="globe" /><span aria-hidden>{FLAG[L.lang]}</span><LangSelect className="plain" /></div>
         </div>

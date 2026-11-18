@@ -21,45 +21,45 @@ export async function POST(req) {
   if (body.site) return NextResponse.json({ ok: true });
   // Formulaire envoyé moins de 3 secondes après son ouverture : robot, ignoré sans le dire.
   if (Number.isFinite(body.elapsed) && body.elapsed < 3000) return NextResponse.json({ ok: true });
-  const t = (fr, en, es) => (body.lang === "en" ? en : body.lang === "es" ? es : fr);
+  const t = (fr, en, es, pt) => (body.lang === "en" ? en : body.lang === "es" ? es : body.lang === "pt" ? pt : fr);
 
   const { session } = await currentSession(req.cookies.get(COOKIE)?.value);
   if (!session?.uid) {
-    return NextResponse.json({ ok: false, error: t("Les avis sont réservés aux abonnés : connecte-toi avec ton compte abonné.", "Reviews are reserved for subscribers: log in with your subscriber account.", "Las opiniones están reservadas a los suscriptores: inicia sesión con tu cuenta de suscriptor.") }, { status: 401 });
+    return NextResponse.json({ ok: false, error: t("Les avis sont réservés aux abonnés : connecte-toi avec ton compte abonné.", "Reviews are reserved for subscribers: log in with your subscriber account.", "Las opiniones están reservadas a los suscriptores: inicia sesión con tu cuenta de suscriptor.", "As avaliações são reservadas aos assinantes: faça login com sua conta de assinante.") }, { status: 401 });
   }
   // Admins et créateurs partenaires (accès offert) : pas d'avis, ce ne seraient pas des avis de clients.
   const role = await getRole(session.uid).catch(() => session.role || (session.admin ? "admin" : null));
   if (role) {
-    return NextResponse.json({ ok: false, error: t("Les comptes admin et créateurs ne peuvent pas donner d'avis.", "Admin and creator accounts can't leave reviews.", "Las cuentas de administrador y de creador no pueden dar su opinión.") }, { status: 403 });
+    return NextResponse.json({ ok: false, error: t("Les comptes admin et créateurs ne peuvent pas donner d'avis.", "Admin and creator accounts can't leave reviews.", "Las cuentas de administrador y de creador no pueden dar su opinión.", "Contas de administrador e de criador não podem dar avaliação.") }, { status: 403 });
   }
   let formule;
   try {
     formule = await whopTier(session.uid);
   } catch {
-    return NextResponse.json({ ok: false, error: t("Impossible de vérifier ton abonnement pour le moment, réessaie dans un instant.", "Your subscription couldn't be checked right now, please try again in a moment.", "No se ha podido comprobar tu suscripción por ahora, inténtalo de nuevo en un momento.") }, { status: 503 });
+    return NextResponse.json({ ok: false, error: t("Impossible de vérifier ton abonnement pour le moment, réessaie dans un instant.", "Your subscription couldn't be checked right now, please try again in a moment.", "No se ha podido comprobar tu suscripción por ahora, inténtalo de nuevo en un momento.", "Não foi possível verificar sua assinatura agora, tente novamente em um momento.") }, { status: 503 });
   }
   if (!PAYANTES.has(formule)) {
-    return NextResponse.json({ ok: false, error: t("Les avis sont réservés aux abonnés Starter, Pro et Lifetime.", "Reviews are reserved for Starter, Pro and Lifetime subscribers.", "Las opiniones están reservadas a los suscriptores Starter, Pro y Lifetime.") }, { status: 403 });
+    return NextResponse.json({ ok: false, error: t("Les avis sont réservés aux abonnés Starter, Pro et Lifetime.", "Reviews are reserved for Starter, Pro and Lifetime subscribers.", "Las opiniones están reservadas a los suscriptores Starter, Pro y Lifetime.", "As avaliações são reservadas aos assinantes Starter, Pro e Lifetime.") }, { status: 403 });
   }
 
   const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || "?";
   const now = Date.now();
   const recent = (hits.get(ip) || []).filter((x) => now - x < 3600e3);
-  if (recent.length >= 3) return NextResponse.json({ ok: false, error: t("Trop d'avis envoyés, réessaie plus tard.", "Too many reviews sent, please try again later.", "Has enviado demasiadas opiniones, inténtalo más tarde.") }, { status: 429 });
+  if (recent.length >= 3) return NextResponse.json({ ok: false, error: t("Trop d'avis envoyés, réessaie plus tard.", "Too many reviews sent, please try again later.", "Has enviado demasiadas opiniones, inténtalo más tarde.", "Você enviou avaliações demais, tente mais tarde.") }, { status: 429 });
 
   const prenom = String(body.prenom || "").trim().slice(0, 40);
   const profil = String(body.profil || "").trim().slice(0, 60);
   const texte = String(body.texte || "").trim().slice(0, 500);
   const note = Math.round(Number(body.note));
-  if (prenom.length < 2) return NextResponse.json({ ok: false, error: t("Indique ton prénom.", "Please enter your first name.", "Indica tu nombre.") }, { status: 400 });
-  if (!(note >= 1 && note <= 5)) return NextResponse.json({ ok: false, error: t("Choisis une note de 1 à 5 étoiles.", "Pick a rating from 1 to 5 stars.", "Elige una nota de 1 a 5 estrellas.") }, { status: 400 });
-  if (texte.length < 15) return NextResponse.json({ ok: false, error: t("Ton avis doit faire au moins 15 caractères.", "Your review must be at least 15 characters.", "Tu opinión debe tener al menos 15 caracteres.") }, { status: 400 });
+  if (prenom.length < 2) return NextResponse.json({ ok: false, error: t("Indique ton prénom.", "Please enter your first name.", "Indica tu nombre.", "Informe seu nome.") }, { status: 400 });
+  if (!(note >= 1 && note <= 5)) return NextResponse.json({ ok: false, error: t("Choisis une note de 1 à 5 étoiles.", "Pick a rating from 1 to 5 stars.", "Elige una nota de 1 a 5 estrellas.", "Escolha uma nota de 1 a 5 estrelas.") }, { status: 400 });
+  if (texte.length < 15) return NextResponse.json({ ok: false, error: t("Ton avis doit faire au moins 15 caractères.", "Your review must be at least 15 characters.", "Tu opinión debe tener al menos 15 caracteres.", "Sua avaliação deve ter pelo menos 15 caracteres.") }, { status: 400 });
 
   const r = await addReview({ uid: session.uid, formule, prenom, profil, note, texte });
   if (!r.ok && r.reason === "deja") {
-    return NextResponse.json({ ok: false, error: t("Tu as déjà donné ton avis : un seul avis par compte. Merci !", "You've already left a review: one review per account. Thanks!", "Ya has dado tu opinión: una sola opinión por cuenta. ¡Gracias!") }, { status: 409 });
+    return NextResponse.json({ ok: false, error: t("Tu as déjà donné ton avis : un seul avis par compte. Merci !", "You've already left a review: one review per account. Thanks!", "Ya has dado tu opinión: una sola opinión por cuenta. ¡Gracias!", "Você já deu sua avaliação: uma única avaliação por conta. Obrigado!") }, { status: 409 });
   }
-  if (!r.ok) return NextResponse.json({ ok: false, error: t("Impossible d'enregistrer ton avis pour le moment.", "Your review couldn't be saved right now.", "No se ha podido guardar tu opinión por ahora.") }, { status: 502 });
+  if (!r.ok) return NextResponse.json({ ok: false, error: t("Impossible d'enregistrer ton avis pour le moment.", "Your review couldn't be saved right now.", "No se ha podido guardar tu opinión por ahora.", "Não foi possível salvar sua avaliação agora.") }, { status: 502 });
   recent.push(now);
   hits.set(ip, recent);
   return NextResponse.json({ ok: true });
