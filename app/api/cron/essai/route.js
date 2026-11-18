@@ -47,7 +47,7 @@ export async function GET(req) {
     let to = null;
     try { to = await memberEmail(t.uid); } catch { noEmail++; continue; }
     const c = byEmail.get(String(to).toLowerCase());
-    const mail = trialEndEmail({ lang: c?.langue || "en", name: c?.nom || null, endsAt: t.endsAt, cur: t.cur });
+    const mail = trialEndEmail({ lang: c?.langue || "en", name: c?.nom || null, endsAt: t.endsAt, cur: t.cur, to });
     if (dry) continue;
     try { await sendMail({ to, ...mail }); sent++; } catch (e) { failed++; console.warn(`[essai] envoi impossible : ${String(e?.message || e).slice(0, 120)}`); }
   }
