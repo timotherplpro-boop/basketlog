@@ -4,7 +4,8 @@ import { SITE } from "../../lib/site";
 import { analyzeDay } from "../../lib/data";
 import { nbaPicks, summarize, lastDays } from "../../lib/history";
 import { nbaToday, seasonForDate } from "../../lib/espn";
-import { nbaPath } from "../../lib/slug";
+import { nbaPath, elPath } from "../../lib/slug";
+import { elUpcoming } from "../../lib/euroleague";
 
 export const revalidate = 3600;
 
@@ -12,9 +13,10 @@ const pct = (p) => `${Math.round(p * 100)}%`;
 
 export async function GET() {
   const today = nbaToday();
-  const [day, picks] = await Promise.all([
+  const [day, picks, el] = await Promise.all([
     analyzeDay(today).catch(() => null),
     nbaPicks(seasonForDate(today)).catch(() => null),
+    elUpcoming(7).catch(() => null),
   ]);
   const s = picks ? summarize(picks) : null;
   const w = picks ? summarize(lastDays(picks, 7, today)) : null;
@@ -54,6 +56,15 @@ export async function GET() {
       const g = a.game;
       const fav = a.pHome >= 0.5 ? g.home : g.away;
       lines.push(`- [${g.away.name} vs ${g.home.name}](${SITE}/en${nbaPath(g, today)}): ${fav.name} ${pct(Math.max(a.pHome, a.pAway))}, projected ${g.away.short} ${Math.round(a.awayPts)}-${Math.round(a.homePts)} ${g.home.short}`);
+    }
+    lines.push("");
+  }
+  const elGames = (el?.list || []).filter(({ a }) => a.game.state !== "post").slice(0, 10);
+  if (elGames.length) {
+    lines.push("## EuroLeague predictions (next 7 days)");
+    for (const { g, a } of elGames) {
+      const fav = a.pHome >= 0.5 ? g.home : g.away;
+      lines.push(`- [${g.away.name} vs ${g.home.name}](${SITE}/en${elPath(g)}), ${String(g.date).slice(0, 10)}: ${fav.name} ${pct(Math.max(a.pHome, a.pAway))}`);
     }
     lines.push("");
   }

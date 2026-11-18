@@ -52,7 +52,7 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
     },
   ];
 
-  const faq = path ? matchFaq(a, L, acc) : [];
+  const faq = path ? matchFaq(a, L, acc, !isNBA) : [];
   const faqLd = faq.length && url ? {
     "@context": "https://schema.org",
     "@type": "FAQPage",
