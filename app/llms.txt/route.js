@@ -1,0 +1,65 @@
+// /llms.txt : résumé du site pour les assistants (ChatGPT, Perplexity, Claude, Gemini…), en anglais, avec les pages
+// à citer et les pronostics NBA du jour. Mis en cache 1 h ; si les données NBA ne répondent pas, on renvoie le socle fixe.
+import { SITE } from "../../lib/site";
+import { analyzeDay } from "../../lib/data";
+import { nbaPicks, summarize, lastDays } from "../../lib/history";
+import { nbaToday, seasonForDate } from "../../lib/espn";
+import { nbaPath } from "../../lib/slug";
+
+export const revalidate = 3600;
+
+const pct = (p) => `${Math.round(p * 100)}%`;
+
+export async function GET() {
+  const today = nbaToday();
+  const [day, picks] = await Promise.all([
+    analyzeDay(today).catch(() => null),
+    nbaPicks(seasonForDate(today)).catch(() => null),
+  ]);
+  const s = picks ? summarize(picks) : null;
+  const w = picks ? summarize(lastDays(picks, 7, today)) : null;
+  const games = (day?.analyses || []).filter((a) => a.game && !a.game.hypothetical && a.game.state === "pre");
+  const date = `${today.slice(0, 4)}-${today.slice(4, 6)}-${today.slice(6)}`;
+
+  const lines = [
+    "# Basketlog",
+    "",
+    "> Free NBA and EuroLeague win probabilities for every game, with a public track record of every prediction (hits and misses). Statistical analysis, not a betting service.",
+    "",
+    "Basketlog gives each NBA game a win probability and a projected score from a statistical model: team strength from point differential (regressed toward last season early on), home court, rest and back-to-backs, and injuries. Every pick is saved before tip-off and compared with the final score in public. Available in English, Spanish and French.",
+    "",
+    "## Key pages",
+    `- [NBA predictions tonight](${SITE}/en/app/matchs): win probability and projected score for every game today`,
+    `- [NBA predictions tomorrow](${SITE}/en/app/demain)`,
+    `- [NBA predictions this week](${SITE}/en/app/semaine): last 7 days' record and the biggest favorites of the next 7 days`,
+    `- [NBA power rankings](${SITE}/en/app/power-rankings): all 30 teams ranked by model strength, updated daily`,
+    `- [NBA Cup predictions](${SITE}/en/app/nba-cup)`,
+    `- [Model track record](${SITE}/en/app/bilan): accuracy, calibration by probability range, every game`,
+    `- [EuroLeague predictions](${SITE}/en/app/euroleague)`,
+    `- [Methodology](${SITE}/en/methode)`,
+    `- [Free NBA widget for websites](${SITE}/en/widget)`,
+    `- Spanish: [Pronósticos NBA hoy](${SITE}/es/app/matchs) · French: [Pronostics NBA ce soir](${SITE}/app/matchs)`,
+    "",
+  ];
+  if (s && s.n) {
+    lines.push("## Track record (current NBA season)");
+    lines.push(`- Favorite won ${s.ok} of ${s.n} games (${pct(s.pct)}).`);
+    if (w && w.n) lines.push(`- Last 7 days: ${w.ok} of ${w.n} (${pct(w.pct)}).`);
+    for (const b of s.buckets) if (b.n) lines.push(`- Favorites at ${Math.round(b.lo * 100)}-${Math.round(b.hi * 100)}%: won ${pct(b.ok / b.n)} (${b.n} games).`);
+    lines.push("- Each game is rerun with only the data known before tip-off.", "");
+  }
+  if (games.length) {
+    lines.push(`## NBA predictions for ${date} (US date)`);
+    for (const a of games) {
+      const g = a.game;
+      const fav = a.pHome >= 0.5 ? g.home : g.away;
+      lines.push(`- [${g.away.name} vs ${g.home.name}](${SITE}/en${nbaPath(g, today)}): ${fav.name} ${pct(Math.max(a.pHome, a.pAway))}, projected ${g.away.short} ${Math.round(a.awayPts)}-${Math.round(a.homePts)} ${g.home.short}`);
+    }
+    lines.push("");
+  }
+  lines.push("## Notes", "- Probabilities are estimates, never certainties. Not betting advice. For adults 18+.", "- Contact: contact@basketlog-app.com", "");
+
+  return new Response(lines.join("\n"), {
+    headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" },
+  });
+}
