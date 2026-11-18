@@ -8,6 +8,7 @@ import { SITE } from "../lib/site";
 import { dayLong } from "../lib/seo";
 import { getL } from "../lib/lang-server";
 import { matchFaq } from "../lib/matchfaq";
+import { pairPath } from "../lib/matchup";
 
 export default async function MatchView({ a, backHref = "/app", league = "NBA", extras = null, path = null, acc = null, others = null }) {
   const L = await getL();
@@ -115,7 +116,7 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
               <p>{f.a}</p>
             </div>
           ))}
-          <p className="mfaq-more"><Link href={L.href("/app/bilan")}>{L.t("Voir le bilan public du modèle →", "See the model's public track record →", "Ver el balance público del modelo →")}</Link></p>
+          <p className="mfaq-more"><Link href={L.href(pairPath(g.home, g.away))}>{L.t(`Toutes les rencontres ${g.away.short} – ${g.home.short} de la saison →`, `Every ${g.away.short} vs ${g.home.short} game this season →`, `Todos los ${g.away.short} – ${g.home.short} de la temporada →`)}</Link>{" · "}<Link href={L.href("/app/bilan")}>{L.t("Bilan public du modèle →", "Model track record →", "Balance público del modelo →")}</Link></p>
         </section>
       )}
 

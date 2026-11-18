@@ -4,6 +4,7 @@ import { upcomingGames } from "../lib/data";
 import { nbaToday, shiftDate, getScoreboardRange, nbaDateOf } from "../lib/espn";
 import { elContext } from "../lib/euroleague";
 import { nbaPath } from "../lib/slug.js";
+import { pairPath } from "../lib/matchup.js";
 
 export const revalidate = 3600; // régénéré chaque heure, avec les matchs à venir
 
@@ -35,6 +36,8 @@ export default async function sitemap() {
     const past = (await getScoreboardRange(shiftDate(today, -3), shiftDate(today, -1))).filter((g) => g.state === "post");
     nba = [
       ...up.map((g) => u(nbaPath(g, g.d), 0.7, "hourly")),
+      // Pages duel sans date (/nba/celtics-vs-lakers) des affiches de la semaine.
+      ...[...new Set(up.map((g) => pairPath(g.home, g.away)))].map((p) => u(p, 0.6, "daily")),
       ...past.map((g) => u(nbaPath(g, nbaDateOf(g.date)), 0.4, "weekly")),
     ];
   } catch {}
