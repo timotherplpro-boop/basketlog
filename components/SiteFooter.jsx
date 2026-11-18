@@ -23,7 +23,7 @@ export default function SiteFooter({ L, compact = false }) {
   const gambling = L.t(
     <>Les jeux d&apos;argent comportent des risques : endettement, dépendance… Appelle le {LEGAL.jeu.tel} ({LEGAL.jeu.nom}, appel non surtaxé).</>,
     <>Gambling involves risks such as debt and addiction. If you need help in the US, call 1-800-GAMBLER (National Problem Gambling Helpline); in France, {LEGAL.jeu.tel} ({LEGAL.jeu.nom}).</>,
-    <>El juego conlleva riesgos como el endeudamiento o la adicción. En España puedes pedir ayuda en jugarbien.es; en Francia, en el {LEGAL.jeu.tel} ({LEGAL.jeu.nom}).</>, <>Apostas envolvem riscos como endividamento e dependência. Se precisar de ajuda, procure o CVV (188) ou o Jogadores Anônimos; na França, ligue para {LEGAL.jeu.tel} ({LEGAL.jeu.nom}).</>
+    <>El juego conlleva riesgos como el endeudamiento o la adicción. En España puedes pedir ayuda en jugarbien.es; en Francia, en el {LEGAL.jeu.tel} ({LEGAL.jeu.nom}).</>, <>Apostas envolvem riscos como endividamento e dependência. Se precisar de ajuda, procure os Jogadores Anônimos (jogadoresanonimos.com.br); na França, ligue para {LEGAL.jeu.tel} ({LEGAL.jeu.nom}).</>
   );
 
   if (compact) {
