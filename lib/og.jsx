@@ -55,3 +55,53 @@ export async function ogImage(lang, init = {}) {
     { ...OG_SIZE, ...(f ? { fonts: f } : {}), ...init }
   );
 }
+
+// Image de partage d'une fiche de match : les deux équipes, leurs probabilités et le score projeté (ou final).
+// Tout vient de l'adresse de l'image (aucun appel de données) ; textes courts et nombres bornés.
+const clip = (s, n) => String(s || "").replace(/[^\p{L}\p{N} .'&-]/gu, "").slice(0, n);
+export async function matchOgImage(q, init = {}) {
+  const f = await fonts();
+  const lang = q.get("lang") === "es" ? "es" : q.get("lang") === "fr" ? "fr" : "en";
+  const away = clip(q.get("a"), 22), home = clip(q.get("h"), 22);
+  const pa = Math.max(0, Math.min(100, parseInt(q.get("pa"), 10) || 50)), ph = 100 - pa;
+  const score = /^\d{2,3}-\d{2,3}$/.test(q.get("s") || "") ? q.get("s") : null;
+  const final = q.get("f") === "1";
+  const day = clip(q.get("d"), 30);
+  const logo = (u) => (/^https:\/\/a\.espncdn\.com\//.test(u || "") ? u : null);
+  const la = logo(q.get("la")), lh = logo(q.get("lh"));
+  const T = {
+    en: { pred: "prediction", win: "win", proj: final ? "Final score" : "Projected score", foot: "Free win probabilities for every NBA game" },
+    es: { pred: "pronóstico", win: "victoria", proj: final ? "Resultado final" : "Marcador proyectado", foot: "Probabilidades gratis para cada partido de la NBA" },
+    fr: { pred: "pronostic", win: "victoire", proj: final ? "Score final" : "Score projeté", foot: "Probabilités gratuites pour chaque match NBA" },
+  }[lang];
+  const side = (name, p, lg, fav) => (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 360 }}>
+      {lg ? <img src={lg} width={150} height={150} alt="" /> : <div style={{ display: "flex", width: 150, height: 150 }} />}
+      <div style={{ display: "flex", marginTop: 14, fontSize: 40, fontWeight: 800, color: "#fff" }}>{name}</div>
+      <div style={{ display: "flex", marginTop: 6, fontSize: 64, fontWeight: 800, color: fav ? "#ff7a1a" : "rgba(255,255,255,.55)" }}>{p}%</div>
+    </div>
+  );
+  return new ImageResponse(
+    (
+      <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", padding: "44px 70px", background: "radial-gradient(circle at 50% 30%, #2a1406 0%, #040817 62%)", color: "#fff", fontFamily: f ? "Inter" : "sans-serif" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 34, fontWeight: 800, color: "#ff8c3a" }}>
+            <img src={BALL} width={44} height={44} alt="" />
+            Basketlog
+          </div>
+          <div style={{ display: "flex", fontSize: 28, fontWeight: 500, color: "rgba(255,255,255,.7)" }}>{`NBA · ${day}`}</div>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 26 }}>
+          {side(away, pa, la, pa >= ph)}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <div style={{ display: "flex", fontSize: 26, fontWeight: 500, color: "rgba(255,255,255,.65)" }}>{T.proj}</div>
+            <div style={{ display: "flex", fontSize: 76, fontWeight: 800, color: "#ffe0c7" }}>{score || "vs"}</div>
+          </div>
+          {side(home, ph, lh, ph > pa)}
+        </div>
+        <div style={{ display: "flex", marginTop: "auto", fontSize: 28, fontWeight: 500, color: "rgba(255,255,255,.75)" }}>{`${T.foot} · basketlog-app.com`}</div>
+      </div>
+    ),
+    { ...OG_SIZE, ...(f ? { fonts: f } : {}), ...init }
+  );
+}
