@@ -872,6 +872,7 @@ a.team:hover .team-name { color: var(--peach); }
 .plan-price span { color: var(--muted); font-size: 15px; white-space: nowrap; }
 .plans { margin-top: 56px; }
 .plan-then { margin-top: 4px; font-size: 14px; color: var(--muted); } /* « puis 13,99 €/mois » sous un prix remisé limité aux premiers paiements */
+.plan-trial { margin-top: 6px; font-size: 14px; font-weight: 700; color: #22c55e; } /* « 3 jours gratuits, puis 29,99 €/mois » (essai Pro) */
 .plan-sub { margin-top: 6px; font-size: 14px; color: var(--muted); min-height: 20px; }
 .plan-pro .plan-sub { color: var(--orange-2); }
 .plan ul { list-style: none; padding: 0; margin: 22px 0 24px; display: grid; gap: 10px; flex: 1; }

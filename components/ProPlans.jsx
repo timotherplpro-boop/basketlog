@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useProStatus } from "../lib/useProStatus";
 import { track } from "../lib/analytics";
 import { useL } from "./LangProvider";
-import { price, money, PRICES } from "../lib/pricing";
+import { price, money, PRICES, PRO_TRIAL_DAYS } from "../lib/pricing";
 import { pctOf } from "../lib/i18n";
 import { CODE_RE, cleanCode, discounted, withPromo } from "../lib/promo";
 import SwitchWatch from "./SwitchWatch";
@@ -47,7 +47,10 @@ const PLANS = (L, ai, cur, promo = null) => {
     ].filter(Boolean),
   },
   {
-    id: "pro", name: "Pro", icon: "crown", price: show("pro"), old: was("pro"), per, then: then("pro"), sub: L.t("Pour les passionnés de basket", "For basketball fans", "Para los apasionados del baloncesto"), badge: L.t("Populaire", "Popular", "Popular"), cta: `${L.t("Débloquer", "Unlock", "Desbloquear")} - ${show("pro")}${sep}${per}`,
+    id: "pro", name: "Pro", icon: "crown", price: show("pro"), old: was("pro"), per, then: then("pro"), sub: L.t("Pour les passionnés de basket", "For basketball fans", "Para los apasionados del baloncesto"), badge: L.t("Populaire", "Popular", "Popular"),
+    trial: PRO_TRIAL_DAYS ? L.t(`${PRO_TRIAL_DAYS} jours gratuits, puis ${show("pro")}${sep}${per}. Résiliable à tout moment.`, `${PRO_TRIAL_DAYS} days free, then ${show("pro")}${sep}${per}. Cancel anytime.`, `${PRO_TRIAL_DAYS} días gratis, luego ${show("pro")}${sep}${per}. Cancela cuando quieras.`) : null,
+    ctaTrial: PRO_TRIAL_DAYS ? L.t(`Essai gratuit ${PRO_TRIAL_DAYS} jours`, `Start ${PRO_TRIAL_DAYS}-day free trial`, `Prueba gratis ${PRO_TRIAL_DAYS} días`) : null,
+    cta: `${L.t("Débloquer", "Unlock", "Desbloquear")} - ${show("pro")}${sep}${per}`,
     items: [
       ["ok", L.t("Analyses illimitées", "Unlimited analyses", "Análisis ilimitados")],
       ["ok", L.t("Analyse complète détaillée", "Detailed full analysis", "Análisis completo detallado")],
@@ -184,6 +187,7 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
     } catch { /* adresse illisible */ }
   }, []);
   const current = pro?.tier || "gratuit";
+  const trialOk = current === "gratuit" || current === "compte"; // l'essai Pro ne concerne que les non-abonnés
   const TIER_LABEL = L.t(
     { gratuit: "Gratuit", compte: "Compte gratuit", starter: "Starter", pro: "Pro", lifetime: "Lifetime" },
     { gratuit: "Free", compte: "Free account", starter: "Starter", pro: "Pro", lifetime: "Lifetime" },
@@ -266,6 +270,7 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
                 <b>{p.price}</b><span>{p.per}</span>
               </div>
               {p.then && <div className="plan-then">{p.then}</div>}
+              {p.trial && trialOk && <div className="plan-trial">🎁 {p.trial}</div>}
               <div className="plan-sub">{p.sub}</div>
               <ul>{p.items.map(([kind, text, extra]) => (
                 <li key={text} className={`pi pi-${kind}`}>
@@ -276,7 +281,7 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
               {pro?.connected && current === p.id ? (
                 <span className="plan-cta plan-current">{L.t("Ta formule actuelle", "Your current plan", "Tu plan actual")}</span>
               ) : url ? (
-                <a href={payHref(p.id)} className={`plan-cta plan-buy ${agree ? "" : "plan-wait"}`} aria-disabled={!agree} onClick={buy(p.id)}>{p.cta}</a>
+                <a href={payHref(p.id)} className={`plan-cta plan-buy ${agree ? "" : "plan-wait"}`} aria-disabled={!agree} onClick={buy(p.id)}>{p.ctaTrial && trialOk ? p.ctaTrial : p.cta}</a>
               ) : (
                 <span className="plan-cta plan-soon">{L.t("Bientôt disponible", "Coming soon", "Próximamente")}</span>
               )}

@@ -20,7 +20,7 @@ export async function generateMetadata() {
 // Contenu des formules (comme Visifoot). Les questions à l'IA ne figurent que si l'IA est configurée.
 const OFFRES = (ai) => [
   ["Starter", `${price("starter", "EUR", FR)} par mois (${price("starter", "USD", FR)} hors zone euro)`, "1 analyse réduite par jour : probabilités exactes, score projeté et stats clés du match", "Abonnement mensuel, renouvelé automatiquement chaque mois"],
-  ["Pro", `${price("pro", "EUR", FR)} par mois (${price("pro", "USD", FR)} hors zone euro)`, `Analyses complètes illimitées, actualités en temps réel${ai ? ", 1 question personnelle par jour à l'IA" : ""}`, "Abonnement mensuel, renouvelé automatiquement chaque mois"],
+  ["Pro", `${price("pro", "EUR", FR)} par mois (${price("pro", "USD", FR)} hors zone euro)`, `Analyses complètes illimitées, actualités en temps réel${ai ? ", 1 question personnelle par jour à l'IA" : ""}`, "Abonnement mensuel, renouvelé automatiquement chaque mois. Premier abonnement Pro : essai gratuit de 3 jours (moyen de paiement demandé), puis prélèvement du prix mensuel à la fin de l'essai sauf résiliation avant ; un seul essai par compte"],
   ["Lifetime", `${price("lifetime", "EUR", FR)} une seule fois (${price("lifetime", "USD", FR)} hors zone euro)`, `Analyses complètes illimitées, comme Pro${ai ? ", questions personnelles à l'IA illimitées dans la limite d'un usage raisonnable (50 par jour)" : ""}`, "Paiement unique, sans renouvellement, pour toute la durée d'exploitation du service"],
 ];
 
@@ -109,7 +109,7 @@ function CGVFr() {
 
 const OFFERS_EN = (ai) => [
   ["Starter", `${price("starter", "EUR", EN)} per month (${price("starter", "USD", EN)} outside the euro area)`, "1 reduced analysis per day: exact probabilities, projected score and key stats for the game", "Monthly subscription, renewed automatically every month"],
-  ["Pro", `${price("pro", "EUR", EN)} per month (${price("pro", "USD", EN)} outside the euro area)`, `Unlimited full analyses, real-time news${ai ? ", 1 personal question a day to the AI" : ""}`, "Monthly subscription, renewed automatically every month"],
+  ["Pro", `${price("pro", "EUR", EN)} per month (${price("pro", "USD", EN)} outside the euro area)`, `Unlimited full analyses, real-time news${ai ? ", 1 personal question a day to the AI" : ""}`, "Monthly subscription, renewed automatically every month. First Pro subscription: 3-day free trial (payment method required), then the monthly price is charged when the trial ends unless cancelled before; one trial per account"],
   ["Lifetime", `${price("lifetime", "EUR", EN)} one-time (${price("lifetime", "USD", EN)} outside the euro area)`, `Unlimited full analyses, same as Pro${ai ? ", unlimited personal questions to the AI within fair use (50 per day)" : ""}`, "One-time payment, no renewal, for as long as the service is operated"],
 ];
 
@@ -199,7 +199,7 @@ function CGVEn({ L }) {
 
 const OFFERS_ES = (ai) => [
   ["Starter", `${price("starter", "EUR", ES)} al mes (${price("starter", "USD", ES)} fuera de la zona euro)`, "1 análisis reducido al día: probabilidades exactas, marcador proyectado y estadísticas clave del partido", "Suscripción mensual, renovada automáticamente cada mes"],
-  ["Pro", `${price("pro", "EUR", ES)} al mes (${price("pro", "USD", ES)} fuera de la zona euro)`, `Análisis completos ilimitados, noticias en tiempo real${ai ? ", 1 pregunta personal al día a la IA" : ""}`, "Suscripción mensual, renovada automáticamente cada mes"],
+  ["Pro", `${price("pro", "EUR", ES)} al mes (${price("pro", "USD", ES)} fuera de la zona euro)`, `Análisis completos ilimitados, noticias en tiempo real${ai ? ", 1 pregunta personal al día a la IA" : ""}`, "Suscripción mensual, renovada automáticamente cada mes. Primera suscripción Pro: prueba gratuita de 3 días (se pide un medio de pago), luego se cobra el precio mensual al terminar la prueba salvo cancelación antes; una sola prueba por cuenta"],
   ["Lifetime", `${price("lifetime", "EUR", ES)} en un solo pago (${price("lifetime", "USD", ES)} fuera de la zona euro)`, `Análisis completos ilimitados, como Pro${ai ? ", preguntas personales a la IA ilimitadas dentro de un uso razonable (50 al día)" : ""}`, "Pago único, sin renovación, mientras se preste el servicio"],
 ];
 
