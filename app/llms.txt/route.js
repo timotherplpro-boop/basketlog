@@ -34,6 +34,8 @@ export async function GET() {
     `- [NBA predictions tonight](${SITE}/en/app/matchs): win probability and projected score for every game today`,
     `- [NBA predictions tomorrow](${SITE}/en/app/demain)`,
     `- [NBA predictions this week](${SITE}/en/app/semaine): last 7 days' record and the biggest favorites of the next 7 days`,
+    `- [NBA tonight: 3 games to watch](${SITE}/en/articles): a daily article with the games to watch, win probabilities and injuries`,
+    `- [NBA player pages](${SITE}/en/nba/player/lebron-james): season stats, injury status and next game for the top 200 scorers`,
     `- [NBA injury report today](${SITE}/en/app/blessures): players out and questionable for every team playing tonight`,
     `- [NBA power rankings](${SITE}/en/app/power-rankings): all 30 teams ranked by model strength, updated daily`,
     `- [NBA Cup predictions](${SITE}/en/app/nba-cup)`,

@@ -1,9 +1,10 @@
 import { TEAMS } from "../lib/teams";
 import { SITE } from "../lib/site";
 import { upcomingGames } from "../lib/data";
-import { nbaToday, shiftDate, getScoreboardRange, nbaDateOf } from "../lib/espn";
+import { nbaToday, shiftDate, getScoreboardRange, nbaDateOf, getPlayerStats, seasonForDate } from "../lib/espn";
+import { articleDates, articlePath } from "../lib/articles";
 import { elContext } from "../lib/euroleague";
-import { nbaPath, elPath } from "../lib/slug.js";
+import { nbaPath, elPath, playerPath } from "../lib/slug.js";
 import { pairPath } from "../lib/matchup.js";
 
 export const revalidate = 3600; // régénéré chaque heure, avec les matchs à venir
@@ -54,5 +55,17 @@ export default async function sitemap() {
     ];
   } catch {}
 
-  return [...pages, ...teams, ...nba, ...el].flatMap(both);
+  // Articles quotidiens (Google Discover) : la page liste et les 14 derniers jours.
+  const arts = [u("/articles", 0.7, "daily"), ...articleDates(14).map((d, i) => u(articlePath(d), i === 0 ? 0.8 : 0.5, i === 0 ? "hourly" : "weekly"))];
+
+  // Pages joueurs : les 200 meilleurs marqueurs de la saison (au moins 3 matchs).
+  let players = [];
+  try {
+    const st = await getPlayerStats(seasonForDate(nbaToday()));
+    const seen = new Set();
+    players = Object.values(st || {}).filter((p) => (p.gp || 0) >= 3 && p.ppg != null).sort((a, b) => b.ppg - a.ppg)
+      .map((p) => playerPath(p.name)).filter((p) => !seen.has(p) && seen.add(p)).slice(0, 200).map((p) => u(p, 0.5, "daily"));
+  } catch {}
+
+  return [...pages, ...teams, ...nba, ...el, ...arts, ...players].flatMap(both);
 }

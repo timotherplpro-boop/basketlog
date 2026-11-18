@@ -7,7 +7,7 @@ import JsonLd from "../../../components/JsonLd";
 import Crumbs from "../../../components/Crumbs";
 import { pageMeta } from "../../../lib/seo";
 import { getL } from "../../../lib/lang-server";
-import { nbaPath } from "../../../lib/slug";
+import { nbaPath, playerPath } from "../../../lib/slug";
 import { fmtDate, fmtTime, numOf } from "../../../lib/i18n";
 
 export const dynamic = "force-dynamic";
@@ -103,7 +103,7 @@ export default async function BlessuresPage() {
           <ul>
             {list.map((i, k) => (
               <li key={k}>
-                <b>{i.player}</b>{i.pos ? <span className="mono"> {i.pos}</span> : null}
+                <b>{i.ppg != null ? <Link href={L.href(playerPath(i.player))}>{i.player}</Link> : i.player}</b>{i.pos ? <span className="mono"> {i.pos}</span> : null}
                 <span className={`inj-st inj-${i.st.k}`}>{i.st.t}</span>
                 {i.ppg != null && <span className="mono"> · {pts(i.ppg)}</span>}
                 {L.en && i.detail ? <small> · {i.detail}</small> : null}

@@ -9,7 +9,7 @@ import { teamSummary } from "../../../../lib/summary";
 import { pageMeta, fitTitle } from "../../../../lib/seo";
 import { getL } from "../../../../lib/lang-server";
 import { fmtDate, fmtTime, numOf } from "../../../../lib/i18n";
-import { nbaPath } from "../../../../lib/slug.js";
+import { nbaPath, playerPath } from "../../../../lib/slug.js";
 import JsonLd from "../../../../components/JsonLd";
 import { SITE } from "../../../../lib/site";
 import Crumbs from "../../../../components/Crumbs";
@@ -187,7 +187,7 @@ export default async function TeamPage({ params }) {
               <div className="pl-row" key={p.cat}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 {p.head ? <img className="pl-head" src={p.head} alt="" /> : <span className="pl-head ph" />}
-                <span className="pl-id"><b>{p.name}</b><small>{p.pos}{p.jersey ? ` · #${p.jersey}` : ""}</small></span>
+                <span className="pl-id"><b><Link href={L.href(playerPath(p.name))}>{p.name}</Link></b><small>{p.pos}{p.jersey ? ` · #${p.jersey}` : ""}</small></span>
                 <span className="pl-val"><strong>{p.value == null ? "–" : L.en ? p.value : String(p.value).replace(".", ",")}</strong><small>{catLabel(p.cat, L)}</small></span>
               </div>
             ))}
@@ -254,7 +254,7 @@ export default async function TeamPage({ params }) {
               <div className="rp" key={p.id}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 {p.head ? <img src={p.head} alt="" loading="lazy" /> : <span className="ph" />}
-                <b>{p.name}</b>
+                <b><Link href={L.href(playerPath(p.name))}>{p.name}</Link></b>
                 <small>{p.pos}{p.jersey ? ` · #${p.jersey}` : ""}{p.height ? ` · ${p.height}` : ""}</small>
               </div>
             ))}
