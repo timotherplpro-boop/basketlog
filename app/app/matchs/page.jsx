@@ -108,7 +108,7 @@ export default async function MatchsPage({ searchParams }) {
     const byFav = [...pre].sort((x, y) => fav(y).p - fav(x).p);
     const close = [...pre].sort((x, y) => fav(x).p - fav(y).p)[0];
     const acc = await recentAccuracy(400).catch(() => null);
-    const top = byFav.slice(0, 3).map((g) => `${fav(g).t.short} (${pc(fav(g).p)}, ${g.away.short} – ${g.home.short})`).join(", ");
+    const top = byFav.slice(0, 3).map((g) => `${fav(g).t.short} (${pc(fav(g).p)}, ${g.away.short} ${L.en ? "vs" : "–"} ${g.home.short})`).join(", ");
     faq.push({
       q: L.t("Quels sont les plus gros favoris NBA ce soir ?", "Who are the biggest NBA favorites tonight?", "¿Quiénes son los grandes favoritos de la NBA hoy?"),
       a: L.t(`Selon le modèle Basketlog : ${top}.`, `According to the Basketlog model: ${top}.`, `Según el modelo de Basketlog: ${top}.`),
