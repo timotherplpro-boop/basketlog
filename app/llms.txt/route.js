@@ -34,6 +34,7 @@ export async function GET() {
     `- [NBA predictions tonight](${SITE}/en/app/matchs): win probability and projected score for every game today`,
     `- [NBA predictions tomorrow](${SITE}/en/app/demain)`,
     `- [NBA predictions this week](${SITE}/en/app/semaine): last 7 days' record and the biggest favorites of the next 7 days`,
+    `- [NBA injury report today](${SITE}/en/app/blessures): players out and questionable for every team playing tonight`,
     `- [NBA power rankings](${SITE}/en/app/power-rankings): all 30 teams ranked by model strength, updated daily`,
     `- [NBA Cup predictions](${SITE}/en/app/nba-cup)`,
     `- [Model track record](${SITE}/en/app/bilan): accuracy, calibration by probability range, every game`,

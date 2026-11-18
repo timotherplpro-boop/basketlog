@@ -1807,3 +1807,14 @@ button.comp-more { border: 0; background: none; padding: 0; font-family: inherit
 .big-stat { font-size: 1.1rem; margin: 0 0 16px; }
 .wk-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .wk-list .mono { color: var(--muted); }
+
+/* Blessés NBA du jour */
+.inj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.inj-team h3 { display: flex; align-items: center; gap: 8px; font-size: 15px; margin: 0 0 6px; }
+.inj-team h3 img { width: 22px; height: 22px; object-fit: contain; }
+.inj-team ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 14px; }
+.inj-team li small { opacity: .7; }
+.inj-st { margin-left: 6px; font-size: 12px; padding: 1px 6px; border-radius: 6px; background: rgba(148,163,184,.18); }
+.inj-out { background: rgba(239,68,68,.18); color: #f87171; }
+.inj-doubt, .inj-q { background: rgba(245,158,11,.18); color: #fbbf24; }
+.inj-game h2 { font-size: 17px; }
