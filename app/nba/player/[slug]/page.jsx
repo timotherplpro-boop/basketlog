@@ -142,6 +142,7 @@ export default async function PlayerPage({ params }) {
           </ul>
         </section>
       )}
+      <p className="team-rec"><Link href={L.href("/app/leaders")}>{L.t("Meilleurs marqueurs NBA", "NBA scoring leaders", "Máximos anotadores NBA", "Cestinhas da NBA")}</Link>{" · "}<Link href={L.href("/app/leaders/rebounds")}>{L.t("Meilleurs rebondeurs", "Rebounding leaders", "Máximos reboteadores", "Líderes em rebotes")}</Link>{" · "}<Link href={L.href("/app/leaders/assists")}>{L.t("Meilleurs passeurs", "Assists leaders", "Máximos asistentes", "Líderes em assistências")}</Link></p>
       <p className="disclaimer">{L.t("Statistiques de la saison régulière (source : ESPN), mises à jour chaque jour.", "Regular-season stats (source: ESPN), updated daily.", "Estadísticas de la temporada regular (fuente: ESPN), actualizadas cada día.", "Estatísticas da temporada regular (fonte: ESPN), atualizadas todo dia.")}</p>
     </main>
   );
