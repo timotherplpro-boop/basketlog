@@ -93,7 +93,7 @@ export default async function ArticlePage({ params }) {
                   return <li key={a.game.id}><Link href={L.href(gamePath(a, date))}>{sectionHead(a, L)}</Link><span className="mono"> · {f.short} {pctOf(Math.max(a.pHome, a.pAway), L)}</span></li>;
                 })}
               </ul>
-              <p className="mfaq-more"><Link href={L.href("/app/blessures")}>{L.t("Blessés NBA du jour →", "Today's NBA injury report →", "Lesionados NBA de hoy →", "Lesionados NBA de hoje →")}</Link>{" · "}<Link href={L.href("/app/bilan")}>{L.t("Bilan public du modèle →", "Model track record →", "Balance público del modelo →", "Desempenho público do modelo →")}</Link></p>
+              <p className="mfaq-more"><Link href={L.href("/app/blessures")}>{L.t("Blessés NBA du jour →", "Today's NBA injury report →", "Lesionados NBA de hoy →", "Lesionados NBA de hoje →")}</Link>{" · "}<Link href={L.href("/app/bilan")}>{L.t("Bilan public du modèle →", "Model track record →", "Balance público del modelo →", "Desempenho público do modelo →")}</Link>{" · "}<Link href={L.href("/app/programme")}>{L.t("Horaires et où regarder →", "Times and TV →", "Horarios y dónde ver →", "Horários e onde assistir →")}</Link>{" · "}<Link href={L.href("/app/simulation")}>{L.t("Chances de playoffs →", "Playoff odds →", "Probabilidades de playoffs →", "Chances de playoffs →")}</Link></p>
             </section>
           </>
         )}

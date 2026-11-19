@@ -126,7 +126,7 @@ export default async function MatchsPage({ searchParams }) {
     });
     faq.push({
       q: L.t("Combien de matchs NBA ce soir ?", "How many NBA games are on tonight?", "¿Cuántos partidos de la NBA hay hoy?", "Quantos jogos da NBA tem hoje?"),
-      a: L.t(`${games.length} match${games.length > 1 ? "s" : ""}, premier coup d'envoi à ${fmtTime(L, pre[0].date)} (${L.tzLabel}).`, `${games.length} game${games.length > 1 ? "s" : ""}, first tip-off at ${fmtTime(L, pre[0].date)} ${L.tzLabel}.`, `${games.length} partido${games.length > 1 ? "s" : ""}, el primero a las ${fmtTime(L, pre[0].date)} (${L.tzLabel}).`, `${games.length} jogo${games.length > 1 ? "s" : ""}, o primeiro às ${fmtTime(L, pre[0].date)} (${L.tzLabel}).`),
+      a: L.t(`${games.length} match${games.length > 1 ? "s" : ""}, premier coup d'envoi à ${fmtTime(L, pre[0].date)} (${L.tzLabel}).`, `${games.length} game${games.length > 1 ? "s" : ""}, first tip-off at ${fmtTime(L, pre[0].date)} ${L.tzLabel}.`, `${games.length} partido${games.length > 1 ? "s" : ""}, el primero a las ${fmtTime(L, pre[0].date)} (${L.tzLabel}); en Ciudad de México a las ${new Intl.DateTimeFormat("es-MX", { timeZone: "America/Mexico_City", hour: "2-digit", minute: "2-digit" }).format(new Date(pre[0].date))}.`, `${games.length} jogo${games.length > 1 ? "s" : ""}, o primeiro às ${fmtTime(L, pre[0].date)} (${L.tzLabel}).`),
     });
     if (acc && acc.n >= 20) faq.push({
       q: L.t("Ces pronostics sont-ils fiables ?", "How accurate are these NBA predictions?", "¿Son fiables estos pronósticos?", "Esses palpites são confiáveis?"),
