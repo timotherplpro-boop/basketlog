@@ -159,6 +159,11 @@ export default async function TeamPage({ params }) {
           <span className="tag hot">{L.t(`Conférence ${confName}`, `${confName}ern Conference`, `Conferencia ${confName}`, `Conferência ${confName}`)}</span>
           <h1>{L.t(`Pronostics ${team.name}`, `${team.name} predictions`, `Pronósticos ${team.name}`, `Palpites ${team.name}`)}</h1>
           <p className="team-rec">{streak ? L.t(`Série en cours : ${streak}`, `Current streak: ${streak}`, `Racha actual: ${streak}`, `Sequência atual: ${streak}`) : L.t(`Saison ${seasonLabel}`, `${seasonLabel} season`, `Temporada ${seasonLabel}`, `Temporada ${seasonLabel}`)}{me.last10 ? L.t(` · 10 derniers : ${me.last10}`, ` · Last 10: ${me.last10}`, ` · Últimos 10: ${me.last10}`, ` · Últimos 10: ${me.last10}`) : ""}</p>
+          <p className="team-rec">
+            {L.t(`Ajouter les matchs des ${team.short} à mon calendrier : `, `Add the ${team.short} schedule to my calendar: `, `Añadir los partidos de los ${team.short} a mi calendario: `, `Adicionar os jogos do ${team.short} ao meu calendário: `)}
+            <a href={`webcal://basketlog-app.com/api/calendar/${team.id}?lang=${L.lang}`}>{L.t("iPhone / Outlook", "iPhone / Outlook", "iPhone / Outlook", "iPhone / Outlook")}</a>{" · "}
+            <a href={`https://calendar.google.com/calendar/render?cid=${encodeURIComponent(`webcal://basketlog-app.com/api/calendar/${team.id}?lang=${L.lang}`)}`} target="_blank" rel="noopener">Google</a>
+          </p>
           {simT && (
             <p className="team-rec"><Link href={L.href("/app/simulation")}>{L.t(`Chances de playoffs : ${probTxt(simT.playoffs, L)} · titre : ${probTxt(simT.title, L)}`, `Playoff odds: ${probTxt(simT.playoffs, L)} · title: ${probTxt(simT.title, L)}`, `Opciones de playoffs: ${probTxt(simT.playoffs, L)} · título: ${probTxt(simT.title, L)}`, `Chances de playoffs: ${probTxt(simT.playoffs, L)} · título: ${probTxt(simT.title, L)}`)}</Link></p>
           )}
