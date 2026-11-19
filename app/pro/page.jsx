@@ -1,5 +1,6 @@
 import ProPlans from "../../components/ProPlans";
 import Faq from "../../components/Faq";
+import ProSample from "../../components/ProSample";
 import { pageMeta } from "../../lib/seo";
 import { getL } from "../../lib/lang-server";
 import { aiReady } from "../../lib/pro";
@@ -85,8 +86,10 @@ export default async function ProPage({ searchParams }) {
         <div className="pill-tag">Basketlog Pro</div>
         <h1 className="t-80">{L.t("Choisis ton plan", "Choose your plan", "Elige tu plan", "Escolha seu plano")}</h1>
         <p className="lead">{L.t("Accède à des analyses complètes et des pronostics détaillés", "Get full analyses and detailed predictions", "Accede a análisis completos y pronósticos detallados", "Acesse análises completas e palpites detalhados")}</p>
+        <a href="#exemple" className="ps-link">👀 {L.t("Voir un exemple d'analyse complète", "See a full analysis example", "Ver un ejemplo de análisis completo", "Ver um exemplo de análise completa")}</a>
       </section>
       <ProPlans embed={process.env.PAY_EMBED === "1" || sp?.paiement === "test"} checkout={checkout} cur={cur} loginReady={loginReady} ai={ai} switching={switching} notice={sp?.ok || sp?.bienvenue === "abonne" ? "ok" : sp?.bienvenue ? "compte" : sp?.erreur || ""} />
+      <ProSample L={L} />
       <section className="pro-faq">
         <h2 className="t-80" style={{ fontSize: "clamp(28px,4vw,40px)" }}>{L.t("Questions fréquentes", "FAQ", "Preguntas frecuentes", "Perguntas frequentes")}</h2>
         <Faq items={faq} />
