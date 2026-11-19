@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { socialDay } from "../../../../lib/social-day";
-import { blueskyProfile, ogImageUrl } from "../../../../lib/social";
+import { socialDay, recapDay } from "../../../../lib/social-day";
+import { blueskyProfile, ogImageUrl, RECAP_MARK } from "../../../../lib/social";
 import { socialConfig, socialStatus, sendTelegram, telegramCheck, blueskySession, blueskyThumb, sendBluesky, blueskyPostedSince, blueskySetProfile } from "../../../../lib/social-send";
 import { COOKIE, currentSession } from "../../../../lib/pro";
 
@@ -17,6 +17,7 @@ export const maxDuration = 60;
 // ou compte admin connecté.
 let lastRun = 0;
 let lastDay = "";
+let lastRecap = "";
 
 // "cron", "admin" ou null.
 async function access(req) {
@@ -73,6 +74,57 @@ export async function GET(req) {
     const ok = tg.every((t) => t.ok && t.admin && t.canPost) && (!check.bluesky || check.bluesky.ok) && (tg.length > 0 || !!check.bluesky);
     return json({ ok, ...check, at: new Date().toISOString() });
   }
+  // Récap du matin (?recap=1, 08 h 13 UTC) : résultats de la veille, plus grosse surprise, lien vers /app/resultats.
+  if (sp.get("recap") === "1") {
+    const r = await recapDay();
+    const rbase = { d: r.d, status: socialStatus(cfg), games: r.facts.n, recap: true };
+    if (!r.posts) return json({ ok: true, ...rbase, skipped: "aucun match terminé hier" });
+    if (!cfg.enabled || sp.get("dry") === "1") return json({ ok: true, ...rbase, dry: true, posts: r.posts });
+    if (!cfg.telegram && !cfg.bluesky) return json({ ok: false, ...rbase, skipped: "aucun compte branché" });
+    if (lastRecap === r.d) return json({ ok: true, ...rbase, skipped: "récap déjà publié" });
+    const out = [];
+    let rs = null;
+    if (cfg.bluesky) {
+      try {
+        rs = await blueskySession(cfg.bluesky);
+        if (await blueskyPostedSince(rs, new Date(Date.now() - 6 * 3600e3).toISOString(), RECAP_MARK)) {
+          lastRecap = r.d;
+          return json({ ok: true, ...rbase, skipped: "récap déjà publié (Bluesky)" });
+        }
+      } catch (e) {
+        out.push({ channel: "bluesky", ok: false, error: e.message });
+      }
+    }
+    lastRecap = r.d;
+    const tg = async () => {
+      const o = [];
+      for (const [lang, chat] of Object.entries(cfg.telegram?.chats || {})) {
+        const p = r.posts[lang];
+        if (!p) continue;
+        try { o.push({ channel: "telegram", lang, ok: true, id: await sendTelegram(cfg.telegram.token, chat, p.telegram, p.telegramPreview) }); }
+        catch (e) { o.push({ channel: "telegram", lang, ok: false, error: e.message }); }
+      }
+      return o;
+    };
+    const bs = async () => {
+      const o = [];
+      if (!rs) return o;
+      for (const lang of cfg.bluesky.langs) {
+        const p = r.posts[lang];
+        if (!p) continue;
+        try {
+          const thumb = await blueskyThumb(rs, ogImageUrl(lang));
+          o.push({ channel: "bluesky", lang, ok: true, uri: await sendBluesky(rs, p.bluesky, thumb) });
+        } catch (e) { o.push({ channel: "bluesky", lang, ok: false, error: e.message }); }
+      }
+      return o;
+    };
+    const [a1, a2] = await Promise.all([tg(), bs()]);
+    out.push(...a1, ...a2);
+    for (const s of out.filter((x) => !x.ok)) console.warn(`[social récap] ${s.channel}${s.lang ? ` ${s.lang}` : ""} : ${s.error}`);
+    return json({ ok: out.length > 0 && out.every((s) => s.ok), ...rbase, sent: out, at: new Date().toISOString() });
+  }
+
   const day = await socialDay();
   const base = { d: day.d, status: socialStatus(cfg), games: day.picks.length, errors: day.errors };
   if (!day.picks.length) return json({ ok: !day.errors.length, ...base, skipped: "aucun match à venir aujourd'hui" });

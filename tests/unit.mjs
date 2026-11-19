@@ -19,6 +19,7 @@ import { accueilTests } from "./accueil.mjs";
 import { widgetTests } from "./widget.mjs";
 import { creatorGainsTests } from "./creator-gains.mjs";
 import { payTests } from "./pay.mjs";
+import { recapTests } from "./recap.mjs";
 
 export async function unit() {
   let passed = 0, failed = 0;
@@ -575,6 +576,7 @@ export async function unit() {
   await widgetTests({ ok, ko, eq });
   await creatorGainsTests({ ok, ko, eq });
   await payTests({ ok, ko, eq });
+  await recapTests({ ok, ko, eq });
 
   return { passed, failed };
 }

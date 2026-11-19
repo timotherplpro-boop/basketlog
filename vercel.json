@@ -17,6 +17,10 @@
       "schedule": "20 15 * * *"
     },
     {
+      "path": "/api/cron/social?recap=1",
+      "schedule": "13 8 * * *"
+    },
+    {
       "path": "/api/cron/newsletter",
       "schedule": "11 12 * * 0"
     },
