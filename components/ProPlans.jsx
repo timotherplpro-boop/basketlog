@@ -50,7 +50,7 @@ const PLANS = (L, ai, cur, promo = null) => {
   },
   {
     id: "pro", name: "Pro", icon: "crown", price: show("pro"), old: was("pro"), per, then: then("pro"), sub: L.t("Pour les passionnés de basket", "For basketball fans", "Para los apasionados del baloncesto", "Para os apaixonados por basquete"), badge: L.t("Populaire", "Popular", "Popular", "Popular"),
-    trial: PRO_TRIAL_DAYS ? L.t(`${PRO_TRIAL_DAYS} jours gratuits, puis ${show("pro")}${sep}${per}. Résiliable à tout moment.`, `${PRO_TRIAL_DAYS} days free, then ${show("pro")}${sep}${per}. Cancel anytime.`, `${PRO_TRIAL_DAYS} días gratis, luego ${show("pro")}${sep}${per}. Cancela cuando quieras.`, `${PRO_TRIAL_DAYS} dias grátis, depois ${show("pro")}${sep}${per}. Cancele quando quiser.`) : null,
+    trial: PRO_TRIAL_DAYS ? L.t(`${PRO_TRIAL_DAYS} jours gratuits, puis ${show("pro")}${sep}${per} + taxes. Résiliable à tout moment.`, `${PRO_TRIAL_DAYS} days free, then ${show("pro")}${sep}${per} + tax. Cancel anytime.`, `${PRO_TRIAL_DAYS} días gratis, luego ${show("pro")}${sep}${per} + impuestos. Cancela cuando quieras.`, `${PRO_TRIAL_DAYS} dias grátis, depois ${show("pro")}${sep}${per} + impostos. Cancele quando quiser.`) : null,
     ctaTrial: PRO_TRIAL_DAYS ? L.t(`Essai gratuit ${PRO_TRIAL_DAYS} jours`, `Start ${PRO_TRIAL_DAYS}-day free trial`, `Prueba gratis ${PRO_TRIAL_DAYS} días`, `Teste grátis por ${PRO_TRIAL_DAYS} dias`) : null,
     cta: `${L.t("Débloquer", "Unlock", "Desbloquear", "Desbloquear")} - ${show("pro")}${sep}${per}`,
     items: [
@@ -271,6 +271,7 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
                 {p.old && <s className="plan-old"><span className="vh">{L.t("Prix sans le code : ", "Price without the code: ", "Precio sin el código: ", "Preço sem o código: ")}</span>{p.old}</s>}
                 <b>{p.price}</b><span>{p.per}</span>
               </div>
+              {p.id !== "free" && <div className="plan-tax">{L.t("+ taxes de ton pays, ajoutées au paiement", "+ your local tax, added at checkout", "+ impuestos de tu país, añadidos al pagar", "+ impostos do seu país, somados no pagamento")}</div>}
               {p.then && <div className="plan-then">{p.then}</div>}
               {p.trial && trialOk && <div className="plan-trial">🎁 {p.trial}</div>}
               <div className="plan-sub">{p.sub}</div>

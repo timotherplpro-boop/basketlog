@@ -44,7 +44,7 @@ function CGVFr() {
           </table>
         </div>
         <p>Une analyse réduite (Starter) comprend les probabilités exactes, le score projeté et les stats clés du match. Une analyse complète (Pro et Lifetime) est la fiche détaillée d&apos;un match : argumentation du modèle, facteurs, tous les scénarios, stats comparées, joueurs à suivre, forme récente, confrontations, absences et actualités en temps réel. Les probabilités de victoire de la liste des matchs et l&apos;aperçu de chaque analyse restent gratuits pour tous.</p>
-        <p>Les prix sont en euros dans la zone euro et en dollars américains ailleurs, sans frais supplémentaires de notre part ({e.tva.charAt(0).toLowerCase() + e.tva.slice(1)}). Le prix total, dans la monnaie de paiement, est affiché sur la page de paiement avant validation. Les prix peuvent évoluer ; un changement de prix ne s&apos;applique jamais à une période déjà payée, et les abonnés sont prévenus avant toute hausse.</p>
+        <p>Les prix sont en euros dans la zone euro et en dollars américains ailleurs, hors taxes. Basketlog n'ajoute aucun frais ({e.tva.charAt(0).toLowerCase() + e.tva.slice(1)}) ; la TVA ou la taxe de vente applicable dans ton pays est calculée et ajoutée par Whop, la plateforme de paiement, sur la page de paiement. Le prix total, taxes comprises et dans la monnaie de paiement, y est affiché avant validation. Les prix peuvent évoluer ; un changement de prix ne s&apos;applique jamais à une période déjà payée, et les abonnés sont prévenus avant toute hausse.</p>
       </Sec>
 
       <Sec n={3} title="Commande et paiement">
@@ -134,7 +134,7 @@ function CGVEn({ L }) {
           </table>
         </div>
         <p>A reduced analysis (Starter) includes the exact probabilities, projected score and key stats for the game. A full analysis (Pro and Lifetime) is the detailed page for a game: the model&apos;s reasoning, factors, every scenario, stat comparison, players to watch, recent form, head-to-head, injuries and real-time news. Win probabilities in the games list and the preview of every analysis remain free for everyone.</p>
-        <p>Prices are in euros in the euro area and in US dollars elsewhere, with no additional fees from us (VAT not applicable). The total price, in the payment currency, is shown on the checkout page before you confirm. Prices may change; a price change never applies to a period already paid, and subscribers are notified before any increase.</p>
+        <p>Prices are in euros in the euro area and in US dollars elsewhere, excluding taxes. Basketlog adds no fees of its own (VAT not applicable); the VAT or sales tax that applies in your country is calculated and added by Whop, the payment platform, on the checkout page. The total price, taxes included and in the payment currency, is shown there before you confirm. Prices may change; a price change never applies to a period already paid, and subscribers are notified before any increase.</p>
       </Sec>
 
       <Sec n={3} title="Ordering and payment">
@@ -224,7 +224,7 @@ function CGVEs({ L }) {
           </table>
         </div>
         <p>Un análisis reducido (Starter) incluye las probabilidades exactas, el marcador proyectado y las estadísticas clave del partido. Un análisis completo (Pro y Lifetime) es la ficha detallada de un partido: argumentación del modelo, factores, todos los escenarios, estadísticas comparadas, jugadores a seguir, forma reciente, enfrentamientos, bajas y noticias en tiempo real. Las probabilidades de victoria de la lista de partidos y el avance de cada análisis siguen siendo gratis para todos.</p>
-        <p>Los precios están en euros en la zona euro y en dólares estadounidenses fuera de ella, sin gastos adicionales por nuestra parte (IVA no aplicable). El precio total, en la moneda de pago, se muestra en la página de pago antes de confirmar. Los precios pueden cambiar; un cambio de precio nunca se aplica a un periodo ya pagado, y los suscriptores reciben aviso antes de cualquier subida.</p>
+        <p>Los precios están en euros en la zona euro y en dólares estadounidenses fuera de ella, sin impuestos. Basketlog no añade ningún gasto propio (IVA no aplicable); el IVA o el impuesto sobre las ventas de tu país lo calcula y lo añade Whop, la plataforma de pago, en la página de pago. El precio total, con impuestos y en la moneda de pago, se muestra allí antes de confirmar. Los precios pueden cambiar; un cambio de precio nunca se aplica a un periodo ya pagado, y los suscriptores reciben aviso antes de cualquier subida.</p>
       </Sec>
 
       <Sec n={3} title="Pedido y pago">
