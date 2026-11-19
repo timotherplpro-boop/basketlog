@@ -24,7 +24,7 @@ export async function generateMetadata({ params }) {
   if (!t) return {};
   const s = seasonLabel();
   return pageMeta({
-    title: L.t(`Calendrier des ${t.name} ${s} : tous les matchs, horaires et résultats`, `${t.name} schedule ${s}: every game, start times and results`, `Calendario de los ${t.name} ${s}: todos los partidos, horarios y resultados`, `Calendário do ${t.name} ${s}: todos os jogos, horários e resultados`),
+    title: L.t(`Calendrier des ${t.short} ${s} : tous les matchs, horaires et résultats`, `${t.short} schedule ${s}: every game, start times and results`, `Calendario de los ${t.short} ${s}: todos los partidos, horarios y resultados`, `Calendário do ${t.short} ${s}: todos os jogos, horários e resultados`),
     description: L.t(`Le calendrier complet des ${t.name} pour la saison NBA ${s} : dates, heures en France, domicile ou extérieur, résultats et probabilité de victoire de chaque match. À ajouter à ton agenda.`, `The full ${t.name} schedule for the ${s} NBA season: dates, tip-off times (ET), home or away, results and the win probability for every game. Add it to your calendar.`, `El calendario completo de los ${t.name} para la temporada NBA ${s}: fechas, horarios en España, local o visitante, resultados y probabilidad de victoria de cada partido. Añádelo a tu agenda.`, `O calendário completo do ${t.name} na temporada da NBA ${s}: datas, horário de Brasília, casa ou fora, resultados e probabilidade de vitória de cada jogo. Adicione à sua agenda.`),
     path: `/app/equipe/${t.id}/calendrier`,
     L,
@@ -41,7 +41,8 @@ export default async function TeamSchedulePage({ params }) {
   const games = sched.filter((g) => g.type !== "pre");
   const months = [];
   for (const g of games) {
-    const m = fmtDate(L, g.date, { month: "long", year: "numeric" });
+    const m0 = fmtDate(L, g.date, { month: "long", year: "numeric" }).replace(/ De /, " de ");
+    const m = m0.charAt(0).toUpperCase() + m0.slice(1);
     if (!months.length || months[months.length - 1].m !== m) months.push({ m, list: [] });
     months[months.length - 1].list.push(g);
   }
@@ -68,13 +69,13 @@ export default async function TeamSchedulePage({ params }) {
       <Crumbs L={L} items={[[L.t("Accueil", "Home", "Inicio", "Início"), "/"], [L.t(`Pronostic ${team.name}`, `${team.name} predictions`, `Pronóstico ${team.name}`, `Palpite ${team.name}`), `/app/equipe/${team.id}`], [L.t("Calendrier", "Schedule", "Calendario", "Calendário"), `/app/equipe/${team.id}/calendrier`]]} />
       <AppTabs active="classement" />
       <div className="app-head">
-        <h1>{L.t(`Calendrier des ${team.name} ${sl}`, `${team.name} schedule ${sl}`, `Calendario de los ${team.name} ${sl}`, `Calendário do ${team.name} ${sl}`)}</h1>
+        <h1>{L.t(`Calendrier des ${team.short} ${sl}`, `${team.name} schedule ${sl}`, `Calendario de los ${team.short} ${sl}`, `Calendário do ${team.short} ${sl}`)}</h1>
         <p>{L.t(`Bilan : ${w}-${played.length - w}. Heures en heure de Paris.`, `Record: ${w}-${played.length - w}. Times are ET.`, `Balance: ${w}-${played.length - w}. Horarios en hora de España.`, `Campanha: ${w}-${played.length - w}. Horário de Brasília.`)}</p>
         <p className="team-rec">{L.t("Ajouter à mon calendrier : ", "Add to my calendar: ", "Añadir a mi calendario: ", "Adicionar ao meu calendário: ")}<a href={ics}>iPhone / Outlook</a>{" · "}<a href={`https://calendar.google.com/calendar/render?cid=${encodeURIComponent(ics)}`} target="_blank" rel="noopener">Google</a>{" · "}<Link href={L.href(`/app/equipe/${team.id}`)}>{L.t(`Fiche des ${team.short} →`, `${team.short} team page →`, `Ficha de los ${team.short} →`, `Página do ${team.short} →`)}</Link></p>
       </div>
       {months.map(({ m, list }) => (
         <section key={m} className="card block">
-          <h2 style={{ textTransform: "capitalize" }}>{m}</h2>
+          <h2>{m}</h2>
           <table className="std-table">
             <tbody>
               {list.map((g) => {
