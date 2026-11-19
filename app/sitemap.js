@@ -1,3 +1,4 @@
+import { switchPath } from "../lib/i18n";
 import { TEAMS } from "../lib/teams";
 import { SITE } from "../lib/site";
 import { upcomingGames } from "../lib/data";
@@ -14,9 +15,10 @@ const u = (path, priority, changeFrequency, lastModified = new Date()) => ({ pat
 // Chaque page existe en français (adresse actuelle), en anglais (/en), en espagnol (/es) et en portugais du Brésil (/pt), liées par hreflang.
 const both = ({ path, ...rest }) => {
   const fr = `${SITE}${path}`;
-  const en = `${SITE}/en${path}`;
-  const es = `${SITE}/es${path}`;
-  const pt = `${SITE}/pt${path}`;
+  // Même forme que l'adresse canonique des pages (/en et non /en/ pour l'accueil), sinon Google ne relie pas la page au sitemap.
+  const en = `${SITE}${switchPath(path, "en")}`;
+  const es = `${SITE}${switchPath(path, "es")}`;
+  const pt = `${SITE}${switchPath(path, "pt")}`;
   const alternates = { languages: { fr, en, es, "pt-BR": pt, "x-default": en } }; // x-default : anglais (visiteurs d'une autre langue)
   const p2 = Math.round(rest.priority * 0.9 * 100) / 100;
   return [{ url: fr, ...rest, alternates }, { url: en, ...rest, priority: p2, alternates }, { url: es, ...rest, priority: p2, alternates }, { url: pt, ...rest, priority: p2, alternates }];
