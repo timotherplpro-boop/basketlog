@@ -1835,8 +1835,9 @@ button.comp-more { border: 0; background: none; padding: 0; font-family: inherit
 .sim-table { min-width: 520px; }
 .sim-table td.tm img { width: 20px; height: 20px; }
 .cup-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
-.cup-dates { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; color: var(--dim); margin-top: 6px; }
-.cup-dates b { color: var(--ink, inherit); }
+.cup-dates { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 18px; font-size: 14px; color: var(--muted); margin-top: 6px; }
+.cup-dates b { color: var(--text); }
+.cup-dates a { color: var(--orange); }
 .pref-src { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 18px 0; font-size: 14px; }
 .pref-src a { font-weight: 700; }
 .sec-h { font-size: 18px; margin: 26px 0 12px; }
