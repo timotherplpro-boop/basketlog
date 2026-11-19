@@ -39,6 +39,7 @@ export async function GET() {
     `- [NBA injury report today](${SITE}/en/app/blessures): players out and questionable for every team playing tonight`,
     `- [NBA playoff odds](${SITE}/en/app/simulation): every team's chances to make the playoffs, reach the Finals and win the title (4,000 season simulations, updated daily)`,
     `- [NBA Cup predictions](${SITE}/en/app/nba-cup): group standings and each team's odds to reach the quarterfinals and win the Cup`,
+    `- [EuroLeague playoff, Final Four and title odds](${SITE}/en/app/euroleague/simulation)`,
     `- [NBA games tonight: times and TV](${SITE}/en/app/programme) · [NBA scoring leaders](${SITE}/en/app/leaders)`,
     `- [NBA power rankings](${SITE}/en/app/power-rankings): all 30 teams ranked by model strength, updated daily`,
     `- [NBA Cup predictions](${SITE}/en/app/nba-cup)`,

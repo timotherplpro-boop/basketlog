@@ -63,6 +63,7 @@ export default async function EuroLeaguePage() {
         <h1>{L.t("Pronostics EuroLeague", "EuroLeague predictions", "Pronósticos Euroliga", "Palpites Euroliga")} {year}-{String(year + 1).slice(2)}</h1>
         <p>{L.t("Les 20 meilleurs clubs d'Europe, analysés comme la NBA", "Europe's top 20 clubs, analyzed like the NBA", "Los 20 mejores clubes de Europa, analizados como la NBA", "Os 20 melhores clubes da Europa, analisados como a NBA")}</p>
         <p className="note">{L.t("Probabilités, score projeté et forme : clique sur un match pour l'analyse complète.", "Probabilities, projected score and form: click a game for the full analysis.", "Probabilidades, marcador proyectado y forma: haz clic en un partido para ver el análisis completo.", "Probabilidades, placar projetado e fase: clique em um jogo para ver a análise completa.")}</p>
+        <p><Link href={L.href("/app/euroleague/simulation")}>{L.t("Chances de playoffs, de Final Four et de titre de chaque club →", "Playoff, Final Four and title odds for every club →", "Probabilidades de playoffs, Final Four y título de cada club →", "Chances de playoffs, Final Four e título de cada clube →")}</Link></p>
       </div>
       <div className="el-grid">
         <UpcomingList games={games} L={L} href={(g) => elPath(g)} />
