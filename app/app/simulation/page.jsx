@@ -129,6 +129,7 @@ export default async function SimulationPage() {
           <h2>{L.t("Chances de playoffs : l'essentiel", "Playoff odds: quick answers", "Probabilidades de playoffs: lo esencial", "Chances de playoffs: o essencial")}</h2>
           {faq.map((f) => (<div key={f.q} className="mfaq-item"><h3>{f.q}</h3><p>{f.a}</p></div>))}
           <p className="mfaq-more">
+            <Link href={L.href("/app/champion")}>{L.t("Qui sera champion NBA ? →", "Who will win the NBA title? →", "¿Quién ganará el anillo? →", "Quem vai ser campeão? →")}</Link>{" · "}
             <Link href={L.href("/app/classement")}>{L.t("Classement NBA →", "NBA standings →", "Clasificación NBA →", "Classificação NBA →")}</Link>{" · "}
             <Link href={L.href("/app/power-rankings")}>{L.t("Power ranking NBA →", "NBA power rankings →", "Power ranking NBA →", "Power ranking NBA →")}</Link>{" · "}
             <Link href={L.href("/app/nba-cup")}>{L.t("NBA Cup →", "NBA Cup →", "NBA Cup →", "NBA Cup →")}</Link>{" · "}
