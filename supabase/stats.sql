@@ -11,9 +11,9 @@
 
 create table if not exists public.basketlog_stats (
   jour     date not null,
-  etape    text not null check (etape in ('visite', 'fiche', 'fenetre', 'pro', 'clic', 'compte', 'retour')),
+  etape    text not null check (char_length(etape) between 1 and 20),
   source   text not null check (char_length(source) between 1 and 20),
-  langue   text not null check (langue in ('fr', 'en', 'es')),
+  langue   text not null check (char_length(langue) between 2 and 5),
   appareil text not null check (appareil in ('mobile', 'tablette', 'ordinateur')),
   n        int  not null default 0 check (n >= 0),
   primary key (jour, etape, source, langue, appareil)
