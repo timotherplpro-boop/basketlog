@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { simulateSeason } from "../../../../lib/sim";
+import { probTxt } from "../../../../lib/probtxt";
 import { notFound } from "next/navigation";
 import { teamById } from "../../../../lib/teams";
 import { sized } from "../../../../lib/img";
@@ -75,6 +77,8 @@ export default async function TeamPage({ params }) {
   const [std, stats, sched, roster, up] = await Promise.all([
     conferenceStandings(), getTeamStats(team.id), getTeamSchedule(team.id), getRoster(team.id, L.lang), upcomingAnalyses(7),
   ]);
+  let simT = null;
+  try { simT = (await simulateSeason()).teams[team.id] || null; } catch {}
   const confRows = team.conf === "E" ? std.east : std.west;
   const rank = confRows.findIndex((r) => r.id === team.id) + 1;
   const me = confRows.find((r) => r.id === team.id) || {};
@@ -131,6 +135,13 @@ export default async function TeamPage({ params }) {
       `${me.wins}-${me.losses}${rank ? `, ${ord(rank)} in the ${confName}ern Conference` : ""}${me.last10 ? `, ${me.last10} over the last 10 games` : ""}${me.diff != null ? `, with an average margin of ${me.diff > 0 ? "+" : ""}${numOf(me.diff, L)} points per game` : ""}.`,
       `${me.wins}-${me.losses}${rank ? `, ${rank}.º de la Conferencia ${confName}` : ""}${me.last10 ? `, ${me.last10} en los últimos 10 partidos` : ""}${me.diff != null ? `, con una diferencia media de ${me.diff > 0 ? "+" : ""}${numOf(me.diff, L)} puntos por partido` : ""}.`, `${me.wins}-${me.losses}${rank ? `, ${rank}.º da Conferência ${confName}` : ""}${me.last10 ? `, ${me.last10} nos últimos 10 jogos` : ""}${me.diff != null ? `, com saldo médio de ${me.diff > 0 ? "+" : ""}${numOf(me.diff, L)} pontos por jogo` : ""}.`),
   });
+  if (simT) faq.push({
+    q: L.t(`Les ${team.short} vont-ils se qualifier pour les playoffs ?`, `Will the ${team.short} make the playoffs?`, `¿Se clasificarán los ${team.short} para los playoffs?`, `O ${team.short} vai se classificar para os playoffs?`),
+    a: L.t(`Selon 4 000 simulations de la fin de saison par le modèle Basketlog, les ${team.short} ont ${probTxt(simT.playoffs, L)} de chances d'aller en playoffs (play-in compris), ${probTxt(simT.top6, L)} de finir dans le top 6 et ${probTxt(simT.title, L)} de gagner le titre. Victoires projetées : ${numOf(simT.projWins, L, 0)}.`,
+      `Based on 4,000 simulations of the rest of the season with the Basketlog model, the ${team.short} have a ${probTxt(simT.playoffs, L)} chance to make the playoffs (play-in included), ${probTxt(simT.top6, L)} to finish top 6 and ${probTxt(simT.title, L)} to win the title. Projected wins: ${numOf(simT.projWins, L, 0)}.`,
+      `Según 4.000 simulaciones del resto de la temporada con el modelo de Basketlog, los ${team.short} tienen un ${probTxt(simT.playoffs, L)} de opciones de llegar a los playoffs (play-in incluido), un ${probTxt(simT.top6, L)} de acabar en el top 6 y un ${probTxt(simT.title, L)} de ganar el título. Victorias proyectadas: ${numOf(simT.projWins, L, 0)}.`,
+      `Segundo 4.000 simulações do resto da temporada com o modelo do Basketlog, o ${team.short} tem ${probTxt(simT.playoffs, L)} de chance de ir aos playoffs (play-in incluído), ${probTxt(simT.top6, L)} de terminar no top 6 e ${probTxt(simT.title, L)} de ganhar o título. Vitórias projetadas: ${numOf(simT.projWins, L, 0)}.`),
+  });
   if (withP.length >= 2) faq.push({
     q: L.t(`Dans combien de leurs prochains matchs les ${team.short} sont-ils favoris ?`, `How many of their upcoming games are the ${team.short} favored in?`, `¿En cuántos de sus próximos partidos son favoritos los ${team.short}?`, `Em quantos dos próximos jogos o ${team.short} é favorito?`),
     a: L.t(`D'après le modèle Basketlog, les ${team.short} sont favoris dans ${favN} de leurs ${withP.length} prochains matchs.`, `According to the Basketlog model, the ${team.short} are favored in ${favN} of their next ${withP.length} games.`, `Según el modelo de Basketlog, los ${team.short} son favoritos en ${favN} de sus próximos ${withP.length} partidos.`, `Segundo o modelo do Basketlog, o ${team.short} é favorito em ${favN} dos seus próximos ${withP.length} jogos.`),
@@ -148,6 +159,9 @@ export default async function TeamPage({ params }) {
           <span className="tag hot">{L.t(`Conférence ${confName}`, `${confName}ern Conference`, `Conferencia ${confName}`, `Conferência ${confName}`)}</span>
           <h1>{L.t(`Pronostics ${team.name}`, `${team.name} predictions`, `Pronósticos ${team.name}`, `Palpites ${team.name}`)}</h1>
           <p className="team-rec">{streak ? L.t(`Série en cours : ${streak}`, `Current streak: ${streak}`, `Racha actual: ${streak}`, `Sequência atual: ${streak}`) : L.t(`Saison ${seasonLabel}`, `${seasonLabel} season`, `Temporada ${seasonLabel}`, `Temporada ${seasonLabel}`)}{me.last10 ? L.t(` · 10 derniers : ${me.last10}`, ` · Last 10: ${me.last10}`, ` · Últimos 10: ${me.last10}`, ` · Últimos 10: ${me.last10}`) : ""}</p>
+          {simT && (
+            <p className="team-rec"><Link href={L.href("/app/simulation")}>{L.t(`Chances de playoffs : ${probTxt(simT.playoffs, L)} · titre : ${probTxt(simT.title, L)}`, `Playoff odds: ${probTxt(simT.playoffs, L)} · title: ${probTxt(simT.title, L)}`, `Opciones de playoffs: ${probTxt(simT.playoffs, L)} · título: ${probTxt(simT.title, L)}`, `Chances de playoffs: ${probTxt(simT.playoffs, L)} · título: ${probTxt(simT.title, L)}`)}</Link></p>
+          )}
         </div>
         <Link href={L.href(`/app?team=${team.id}`)} className="btn-solid">{L.t("Analyser un duel", "Analyze a matchup", "Analizar un duelo", "Analisar um duelo")}</Link>
       </div>

@@ -1829,3 +1829,14 @@ button.comp-more { border: 0; background: none; padding: 0; font-family: inherit
 .pl-head-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
 .pl-photo { width: 120px; height: auto; border-radius: 12px; background: rgba(148,163,184,.12); }
 .next-game { display: block; text-decoration: none; color: inherit; }
+
+/* Chances de playoffs et NBA Cup (simulations) */
+.tbl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.sim-table { min-width: 520px; }
+.sim-table td.tm img { width: 20px; height: 20px; }
+.cup-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.cup-dates { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; color: var(--dim); margin-top: 6px; }
+.cup-dates b { color: var(--ink, inherit); }
+.pref-src { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 18px 0; font-size: 14px; }
+.pref-src a { font-weight: 700; }
+.sec-h { font-size: 18px; margin: 26px 0 12px; }

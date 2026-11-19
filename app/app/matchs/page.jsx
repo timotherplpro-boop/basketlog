@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PrefSource from "../../../components/PrefSource";
 import { analyzeDay, recentAccuracy } from "../../../lib/data";
 import { fmtTime } from "../../../lib/i18n";
 import { recordPronosSoon } from "../../../lib/pronos";
@@ -173,6 +174,7 @@ export default async function MatchsPage({ searchParams }) {
           <p className="mfaq-more"><Link href={L.href("/app/bilan")}>{L.t("Voir le bilan public du modèle →", "See the model's public track record →", "Ver el balance público del modelo →", "Ver o desempenho público do modelo →")}</Link></p>
         </section>
       )}
+      <PrefSource L={L} />
     </main>
   );
 }

@@ -9,6 +9,7 @@ import JsonLd from "../../../components/JsonLd";
 import Crumbs from "../../../components/Crumbs";
 import AppTabs from "../../../components/AppTabs";
 import { parseArticleSlug, buildArticle, articleTitle, articlePath, sectionText, sectionHead, gamePath, dayLabel } from "../../../lib/articles";
+import PrefSource from "../../../components/PrefSource";
 
 export const dynamic = "force-dynamic";
 
@@ -97,6 +98,7 @@ export default async function ArticlePage({ params }) {
           </>
         )}
         <p className="disclaimer">{L.t("Probabilités estimées par le modèle statistique Basketlog. Ni certitude, ni conseil de pari.", "Probabilities estimated by the Basketlog statistical model. Neither a certainty nor betting advice.", "Probabilidades estimadas por el modelo estadístico de Basketlog. Ni certeza ni consejo de apuestas.", "Probabilidades estimadas pelo modelo estatístico do Basketlog. Nem certeza nem recomendação de aposta.")}</p>
+        <PrefSource L={L} />
       </article>
     </main>
   );
