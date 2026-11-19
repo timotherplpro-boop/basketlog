@@ -13,14 +13,14 @@ const sgn = (v, L) => (L.en ? fmt(v) : fmt(v).replace(".", ","));
 
 const within = (p, ms) => Promise.race([Promise.resolve(p).catch(() => null), new Promise((r) => setTimeout(() => r(null), ms))]);
 
-// Match d'exemple : le prochain match pas encore commencé (aujourd'hui, sinon demain), le plus serré possible
-// pour que les scénarios soient parlants.
+// Match d'exemple : le prochain match pas encore commencé (aujourd'hui, sinon demain), celui où le modèle est le plus affirmé
+// (confiance la plus haute), pour que l'exemple soit parlant.
 async function sampleGame() {
   const today = nbaToday();
   for (const d of [today, shiftDate(today, 1)]) {
     const r = await within(analyzeDay(d), 2500);
     const list = (r?.analyses || []).filter((a) => a?.game?.state === "pre" && !a.game.hypothetical && a.factors?.length);
-    if (list.length) return list.sort((x, y) => Math.abs(x.margin) - Math.abs(y.margin))[0];
+    if (list.length) return list.sort((x, y) => Math.abs(y.margin) - Math.abs(x.margin))[0];
   }
   return null;
 }
