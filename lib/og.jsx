@@ -107,3 +107,33 @@ export async function matchOgImage(q, init = {}) {
     { ...OG_SIZE, ...(f ? { fonts: f } : {}), ...init }
   );
 }
+
+// Image de partage d'un classement de probabilités (chances de titre, de Coupe…) : titre + 5 lignes « équipe – % ».
+// Paramètres : h (titre), s (sous-titre), r (« Spurs|21,Celtics|19,… »).
+export async function oddsOgImage(q, init = {}) {
+  const f = await fonts();
+  const h = (q.get("h") || "Basketlog").slice(0, 80);
+  const sub = (q.get("s") || "").slice(0, 90);
+  const rows = (q.get("r") || "").split(",").map((x) => x.split("|")).filter((x) => x[0]).slice(0, 5).map(([n, p]) => [n.slice(0, 26), Math.max(0, Math.min(100, Number(p) || 0))]);
+  const max = Math.max(1, ...rows.map((x) => x[1]));
+  return new ImageResponse(
+    (
+      <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", padding: "48px 70px", background: "radial-gradient(circle at 80% 20%, #2a1406 0%, #040817 62%)", color: "#fff", fontFamily: f ? "Inter" : "sans-serif" }}>
+        <div style={{ display: "flex", fontSize: 26, color: "#ff7a1a", fontWeight: 800, letterSpacing: 1 }}>BASKETLOG</div>
+        <div style={{ display: "flex", fontSize: 54, fontWeight: 800, marginTop: 10, lineHeight: 1.1 }}>{h}</div>
+        {sub ? <div style={{ display: "flex", fontSize: 26, color: "#9aa3b8", marginTop: 8 }}>{sub}</div> : null}
+        <div style={{ display: "flex", flexDirection: "column", marginTop: 26, gap: 14 }}>
+          {rows.map(([n, p], i) => (
+            <div key={n} style={{ display: "flex", alignItems: "center", gap: 18 }}>
+              <div style={{ display: "flex", width: 40, fontSize: 30, color: "#9aa3b8", fontWeight: 800 }}>{i + 1}</div>
+              <div style={{ display: "flex", width: 330, fontSize: 34, fontWeight: 800 }}>{n}</div>
+              <div style={{ display: "flex", height: 34, width: Math.round((p / max) * 520), background: "#ff7a1a", borderRadius: 8 }} />
+              <div style={{ display: "flex", fontSize: 34, fontWeight: 800 }}>{p < 1 ? "<1" : Math.round(p)}%</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ),
+    { ...OG_SIZE, ...(f ? { fonts: f } : {}), ...init }
+  );
+}

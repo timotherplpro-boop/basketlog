@@ -3,7 +3,7 @@ import { upcomingGames } from "../../../lib/data";
 import UpcomingList from "../../../components/UpcomingList";
 import AppTabs from "../../../components/AppTabs";
 import JsonLd from "../../../components/JsonLd";
-import { pageMeta, topFavorites } from "../../../lib/seo";
+import { pageMeta, topFavorites, oddsImage } from "../../../lib/seo";
 import { getL } from "../../../lib/lang-server";
 import { SITE } from "../../../lib/site";
 import { nbaPath } from "../../../lib/slug";
@@ -27,7 +27,13 @@ const yearOf = () => new Date().getFullYear();
 export async function generateMetadata() {
   const L = await getL();
   const y = yearOf();
+  let image = null;
+  try {
+    const top = Object.entries((await simulateCup()).odds).sort((a, b) => b[1].cup - a[1].cup).map(([id, o]) => [teamById(id)?.short || id, o.cup]);
+    if (top.length) image = oddsImage(L.t(`Qui va gagner la NBA Cup ${y} ?`, `Who will win the ${y} NBA Cup?`, `¿Quién ganará la NBA Cup ${y}?`, `Quem vai ganhar a NBA Cup ${y}?`), L.t("Chances de victoire, 6 000 simulations", "Odds to win, 6,000 simulations", "Opciones de ganar, 6.000 simulaciones", "Chances de vitória, 6.000 simulações"), top);
+  } catch {}
   return pageMeta({
+    image,
     title: L.t(`NBA Cup ${y} : pronostic, groupes et qui va gagner la Coupe`, `NBA Cup ${y} predictions: groups, odds and who will win`, `NBA Cup ${y}: pronóstico, grupos y quién ganará la Copa`, `NBA Cup ${y}: palpite, grupos e quem vai ganhar a Copa`),
     description: L.t(
       `NBA Cup ${y} : classement des 6 groupes, chances de qualification pour les quarts et de victoire finale de chaque équipe (6 000 simulations), et pronostic de chaque match. Finale le 11 décembre à Indianapolis.`,

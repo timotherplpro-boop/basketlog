@@ -2,7 +2,7 @@ import Link from "next/link";
 import AppTabs from "../../../../components/AppTabs";
 import JsonLd from "../../../../components/JsonLd";
 import Crumbs from "../../../../components/Crumbs";
-import { pageMeta } from "../../../../lib/seo";
+import { pageMeta, oddsImage } from "../../../../lib/seo";
 import { getL } from "../../../../lib/lang-server";
 import { fmtDate, numOf } from "../../../../lib/i18n";
 import { simulateEL } from "../../../../lib/sim";
@@ -15,9 +15,15 @@ const label = (code) => { const y = Number(String(code || "").slice(1)) || new D
 
 export async function generateMetadata() {
   const L = await getL();
-  let s = "";
-  try { s = label((await simulateEL()).season); } catch {}
+  let s = "", image = null;
+  try {
+    const sim = await simulateEL();
+    s = label(sim.season);
+    const top = Object.values(sim.teams).sort((a, b) => b.title - a.title).map((r) => [sim.clubs[r.id]?.short || r.id, r.title]);
+    image = oddsImage(L.t(`Chances de titre EuroLeague ${s}`, `EuroLeague title odds ${s}`, `Opciones de título Euroliga ${s}`, `Chances de título Euroliga ${s}`), L.t("5 000 simulations de la fin de saison", "5,000 simulations of the rest of the season", "5.000 simulaciones del resto de la temporada", "5.000 simulações do resto da temporada"), top);
+  } catch {}
   return pageMeta({
+    image,
     title: L.t(`EuroLeague ${s} : chances de playoffs, de Final Four et de titre`, `EuroLeague ${s} odds: playoff, Final Four and title chances`, `Euroliga ${s}: probabilidades de playoffs, Final Four y título`, `Euroliga ${s}: chances de playoffs, Final Four e título`),
     description: L.t("Les chances de chaque club d'Euroligue de finir dans le top 6, d'aller en playoffs, au Final Four et de gagner le titre, selon 5 000 simulations de la fin de saison par le modèle Basketlog.", "Each EuroLeague club's chances of a top-6 finish, a playoff spot, a Final Four trip and the title, from 5,000 simulations of the rest of the season with the Basketlog model.", "Las opciones de cada club de la Euroliga de acabar en el top 6, llegar a los playoffs, a la Final Four y ganar el título, según 5.000 simulaciones del resto de la temporada con el modelo de Basketlog.", "As chances de cada clube da Euroliga de terminar no top 6, ir aos playoffs, à Final Four e ganhar o título, segundo 5.000 simulações do resto da temporada com o modelo do Basketlog."),
     path: "/app/euroleague/simulation",

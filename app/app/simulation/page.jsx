@@ -2,7 +2,7 @@ import Link from "next/link";
 import AppTabs from "../../../components/AppTabs";
 import JsonLd from "../../../components/JsonLd";
 import Crumbs from "../../../components/Crumbs";
-import { pageMeta } from "../../../lib/seo";
+import { pageMeta, oddsImage } from "../../../lib/seo";
 import { getL } from "../../../lib/lang-server";
 import { fmtDate, numOf } from "../../../lib/i18n";
 import { nbaToday, seasonForDate } from "../../../lib/espn";
@@ -18,7 +18,13 @@ const seasonLabel = () => { const y = seasonForDate(nbaToday()); return `${y - 1
 export async function generateMetadata() {
   const L = await getL();
   const s = seasonLabel();
+  let image = null;
+  try {
+    const top = Object.values((await simulateSeason()).teams).sort((a, b) => b.title - a.title).map((r) => [teamById(r.id)?.short || r.id, r.title]);
+    image = oddsImage(L.t(`Chances de titre NBA ${s}`, `NBA title odds ${s}`, `Opciones de título NBA ${s}`, `Chances de título NBA ${s}`), L.t("4 000 simulations de la fin de saison", "4,000 simulations of the rest of the season", "4.000 simulaciones del resto de la temporada", "4.000 simulações do resto da temporada"), top);
+  } catch {}
   return pageMeta({
+    image,
     title: L.t(`Chances de playoffs NBA ${s} : probabilités de qualification et de titre`, `NBA playoff odds ${s}: playoff and title chances for every team`, `Probabilidades de playoffs NBA ${s}: opciones de clasificación y de título`, `Chances de playoffs da NBA ${s}: probabilidade de classificação e de título`),
     description: L.t(
       `Les chances de chaque équipe NBA de finir dans le top 6, de se qualifier pour les playoffs, d'aller en finale et de gagner le titre ${s}, selon 4 000 simulations de la fin de saison par le modèle Basketlog.`,
