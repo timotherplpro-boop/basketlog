@@ -18,7 +18,7 @@ const within = (p, ms) => Promise.race([Promise.resolve(p).catch(() => null), ne
 async function sampleGame() {
   const today = nbaToday();
   for (const d of [today, shiftDate(today, 1)]) {
-    const r = await within(analyzeDay(d), 2500);
+    const r = await within(analyzeDay(d), 4500);
     const list = (r?.analyses || []).filter((a) => a?.game?.state === "pre" && !a.game.hypothetical && a.factors?.length);
     if (list.length) return list.sort((x, y) => Math.abs(y.margin) - Math.abs(x.margin))[0];
   }
