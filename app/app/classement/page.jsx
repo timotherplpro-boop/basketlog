@@ -25,10 +25,10 @@ export async function generateMetadata() {
   });
 }
 
-function Table({ title, rows, L }) {
+function Table({ title, rows, L, href }) {
   return (
     <div className="panel">
-      <div className="panel-label" style={{ marginBottom: 8 }}>{title}</div>
+      <div className="panel-label" style={{ marginBottom: 8 }}>{href ? <Link href={L.href(href)}>{title}</Link> : title}</div>
       <table className="std-table">
         <thead><tr><th>#</th><th>{L.t("Équipe", "Team", "Equipo", "Time")}</th><th>{L.t("V-D", "W-L", "V-D", "V-D")}</th><th>%</th><th>{L.t("Écart", "Diff", "Dif.", "Saldo")}</th><th>{L.t("Série", "Streak", "Racha", "Sequência")}</th></tr></thead>
         <tbody>
@@ -103,8 +103,8 @@ export default async function ClassementPage() {
         <p className="note">{L.t("Clique sur une équipe pour voir sa fiche : stats, joueurs, calendrier.", "Click a team to see its page: stats, players, schedule.", "Haz clic en un equipo para ver su ficha: estadísticas, jugadores, calendario.", "Clique em um time para ver sua página: estatísticas, jogadores, calendário.")}</p>
       </div>
       <div className="std-grid">
-        <Table title={L.t("CONFÉRENCE EST", "EASTERN CONFERENCE", "CONFERENCIA ESTE", "CONFERÊNCIA LESTE")} rows={east} L={L} />
-        <Table title={L.t("CONFÉRENCE OUEST", "WESTERN CONFERENCE", "CONFERENCIA OESTE", "CONFERÊNCIA OESTE")} rows={west} L={L} />
+        <Table title={L.t("CONFÉRENCE EST", "EASTERN CONFERENCE", "CONFERENCIA ESTE", "CONFERÊNCIA LESTE")} rows={east} L={L} href="/app/classement/east" />
+        <Table title={L.t("CONFÉRENCE OUEST", "WESTERN CONFERENCE", "CONFERENCIA OESTE", "CONFERÊNCIA OESTE")} rows={west} L={L} href="/app/classement/west" />
       </div>
       {faq.length > 0 && (
         <section className="card block match-faq">
