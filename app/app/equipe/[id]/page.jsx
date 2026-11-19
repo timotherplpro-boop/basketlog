@@ -160,6 +160,7 @@ export default async function TeamPage({ params }) {
           <h1>{L.t(`Pronostics ${team.name}`, `${team.name} predictions`, `Pronósticos ${team.name}`, `Palpites ${team.name}`)}</h1>
           <p className="team-rec">{streak ? L.t(`Série en cours : ${streak}`, `Current streak: ${streak}`, `Racha actual: ${streak}`, `Sequência atual: ${streak}`) : L.t(`Saison ${seasonLabel}`, `${seasonLabel} season`, `Temporada ${seasonLabel}`, `Temporada ${seasonLabel}`)}{me.last10 ? L.t(` · 10 derniers : ${me.last10}`, ` · Last 10: ${me.last10}`, ` · Últimos 10: ${me.last10}`, ` · Últimos 10: ${me.last10}`) : ""}</p>
           <p className="team-rec">
+            <Link href={L.href(`/app/equipe/${team.id}/calendrier`)}>{L.t(`Calendrier complet des ${team.short}`, `Full ${team.short} schedule`, `Calendario completo de los ${team.short}`, `Calendário completo do ${team.short}`)}</Link>{" · "}
             {L.t(`Ajouter les matchs des ${team.short} à mon calendrier : `, `Add the ${team.short} schedule to my calendar: `, `Añadir los partidos de los ${team.short} a mi calendario: `, `Adicionar os jogos do ${team.short} ao meu calendário: `)}
             <a href={`webcal://basketlog-app.com/api/calendar/${team.id}?lang=${L.lang}`}>{L.t("iPhone / Outlook", "iPhone / Outlook", "iPhone / Outlook", "iPhone / Outlook")}</a>{" · "}
             <a href={`https://calendar.google.com/calendar/render?cid=${encodeURIComponent(`webcal://basketlog-app.com/api/calendar/${team.id}?lang=${L.lang}`)}`} target="_blank" rel="noopener">Google</a>

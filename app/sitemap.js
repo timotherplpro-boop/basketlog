@@ -30,7 +30,7 @@ export default async function sitemap() {
     u("/app/euroleague", 0.8, "daily"), u("/app/competitions", 0.7, "daily"), u("/app/bilan", 0.8, "daily"), u("/methode", 0.7, "monthly"), u("/pro", 0.6, "weekly"), u("/avis", 0.5, "weekly"), u("/widget", 0.5, "monthly"),
     u("/mentions-legales", 0.2, "yearly"), u("/cgu", 0.2, "yearly"), u("/cgv", 0.2, "yearly"), u("/confidentialite", 0.2, "yearly"), u("/cookies", 0.2, "yearly"),
   ];
-  const teams = TEAMS.map((t) => u(`/app/equipe/${t.id}`, 0.6, "daily"));
+  const teams = TEAMS.flatMap((t) => [u(`/app/equipe/${t.id}`, 0.6, "daily"), u(`/app/equipe/${t.id}/calendrier`, 0.5, "daily")]);
 
   // Matchs NBA : les 7 prochains jours et les 3 derniers (fiches avec score final).
   let nba = [];
