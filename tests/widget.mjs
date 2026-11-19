@@ -1,5 +1,5 @@
 // Widget « Probabilités NBA du soir » (lib/widget.js) : rendu HTML, liens, échappement, code d'intégration.
-import { WIDGET_MAX, embedCode, widgetGames, widgetHtml, widgetLang, widgetLink, widgetTheme } from "../lib/widget.js";
+import { WIDGET_MAX, embedCode, widgetGames, widgetHtml, widgetLang, widgetLink, widgetTheme, teamWidgetHtml, teamWidgetGames, teamEmbedCode, widgetTeamId } from "../lib/widget.js";
 
 const SITE = "https://basketlog-app.com";
 const team = (id, short, logo = `https://a.espncdn.com/${id}.png`) => ({ id, short, abbr: short.slice(0, 3).toUpperCase(), logo });
@@ -51,4 +51,25 @@ export async function widgetTests({ ok, ko, eq }) {
     !/nofollow|display:\s*none/.test(code),
   ], [true, true, true]);
   eq("code d'intégration FR, thème auto : adresse sans thème, lien vers l'accueil", [embedCode(SITE).includes(`?lang=fr"`), embedCode(SITE).includes(`<a href="${SITE}/">Basketlog</a>`)], [true, true]);
+
+  // Widget d'une équipe
+  const lak = { id: "13", short: "Lakers", name: "Los Angeles Lakers", abbr: "LAL", logo: "https://a.espncdn.com/lal.png" };
+  const kings = { id: "23", short: "Kings", name: "Sacramento Kings", abbr: "SAC", logo: "https://a.espncdn.com/sac.png" };
+  const jazz = { id: "26", short: "Jazz", name: "Utah Jazz", abbr: "UTAH", logo: "" };
+  const up = [
+    { id: "1", d: "20261120", date: "2026-11-21T03:00:00Z", home: lak, away: kings, pHome: 0.88 },
+    { id: "2", d: "20261121", date: "2026-11-22T01:00:00Z", home: jazz, away: kings, pHome: 0.5 },
+    { id: "3", d: "20261123", date: "2026-11-24T03:00:00Z", home: jazz, away: lak, pHome: 0.3 },
+  ];
+  eq("widget équipe : identifiant", [widgetTeamId("13"), widgetTeamId("x1"), widgetTeamId("1234"), widgetTeamId(undefined)], ["13", null, null, null]);
+  eq("widget équipe : seulement ses matchs", teamWidgetGames(up, "13").map((x) => x.id), ["1", "3"]);
+  const th = teamWidgetHtml({ team: lak, up, lang: "en", site: SITE });
+  eq("widget équipe EN : titre, probas de l'équipe, adresses lisibles, lien page équipe", [
+    th.includes("Lakers: next games"), th.includes("88%"), th.includes("70%"), th.includes("vs Kings"), th.includes("@ Jazz"),
+    th.includes(`${SITE}/en/nba/kings-vs-lakers-2026-11-20?utm_source=widget`), th.includes(`${SITE}/en/app/equipe/13?utm_source=widget`), !/<script/i.test(th),
+  ], [true, true, true, true, true, true, true, true]);
+  const tfr = teamWidgetHtml({ team: lak, up: [], lang: "fr", site: SITE });
+  eq("widget équipe FR sans match : message", tfr.includes("Aucun match à venir"), true);
+  const tc = teamEmbedCode(SITE, lak, "es", "dark");
+  eq("code widget équipe : iframe avec team, liens visibles page équipe et Basketlog", [tc.includes(`/api/widget?lang=es&team=13&theme=dark`), tc.includes(`<a href="${SITE}/es/app/equipe/13">Pronósticos Lakers</a>`), tc.includes(`<a href="${SITE}/es">Basketlog</a>`)], [true, true, true]);
 }

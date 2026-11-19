@@ -1855,3 +1855,5 @@ html { scroll-behavior: smooth; }
 .ps-card .ar { margin: 0; }
 .ps-cta { text-align: center; margin-top: 22px; }
 .plan-tax { margin-top: 2px; font-size: 13px; color: var(--muted); } /* 19/11/2026 : prix hors taxes, Whop ajoute la taxe au paiement */
+.tw-pick { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-weight: 600; }
+.tw-pick select { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--card, transparent); color: var(--text); font: inherit; max-width: 100%; }

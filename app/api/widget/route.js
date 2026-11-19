@@ -1,7 +1,8 @@
-import { analyzeDay } from "../../../lib/data";
+import { analyzeDay, upcomingAnalyses } from "../../../lib/data";
 import { nbaToday, shiftDate } from "../../../lib/espn";
 import { SITE } from "../../../lib/site";
-import { widgetGames, widgetHtml, widgetLang, widgetTheme } from "../../../lib/widget";
+import { widgetGames, widgetHtml, widgetLang, widgetTheme, widgetTeamId, teamWidgetHtml, teamWidgetGames } from "../../../lib/widget";
+import { teamById } from "../../../lib/teams";
 
 // Widget « Probabilités NBA du soir » à intégrer dans une iframe (voir /widget). Réponse gardée 15 minutes par le CDN,
 // donc un seul calcul par langue et par thème toutes les 15 minutes, quel que soit le nombre de sites qui l'affichent.
@@ -10,6 +11,21 @@ export async function GET(req) {
   const sp = req.nextUrl.searchParams;
   const lang = widgetLang(sp.get("lang"));
   const theme = widgetTheme(sp.get("theme"));
+  // Widget d'une équipe (?team=13) : ses prochains matchs (10 jours) avec sa probabilité de victoire.
+  const teamId = widgetTeamId(sp.get("team"));
+  if (teamId) {
+    const team = teamById(teamId);
+    let up = [];
+    try { if (team) up = await upcomingAnalyses(10); } catch { up = []; }
+    const okT = !!team && teamWidgetGames(up, teamId).length > 0;
+    return new Response(teamWidgetHtml({ team, up, lang, theme, site: SITE }), {
+      headers: {
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": okT ? "public, max-age=300, s-maxage=900, stale-while-revalidate=3600" : "public, max-age=60, s-maxage=300",
+        "x-robots-tag": "noindex",
+      },
+    });
+  }
   let analyses = [], tomorrow = false;
   try {
     const today = nbaToday();

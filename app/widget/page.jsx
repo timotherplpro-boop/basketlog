@@ -3,6 +3,8 @@ import { getL } from "../../lib/lang-server";
 import { SITE } from "../../lib/site";
 import { WIDGET_HEIGHT, embedCode } from "../../lib/widget";
 import CopyCode from "../../components/CopyCode";
+import TeamWidgetPicker from "../../components/TeamWidgetPicker";
+import { TEAMS } from "../../lib/teams";
 
 // Page « Widget » : aperçu et code à copier pour les sites et blogs basket qui veulent afficher les probabilités NBA du soir.
 export async function generateMetadata() {
@@ -63,6 +65,25 @@ export default async function WidgetPage() {
           "Other languages: replace lang=en with lang=fr (French) or lang=es (Spanish) in the address.",
           "Otros idiomas: cambia lang=es por lang=en (inglés) o lang=fr (francés) en la dirección.", "Outros idiomas: troque lang=pt por lang=en (inglês), lang=es (espanhol) ou lang=fr (francês) no endereço."
         )}</p>
+      </div>
+
+      <div className="card block" id="equipe">
+        <h2>{L.t("Widget d'une équipe : ses prochains matchs", "Team widget: your team's next games", "Widget de un equipo: sus próximos partidos", "Widget de um time: os próximos jogos")}</h2>
+        <p className="narr">{L.t(
+          "Pour un blog consacré à une équipe : ses 5 prochains matchs avec sa probabilité de victoire, mis à jour automatiquement. Choisissez l'équipe, puis copiez le code.",
+          "For a blog about one team: its next 5 games with its win probability, updated automatically. Pick the team, then copy the code.",
+          "Para un blog dedicado a un equipo: sus 5 próximos partidos con su probabilidad de victoria, actualizados automáticamente. Elige el equipo y copia el código.",
+          "Para um blog dedicado a um time: os 5 próximos jogos com a chance de vitória, atualizados automaticamente. Escolha o time e copie o código."
+        )}</p>
+        <TeamWidgetPicker
+          teams={[...TEAMS].sort((a, b) => a.name.localeCompare(b.name)).map((t) => ({ id: t.id, short: t.short, name: t.name }))}
+          site={SITE}
+          lang={lang}
+          label={L.t("Équipe :", "Team:", "Equipo:", "Time:")}
+          copy={copy}
+          done={done}
+          preview={L.t("Aperçu du widget d'équipe", "Team widget preview", "Vista previa del widget de equipo", "Prévia do widget de time")}
+        />
       </div>
 
       <div className="card block">
