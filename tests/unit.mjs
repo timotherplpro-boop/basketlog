@@ -20,6 +20,7 @@ import { widgetTests } from "./widget.mjs";
 import { creatorGainsTests } from "./creator-gains.mjs";
 import { payTests } from "./pay.mjs";
 import { recapTests } from "./recap.mjs";
+import { defiTests } from "./defi.mjs";
 
 export async function unit() {
   let passed = 0, failed = 0;
@@ -577,6 +578,7 @@ export async function unit() {
   await creatorGainsTests({ ok, ko, eq });
   await payTests({ ok, ko, eq });
   await recapTests({ ok, ko, eq });
+  await defiTests({ ok, ko, eq });
 
   return { passed, failed };
 }

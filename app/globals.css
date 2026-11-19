@@ -1857,3 +1857,19 @@ html { scroll-behavior: smooth; }
 .plan-tax { margin-top: 2px; font-size: 13px; color: var(--muted); } /* 19/11/2026 : prix hors taxes, Whop ajoute la taxe au paiement */
 .tw-pick { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-weight: 600; }
 .tw-pick select { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--card, transparent); color: var(--text); font: inherit; max-width: 100%; }
+/* Jeu « Bats le modèle » */
+.defi-list { display: grid; gap: 10px; margin-top: 10px; }
+.defi-game { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: grid; gap: 8px; }
+.defi-when { font-size: 12px; color: var(--muted); }
+.defi-teams { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.defi-team { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 8px; border: 1px solid var(--line); border-radius: 10px; background: transparent; color: var(--text); font: inherit; font-weight: 700; cursor: pointer; }
+.defi-team img { width: 28px; height: 28px; object-fit: contain; }
+.defi-team.on { border-color: var(--orange); background: rgba(255, 122, 26, .14); box-shadow: 0 0 0 1px var(--orange) inset; }
+.defi-model { font-size: 13px; color: var(--muted); }
+.defi-against { color: var(--orange); font-weight: 700; }
+.defi-status { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+.defi-login { margin-top: 14px; padding: 12px; border: 1px dashed var(--line); border-radius: 12px; display: grid; gap: 10px; }
+.defi-login p { margin: 0; }
+.defi-score .defi-big { font-size: 26px; margin: 6px 0; }
+.defi-verdict { font-weight: 700; margin: 0 0 10px; }
+.defi-share { margin-top: 6px; }

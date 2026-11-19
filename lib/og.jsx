@@ -137,3 +137,48 @@ export async function oddsOgImage(q, init = {}) {
     { ...OG_SIZE, ...(f ? { fonts: f } : {}), ...init }
   );
 }
+
+// Image de partage du jeu « Bats le modèle » : sans score, l'affiche du jeu ; avec score (?u=7&m=6&n=10), le duel
+// joueur contre modèle. Langue : ?lang=fr|en|es|pt.
+const DEFI = {
+  fr: { title: "Bats le modèle", sub: "Choisis les vainqueurs NBA de ce soir. Gratuit.", you: "Moi", model: "Modèle Basketlog", won: "J'ai battu le modèle", lost: "Mon score face au modèle", of: (n) => `sur ${n} matchs` },
+  en: { title: "Beat the model", sub: "Pick tonight's NBA winners. Free.", you: "Me", model: "Basketlog model", won: "I beat the model", lost: "My score vs the model", of: (n) => `out of ${n} games` },
+  es: { title: "Gana al modelo", sub: "Elige los ganadores NBA de esta noche. Gratis.", you: "Yo", model: "Modelo Basketlog", won: "Le gané al modelo", lost: "Mi resultado contra el modelo", of: (n) => `de ${n} partidos` },
+  pt: { title: "Vença o modelo", sub: "Escolha os vencedores da NBA de hoje. Grátis.", you: "Eu", model: "Modelo Basketlog", won: "Venci o modelo", lost: "Meu resultado contra o modelo", of: (n) => `de ${n} jogos` },
+};
+export async function defiOgImage(q, init = {}) {
+  const f = await fonts();
+  const T = DEFI[q.get("lang")] || DEFI.fr;
+  const n = Math.min(30, Math.max(0, parseInt(q.get("n"), 10) || 0));
+  const u = Math.min(n, Math.max(0, parseInt(q.get("u"), 10) || 0));
+  const m = Math.min(n, Math.max(0, parseInt(q.get("m"), 10) || 0));
+  const scored = n > 0;
+  return new ImageResponse(
+    (
+      <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", padding: "52px 70px", background: "radial-gradient(circle at 80% 20%, #2a1406 0%, #040817 62%)", color: "#fff", fontFamily: f ? "Inter" : "sans-serif" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <img src={BALL} width={54} height={54} alt="" />
+          <div style={{ display: "flex", fontSize: 30, color: "#ff7a1a", fontWeight: 800, letterSpacing: 1 }}>BASKETLOG</div>
+        </div>
+        <div style={{ display: "flex", fontSize: 64, fontWeight: 800, marginTop: 26 }}>{scored ? (u > m ? T.won : T.lost) : T.title}</div>
+        {scored ? (
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 60, marginTop: 30 }}>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ display: "flex", fontSize: 150, fontWeight: 800, color: u >= m ? "#ff7a1a" : "#fff", lineHeight: 1 }}>{u}</div>
+              <div style={{ display: "flex", fontSize: 30, color: "#9aa3b8" }}>{T.you}</div>
+            </div>
+            <div style={{ display: "flex", fontSize: 90, fontWeight: 800, color: "#9aa3b8", lineHeight: 1.3 }}>–</div>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <div style={{ display: "flex", fontSize: 150, fontWeight: 800, color: m > u ? "#ff7a1a" : "#fff", lineHeight: 1 }}>{m}</div>
+              <div style={{ display: "flex", fontSize: 30, color: "#9aa3b8" }}>{T.model}</div>
+            </div>
+            <div style={{ display: "flex", fontSize: 34, color: "#9aa3b8", marginBottom: 42 }}>{T.of(n)}</div>
+          </div>
+        ) : (
+          <div style={{ display: "flex", fontSize: 38, color: "#9aa3b8", marginTop: 20 }}>{T.sub}</div>
+        )}
+      </div>
+    ),
+    { ...OG_SIZE, ...(f ? { fonts: f } : {}), ...init }
+  );
+}

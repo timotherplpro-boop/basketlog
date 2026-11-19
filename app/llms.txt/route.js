@@ -43,6 +43,7 @@ export async function GET() {
     `- [EuroLeague playoff, Final Four and title odds](${SITE}/en/app/euroleague/simulation)`,
     `- [NBA games tonight: times and TV](${SITE}/en/app/programme) · [NBA scoring leaders](${SITE}/en/app/leaders)`,
     `- [NBA scores last night, with the model's pre-game favorite for each game](${SITE}/en/app/resultats)`,
+    `- [Free game: pick tonight's NBA winners and try to beat the Basketlog model](${SITE}/en/app/defi)`,
     `- [NBA Christmas Day games: schedule and win probabilities](${SITE}/en/app/noel) · [Free FiveThirtyEight NBA predictions alternative](${SITE}/en/fivethirtyeight-nba)`,
     `- [NBA power rankings](${SITE}/en/app/power-rankings): all 30 teams ranked by model strength, updated daily`,
     `- [NBA Cup predictions](${SITE}/en/app/nba-cup)`,

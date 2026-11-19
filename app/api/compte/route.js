@@ -13,6 +13,7 @@ import { changerMdp, compteParEmail, getCompte, supprimerCompteEmail } from "../
 import { MAX_PASSWORD, hashPassword, passwordProblem, verifyPassword } from "../../../lib/password";
 import { forgetNewsletter } from "../../../lib/newsletter-server";
 import { readCreator } from "../../../lib/creator-stats";
+import { defiForget } from "../../../lib/defi";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -468,6 +469,8 @@ export async function POST(req) {
           console.warn(`[compte] code promo ${c.code} non désactivé après l'effacement : ${e?.kind || "?"} — ${String(e?.message || e).slice(0, 200)}`);
         }
       }
+      // Jeu « Bats le modèle » : choix du membre effacés (ne bloque jamais la suppression).
+      await defiForget(uid).catch(() => null);
       // 4) Newsletter du dimanche : l'adresse quitte la liste d'envoi (seulement après l'effacement, pour ne rien retirer si celui-ci a échoué).
       // Ne bloque jamais la suppression ; si Resend ne répond pas, la page le dit au membre. Compte Basketlog : son adresse, lue
       // avant l'effacement ; compte Whop : l'adresse que Whop donne pour ce compte.
