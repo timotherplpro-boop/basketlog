@@ -37,14 +37,16 @@ const PLANS = (L, ai, cur, promo = null) => {
   const then = (id) => (limited ? L.t(`puis ${price(id, cur, L)}/mois`, `then ${price(id, cur, L)}/month`, `luego ${price(id, cur, L)}/mes`, `depois ${price(id, cur, L)}/mês`) : null);
   return [
   {
-    id: "starter", name: "Starter", icon: "bolt", price: show("starter"), old: was("starter"), per, then: then("starter"), sub: ai ? L.t("Pour découvrir l'IA", "To discover the AI", "Para descubrir la IA", "Para conhecer a IA") : L.t("Pour découvrir les analyses", "To try the analyses", "Para descubrir los análisis", "Para conhecer as análises"), cta: `${L.t("Débloquer", "Unlock", "Desbloquear", "Desbloquear")} - ${show("starter")}${sep}${per}`,
+    // 19/11/2026 : Starter n'est plus vendu (choix de Tim) ; la carte Gratuit le remplace. Les abonnés Starter gardent leur accès.
+    id: "free", name: L.t("Gratuit", "Free", "Gratis", "Grátis"), icon: "bolt", price: money(0, cur, L), per: L.t("pour toujours", "forever", "para siempre", "para sempre"),
+    sub: L.t("Pour suivre la NBA chaque soir", "To follow the NBA every night", "Para seguir la NBA cada noche", "Para acompanhar a NBA toda noite"),
+    cta: L.t("Voir les matchs du jour", "See today's games", "Ver los partidos de hoy", "Ver os jogos de hoje"), href: "/app/matchs",
     items: [
-      ["ok", L.t("1 analyse par jour", "1 analysis per day", "1 análisis al día", "1 análise por dia")],
-      ["ok", L.t("Analyse réduite", "Reduced analysis", "Análisis reducido", "Análise reduzida")],
-      ["ok", L.t("Stats clés", "Key stats", "Estadísticas clave", "Estatísticas-chave")],
-      ["ok", L.t("Probabilités exactes 1x/jour", "Exact probabilities 1x/day", "Probabilidades exactas 1x/día", "Probabilidades exatas 1x/dia")],
-      ai && ["no", L.t("Questions personnelles à l'IA", "Personal questions to the AI", "Preguntas personales a la IA", "Perguntas pessoais à IA")],
-    ].filter(Boolean),
+      ["ok", L.t("Probabilités de victoire de tous les matchs", "Win probabilities for every game", "Probabilidades de victoria de todos los partidos", "Probabilidades de vitória de todos os jogos")],
+      ["ok", L.t("Aperçu de chaque analyse", "Preview of every analysis", "Vista previa de cada análisis", "Prévia de cada análise")],
+      ["ok", L.t("Forme récente et scénario n° 1", "Recent form and #1 scenario", "Forma reciente y escenario n.º 1", "Fase recente e cenário n.º 1")],
+      ["no", L.t("Analyse complète", "Full analysis", "Análisis completo", "Análise completa")],
+    ],
   },
   {
     id: "pro", name: "Pro", icon: "crown", price: show("pro"), old: was("pro"), per, then: then("pro"), sub: L.t("Pour les passionnés de basket", "For basketball fans", "Para los apasionados del baloncesto", "Para os apaixonados por basquete"), badge: L.t("Populaire", "Popular", "Popular", "Popular"),
@@ -61,7 +63,7 @@ const PLANS = (L, ai, cur, promo = null) => {
     ].filter(Boolean),
   },
   {
-    id: "lifetime", name: "Lifetime", icon: "infinity", price: show("lifetime"), old: was("lifetime"), per: L.t("une seule fois", "one-time", "pago único", "pagamento único"), sub: L.t(`Économise +${money(100, cur, L)}/an vs mensuel`, `Save ${money(100, cur, L)}+/year vs monthly`, `Ahorra +${money(100, cur, L)}/año frente al mensual`, `Economize +${money(100, cur, L)}/ano em relação ao mensal`), badge: L.t("À vie", "Lifetime", "De por vida", "Vitalício"), cta: L.t(`Débloquer - ${show("lifetime")}`, `Unlock - ${show("lifetime")}`, `Desbloquear - ${show("lifetime")}`, `Desbloquear - ${show("lifetime")}`),
+    id: "lifetime", name: "Lifetime", icon: "infinity", price: show("lifetime"), old: was("lifetime"), per: L.t("une seule fois", "one-time", "pago único", "pagamento único"), sub: L.t("Un seul paiement, à vie", "Pay once, yours for life", "Un solo pago, de por vida", "Um só pagamento, para sempre"), badge: L.t("À vie", "Lifetime", "De por vida", "Vitalício"), cta: L.t(`Débloquer - ${show("lifetime")}`, `Unlock - ${show("lifetime")}`, `Desbloquear - ${show("lifetime")}`, `Desbloquear - ${show("lifetime")}`),
     items: [
       ["ok", L.t("Analyses illimitées à vie", "Unlimited analyses for life", "Análisis ilimitados de por vida", "Análises ilimitadas para sempre")],
       ["ok", L.t("Analyse complète détaillée", "Detailed full analysis", "Análisis completo detallado", "Análise completa detalhada")],
@@ -280,6 +282,8 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
               ))}</ul>
               {pro?.connected && current === p.id ? (
                 <span className="plan-cta plan-current">{L.t("Ta formule actuelle", "Your current plan", "Tu plan actual", "Seu plano atual")}</span>
+              ) : p.href ? (
+                <Link href={L.href(p.href)} className="plan-cta plan-free">{p.cta}</Link>
               ) : url ? (
                 <a href={payHref(p.id)} className={`plan-cta plan-buy ${agree ? "" : "plan-wait"}`} aria-disabled={!agree} onClick={buy(p.id)}>{p.ctaTrial && trialOk ? p.ctaTrial : p.cta}</a>
               ) : (
@@ -291,9 +295,9 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
       </div>
       <p className="pro-legal">
         {L.t(
-          <>Starter et Pro sont sans engagement : tu arrêtes quand tu veux depuis la page Mon compte de ce site, et tu gardes l&apos;accès jusqu&apos;à la fin du mois payé. Une période commencée n&apos;est pas remboursée. Réservé aux 18 ans et plus. </>,
-          <>Starter and Pro have no commitment: cancel anytime from the My account page on this site and keep access until the end of the paid month. A started period is not refunded. For adults 18 and over. </>,
-          <>Starter y Pro no tienen permanencia: cancelas cuando quieras desde la página Mi cuenta de este sitio y mantienes el acceso hasta el final del mes pagado. Un periodo empezado no se reembolsa. Solo para mayores de 18 años. </>, <>Starter e Pro não têm fidelidade: você cancela quando quiser pela página Minha conta deste site e mantém o acesso até o fim do mês pago. Um período iniciado não é reembolsado. Somente para maiores de 18 anos. </>
+          <>Pro est sans engagement : tu arrêtes quand tu veux depuis la page Mon compte de ce site, et tu gardes l&apos;accès jusqu&apos;à la fin du mois payé. Une période commencée n&apos;est pas remboursée. Réservé aux 18 ans et plus. </>,
+          <>Pro has no commitment: cancel anytime from the My account page on this site and keep access until the end of the paid month. A started period is not refunded. For adults 18 and over. </>,
+          <>Pro no tiene permanencia: cancelas cuando quieras desde la página Mi cuenta de este sitio y mantienes el acceso hasta el final del mes pagado. Un periodo empezado no se reembolsa. Solo para mayores de 18 años. </>, <>O Pro não tem fidelidade: você cancela quando quiser pela página Minha conta deste site e mantém o acesso até o fim do mês pago. Um período iniciado não é reembolsado. Somente para maiores de 18 anos. </>
         )}
         <Link href={L.href("/cgv")}>{L.t("Conditions générales de vente", "Terms of Sale", "Condiciones generales de venta", "Condições gerais de venda")}</Link>
       </p>

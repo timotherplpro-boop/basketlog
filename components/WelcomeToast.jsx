@@ -6,8 +6,8 @@ import { ONBOARDING_EVENT, SOURCE_EVENT, isAnalysisPath, onboardingDone } from "
 import { useL } from "./LangProvider";
 
 const MSG = {
-  inscription: ["Bienvenue sur Basketlog ! Ton compte est créé. Les analyses se débloquent avec Starter, Pro ou Lifetime.", "Welcome to Basketlog! Your account is ready. Analyses unlock with Starter, Pro or Lifetime.", "¡Bienvenido a Basketlog! Tu cuenta está creada. Los análisis se desbloquean con Starter, Pro o Lifetime."],
-  nouveau: ["Bienvenue sur Basketlog ! Ton compte gratuit est créé : tu vois l'aperçu des analyses. L'analyse complète se débloque avec Starter, Pro ou Lifetime.", "Welcome to Basketlog! Your free account is ready: you can see the analysis previews. The full analysis unlocks with Starter, Pro or Lifetime.", "¡Bienvenido a Basketlog! Tu cuenta gratis está creada: ves el avance de los análisis. El análisis completo se desbloquea con Starter, Pro o Lifetime."],
+  inscription: ["Bienvenue sur Basketlog ! Ton compte est créé. Les analyses se débloquent avec Pro ou Lifetime.", "Welcome to Basketlog! Your account is ready. Analyses unlock with Pro or Lifetime.", "¡Bienvenido a Basketlog! Tu cuenta está creada. Los análisis se desbloquean con Pro o Lifetime."],
+  nouveau: ["Bienvenue sur Basketlog ! Ton compte gratuit est créé : tu vois l'aperçu des analyses. L'analyse complète se débloque avec Pro ou Lifetime.", "Welcome to Basketlog! Your free account is ready: you can see the analysis previews. The full analysis unlocks with Pro or Lifetime.", "¡Bienvenido a Basketlog! Tu cuenta gratis está creada: ves el avance de los análisis. El análisis completo se desbloquea con Pro o Lifetime."],
   connexion: ["Te revoilà ! Tu es connecté.", "Welcome back! You're signed in.", "¡Hola de nuevo! Has iniciado sesión."],
   retour: ["Te revoilà ! Tu es connecté.", "Welcome back! You're signed in.", "¡Hola de nuevo! Has iniciado sesión."],
   abonne: ["Ton abonnement est actif. Bonnes analyses !", "Your subscription is active. Enjoy the analyses!", "Tu suscripción está activa. ¡Buenos análisis!"],
