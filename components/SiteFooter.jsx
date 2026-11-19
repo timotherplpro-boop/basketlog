@@ -45,6 +45,7 @@ export default function SiteFooter({ L, compact = false }) {
           <Link href={L.href("/app/matchs")}>{L.t("Pronostics NBA du jour", "Today's NBA predictions", "Pronósticos NBA de hoy", "Palpites NBA de hoje")}</Link>
           <Link href={L.href("/app/classement")}>{L.t("Classement NBA", "NBA standings", "Clasificación NBA", "Classificação NBA")}</Link>
           <Link href={L.href("/app/simulation")}>{L.t("Chances de playoffs NBA", "NBA playoff odds", "Probabilidades de playoffs NBA", "Chances de playoffs da NBA")}</Link>
+          <Link href={L.href("/app/resultats")}>{L.t("Résultats NBA de la nuit", "NBA scores last night", "Resultados NBA de anoche", "Resultados da NBA de ontem")}</Link>
           <Link href={L.href("/app/programme")}>{L.t("Programme NBA et où regarder", "NBA TV schedule", "Horarios NBA y dónde ver", "Jogos da NBA e onde assistir")}</Link>
           <Link href={L.href("/app/leaders")}>{L.t("Meilleurs marqueurs NBA", "NBA scoring leaders", "Máximos anotadores NBA", "Cestinhas da NBA")}</Link>
           <Link href={L.href("/app/nba-cup")}>{L.t("NBA Cup", "NBA Cup", "NBA Cup", "NBA Cup")}</Link>

@@ -42,6 +42,7 @@ export async function GET() {
     `- [Who will win the NBA title? Championship odds](${SITE}/en/app/champion)`,
     `- [EuroLeague playoff, Final Four and title odds](${SITE}/en/app/euroleague/simulation)`,
     `- [NBA games tonight: times and TV](${SITE}/en/app/programme) · [NBA scoring leaders](${SITE}/en/app/leaders)`,
+    `- [NBA scores last night, with the model's pre-game favorite for each game](${SITE}/en/app/resultats)`,
     `- [NBA power rankings](${SITE}/en/app/power-rankings): all 30 teams ranked by model strength, updated daily`,
     `- [NBA Cup predictions](${SITE}/en/app/nba-cup)`,
     `- [Model track record](${SITE}/en/app/bilan): accuracy, calibration by probability range, every game`,

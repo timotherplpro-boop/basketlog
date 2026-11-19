@@ -72,6 +72,10 @@ export default async function PowerRankingsPage() {
         <Link href={L.href("/methode")}>{L.t("la méthode Basketlog", "the Basketlog method", "el método de Basketlog", "a metodologia do Basketlog")}</Link>
         {" · "}
         <Link href={L.href("/app/matchs")}>{L.t("pronostics NBA du soir", "tonight's NBA predictions", "pronósticos NBA de hoy", "palpites NBA de hoje")}</Link>
+        {" · "}
+        <Link href={L.href("/app/simulation")}>{L.t("chances de playoffs", "playoff odds", "probabilidades de playoffs", "chances de playoffs")}</Link>
+        {" · "}
+        <Link href={L.href("/app/champion")}>{L.t("favoris au titre", "title favorites", "favoritos al título", "favoritos ao título")}</Link>
       </p>
       <JsonLd data={{
         "@context": "https://schema.org", "@type": "ItemList",
