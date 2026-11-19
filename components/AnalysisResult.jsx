@@ -34,11 +34,15 @@ function injStatus(st, L) {
   return s;
 }
 
-export default async function AnalysisResult({ a, league = "NBA", L, mode = "page", path = null, extras = null }) {
+// preview : exemple offert sur la page Pro (analyse complète affichée sans abonnement, sans suivi ni question à l'IA).
+const Plain = ({ children }) => <>{children}</>;
+
+export default async function AnalysisResult({ a, league = "NBA", L, mode = "page", path = null, extras = null, preview = false }) {
   const isNBA = league === "NBA";
+  const Box = preview ? Plain : Gate;
   const g = a.game, h = a.home, aw = a.away;
   const leagueKey = isNBA ? "NBA" : "EL";
-  const access = await analysisAccess(leagueKey, g.id);
+  const access = preview ? { state: "open", tier: "pro" } : await analysisAccess(leagueKey, g.id);
   const open = access.state === "open";
   const target = {
     league: leagueKey,
@@ -66,7 +70,7 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
   const reduced = open && access.tier === "starter";
   const full = open && !reduced;
   const aiOn = aiReady();
-  const ask = full && aiOn && QUESTIONS[access.tier] ? { limit: access.tier === "lifetime" ? null : QUESTIONS[access.tier] } : null;
+  const ask = !preview && full && aiOn && QUESTIONS[access.tier] ? { limit: access.tier === "lifetime" ? null : QUESTIONS[access.tier] } : null;
   const [narrative, qUsed] = await Promise.all([
     full ? aiNarrative(a, L) : null,
     ask && ask.limit != null ? memberSession().then((m) => (m ? questionUsage(m.uid) : 0)) : 0,
@@ -188,7 +192,7 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
         // « Créer un compte ») : le bouton mène aux formules puis au paiement intégré.
         <>
           {freePart}
-          <Gate key={target.id} access={access} target={target} pct={visiblePct} proof={proof} match={matchInfo} mode={mode}>
+          <Box key={target.id} access={access} target={target} pct={visiblePct} proof={proof} match={matchInfo} mode={mode}>
             {reduced && <>
               {probsBlock}
               {ficheBlock(L.t("Stats clés des deux équipes", "Key stats for both teams", "Estadísticas clave de los dos equipos", "Estatísticas-chave dos dois times"))}
@@ -273,7 +277,7 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
               {isNBA && <NewsSection a={a} L={L} />}
               {ask && <AskAI target={{ league: leagueKey, id: String(g.id), d: g.date ? nbaDateOf(g.date) : null }} tier={access.tier} limit={ask.limit} used={qUsed} />}
             </>}
-          </Gate>
+          </Box>
         </>
       )}
     </section>
