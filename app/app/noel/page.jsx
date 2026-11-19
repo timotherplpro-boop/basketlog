@@ -66,7 +66,7 @@ export default async function ChristmasPage() {
   const y = yearOf();
   const { date, rows } = await loadGames();
   const withP = rows.filter((r) => r.pHome != null);
-  const when = (iso) => `${fmtDate(L, iso, { weekday: "short", day: "numeric" }).replace(/\.$/, "")} ${fmtTime(L, iso)}`;
+  const when = (iso) => `${fmtDate(L, iso, { weekday: "short", day: "numeric", month: "short" }).replace(/\.$/, "")} · ${fmtTime(L, iso)}`;
   const favOf = (r) => (r.pHome >= 0.5 ? r.game.home : r.game.away);
   const pf = (r) => Math.max(r.pHome, r.pAway);
   const closest = [...withP].sort((a, b) => Math.abs(a.pHome - 0.5) - Math.abs(b.pHome - 0.5))[0];
@@ -89,7 +89,7 @@ export default async function ChristmasPage() {
     },
     {
       q: L.t("Sur quelle chaîne voir les matchs de Noël ?", "What channel are the Christmas games on?", "¿Dónde ver los partidos de Navidad?", "Onde assistir aos jogos de Natal?"),
-      a: L.t("Aux États-Unis, les 5 matchs passent sur ABC. Ailleurs, NBA League Pass diffuse tous les matchs ; les diffuseurs de chaque pays annoncent leurs matchs de Noël quelques semaines avant.", "All 5 games air nationally on ABC. NBA League Pass shows every game outside the US.", "En Estados Unidos, los 5 partidos van por ABC. En el resto del mundo, NBA League Pass emite todos los partidos; las cadenas de cada país anuncian sus partidos de Navidad unas semanas antes.", "Nos Estados Unidos, os 5 jogos passam na ABC. No resto do mundo, o NBA League Pass transmite todos os jogos; as emissoras de cada país anunciam seus jogos de Natal algumas semanas antes."),
+      a: L.t("Aux États-Unis, les 5 matchs passent sur ABC (et ESPN). Ailleurs, NBA League Pass diffuse tous les matchs ; les diffuseurs de chaque pays annoncent leurs matchs de Noël quelques semaines avant.", "All 5 games air nationally on ABC (simulcast on ESPN). NBA League Pass shows every game outside the US.", "En Estados Unidos, los 5 partidos van por ABC (y ESPN). En el resto del mundo, NBA League Pass emite todos los partidos; las cadenas de cada país anuncian sus partidos de Navidad unas semanas antes.", "Nos Estados Unidos, os 5 jogos passam na ABC (e na ESPN). No resto do mundo, o NBA League Pass transmite todos os jogos; as emissoras de cada país anunciam seus jogos de Natal algumas semanas antes."),
     },
     ...(closest && biggest ? [{
       q: L.t("Qui est favori pour les matchs de Noël ?", "Who is favored on Christmas Day?", "¿Quién es favorito en Navidad?", "Quem é favorito no Natal?"),
