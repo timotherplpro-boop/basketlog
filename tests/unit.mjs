@@ -8,7 +8,7 @@ import { DELETE_WORDS, buildPlans, cleanName, creatorCodes, deleteConfirmed, nor
 import { SWITCH_COOKIE, SWITCH_TARGETS, SWITCH_TTL_MS, makeIntent, readIntent, readToken, signToken } from "../lib/switch.js";
 import { CODE_RE, cleanCode, cleanPct, discounted, mergePromos, randomChars, suggestCode, withPromo } from "../lib/promo.js";
 import { asPct, checkPromo, describeProblem, describeProblems, promoMonths, whopPromoReady } from "../lib/whop-promo.js";
-import { BSKY_BIO_MAX, BSKY_MAX, BSKY_NAME_MAX, blueskyPost, blueskyProfile, elPick, graphemes, nbaPick, socialPosts, telegramText } from "../lib/social.js";
+import { BSKY_BIO_MAX, BSKY_MAX, BSKY_NAME_MAX, blueskyPost, blueskyProfile, elPick, graphemes, launchPosts, nbaPick, socialPosts, telegramText } from "../lib/social.js";
 import { blueskySetProfile, socialConfig, socialStatus } from "../lib/social-send.js";
 import { MIN_PASSWORD, fakeVerify, hashPassword, passwordProblem, verifyPassword } from "../lib/password.js";
 import { RESET_TOKEN_RE, accountIdOf, accountUid, clientIp, inAppBrowser, isAccountSession, limitKey, localName, maskEmail, newResetToken, normEmail, sameOrigin, tokenHash, whopUidOf } from "../lib/auth-utils.js";
@@ -266,6 +266,11 @@ export async function unit() {
   eq("Comptes : noms par défaut (@basketlog en français, basketlog.bsky.social) quand seuls les codes sont donnés", [socialConfig({ TELEGRAM_BOT_TOKEN: "x" }).telegram.chats, socialConfig({ BLUESKY_APP_PASSWORD: "y" }).bluesky.handle], [{ fr: "@basketlog" }, "basketlog.bsky.social"]);
   const socPub = JSON.stringify(socialStatus(cfgFull));
   eq("Comptes : l'état public ne montre aucun code d'accès", [socPub.includes("secret"), socPub.includes("@basketlog_es"), socPub.includes("basketlog.bsky.social")], [false, true, true]);
+
+  // --- Offre Pro (20/11/2026) : ligne promo des posts du jour et post de lancement
+  eq("Promo : Telegram du jour avec l'essai 3 jours et le lien /pro de la langue", [telegramText(socPicks, "fr", { d: SD }).includes("3 jours offerts, puis Pro à 9,99 €/mois + taxes"), telegramText(socPicks, "en", { d: SD }).includes("https://basketlog-app.com/en/pro")], [true, true]);
+  const lp = launchPosts();
+  eq("Lancement : trois langues, Bluesky ≤ 300, lien /pro cliquable, prix et taxes", Object.keys(lp).map((l) => [l, graphemes(lp[l].bluesky.text) <= BSKY_MAX, lp[l].bluesky.facets[0].features[0].uri.endsWith("/pro"), /9,99|9\.99/.test(lp[l].bluesky.text) && /tax|impuestos/.test(lp[l].bluesky.text)]), [["en", true, true, true], ["fr", true, true, true], ["es", true, true, true]]);
 
   // --- Profil Bluesky : texte (lib/social.js) et écriture (lib/social-send.js, appels simulés)
   const bp = blueskyProfile();

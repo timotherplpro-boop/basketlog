@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { socialDay, recapDay } from "../../../../lib/social-day";
-import { blueskyProfile, ogImageUrl, RECAP_MARK } from "../../../../lib/social";
+import { blueskyProfile, ogImageUrl, RECAP_MARK, launchPosts } from "../../../../lib/social";
 import { socialConfig, socialStatus, sendTelegram, telegramCheck, blueskySession, blueskyThumb, sendBluesky, blueskyPostedSince, blueskySetProfile } from "../../../../lib/social-send";
 import { COOKIE, currentSession } from "../../../../lib/pro";
 
@@ -50,6 +50,34 @@ export async function GET(req) {
       console.warn(`[social] profil Bluesky : ${e.message}`);
       return json({ ok: false, handle: cfg.bluesky.handle, profile, error: e.message });
     }
+  }
+  // Post de lancement de l'offre Pro (?promo=1, compte admin seulement ; ?promo=1&dry=1 : aperçu). Une fois par langue :
+  // un message Bluesky qui commence pareil dans les 12 dernières heures bloque la langue (Telegram compris).
+  if (sp.get("promo") === "1") {
+    if (who !== "admin") return json({ error: "interdit" }, 401);
+    const posts = launchPosts();
+    if (sp.get("dry") === "1") return json({ ok: true, dry: true, posts });
+    const out = [];
+    let ps = null;
+    if (cfg.bluesky) {
+      try { ps = await blueskySession(cfg.bluesky); } catch (e) { out.push({ channel: "bluesky", ok: false, error: e.message }); }
+    }
+    const since = new Date(Date.now() - 12 * 3600e3).toISOString();
+    for (const [lang, p] of Object.entries(posts)) {
+      if (ps && (await blueskyPostedSince(ps, since, p.bluesky.text.slice(0, 15)))) { out.push({ lang, skipped: "déjà publié" }); continue; }
+      const chat = cfg.telegram?.chats?.[lang];
+      if (chat) {
+        try { out.push({ channel: "telegram", lang, ok: true, id: await sendTelegram(cfg.telegram.token, chat, p.telegram, p.telegramPreview) }); }
+        catch (e) { out.push({ channel: "telegram", lang, ok: false, error: e.message }); }
+      }
+      if (ps && cfg.bluesky.langs.includes(lang)) {
+        try {
+          const thumb = await blueskyThumb(ps, ogImageUrl(lang));
+          out.push({ channel: "bluesky", lang, ok: true, uri: await sendBluesky(ps, p.bluesky, thumb) });
+        } catch (e) { out.push({ channel: "bluesky", lang, ok: false, error: e.message }); }
+      }
+    }
+    return json({ ok: out.every((x) => x.ok !== false), sent: out, at: new Date().toISOString() });
   }
   if (sp.get("check") === "1") {
     const check = { status: socialStatus(cfg), telegram: {}, bluesky: null };
