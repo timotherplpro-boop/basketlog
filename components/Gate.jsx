@@ -43,10 +43,12 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
   }, [access.state, access.tier, access.limit, target.id, target.league]);
 
   const { used = 0, limit = null, tier } = access;
+  // Compte gratuit : sa première analyse complète est offerte (20/11/2026), une seule fois.
+  const welcome = !!access.welcome && tier === "compte";
 
   const start = run.start;
   const launch = useCallback((source = "fiche") => {
-    track("Analyse lancée", { match_id: target.id, ligue: target.league, formule: tier, source });
+    track("Analyse lancée", { match_id: target.id, ligue: target.league, formule: tier, source, ...(welcome ? { offerte: true } : {}) });
     start(
       () => fetch("/api/pro/analyse", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(target) }).then((r) => r.json()),
       (r) => {
@@ -55,7 +57,7 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
         router.refresh();
       }
     );
-  }, [start, router, target, tier]);
+  }, [start, router, target, tier, welcome]);
 
   // « Tu veux voir l'analyse complète ? » dès que l'analyse s'affiche sans sa partie complète.
   useEffect(() => {
@@ -89,6 +91,11 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
   if (state === "open") {
     return (
       <>
+        {welcome && (
+          <div className="counter">
+            🎁 {L.t("Ton analyse complète offerte", "Your free full analysis", "Tu análisis completo de regalo", "Sua análise completa de presente")} · <Link href={L.href("/pro")} onClick={() => track("Clic Passer Pro", { source: "analyse_offerte" })}>{L.t(`Tous les matchs : essai Pro ${PRO_TRIAL_DAYS} jours`, `Every game: ${PRO_TRIAL_DAYS}-day Pro trial`, `Todos los partidos: prueba Pro ${PRO_TRIAL_DAYS} días`, `Todos os jogos: teste Pro ${PRO_TRIAL_DAYS} dias`)}</Link>
+          </div>
+        )}
         {limit != null && (
           <div className="counter">
             {L.t(
@@ -136,7 +143,9 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
             <>
               {state === "available" ? (
                 // Abonné : l'analyse est incluse, on ne lui dit pas qu'il n'a accès qu'à une partie.
-                <h3>{left == null
+                <h3>{welcome
+                  ? <>🎁 {L.t("Ton analyse complète offerte", "Your free full analysis", "Tu análisis completo de regalo", "Sua análise completa de presente")}</>
+                  : left == null
                   ? L.t("L'analyse complète est incluse dans ta formule", "The full analysis is included in your plan", "El análisis completo está incluido en tu plan", "A análise completa está incluída no seu plano")
                   : L.t("Ton analyse Starter du jour est disponible", "Your daily Starter analysis is available", "Tu análisis Starter del día está disponible", "Sua análise Starter do dia está disponível")}</h3>
               ) : (
@@ -147,10 +156,12 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
               )}
               {state === "available" ? (
                 <>
-                  <p>{left == null
+                  <p>{welcome
+                    ? <>{contents} {L.t("Ton compte gratuit en inclut une, offerte une seule fois : utilise-la sur ce match ou garde-la pour un autre.", "Your free account includes one, given once: use it on this game or keep it for another.", "Tu cuenta gratis incluye uno, de regalo una sola vez: úsalo en este partido o guárdalo para otro.", "Sua conta grátis inclui uma, de presente uma única vez: use neste jogo ou guarde para outro.")}</>
+                    : left == null
                     ? <>{contents} {L.t("Ta formule les débloque sur tous les matchs, sans limite.", "Your plan unlocks them on every game, with no limit.", "Tu plan los desbloquea en todos los partidos, sin límite.", "Seu plano as desbloqueia em todos os jogos, sem limite.")}</>
                     : L.t(`Ton analyse Starter du jour montre les probabilités exactes, le score projeté et les stats clés du match. Il te reste ${left} analyse aujourd'hui.`, `Your daily Starter analysis shows the exact probabilities, projected score and key stats. You have ${left} analysis left today.`, `Tu análisis Starter del día muestra las probabilidades exactas, el marcador proyectado y las estadísticas clave. Te queda ${left} análisis hoy.`, `Sua análise Starter do dia mostra as probabilidades exatas, o placar projetado e as estatísticas-chave. Resta ${left} análise hoje.`)}</p>
-                  <button type="button" className="btn-solid" onClick={() => launch()}>🔓 {left == null ? L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo", "Desbloquear a análise completa") : L.t("Débloquer mon analyse du jour", "Unlock my daily analysis", "Desbloquear mi análisis del día", "Desbloquear minha análise do dia")}</button>
+                  <button type="button" className="btn-solid" onClick={() => launch()}>{welcome ? <>🎁 {L.t("Utiliser mon analyse offerte", "Use my free analysis", "Usar mi análisis de regalo", "Usar minha análise de presente")}</> : <>🔓 {left == null ? L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo", "Desbloquear a análise completa") : L.t("Débloquer mon analyse du jour", "Unlock my daily analysis", "Desbloquear mi análisis del día", "Desbloquear minha análise do dia")}</>}</button>
                 </>
               ) : state === "visitor" ? (
                 <>
@@ -163,6 +174,8 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
                 <>
                   <p>{contents} {tier === "starter"
                     ? L.t("Ton analyse Starter du jour est utilisée : Pro rend les analyses complètes illimitées.", "Today's Starter analysis is used: Pro makes full analyses unlimited.", "Ya has usado tu análisis Starter de hoy: Pro hace los análisis completos ilimitados.", "Você já usou sua análise Starter de hoje: o Pro deixa as análises completas ilimitadas.")
+                    : free && access.welcomeUsed
+                    ? L.t("Ton analyse offerte est déjà utilisée : essaie Pro pour débloquer tous les matchs.", "You've used your free analysis: try Pro to unlock every game.", "Ya usaste tu análisis de regalo: prueba Pro para desbloquear todos los partidos.", "Você já usou sua análise de presente: experimente o Pro para desbloquear todos os jogos.")
                     : L.t("Elle est incluse dans Pro et Lifetime.", "It comes with Pro and Lifetime.", "Está incluido en Pro y Lifetime.", "Está incluída no Pro e no Lifetime.")}</p>
                   <Link href={L.href("/pro")} className="btn-solid" onClick={() => { rememberHere(); track("Clic Passer Pro", { source: free ? "compte_gratuit" : "limite" }); }}>{trial ? `🎁 ${trialCta}` : <>🔓 {L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo", "Desbloquear a análise completa")}</>}</Link>
                   {trial && <small className="gate-trial">{trialLine}</small>}

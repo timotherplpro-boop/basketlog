@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { COOKIE, cookieOptions, currentSession, safeNext, usageKey } from "../../../../lib/pro";
-import { matchKey, recordAnalysis, tierLimit, tierOf } from "../../../../lib/usage";
+import { matchKey, recordAnalysis, tierLimit, tierOf, welcomeAvailable } from "../../../../lib/usage";
 import { analyzeDuel } from "../../../../lib/data";
 import { nbaPath } from "../../../../lib/slug.js";
 
@@ -43,9 +43,11 @@ export async function POST(req) {
   if (!session) return NextResponse.json({ state: "visitor", path });
 
   const tier = tierOf(session.tier);
-  const limit = tierLimit(tier);
-  // Compte gratuit : pas d'analyse complète, rien à enregistrer.
-  const r = limit === 0 ? { ok: false, used: 0 } : await recordAnalysis(usageKey(session), matchKey(league, id), { ...info, league, path }, limit);
+  const uid = usageKey(session);
+  let limit = tierLimit(tier);
+  // Compte gratuit : une seule analyse complète offerte, s'il n'en a encore jamais lancé (la base décide, limite 1 du jour).
+  if (limit === 0 && (await welcomeAvailable(uid))) limit = 1;
+  const r = limit === 0 ? { ok: false, used: 0 } : await recordAnalysis(uid, matchKey(league, id), { ...info, league, path }, limit);
   const out = NextResponse.json({ state: r.ok ? "open" : "limit", used: r.used, limit, path }, { headers: { "Cache-Control": "no-store" } });
   if (refreshed) out.cookies.set(COOKIE, refreshed, cookieOptions);
   return out;

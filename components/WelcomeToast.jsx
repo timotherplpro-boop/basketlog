@@ -6,8 +6,8 @@ import { ONBOARDING_EVENT, SOURCE_EVENT, isAnalysisPath, onboardingDone } from "
 import { useL } from "./LangProvider";
 
 const MSG = {
-  inscription: ["Bienvenue sur Basketlog ! Ton compte est créé. Les analyses se débloquent avec Pro ou Lifetime.", "Welcome to Basketlog! Your account is ready. Analyses unlock with Pro or Lifetime.", "¡Bienvenido a Basketlog! Tu cuenta está creada. Los análisis se desbloquean con Pro o Lifetime."],
-  nouveau: ["Bienvenue sur Basketlog ! Ton compte gratuit est créé : tu vois l'aperçu des analyses. L'analyse complète se débloque avec Pro ou Lifetime.", "Welcome to Basketlog! Your free account is ready: you can see the analysis previews. The full analysis unlocks with Pro or Lifetime.", "¡Bienvenido a Basketlog! Tu cuenta gratis está creada: ves el avance de los análisis. El análisis completo se desbloquea con Pro o Lifetime."],
+  inscription: ["Bienvenue sur Basketlog ! Ton compte est créé, avec 1 analyse complète offerte : lance-la sur le match de ton choix.", "Welcome to Basketlog! Your account is ready, with 1 free full analysis: run it on any game you like.", "¡Bienvenido a Basketlog! Tu cuenta está creada, con 1 análisis completo de regalo: úsalo en el partido que quieras."],
+  nouveau: ["Bienvenue sur Basketlog ! Ton compte gratuit est créé, avec 1 analyse complète offerte : lance-la sur le match de ton choix.", "Welcome to Basketlog! Your free account is ready, with 1 free full analysis: run it on any game you like.", "¡Bienvenido a Basketlog! Tu cuenta gratis está creada, con 1 análisis completo de regalo: úsalo en el partido que quieras."],
   connexion: ["Te revoilà ! Tu es connecté.", "Welcome back! You're signed in.", "¡Hola de nuevo! Has iniciado sesión."],
   retour: ["Te revoilà ! Tu es connecté.", "Welcome back! You're signed in.", "¡Hola de nuevo! Has iniciado sesión."],
   abonne: ["Ton abonnement est actif. Bonnes analyses !", "Your subscription is active. Enjoy the analyses!", "Tu suscripción está activa. ¡Buenos análisis!"],

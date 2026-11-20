@@ -57,7 +57,9 @@ export default function AppShell({ session, ai = false, children }) {
   const p = stripLang(here.split("?")[0]) || "/";
   const tier = pro?.tier && pro.tier !== "gratuit" ? pro.tier : session?.tier || "compte";
   const name = pro?.name || session?.name || "";
-  const limit = pro ? pro.perDay : tier === "starter" ? 1 : tier === "compte" ? 0 : null; // null = illimité
+  // Compte gratuit qui n'a pas encore utilisé son analyse complète offerte (20/11/2026) : « 0 / 1 ».
+  const welcome = tier === "compte" && !!pro?.welcome && !used && !(pro?.role || session?.role);
+  const limit = welcome ? 1 : pro ? pro.perDay : tier === "starter" ? 1 : tier === "compte" ? 0 : null; // null = illimité
   const unlimited = limit == null;
   const full = !unlimited && used >= limit; // compte gratuit : « 0 / 0 » et « Limite atteinte », comme Visifoot
   const role = pro ? pro.role || null : session?.role || null; // admin ou créateur invité : accès complet
@@ -119,6 +121,8 @@ export default function AppShell({ session, ai = false, children }) {
             <Link href={L.href("/pro")} className="sb-q-note warn">
               {L.t("Limite atteinte", "Limit reached", "Límite alcanzado", "Limite atingido")} • {L.t("Upgrade pour plus", "Upgrade for more", "Mejora tu plan para más", "Melhore seu plano para ter mais")}
             </Link>
+          ) : welcome ? (
+            <Link href={L.href("/app/matchs")} className="sb-q-note">🎁 {L.t("1 analyse complète offerte : choisis ton match", "1 free full analysis: pick your game", "1 análisis completo de regalo: elige tu partido", "1 análise completa de presente: escolha seu jogo")}</Link>
           ) : unlimited ? (
             <span className="sb-q-note">{role ? L.t("Accès complet : aucune limite", "Full access: no limit", "Acceso completo: sin límite", "Acesso completo: sem limite") : L.t(`Formule ${plan} : aucune limite`, `${plan} plan: no limit`, `Plan ${plan}: sin límite`, `Plano ${plan}: sem limite`)}</span>
           ) : (

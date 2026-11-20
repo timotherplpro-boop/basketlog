@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { COOKIE, PLANS, cookieOptions, currentSession, usageKey } from "../../../../lib/pro";
-import { getUsage } from "../../../../lib/usage";
+import { getUsage, welcomeAvailable } from "../../../../lib/usage";
 import { isAccountSession } from "../../../../lib/auth-utils";
 
 export const dynamic = "force-dynamic";
@@ -13,10 +13,12 @@ export async function GET(req) {
   const tier = session?.tier && PLANS[session.tier] ? session.tier : session ? "compte" : "gratuit";
   const per = PLANS[tier].perDay;
   const used = session ? (await getUsage(usageKey(session)))?.used ?? null : null; // analyses lancées aujourd'hui
+  // Compte gratuit qui n'a encore lancé aucune analyse complète : il en a une offerte (barre latérale).
+  const welcome = tier === "compte" && session ? await welcomeAvailable(usageKey(session)) : false;
   const acct = isAccountSession(session);
   const res = NextResponse.json(
     {
-      tier, perDay: Number.isFinite(per) ? per : null, connected: !!session, uid: session?.uid || null, name: session?.name || null, role: session?.role || null, used, changed: !!changed,
+      tier, perDay: Number.isFinite(per) ? per : null, connected: !!session, uid: session?.uid || null, name: session?.name || null, role: session?.role || null, used, welcome, changed: !!changed,
       acct, ...(acct ? { email: session.email || null, whop: !!session.whop } : {}), ...(cleared ? { cleared: true } : {}),
     },
     { headers: { "Cache-Control": "no-store" } }

@@ -45,7 +45,7 @@ const PLANS = (L, ai, cur, promo = null) => {
       ["ok", L.t("Probabilités de victoire de tous les matchs", "Win probabilities for every game", "Probabilidades de victoria de todos los partidos", "Probabilidades de vitória de todos os jogos")],
       ["ok", L.t("Aperçu de chaque analyse", "Preview of every analysis", "Vista previa de cada análisis", "Prévia de cada análise")],
       ["ok", L.t("Forme récente et scénario n° 1", "Recent form and #1 scenario", "Forma reciente y escenario n.º 1", "Fase recente e cenário n.º 1")],
-      ["no", L.t("Analyse complète", "Full analysis", "Análisis completo", "Análise completa")],
+      ["ok", L.t("1 analyse complète offerte", "1 free full analysis", "1 análisis completo de regalo", "1 análise completa de presente")],
     ],
   },
   {
@@ -85,7 +85,7 @@ const ItemIcon = ({ kind }) => {
 
 const NOTICES = {
   ok: ["good", "Ton abonnement est actif. Bonnes analyses !", "Your subscription is active. Enjoy the analyses!", "Tu suscripción está activa. ¡Buenos análisis!"],
-  compte: ["good", "Ton compte gratuit est actif. Pour débloquer les analyses complètes, choisis une formule ci-dessous.", "Your free account is active. To unlock full analyses, pick a plan below.", "Tu cuenta gratis está activa. Para desbloquear los análisis completos, elige un plan aquí abajo."],
+  compte: ["good", "Ton compte gratuit est actif, avec 1 analyse complète offerte. Pour les débloquer sur tous les matchs, choisis une formule ci-dessous.", "Your free account is active, with 1 free full analysis. To unlock them on every game, pick a plan below.", "Tu cuenta gratis está activa, con 1 análisis completo de regalo. Para desbloquearlos en todos los partidos, elige un plan aquí abajo."],
   abonnement: ["warn", "Connexion réussie, mais aucun abonnement Basketlog actif n'a été trouvé sur ce compte Whop. Utilise le même compte que pour ton paiement.", "You're logged in, but no active Basketlog subscription was found on this Whop account. Use the same account you paid with.", "Has iniciado sesión, pero no hemos encontrado ninguna suscripción activa de Basketlog en esta cuenta de Whop. Usa la misma cuenta con la que pagaste."],
   connexion: ["warn", "La connexion avec Whop n'a pas abouti. Réessaie dans un instant.", "Logging in with Whop didn't work. Please try again in a moment.", "No se ha podido iniciar sesión con Whop. Vuelve a intentarlo en un momento."],
   config: ["warn", "Le paiement n'est pas encore activé sur Basketlog. Reviens très bientôt.", "Payments aren't enabled on Basketlog yet. Please come back soon.", "El pago todavía no está activado en Basketlog. Vuelve muy pronto."],
