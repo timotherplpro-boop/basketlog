@@ -58,10 +58,10 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
   const fav = a.pHome >= a.pAway ? g.home : g.away;
   const favP = pctOf(Math.max(a.pHome, a.pAway), L);
   const shareText = L.t(
-    `🏀 ${g.away.short} – ${g.home.short} : ${favP} de chances de victoire pour ${fav.short}, selon Basketlog`,
-    `🏀 ${g.away.short} vs ${g.home.short}: ${fav.short} ${favP} chance to win, according to Basketlog`,
-    `🏀 ${g.away.short} – ${g.home.short}: ${favP} de probabilidad de victoria para ${fav.short}, según Basketlog`,
-    `🏀 ${g.away.short} x ${g.home.short}: ${favP} de chance de vitória para ${fav.short}, segundo Basketlog`
+    `🏀 ${g.away.short} – ${g.home.short} : ${fav.short} à ${favP} de chances de victoire, selon Basketlog`,
+    `🏀 ${g.away.short} vs ${g.home.short}: ${fav.short} ${favP} to win, according to Basketlog`,
+    `🏀 ${g.away.short} – ${g.home.short}: ${fav.short} con ${favP} de probabilidad de victoria, según Basketlog`,
+    `🏀 ${g.away.short} x ${g.home.short}: ${fav.short} com ${favP} de chance de vitória, segundo Basketlog`
   );
 
   const faq = path ? matchFaq(a, L, acc, !isNBA) : [];
