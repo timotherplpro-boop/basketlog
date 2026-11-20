@@ -25,6 +25,13 @@ function shortDay(d, L) {
   return new Intl.DateTimeFormat(L.locale, { day: "numeric", month: "short", timeZone: "UTC" }).format(dt).replace(/\.$/, "");
 }
 
+// « vendredi 20 novembre (2026) » · « Friday, November 20(, 2026) » · « viernes 20 de noviembre (de 2026) » · « sexta-feira, 20 de novembro (de 2026) ».
+function fullDay(d, L, year) {
+  const dt = new Date(Date.UTC(+d.slice(0, 4), +d.slice(4, 6) - 1, +d.slice(6, 8), 12));
+  const txt = new Intl.DateTimeFormat(L.locale, { weekday: "long", day: "numeric", month: "long", ...(year ? { year: "numeric" } : {}), timeZone: "UTC" }).format(dt);
+  return L.es ? txt.replace(",", "") : txt;
+}
+
 // FR : « de ce soir », « de demain », « du mercredi 29 octobre » · EN : "tonight", "tomorrow", "for Wednesday, October 29"
 function labelOf(d, today, L) {
   if (L.pt) {
@@ -56,17 +63,32 @@ export async function generateMetadata({ searchParams }) {
   const L = await getL();
   const today = nbaToday();
   const date = isValidDate(sp.d) ? sp.d : today;
-  let n = 0;
-  try { n = (await analyzeDay(date)).analyses.length; } catch {}
+  let an = [];
+  try { an = (await analyzeDay(date)).analyses || []; } catch {}
+  const n = an.length;
   const when = labelOf(date, today, L);
   const isToday = date === today && !sp.d;
-  // Titres calés sur les recherches vues dans la Search Console : « nba predictions today » (US), « pronósticos nba hoy » (ES).
-  const title = L.t(
-    isToday ? "Pronostic NBA ce soir : matchs du jour et probabilités – Basketlog" : `Pronostic NBA ${when} – Basketlog`,
-    isToday ? `NBA predictions today (${shortDay(date, L)}): win probabilities for every game` : `NBA predictions ${when} – Basketlog`,
-    isToday ? `Pronósticos NBA hoy (${shortDay(date, L)}): probabilidades de cada partido` : `Pronósticos NBA ${when} – Basketlog`, isToday ? `Palpites NBA hoje (${shortDay(date, L)}): probabilidades de cada jogo` : `Palpites NBA ${when} – Basketlog`
-  );
-  const description = L.t(
+  // Titres calés sur les recherches vues dans la Search Console (« nba predictions today », « pronósticos nba hoy ») et sur
+  // les pages qui nous devancent (un titre par jour avec le jour de la semaine et la date : « pronósticos nba hoy jueves 22 »).
+  // Jour passé : le bilan du favori (« 7 sur 9 justes »), qui donne une raison de cliquer et montre la transparence.
+  const day = fullDay(date, L, false);
+  const dayY = fullDay(date, L, true);
+  let ok = 0, done = 0;
+  for (const a of an) {
+    const g = a.game;
+    if (g?.state !== "post" || g.home?.score == null || g.away?.score == null || +g.home.score === +g.away.score || a.pHome == null) continue;
+    done++;
+    if ((a.pHome >= 0.5) === (+g.home.score > +g.away.score)) ok++;
+  }
+  const past = !isToday && date < today && done > 0;
+  const title = isToday
+    ? L.t(`Pronostic NBA ce soir, ${day}${n ? ` : ${n} matchs gratuits` : ""}`, `Free NBA Predictions Today, ${day}${n ? `: ${n} games` : ""}`, `Pronósticos NBA hoy ${day}${n ? `: ${n} partidos gratis` : ""}`, `Palpites NBA hoje, ${day}${n ? `: ${n} jogos grátis` : ""}`)
+    : past
+      ? L.t(`Pronostics NBA du ${dayY} : ${ok} sur ${done} justes`, `NBA Predictions, ${dayY}: ${ok} of ${done} right`, `Pronósticos NBA del ${dayY}: ${ok} de ${done} acertados`, `Palpites NBA de ${dayY}: ${ok} de ${done} certos`)
+      : L.t(`Pronostic NBA du ${dayY}${n ? ` : ${n} matchs` : ""}`, `NBA Predictions for ${dayY}${n ? `: ${n} games` : ""}`, `Pronósticos NBA del ${dayY}${n ? `: ${n} partidos` : ""}`, `Palpites NBA de ${dayY}${n ? `: ${n} jogos` : ""}`);
+  const description = past
+    ? L.t(`Les ${n} matchs NBA ${when} : pronostic d'avant-match, score final et réussite. Le favori Basketlog a gagné ${ok} matchs sur ${done}.`, `All ${n} NBA games ${when}: pre-game prediction, final score and result. The Basketlog favorite won ${ok} of ${done}.`, `Los ${n} partidos de la NBA ${when}: pronóstico previo, resultado final y acierto. El favorito de Basketlog ganó ${ok} de ${done}.`, `Os ${n} jogos da NBA ${when}: palpite, placar final e acerto. O favorito do Basketlog venceu ${ok} de ${done}.`)
+    : L.t(
     n ? `Pronostic NBA gratuit pour les ${n} matchs ${when} : favori, probabilités de victoire, score projeté et heure de chaque match (heure de Paris).` : `Matchs NBA ${when} : pronostic gratuit, probabilités de victoire, score projeté et heure de chaque match (heure de Paris).`,
     n ? `All ${n} NBA games ${when} analyzed: win probabilities, projected score and the favorite in every matchup, in Eastern Time.` : `NBA games ${when}: win probabilities, projected score and the favorite in every matchup, in Eastern Time.`,
     n ? `Los ${n} partidos de la NBA ${when} analizados: probabilidades de victoria, marcador proyectado y favorito de cada encuentro, en hora de España.` : `Partidos de la NBA ${when}: probabilidades de victoria, marcador proyectado y favorito de cada encuentro, en hora de España.`, n ? `Os ${n} jogos da NBA ${when} analisados: probabilidades de vitória, placar projetado e favorito de cada confronto, no horário de Brasília.` : `Jogos da NBA ${when}: probabilidades de vitória, placar projetado e favorito de cada confronto, no horário de Brasília.`

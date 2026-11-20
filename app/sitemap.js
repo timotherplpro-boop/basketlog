@@ -43,6 +43,12 @@ export default async function sitemap() {
       // Pages duel sans date (/nba/celtics-vs-lakers) des affiches de la semaine.
       ...[...new Set(up.map((g) => pairPath(g.home, g.away)))].map((p) => u(p, 0.6, "daily")),
       ...past.map((g) => u(nbaPath(g, nbaDateOf(g.date)), 0.4, "weekly")),
+      // Pronostics d'un jour précis (/app/matchs?d=…, titre avec le jour et la date, bilan du favori une fois joués) :
+      // les 3 derniers jours et les jours à venir. Aujourd'hui (/app/matchs) et demain (/app/demain) ont leur propre adresse.
+      ...[...new Set([...past.map((g) => nbaDateOf(g.date)), ...up.map((g) => g.d)])]
+        .filter((d) => d && d !== today && d !== shiftDate(today, 1))
+        .sort()
+        .map((d) => u(`/app/matchs?d=${d}`, d < today ? 0.4 : 0.5, d < today ? "weekly" : "hourly")),
     ];
   } catch {}
 

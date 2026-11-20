@@ -23,8 +23,11 @@ export async function generateMetadata({ params }) {
   const c = CONF[(await params).conf];
   if (!c) return {};
   const n = names(L, c), s = seasonLabel();
+  // Date du jour dans le titre (« au 20 novembre 2026 ») : sur cette recherche on est déjà en première page sans clic ;
+  // Wikipédia et ESPN, devant nous, ne montrent pas de date : un classement visiblement à jour se distingue.
+  const at = fmtDate(L, new Date().toISOString(), { day: "numeric", month: "long", year: "numeric" });
   return pageMeta({
-    title: L.t(`Classement ${n.full} NBA ${s} : bilan et chances de playoffs`, `NBA ${n.full} standings ${s}: records and playoff odds`, `Clasificación ${n.full} NBA ${s}: balance y opciones de playoffs`, `Classificação ${n.full} NBA ${s}: campanha e chances de playoffs`),
+    title: L.t(`Classement ${n.full} NBA au ${at} : bilan et playoffs`, `NBA ${n.full} standings (${at}): records and playoff odds`, `Clasificación ${n.full} NBA al ${at}: balance y playoffs`, `Classificação ${n.full} NBA em ${at}: campanha e playoffs`),
     description: L.t(`Classement à jour de la ${n.full} NBA ${s} : bilan, écart de points, série, 10 derniers matchs et chances de playoffs de chaque équipe selon le modèle Basketlog.`, `Up-to-date NBA ${n.full} standings ${s}: record, point differential, streak, last 10 games and each team's playoff odds from the Basketlog model.`, `Clasificación actualizada de la ${n.full} NBA ${s}: balance, diferencia de puntos, racha, últimos 10 partidos y opciones de playoffs de cada equipo según el modelo de Basketlog.`, `Classificação atualizada da ${n.full} NBA ${s}: campanha, saldo de pontos, sequência, últimos 10 jogos e chances de playoffs de cada time segundo o modelo do Basketlog.`),
     path: `/app/classement/${(await params).conf}`,
     L,
