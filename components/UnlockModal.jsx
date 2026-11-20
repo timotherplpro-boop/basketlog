@@ -10,6 +10,7 @@ import { localStore } from "../lib/safe-store";
 import { useL } from "./LangProvider";
 import { useFocusTrap } from "./useFocusTrap";
 import { ExitOfferBody, useExitOffer } from "./ExitOffer";
+import { PRO_TRIAL_DAYS } from "../lib/pricing";
 
 const Svg = ({ children, size = 18 }) => (
   <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>{children}</svg>
@@ -113,9 +114,13 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
     ? { lead: `${match.home} vs ${match.away}`, big: L.t("Match en cours", "Game in progress", "Partido en curso", "Jogo em andamento") }
     : { lead: L.t(`${match.home} vs ${match.away} commence dans`, `${match.home} vs ${match.away} starts in`, `${match.home} vs ${match.away} empieza en`, `${match.home} x ${match.away} começa em`), big: left(start - now, L) };
 
+  // Essai Pro (20/11/2026) : le bouton et la ligne du bas annoncent l'essai gratuit (sauf abonné Starter).
+  const trial = PRO_TRIAL_DAYS > 0 && !(state !== "visitor" && tier === "starter");
   const foot = state !== "visitor" && tier === "starter"
     ? L.t("Accès instantané avec Pro, analyses illimitées", "Instant access with Pro, unlimited analyses", "Acceso inmediato con Pro, análisis ilimitados", "Acesso imediato com o Pro, análises ilimitadas")
-    : L.t("Accès instantané après l'abonnement", "Instant access once you subscribe", "Acceso inmediato al suscribirte", "Acesso imediato ao assinar");
+    : trial
+      ? L.t(`${PRO_TRIAL_DAYS} jours offerts, puis 9,99 €/mois + taxes. Résiliable à tout moment.`, `${PRO_TRIAL_DAYS} days free, then $9.99/mo (+ tax). Cancel anytime.`, `${PRO_TRIAL_DAYS} días gratis, luego 9,99 €/mes + impuestos. Cancela cuando quieras.`, `${PRO_TRIAL_DAYS} dias grátis, depois 9,99 €/mês + impostos. Cancele quando quiser.`)
+      : L.t("Accès instantané après l'abonnement", "Instant access once you subscribe", "Acceso inmediato al suscribirte", "Acesso imediato ao assinar");
 
   return createPortal(
     <div className="modal ulk" role="dialog" aria-modal="true" aria-labelledby="ulk-title" onClick={(e) => e.target === e.currentTarget && tryClose()}>
@@ -124,7 +129,8 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
         {pitch && offer ? (
           <ExitOfferBody
             offer={offer}
-            href={proUrlWithCode(href, offer.code)}
+            trial={PRO_TRIAL_DAYS > 0 ? PRO_TRIAL_DAYS : 0}
+            href={PRO_TRIAL_DAYS > 0 ? href : proUrlWithCode(href, offer.code)}
             titleId="ulk-title"
             onAccept={() => track("Clic offre de sortie", { lieu: "fenetre_analyse", code: offer.code, remise: offer.pct })}
             onDecline={tryClose}
@@ -149,7 +155,7 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
           </div>
         )}
 
-        <a href={href} className="btn-solid ulk-cta" onClick={onCta}>{L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo", "Desbloquear a análise completa")}</a>
+        <a href={href} className="btn-solid ulk-cta" onClick={onCta}>{trial ? `🎁 ${L.t(`Essai gratuit ${PRO_TRIAL_DAYS} jours`, `Start ${PRO_TRIAL_DAYS}-day free trial`, `Prueba gratis ${PRO_TRIAL_DAYS} días`, `Teste grátis por ${PRO_TRIAL_DAYS} dias`)}` : L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo", "Desbloquear a análise completa")}</a>
         <small className="ulk-foot">{foot}</small>
         </>)}
       </div>

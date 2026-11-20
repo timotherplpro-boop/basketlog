@@ -37,8 +37,21 @@ const Cross = () => (
 
 // Contenu de l'offre. `href` : le bouton est un lien (vers /pro avec le code) ; sans `href`, c'est un bouton (la page /pro
 // applique elle-même le code).
-export function ExitOfferBody({ offer, href, onAccept, onDecline, titleId = "exo-title" }) {
+export function ExitOfferBody({ offer, href, onAccept, onDecline, titleId = "exo-title", trial = 0 }) {
   const L = useL();
+  // 20/11/2026 : dans la fenêtre « analyse complète », l'offre de sortie propose l'essai gratuit Pro (plus parlant que
+  // la remise : 2 clics sur 30 affichages) ; la page /pro garde la remise.
+  if (trial > 0) {
+    return (
+      <div className="exo">
+        <span className="exo-eyebrow">{L.t("Avant de partir", "Before you go", "Antes de irte", "Antes de você ir")}</span>
+        <h3 id={titleId}>{L.t(`Essaie Pro gratuitement pendant ${trial} jours`, `Try Pro free for ${trial} days`, `Prueba Pro gratis durante ${trial} días`, `Teste o Pro grátis por ${trial} dias`)}</h3>
+        <p className="exo-sub">{L.t("Toutes les analyses complètes, sur tous les matchs. Rien à payer aujourd'hui, puis 9,99 €/mois + taxes. Résiliable à tout moment avant la fin de l'essai.", "Every full analysis, on every game. Nothing to pay today, then $9.99/mo (+ tax). Cancel anytime before the trial ends.", "Todos los análisis completos, en todos los partidos. Nada que pagar hoy, luego 9,99 €/mes + impuestos. Cancela cuando quieras antes de que acabe la prueba.", "Todas as análises completas, em todos os jogos. Nada a pagar hoje, depois 9,99 €/mês + impostos. Cancele quando quiser antes do fim do teste.")}</p>
+        <a href={href} className="btn-solid exo-cta" onClick={onAccept}>🎁 {L.t("Démarrer l'essai gratuit", "Start the free trial", "Empezar la prueba gratis", "Começar o teste grátis")}</a>
+        <button type="button" className="exo-no" onClick={onDecline}>{L.t("Non merci", "No thanks", "No, gracias", "Não, obrigado")}</button>
+      </div>
+    );
+  }
   const cta = L.t("Profiter de la remise", "Claim the discount", "Aprovechar el descuento", "Aproveitar o desconto");
   return (
     <div className="exo">

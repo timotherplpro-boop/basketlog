@@ -1873,3 +1873,4 @@ html { scroll-behavior: smooth; }
 .defi-score .defi-big { font-size: 26px; margin: 6px 0; }
 .defi-verdict { font-weight: 700; margin: 0 0 10px; }
 .defi-share { margin-top: 6px; }
+.gate-trial { display: block; margin-top: 8px; font-size: 13px; color: var(--muted); } /* 20/11/2026 : essai Pro sous le bouton des écrans verrouillés */
