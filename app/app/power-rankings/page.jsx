@@ -32,6 +32,10 @@ export default async function PowerRankingsPage() {
   const rows = await powerRankings();
   const num = (x) => `${x > 0 ? "+" : ""}${L.en ? x.toFixed(1) : x.toFixed(1).replace(".", ",")}`;
   const pc = (p) => (L.en ? `${Math.round(p * 100)}%` : `${Math.round(p * 100)} %`);
+  const mv = (m) => (m == null ? "–" : m > 0 ? `▲ ${m}` : m < 0 ? `▼ ${-m}` : "=");
+  const moved = rows.filter((r) => r.move != null);
+  const up = [...moved].sort((a, b) => b.move - a.move)[0];
+  const down = [...moved].sort((a, b) => a.move - b.move)[0];
   return (
     <main className="app-page wide">
       <AppTabs active="classement" />
