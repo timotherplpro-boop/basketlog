@@ -6,6 +6,8 @@ import { nbaPath } from "../../../../lib/slug.js";
 
 export const dynamic = "force-dynamic";
 
+const ANALYSIS_PATH = /^\/(?:(?:en|es|pt)\/)?(?:app(?:\/|\?|$)|nba\/[a-z0-9-]+-vs-|euroleague\/[a-z0-9-]+-vs-)/;
+
 const str = (v, n = 40) => (typeof v === "string" ? v.slice(0, n) : typeof v === "number" ? String(v) : null);
 const team = (t) => (t && typeof t === "object" ? {
   short: str(t.short), abbr: str(t.abbr, 8),
@@ -37,7 +39,8 @@ export async function POST(req) {
       info = { date: null, home: team(g.home), away: team(g.away) };
     }
   }
-  if (!id || !path || !/^\/app(\/|\?|$)/.test(path)) return NextResponse.json({ error: "match" }, { status: 400 });
+  // Fiches de match : /app/…, et depuis le 16/11/2026 les adresses lisibles /nba/… et /euroleague/… (avec ou sans /en, /es, /pt).
+  if (!id || !path || !ANALYSIS_PATH.test(path)) return NextResponse.json({ error: "match" }, { status: 400 });
 
   const { session, refreshed } = await currentSession(req.cookies.get(COOKIE)?.value);
   if (!session) return NextResponse.json({ state: "visitor", path });
