@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { socialDay, recapDay } from "../../../../lib/social-day";
-import { blueskyProfile, ogImageUrl, RECAP_MARK, launchPosts } from "../../../../lib/social";
+import { blueskyProfile, ogImageUrl, RECAP_MARK, launchPosts, POWER_MARK, powerPosts } from "../../../../lib/social";
+import { powerRankings } from "../../../../lib/data";
+import { GROUPS, nationalPosts } from "../../../../lib/nationals.js";
+import { nationalBase, nationalFrom } from "../../../../lib/nationals-data";
 import { socialConfig, socialStatus, sendTelegram, telegramCheck, blueskySession, blueskyThumb, sendBluesky, blueskyPostedSince, blueskySetProfile } from "../../../../lib/social-send";
 import { COOKIE, currentSession } from "../../../../lib/pro";
 
@@ -30,6 +33,37 @@ async function access(req) {
 }
 
 const json = (body, status = 200) => NextResponse.json(body, { status, headers: { "Cache-Control": "no-store" } });
+
+// Envoie des publications { [langue]: { telegram, telegramPreview, bluesky } } sur les chaînes Telegram de chaque langue
+// et sur Bluesky (langues branchées). sess : session Bluesky déjà ouverte (ou null).
+async function sendPosts(cfg, sess, posts) {
+  const out = [];
+  for (const [lang, p] of Object.entries(posts || {})) {
+    const chat = cfg.telegram?.chats?.[lang];
+    if (chat) {
+      try { out.push({ channel: "telegram", lang, ok: true, id: await sendTelegram(cfg.telegram.token, chat, p.telegram, p.telegramPreview) }); }
+      catch (e) { out.push({ channel: "telegram", lang, ok: false, error: e.message }); }
+    }
+    if (sess && cfg.bluesky.langs.includes(lang)) {
+      try {
+        const thumb = await blueskyThumb(sess, ogImageUrl(lang));
+        out.push({ channel: "bluesky", lang, ok: true, uri: await sendBluesky(sess, p.bluesky, thumb) });
+      } catch (e) { out.push({ channel: "bluesky", lang, ok: false, error: e.message }); }
+    }
+  }
+  return out;
+}
+
+// « 🇫🇷 Les Français en NBA cette nuit » (en français) et « 🇪🇸 Españoles y latinos… » (en espagnol), après les pronostics du jour.
+async function nationalsToday() {
+  const base = await nationalBase();
+  const out = [];
+  for (const g of [GROUPS.fr, GROUPS.es]) {
+    const posts = nationalPosts(g, nationalFrom(g, base).tonight);
+    if (posts) out.push(posts);
+  }
+  return out;
+}
 
 export async function GET(req) {
   const who = await access(req);
@@ -102,6 +136,26 @@ export async function GET(req) {
     const ok = tg.every((t) => t.ok && t.admin && t.canPost) && (!check.bluesky || check.bluesky.ok) && (tg.length > 0 || !!check.bluesky);
     return json({ ok, ...check, at: new Date().toISOString() });
   }
+  // Power ranking de la semaine (?power=1, le lundi à 08 h 33 UTC) : top 5, plus forte hausse et plus forte baisse sur 7 jours.
+  if (sp.get("power") === "1") {
+    const rows = await powerRankings().catch(() => null);
+    const posts = rows ? powerPosts(rows) : null;
+    const pbase = { status: socialStatus(cfg), power: true };
+    if (!posts) return json({ ok: false, ...pbase, skipped: "power ranking indisponible" });
+    if (!cfg.enabled || sp.get("dry") === "1") return json({ ok: true, ...pbase, dry: true, posts });
+    if (!cfg.telegram && !cfg.bluesky) return json({ ok: false, ...pbase, skipped: "aucun compte branché" });
+    let ps = null;
+    const errs = [];
+    if (cfg.bluesky) {
+      try {
+        ps = await blueskySession(cfg.bluesky);
+        if (await blueskyPostedSince(ps, new Date(Date.now() - 6 * 3600e3).toISOString(), POWER_MARK)) return json({ ok: true, ...pbase, skipped: "déjà publié (Bluesky)" });
+      } catch (e) { errs.push({ channel: "bluesky", ok: false, error: e.message }); }
+    }
+    const sent = [...errs, ...(await sendPosts(cfg, ps, posts))];
+    for (const s of sent.filter((x) => !x.ok)) console.warn(`[social power] ${s.channel}${s.lang ? ` ${s.lang}` : ""} : ${s.error}`);
+    return json({ ok: sent.length > 0 && sent.every((s) => s.ok), ...pbase, sent, at: new Date().toISOString() });
+  }
   // Récap du matin (?recap=1, 08 h 13 UTC) : résultats de la veille, plus grosse surprise, lien vers /app/resultats.
   if (sp.get("recap") === "1") {
     const r = await recapDay();
@@ -156,7 +210,7 @@ export async function GET(req) {
   const day = await socialDay();
   const base = { d: day.d, status: socialStatus(cfg), games: day.picks.length, errors: day.errors };
   if (!day.picks.length) return json({ ok: !day.errors.length, ...base, skipped: "aucun match à venir aujourd'hui" });
-  if (!cfg.enabled || sp.get("dry") === "1") return json({ ok: true, ...base, dry: true, posts: day.posts });
+  if (!cfg.enabled || sp.get("dry") === "1") return json({ ok: true, ...base, dry: true, posts: day.posts, nationals: await nationalsToday().catch((e) => ({ error: e.message })) });
   if (!cfg.telegram && !cfg.bluesky) return json({ ok: false, ...base, skipped: "aucun compte branché (variables Telegram ou Bluesky manquantes)" });
   if (Date.now() - lastRun < 60e3) return json({ ok: true, ...base, skipped: "déjà lancé il y a moins d'une minute" });
   if (lastDay === day.d) return json({ ok: true, ...base, skipped: "déjà publié aujourd'hui" });
@@ -205,6 +259,10 @@ export async function GET(req) {
   };
   const [tgSent, bsSent] = await Promise.all([telegramJob(), blueskyJob()]);
   sent.push(...tgSent, ...bsSent);
+  // Joueurs français, espagnols et latinos de la nuit (rien si aucun ne joue).
+  try {
+    for (const posts of await nationalsToday()) sent.push(...(await sendPosts(cfg, sess, posts)).map((x) => ({ ...x, nationals: true })));
+  } catch (e) { console.warn(`[social] joueurs du soir : ${e.message}`); }
   if (sent.some((s) => s.ok)) lastDay = day.d;
   for (const s of sent.filter((x) => !x.ok)) console.warn(`[social] ${s.channel}${s.lang ? ` ${s.lang}` : ""} : ${s.error}`);
   return json({ ok: sent.length > 0 && sent.every((s) => s.ok), ...base, sent, at: new Date().toISOString() });

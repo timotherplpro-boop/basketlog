@@ -21,6 +21,10 @@
       "schedule": "13 8 * * *"
     },
     {
+      "path": "/api/cron/social?power=1",
+      "schedule": "33 8 * * 1"
+    },
+    {
       "path": "/api/cron/newsletter",
       "schedule": "11 12 * * 0"
     },

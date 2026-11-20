@@ -22,6 +22,7 @@ import { payTests } from "./pay.mjs";
 import { recapTests } from "./recap.mjs";
 import { defiTests } from "./defi.mjs";
 import { discordTests } from "./discord.mjs";
+import { nationalsTests } from "./nationals.mjs";
 
 export async function unit() {
   let passed = 0, failed = 0;
@@ -586,6 +587,7 @@ export async function unit() {
   await recapTests({ ok, ko, eq });
   await defiTests({ ok, ko, eq });
   await discordTests({ ok, ko, eq });
+  await nationalsTests({ ok, ko, eq });
 
   return { passed, failed };
 }

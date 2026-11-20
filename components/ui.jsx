@@ -3,6 +3,7 @@ import { mk, fmtDate, fmtTime, pctOf } from "../lib/i18n";
 import { confText } from "../lib/matchtext";
 import { sized, LOGO_W } from "../lib/img";
 import { nbaPath } from "../lib/slug.js";
+import LocalTime from "./LocalTime";
 
 export function TeamLogo({ team, size = 30 }) {
   if (!team.logo) return <div style={{ width: size, height: size, borderRadius: 8, background: team.color }} />;
@@ -33,7 +34,7 @@ export function StatusTag({ game, L = mk("fr") }) {
   if (game.postponed === "canceled") return <span className="tag">{L.t("Annulé", "Canceled", "Cancelado", "Cancelado")}</span>;
   if (game.postponed) return <span className="tag">{L.t("Reporté", "Postponed", "Aplazado", "Adiado")}</span>;
   if (game.state === "post") return <span className="tag">{L.t("Terminé", "Final", "Finalizado", "Encerrado")}</span>;
-  return <span className="tag">{parisDay(game.date, L)} · {parisTime(game.date, L)}{L.en ? " ET" : ""}</span>;
+  return <span className="tag"><LocalTime iso={game.date} lang={L.lang} day label={L.en} /></span>;
 }
 
 export function GameCard({ a, date, L = mk("fr") }) {

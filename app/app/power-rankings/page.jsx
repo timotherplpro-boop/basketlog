@@ -42,10 +42,18 @@ export default async function PowerRankingsPage() {
           `All 30 teams ranked by the Basketlog model, ${monthYear(L)}. Strength is the expected point margin against an average team on a neutral court (before today's injuries).`,
           `Los 30 equipos según el modelo de Basketlog, ${monthYear(L)}. La fuerza es la diferencia de puntos esperada ante un equipo medio en campo neutral (sin las bajas del día).`, `Os 30 times segundo o modelo do Basketlog, ${monthYear(L)}. A força é o saldo de pontos esperado contra um time médio em quadra neutra (sem os desfalques do dia).`
         )}</p>
+        {up && down && up.move > 0 && down.move < 0 && (
+          <p className="note">{L.t(
+            `Sur 7 jours : plus forte hausse pour ${up.team.short} (▲ ${up.move}), plus forte baisse pour ${down.team.short} (▼ ${-down.move}).`,
+            `Last 7 days: biggest riser ${up.team.short} (▲ ${up.move}), biggest faller ${down.team.short} (▼ ${-down.move}).`,
+            `En 7 días: mayor subida de ${up.team.short} (▲ ${up.move}), mayor caída de ${down.team.short} (▼ ${-down.move}).`,
+            `Em 7 dias: maior alta do ${up.team.short} (▲ ${up.move}), maior queda do ${down.team.short} (▼ ${-down.move}).`
+          )}</p>
+        )}
       </div>
       <div className="panel">
         <table className="std-table">
-          <thead><tr><th>#</th><th>{L.t("Équipe", "Team", "Equipo", "Time")}</th><th>{L.t("V-D", "W-L", "V-D", "V-D")}</th><th>{L.t("Force", "Strength", "Fuerza", "Força")}</th><th>{L.t("vs équipe moyenne", "vs average team", "vs equipo medio", "vs time médio")}</th></tr></thead>
+          <thead><tr><th>#</th><th>{L.t("Équipe", "Team", "Equipo", "Time")}</th><th>{L.t("V-D", "W-L", "V-D", "V-D")}</th><th>{L.t("Force", "Strength", "Fuerza", "Força")}</th><th>{L.t("vs équipe moyenne", "vs average team", "vs equipo medio", "vs time médio")}</th><th title={L.t("Évolution sur 7 jours", "Change over 7 days", "Cambio en 7 días", "Variação em 7 dias")}>{L.t("7 j", "7 days", "7 días", "7 dias")}</th></tr></thead>
           <tbody>
             {rows.map((r, i) => (
               <tr key={r.team.id}>
@@ -62,6 +70,7 @@ export default async function PowerRankingsPage() {
                 <td>{r.wins}-{r.losses}</td>
                 <td className={r.strength > 0 ? "pos" : r.strength < 0 ? "neg" : ""}>{num(r.strength)}</td>
                 <td>{pc(r.pAvg)}</td>
+                <td className={r.move > 0 ? "pos" : r.move < 0 ? "neg" : ""}>{mv(r.move)}</td>
               </tr>
             ))}
           </tbody>
@@ -76,6 +85,8 @@ export default async function PowerRankingsPage() {
         <Link href={L.href("/app/simulation")}>{L.t("chances de playoffs", "playoff odds", "probabilidades de playoffs", "chances de playoffs")}</Link>
         {" · "}
         <Link href={L.href("/app/champion")}>{L.t("favoris au titre", "title favorites", "favoritos al título", "favoritos ao título")}</Link>
+        {" · "}
+        <Link href={L.href(L.es || L.pt ? "/app/espagnols" : "/app/francais")}>{L.t("les Français en NBA", "French players in the NBA", "españoles y latinos en la NBA", "espanhóis e latinos na NBA")}</Link>
       </p>
       <JsonLd data={{
         "@context": "https://schema.org", "@type": "ItemList",

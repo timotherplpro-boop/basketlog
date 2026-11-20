@@ -6,6 +6,7 @@ import { nbaPicks, summarize, lastDays } from "../../lib/history";
 import { nbaToday, seasonForDate } from "../../lib/espn";
 import { nbaPath, elPath } from "../../lib/slug";
 import { elUpcoming } from "../../lib/euroleague";
+import { csvName } from "../../lib/picks-csv.js";
 
 export const revalidate = 3600;
 
@@ -45,6 +46,8 @@ export async function GET() {
     `- [NBA scores last night, with the model's pre-game favorite for each game](${SITE}/en/app/resultats)`,
     `- [Free game: pick tonight's NBA winners and try to beat the Basketlog model](${SITE}/en/app/defi)`,
     `- [NBA Christmas Day games: schedule and win probabilities](${SITE}/en/app/noel) · [Free FiveThirtyEight NBA predictions alternative](${SITE}/en/fivethirtyeight-nba)`,
+    `- [French players in the NBA tonight: times, opponents, team win probabilities and stats](${SITE}/en/app/francais) · [Spanish and Latino NBA players (Spain, Mexico, Dominican Republic, Puerto Rico)](${SITE}/es/app/espagnols)`,
+    `- Open data (CC BY 4.0): every NBA prediction of the season as CSV: ${SITE}/data/${csvName(seasonForDate(nbaToday()))}`,
     `- [NBA power rankings](${SITE}/en/app/power-rankings): all 30 teams ranked by model strength, updated daily`,
     `- [NBA Cup predictions](${SITE}/en/app/nba-cup)`,
     `- [Model track record](${SITE}/en/app/bilan): accuracy, calibration by probability range, every game`,

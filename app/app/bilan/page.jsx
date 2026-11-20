@@ -8,6 +8,9 @@ import { pageMeta } from "../../../lib/seo";
 import { getL } from "../../../lib/lang-server";
 import { confText } from "../../../lib/matchtext";
 import { nbaPath, elPath } from "../../../lib/slug.js";
+import JsonLd from "../../../components/JsonLd";
+import { SITE } from "../../../lib/site";
+import { csvName } from "../../../lib/picks-csv.js";
 
 export const dynamic = "force-dynamic";
 export async function generateMetadata() {
@@ -201,6 +204,30 @@ export default async function BilanPage({ searchParams }) {
           <p>L&apos;onglet « Pronostics publiés » montre, lui, les pronostics enregistrés avant chaque match depuis le {since}.</p>
         </>)}
       </div>
+      <section className="card block">
+        <h2>{L.t("Télécharger les données", "Download the data", "Descargar los datos", "Baixar os dados")}</h2>
+        <p>{L.t(
+          "Tous les pronostics NBA de la saison, match par match : probabilité de victoire, score projeté, score final et réussite. Format CSV, mis à jour chaque heure. Réutilisation libre (licence CC BY 4.0) avec un lien vers Basketlog.",
+          "Every NBA prediction of the season, game by game: win probability, projected score, final score and result. CSV, updated hourly. Free to reuse (CC BY 4.0 license) with a link to Basketlog.",
+          "Todos los pronósticos NBA de la temporada, partido a partido: probabilidad de victoria, marcador proyectado, resultado final y acierto. Formato CSV, actualizado cada hora. Reutilización libre (licencia CC BY 4.0) con un enlace a Basketlog.",
+          "Todos os palpites da NBA da temporada, jogo a jogo: probabilidade de vitória, placar projetado, placar final e acerto. Formato CSV, atualizado a cada hora. Reutilização livre (licença CC BY 4.0) com um link para o Basketlog."
+        )}</p>
+        <p className="mfaq-more">
+          <a href={`/data/${csvName(season)}`}>{csvName(season)}</a>{" · "}<a href={`/data/${csvName(season - 1)}`}>{csvName(season - 1)}</a>
+        </p>
+      </section>
+      <JsonLd data={{
+        "@context": "https://schema.org", "@type": "Dataset",
+        name: `Basketlog NBA predictions ${label(season)}`,
+        description: "Every NBA game of the season with the Basketlog model's pre-game win probability (computed only from results known before tip-off), projected score, final score and whether the favorite won.",
+        url: `${SITE}${L.href("/app/bilan")}`,
+        creator: { "@type": "Organization", name: "Basketlog", url: SITE },
+        license: "https://creativecommons.org/licenses/by/4.0/",
+        isAccessibleForFree: true,
+        keywords: ["NBA", "basketball", "predictions", "win probability", "sports analytics"],
+        temporalCoverage: `${season - 1}-10/${season}-06`,
+        distribution: [season, season - 1].map((s) => ({ "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: `${SITE}/data/${csvName(s)}` })),
+      }} />
       <p className="disclaimer">{L.t("Basketlog n'est pas un service de paris. Un bon taux de réussite passé ne garantit pas les résultats futurs.", "Basketlog is not a betting service. A good past track record does not guarantee future results.", "Basketlog no es un servicio de apuestas. Un buen porcentaje de acierto en el pasado no garantiza resultados futuros.", "O Basketlog não é um serviço de apostas. Uma boa taxa de acerto no passado não garante resultados futuros.")}</p>
     </main>
   );
