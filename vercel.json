@@ -17,6 +17,10 @@
       "schedule": "20 15 * * *"
     },
     {
+      "path": "/api/cron/push",
+      "schedule": "25 15 * * *"
+    },
+    {
       "path": "/api/cron/social?recap=1",
       "schedule": "13 8 * * *"
     },

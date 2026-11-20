@@ -1,5 +1,6 @@
 import Link from "next/link";
 import PrefSource from "../../../components/PrefSource";
+import PushOptIn from "../../../components/PushOptIn";
 import { analyzeDay, recentAccuracy } from "../../../lib/data";
 import { fmtTime } from "../../../lib/i18n";
 import { recordPronosSoon } from "../../../lib/pronos";
@@ -183,6 +184,7 @@ export default async function MatchsPage({ searchParams }) {
         <Link className="btn-white" href={L.href(`/app/matchs?d=${shiftDate(date, -1)}`)}>{L.t("← Veille", "← Previous day", "← Día anterior", "← Dia anterior")}</Link>
         <Link className="btn-white" href={L.href(shiftDate(date, 1) === shiftDate(today, 1) ? "/app/demain" : `/app/matchs?d=${shiftDate(date, 1)}`)}>{L.t("Lendemain →", "Next day →", "Día siguiente →", "Dia seguinte →")}</Link>
       </div>
+      <PushOptIn source="matchs" />
       <UpcomingList games={games} title="" grouped={false} L={L} />
       {faq.length > 0 && (
         <section className="card block match-faq" style={{ marginTop: 22 }}>

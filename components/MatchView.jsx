@@ -10,6 +10,7 @@ import { getL } from "../lib/lang-server";
 import { matchFaq } from "../lib/matchfaq";
 import { pairPath } from "../lib/matchup";
 import Crumbs from "./Crumbs";
+import ShareMatch from "./ShareMatch";
 
 export default async function MatchView({ a, backHref = "/app", league = "NBA", extras = null, path = null, acc = null, others = null }) {
   const L = await getL();
@@ -52,6 +53,16 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
       isPartOf: { "@id": `${SITE}/#site` },
     },
   ];
+
+  // Message prêt pour le partage (WhatsApp, partage du téléphone) : l'équipe la plus probable et sa probabilité.
+  const fav = a.pHome >= a.pAway ? g.home : g.away;
+  const favP = pctOf(Math.max(a.pHome, a.pAway), L);
+  const shareText = L.t(
+    `🏀 ${g.away.short} – ${g.home.short} : ${favP} de chances de victoire pour ${fav.short}, selon Basketlog`,
+    `🏀 ${g.away.short} vs ${g.home.short}: ${fav.short} ${favP} chance to win, according to Basketlog`,
+    `🏀 ${g.away.short} – ${g.home.short}: ${favP} de probabilidad de victoria para ${fav.short}, según Basketlog`,
+    `🏀 ${g.away.short} x ${g.home.short}: ${favP} de chance de vitória para ${fav.short}, segundo Basketlog`
+  );
 
   const faq = path ? matchFaq(a, L, acc, !isNBA) : [];
   const faqLd = faq.length && url ? {
@@ -97,6 +108,7 @@ export default async function MatchView({ a, backHref = "/app", league = "NBA", 
             <span><strong>{pctOf(a.pHome, L)}</strong><small>{L.t(`victoire ${g.home.abbr}`, `${g.home.abbr} win`, `victoria ${g.home.abbr}`, `vitória ${g.home.abbr}`)}</small></span>
           </div>
         </div>
+        {url && !g.hypothetical && <ShareMatch text={shareText} url={url} matchId={String(g.id)} league={league} />}
       </div>
 
       {g.hypothetical && (

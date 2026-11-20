@@ -48,3 +48,28 @@ self.addEventListener("fetch", (e) => {
     e.respondWith(fetch(req).catch(async () => (await caches.match("/offline.html")) || Response.error()));
   }
 });
+
+// Notifications du soir (web push, 20/11/2026) : texte envoyé par /api/cron/push (lib/push-text.js).
+self.addEventListener("push", (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch { d = { body: e.data ? e.data.text() : "" }; }
+  e.waitUntil(self.registration.showNotification(d.title || "Basketlog", {
+    body: d.body || "",
+    icon: "/icons/icon-192.png",
+    tag: d.tag || "bl",
+    data: { url: d.url || "/app/matchs" },
+  }));
+});
+
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const url = new URL(e.notification.data?.url || "/app/matchs", self.location.origin);
+  if (url.origin !== self.location.origin) return;
+  e.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+      const win = list.find((c) => new URL(c.url).origin === self.location.origin && "focus" in c);
+      if (win) return win.focus().then((c) => (c && "navigate" in c ? c.navigate(url.href) : null)).catch(() => self.clients.openWindow(url.href));
+      return self.clients.openWindow(url.href);
+    })
+  );
+});

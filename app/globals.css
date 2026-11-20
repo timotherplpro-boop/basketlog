@@ -1874,3 +1874,21 @@ html { scroll-behavior: smooth; }
 .defi-verdict { font-weight: 700; margin: 0 0 10px; }
 .defi-share { margin-top: 6px; }
 .gate-trial { display: block; margin-top: 8px; font-size: 13px; color: var(--muted); } /* 20/11/2026 : essai Pro sous le bouton des écrans verrouillés */
+
+/* Partage d'une fiche de match (WhatsApp, partage du téléphone) */
+.share-match { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
+.share-match .share-wa, .share-match .share-other { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; }
+.share-match .share-wa { background: #25d366; color: #0b1a10; border: 0; }
+.share-match .share-wa:hover { background: #2fe476; }
+.share-match .share-other { background: transparent; color: var(--text); border: 1px solid var(--line-2); }
+.share-match .share-other:hover { border-color: currentColor; }
+
+/* Notifications du soir (PushOptIn) */
+.push-card { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 14px 0 6px; padding: 14px 16px; border: 1px solid var(--line-2); border-radius: 14px; background: var(--card); }
+.push-card b { display: block; font-size: 15px; }
+.push-card small { display: block; margin-top: 3px; color: var(--muted); font-size: 13px; line-height: 1.4; }
+.push-card .btn-solid { height: 40px; padding: 0 18px; font-size: 14px; flex-shrink: 0; }
+.push-card .push-off { height: 40px; padding: 0 16px; border-radius: 12px; background: transparent; color: var(--muted); border: 1px solid var(--line-2); font-size: 14px; cursor: pointer; flex-shrink: 0; }
+.push-actions { display: flex; align-items: center; gap: 8px; }
+.sb-link.push-link { background: none; border: 0; width: 100%; text-align: left; cursor: pointer; font: inherit; }
+.sb-link.push-link span { width: 18px; display: inline-block; text-align: center; }

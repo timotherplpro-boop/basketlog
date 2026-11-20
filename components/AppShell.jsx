@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useL, useInitialPath } from "./LangProvider";
 import { useProStatus } from "../lib/useProStatus";
 import { stripLang } from "../lib/i18n";
+import PushOptIn from "./PushOptIn";
 import LangSelect from "./LangSelect";
 import NewsletterInvite from "./NewsletterInvite";
 
@@ -139,6 +140,7 @@ export default function AppShell({ session, ai = false, children }) {
           </div>
           <Link href={L.href("/app/compte")} className={`sb-link ${p.startsWith("/app/compte") ? "on" : ""}`} aria-current={p.startsWith("/app/compte") ? "page" : undefined}><Icon name="sliders" />{L.t("Mon compte et abonnement", "My account and subscription", "Mi cuenta y suscripción", "Minha conta e assinatura")}</Link>
           <a href={`/api/pro/logout?next=${encodeURIComponent(L.href("/"))}`} className="sb-link big"><Icon name="logout" />{L.t("Déconnexion", "Log out", "Cerrar sesión", "Sair")}</a>
+          <PushOptIn variant="link" source="barre_laterale" />
           <a href="mailto:contact@basketlog-app.com" className="sb-link"><Icon name="mail" />Support</a>
           <div className="sb-link sb-lang"><Icon name="globe" /><span aria-hidden>{FLAG[L.lang]}</span><LangSelect className="plain" /></div>
         </div>
