@@ -102,6 +102,7 @@ export async function awardsTests({ ok, ko, eq }) {
   eq("NCAA H : adresse inchangée par défaut", ncaaTeamPath({ loc: "Duke" }), "/ncaa/team/duke");
   const pw = ncaaProb({ A: 5, B: 0 }, "A", "B", true, NCAAW).pHome, pm = ncaaProb({ A: 5, B: 0 }, "A", "B", true).pHome;
   if (pw > pm && pm > 0.5 && NCAAW.SD < NCAA.SD) ok("NCAA F : écart-type plus serré, probabilité plus nette"); else ko("NCAA F : écart-type", [pw, pm]);
+  eq("NCAA : jamais 100 %", ncaaProb({ A: 40, B: -20 }, "A", "B", false, NCAAW).pHome, 0.99);
   eq("NCAA F : libellé anglais", ncaaWords(mk("en"), "w").name, "Women's college basketball");
   eq("NCAA H : libellé anglais", ncaaWords(mk("en"), "m").name, "College basketball");
   const nw = Object.keys(PRIOR_W).length;
