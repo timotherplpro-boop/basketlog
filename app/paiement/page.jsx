@@ -23,8 +23,8 @@ export default async function PaiementPage({ searchParams }) {
   const raw = cleanCode(sp?.code || "");
   const code = CODE_RE.test(raw) ? raw : "";
   const cur = await getCurrency(L);
-  const name = { starter: "Starter", pro: "Pro", lifetime: "Lifetime" }[plan];
-  const per = plan === "lifetime" ? L.t("une seule fois", "one-time", "pago único", "pagamento único") : L.t("/mois", "/month", "/mes", "/mês");
+  const name = { starter: "Starter", pro: "Pro", lifetime: "Lifetime", pass: L.t("Pass 24 h", "24-hour pass", "Pase 24 h", "Passe 24 h") }[plan];
+  const per = plan === "lifetime" ? L.t("une seule fois", "one-time", "pago único", "pagamento único") : plan === "pass" ? L.t("pour 24 h, sans abonnement", "for 24 hours, no subscription", "por 24 h, sin suscripción", "por 24 h, sem assinatura") : L.t("/mois", "/month", "/mes", "/mês");
   return (
     <main className="pay-page">
       <section className="pay-hero">

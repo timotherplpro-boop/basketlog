@@ -1898,3 +1898,14 @@ html { scroll-behavior: smooth; }
 .cite-box textarea { display: block; width: 100%; box-sizing: border-box; margin: 8px 0 12px; padding: 10px; resize: none; border-radius: 10px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: inherit; font-family: var(--mono); font-size: 12px; }
 .pl-answer { margin: 8px 0 0; font-size: 16px; line-height: 1.45; }
 .code-sample { margin: 0; padding: 12px; border-radius: 10px; background: rgba(255,255,255,.04); font-family: var(--mono); font-size: 12px; line-height: 1.5; white-space: pre; }
+/* Pass 24 h (21/11/2026) : bandeau sous les formules de /pro et lien discret sous le bouton d'essai */
+.plan-pass { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 18px auto 0; max-width: 1040px; padding: 16px 18px; border: 1px dashed var(--line-2); border-radius: 14px; background: var(--card); scroll-margin-top: 90px; }
+.plan-pass b { display: block; font-size: 15px; margin-bottom: 3px; }
+.plan-pass span { color: var(--muted); font-size: 14px; line-height: 1.45; }
+.plan-pass-cta { flex-shrink: 0; padding: 10px 16px; border-radius: 12px; border: 1px solid var(--line-2); color: var(--text); font-weight: 600; font-size: 14px; text-decoration: none; white-space: nowrap; }
+.plan-pass-cta:hover { border-color: currentColor; }
+.plan-pass-cta.plan-wait { opacity: .55; }
+.plan-pass:target { border-color: var(--accent, #f97316); }
+@media (max-width: 640px) { .plan-pass { flex-direction: column; align-items: stretch; text-align: left; } .plan-pass-cta { text-align: center; } }
+.gate-pass { display: block; margin-top: 8px; font-size: 13px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+.gate-pass:hover { color: var(--text); }

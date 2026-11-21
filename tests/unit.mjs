@@ -25,6 +25,7 @@ import { discordTests } from "./discord.mjs";
 import { nationalsTests } from "./nationals.mjs";
 import { awardsTests } from "./awards.mjs";
 import { pushTests } from "./push.mjs";
+import { passTests } from "./pass.mjs";
 
 export async function unit() {
   let passed = 0, failed = 0;
@@ -341,7 +342,7 @@ export async function unit() {
   });
   const norm = (o) => normalizeMembership(raw(o), IDS);
   eq("Formule d'un produit Whop (Lifetime, Pro, Starter, inconnu, vide, variables absentes)", [tierOfProduct("prod_L", IDS), tierOfProduct("prod_P", IDS), tierOfProduct("prod_S", IDS), tierOfProduct("prod_X", IDS), tierOfProduct(null, IDS), tierOfProduct("prod_P", {}), tierOfProduct(undefined, { pro: undefined })], ["lifetime", "pro", "starter", null, null, null, null]);
-  eq("Abonnement Whop : lecture complète", norm(), { id: "mem_1", uid: "user_1", status: "active", productId: "prod_P", title: "Basketlog Pro", tier: "pro", cancelAtPeriodEnd: false, periodEnd: "2099-12-08T10:00:00Z", periodDays: 30, renewal: { amount: 29.99, currency: "eur" }, manageUrl: "https://whop.com/@me/settings/orders/mem_1" });
+  eq("Abonnement Whop : lecture complète", norm(), { id: "mem_1", uid: "user_1", status: "active", productId: "prod_P", planId: null, title: "Basketlog Pro", tier: "pro", cancelAtPeriodEnd: false, periodEnd: "2099-12-08T10:00:00Z", periodDays: 30, renewal: { amount: 29.99, currency: "eur" }, manageUrl: "https://whop.com/@me/settings/orders/mem_1" });
   eq("Abonnement Whop : acheteur lu dans « user.id » comme dans « user_id », produit lu dans « product_id »", [norm({ user_id: undefined, user: { id: "user_2" } }).uid, norm({ product: undefined, product_id: "prod_S" }).tier], ["user_2", "starter"]);
   eq("Abonnement Whop : sans acheteur, uid vide (jamais pris pour celui d'un autre)", norm({ user_id: undefined }).uid, null);
   eq("Abonnement Whop : seuls les liens https whop.com sont gardés", ["https://evil.example/x", "javascript:alert(1)", "http://whop.com/x", "https://whop.com.evil.example/x", "https://sub.whop.com/x", 42, null].map((u) => norm({ manage_url: u }).manageUrl), [null, null, null, null, "https://sub.whop.com/x", null, null]);
@@ -592,6 +593,7 @@ export async function unit() {
   await nationalsTests({ ok, ko, eq });
   await awardsTests({ ok, ko, eq });
   await pushTests({ ok, ko, eq });
+  await passTests({ ok, ko, eq });
 
   return { passed, failed };
 }

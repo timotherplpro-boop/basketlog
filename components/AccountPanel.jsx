@@ -447,8 +447,8 @@ export default function AccountPanel() {
         ) : (
           <div className="acc-plans">
             {plans.map((p) => {
-              const name = TIER[p.tier] || p.tier;
-              const until = day(p.periodEnd);
+              const name = p.state === "pass" ? T("Pass 24 h", "24-hour pass", "Pase 24 h") : TIER[p.tier] || p.tier;
+              const until = p.state === "pass" && p.periodEnd ? fmtDate(L, p.periodEnd, { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }) : day(p.periodEnd);
               const price = p.price ? `${money(p.price)}${per(p.periodDays) ? ` ${per(p.periodDays)}` : ""}` : "";
               const working = busy === `plan:${p.id}`;
               const asking = confirmId === p.id;
@@ -460,6 +460,7 @@ export default function AccountPanel() {
                       {{
                         lifetime: T("À vie", "Lifetime", "De por vida"),
                         paid: T("Payé", "Paid", "Pagado"),
+                        pass: T("Actif", "Active", "Activo"),
                         renews: T("Actif", "Active", "Activa"),
                         past_due: T("Paiement à régler", "Payment due", "Pago pendiente"),
                         ends: T("Résilié", "Cancelled", "Cancelada"),
@@ -470,6 +471,7 @@ export default function AccountPanel() {
                   <p className="acc-plan-line">
                     {p.state === "lifetime" && T("Accès à vie, paiement unique : il n'y a rien à résilier.", "Lifetime access, one-time payment: there's nothing to cancel.", "Acceso de por vida, pago único: no hay nada que cancelar.")}
                     {p.state === "paid" && T("Paiement unique effectué.", "One-time payment made.", "Pago único realizado.")}
+                    {p.state === "pass" && T(`Paiement unique : toutes les analyses complètes jusqu'au ${until}. Rien ne se renouvelle.`, `One-time payment: every full analysis until ${until}. Nothing renews.`, `Pago único: todos los análisis completos hasta el ${until}. No se renueva nada.`)}
                     {p.state === "renews" && (until
                       ? T(`Se renouvelle automatiquement. Prochain paiement le ${until}.`, `Renews automatically. Next payment on ${until}.`, `Se renueva automáticamente. Próximo pago el ${until}.`)
                       : T("Se renouvelle automatiquement.", "Renews automatically.", "Se renueva automáticamente."))}

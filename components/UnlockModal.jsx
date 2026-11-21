@@ -156,6 +156,9 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
         )}
 
         <a href={href} className="btn-solid ulk-cta" onClick={onCta}>{trial ? `🎁 ${L.t(`Essai gratuit ${PRO_TRIAL_DAYS} jours`, `Start ${PRO_TRIAL_DAYS}-day free trial`, `Prueba gratis ${PRO_TRIAL_DAYS} días`, `Teste grátis por ${PRO_TRIAL_DAYS} dias`)}` : L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo", "Desbloquear a análise completa")}</a>
+        <a href={`${String(href || "/pro").split("#")[0]}#pass`} className="gate-pass" onClick={() => track("Clic pass 24 h", { source: "fenetre" })}>
+          {L.t("ou juste pour ce soir : pass 24 h à 1,99 € →", "or just for tonight: 24-hour pass for $1.99 →", "o solo para esta noche: pase 24 h por 1,99 € →", "ou só para esta noite: passe 24 h por 1,99 € →")}
+        </a>
         <small className="ulk-foot">{foot}</small>
         </>)}
       </div>

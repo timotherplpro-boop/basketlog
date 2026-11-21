@@ -294,6 +294,20 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
           );
         })}
       </div>
+      {checkout.pass && !(pro?.connected && (current === "pro" || current === "lifetime")) && (
+        <div className="plan-pass" id="pass">
+          <div>
+            <b>⏱️ {L.t("Juste pour ce soir ?", "Just for tonight?", "¿Solo para esta noche?", "Só para esta noite?")}</b>
+            <span>{L.t(
+              `Pass 24 h à ${money(PRICES[cur].pass, cur, L)} + taxes : toutes les analyses complètes pendant 24 heures, paiement unique, sans abonnement.`,
+              `24-hour pass for ${money(PRICES[cur].pass, cur, L)} + tax: every full analysis for 24 hours, one-time payment, no subscription.`,
+              `Pase 24 h por ${money(PRICES[cur].pass, cur, L)} + impuestos: todos los análisis completos durante 24 horas, pago único, sin suscripción.`,
+              `Passe 24 h por ${money(PRICES[cur].pass, cur, L)} + impostos: todas as análises completas por 24 horas, pagamento único, sem assinatura.`
+            )}</span>
+          </div>
+          <a href={payHref("pass")} className={`plan-pass-cta ${agree ? "" : "plan-wait"}`} aria-disabled={!agree} onClick={buy("pass")}>{L.t("Prendre le pass 24 h", "Get the 24-hour pass", "Comprar el pase 24 h", "Comprar o passe 24 h")}</a>
+        </div>
+      )}
       <p className="pro-legal">
         {L.t(
           <>Pro est sans engagement : tu arrêtes quand tu veux depuis la page Mon compte de ce site, et tu gardes l&apos;accès jusqu&apos;à la fin du mois payé. Une période commencée n&apos;est pas remboursée. Réservé aux 18 ans et plus. </>,
