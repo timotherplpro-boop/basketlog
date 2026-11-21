@@ -108,13 +108,14 @@ export default async function NcaaTeamPage({ params }) {
           <ul className="wk-list">
             {[...past].reverse().map((g) => {
               const home = g.h === t.id, me = home ? g.hs : g.as, op = home ? g.as : g.hs, o = home ? g.away : g.home;
-              return <li key={g.d + o.id} className="mono">{day(g.d)} · {me > op ? L.t("V", "W", "V", "V") : L.t("D", "L", "D", "D")} {me}-{op} {g.n ? "vs" : home ? "vs" : "@"} {o.slug ? <Link href={L.href(`/ncaa/team/${o.slug}`)}>{nm(o)}</Link> : nm(o)}</li>;
+              const line = <>{day(g.d)} · {me > op ? L.t("V", "W", "V", "V") : L.t("D", "L", "D", "D")} {me}-{op}</>;
+              return <li key={g.d + o.id} className="mono">{o.slug && g.home.slug && g.away.slug ? <Link href={L.href(ncaaGamePath(g))}>{line}</Link> : line} {g.n ? "vs" : home ? "vs" : "@"} {o.slug ? <Link href={L.href(`/ncaa/team/${o.slug}`)}>{nm(o)}</Link> : nm(o)}</li>;
             })}
           </ul>
         </section>
       )}
       <QuickFaq L={L} items={faq} />
-      <p className="team-rec"><Link href={L.href("/app/ncaa")}>{L.t("Matchs NCAA du jour et top 25 du modèle", "Today's college basketball games and model top 25", "Partidos NCAA de hoy y top 25 del modelo", "Jogos NCAA de hoje e top 25 do modelo")}</Link></p>
+      <p className="team-rec"><Link href={L.href("/app/ncaa/classement")}>{L.t("Classement des 365 équipes", "All 365 teams ranked", "Ranking de los 365 equipos", "Ranking dos 365 times")}</Link>{" · "}<Link href={L.href("/app/ncaa")}>{L.t("Matchs NCAA du jour et top 25 du modèle", "Today's college basketball games and model top 25", "Partidos NCAA de hoy y top 25 del modelo", "Jogos NCAA de hoje e top 25 do modelo")}</Link></p>
       <JsonLd data={{ "@context": "https://schema.org", "@type": "SportsTeam", name: t.name, sport: "Basketball", url, ...(t.logo ? { logo: t.logo } : {}), memberOf: { "@type": "SportsOrganization", name: "NCAA Division I" } }} />
       <p className="disclaimer">{L.t("Données ESPN. Basketlog n'est pas affilié à la NCAA.", "Data from ESPN. Basketlog is not affiliated with the NCAA.", "Datos de ESPN. Basketlog no está afiliado a la NCAA.", "Dados da ESPN. O Basketlog não é afiliado à NCAA.")}</p>
     </main>

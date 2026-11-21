@@ -128,6 +128,7 @@ export default async function NcaaPage() {
             <tbody>{top.map((x, i) => <tr key={x.id}><td className="rk">{i + 1}</td><td className="tm"><Link href={L.href(ncaaTeamPath(x.t))}><span>{/* eslint-disable-next-line @next/next/no-img-element */}{x.t.logo ? <img src={x.t.logo} alt="" /> : null}{x.t.name}</span></Link></td><td>{x.rec.w}-{x.rec.l}</td><td>{x.t.rank ?? "–"}</td><td className="pos">{numOf(x.r, L, 1)}</td></tr>)}</tbody>
           </table>
         </div>
+        <p className="narr"><Link href={L.href("/app/ncaa/classement")}>{L.t("Classement complet des 365 équipes →", "Full rankings of all 365 teams →", "Ranking completo de los 365 equipos →", "Ranking completo dos 365 times →")}</Link></p>
         <p className="note">{L.t("Note : écart de points attendu, corrigé de la force des adversaires. Classement AP : sondage des journalistes, repris par ESPN.", "Rating: expected point margin adjusted for opponent strength. AP rank: the media poll, via ESPN.", "Nota: diferencia de puntos esperada, corregida por la fuerza de los rivales. Ranking AP: encuesta de periodistas, vía ESPN.", "Nota: saldo de pontos esperado, corrigido pela força dos adversários. Ranking AP: pesquisa de jornalistas, via ESPN.")}</p>
       </section>
       <QuickFaq L={L} items={faq} />

@@ -48,7 +48,13 @@ export async function generateMetadata({ params }) {
     L,
   });
   if (L.en) return pageMeta({
+    // Recherches réelles : « dubai vs milan preview », « dubai vs virtus bologna prediction » (Search Console, nov. 2026).
     title: fitTitle(
+      ...(done ? [] : [
+        `${g.away.name} vs ${g.home.name} prediction & preview (${dayShort(g.date, L)}): ${a.fav.team.short || a.fav.team.name} ${pctTxt(Math.max(a.pHome, a.pAway), L)}`,
+        `${g.away.short} vs ${g.home.short} prediction & preview (${dayShort(g.date, L)}): ${a.fav.team.short || a.fav.team.name} ${pctTxt(Math.max(a.pHome, a.pAway), L)}`,
+        `${g.away.short} vs ${g.home.short} prediction (${dayShort(g.date, L)}): ${a.fav.team.short || a.fav.team.name} ${pctTxt(Math.max(a.pHome, a.pAway), L)}`,
+      ]),
       `${g.away.name} vs ${g.home.name} prediction (${dayShort(g.date, L)}): EuroLeague – Basketlog`,
       `${g.away.name} vs ${g.home.name} prediction (${dayShort(g.date, L)}) – Basketlog`,
       `${g.away.name} vs ${g.home.name} prediction (${dayShort(g.date, L)})`,
