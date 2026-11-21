@@ -45,7 +45,8 @@ export default async function sitemap() {
     const lists = await Promise.all([0, 1, 2].map((i) => ncaaDay(shiftDate(today, i)).catch(() => [])));
     for (const g of lists.flat()) if (d1.has(g.home.id) && d1.has(g.away.id)) ncaa.push(u(ncaaGamePath(g), 0.6, "hourly"));
   } catch {}
-  pages.push(...ncaa);
+  // NCAA : version anglaise seulement dans le sitemap (recherches américaines) ; les autres langues restent liées par hreflang.
+  const ncaaEn = ncaa.map((e) => both(e)[1]);
   const teams = TEAMS.flatMap((t) => [u(`/app/equipe/${t.id}`, 0.6, "daily"), u(`/app/equipe/${t.id}/calendrier`, 0.5, "daily")]);
 
   // Matchs NBA : les 7 prochains jours et les 3 derniers (fiches avec score final).
@@ -83,7 +84,8 @@ export default async function sitemap() {
   // Articles quotidiens (Google Discover) : la page liste et les 14 derniers jours.
   const arts = [u("/articles", 0.7, "daily"), ...articleDates(14).map((d, i) => u(articlePath(d), i === 0 ? 0.8 : 0.5, i === 0 ? "hourly" : "weekly"))];
 
-  // Pages joueurs : les 200 meilleurs marqueurs de la saison (au moins 3 matchs).
+  // Pages joueurs (« X joue-t-il ce soir ? ») : les 200 meilleurs marqueurs de la saison (au moins 3 matchs).
+  // Pas plus : Google laisse déjà 260 pages « détectées, non indexées » (Search Console, 21 nov.), inutile de diluer l'exploration.
   let players = [];
   try {
     const st = await getPlayerStats(seasonForDate(nbaToday()));
@@ -92,5 +94,5 @@ export default async function sitemap() {
       .map((p) => playerPath(p.name)).filter((p) => !seen.has(p) && seen.add(p)).slice(0, 200).map((p) => u(p, 0.5, "daily"));
   } catch {}
 
-  return [...pages, ...teams, ...nba, ...el, ...arts, ...players].flatMap(both);
+  return [...[...pages, ...teams, ...nba, ...el, ...arts, ...players].flatMap(both), ...ncaaEn];
 }
