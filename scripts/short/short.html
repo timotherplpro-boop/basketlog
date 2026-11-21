@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<!-- Short quotidien « les matchs de ce soir » (21/11/2026). Page dessinée image par image par render.mjs :
+     setup(data, lang) puis render(t) pour chaque instant t (en secondes). Rien n'est animé tout seul : chaque image
+     dépend seulement de t, pour un rendu identique à chaque fois. 1080 × 1920, fond #0b1220, orange #f97316. -->
+<style>
+  @font-face { font-family: "Pop"; src: local("Poppins Bold"), url("file:///usr/share/fonts/truetype/google-fonts/Poppins-Bold.ttf"); font-weight: 700; }
+  @font-face { font-family: "Pop"; src: local("Poppins Medium"), url("file:///usr/share/fonts/truetype/google-fonts/Poppins-Medium.ttf"); font-weight: 500; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #0b1220; }
+  body { font-family: "Pop", "Inter", "Noto Color Emoji", sans-serif; color: #f4f6fb; position: relative; }
+  .bg { position: absolute; inset: 0; background:
+      radial-gradient(900px 700px at 85% -5%, rgba(249,115,22,.30), transparent 60%),
+      radial-gradient(800px 800px at -10% 105%, rgba(59,130,246,.18), transparent 60%), #0b1220; }
+  .court { position: absolute; left: 50%; top: 50%; width: 1500px; height: 1500px; margin: -750px 0 0 -750px; border-radius: 50%;
+      border: 3px solid rgba(255,255,255,.035); }
+  .court::after { content: ""; position: absolute; inset: 380px; border-radius: 50%; border: 3px solid rgba(255,255,255,.035); }
+  .scene { position: absolute; inset: 0; opacity: 0; }
+  .brand { position: absolute; left: 0; right: 0; bottom: 70px; text-align: center; font-weight: 700; font-size: 38px; letter-spacing: .5px; color: rgba(255,255,255,.88); }
+  .brand i { font-style: normal; color: #f97316; }
+  .pill { display: inline-block; padding: 14px 30px; border-radius: 999px; background: rgba(249,115,22,.16); color: #fdba74; font-weight: 700; font-size: 34px; letter-spacing: 2px; text-transform: uppercase; }
+  /* Scène 1 */
+  #s1 { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 70px; }
+  #s1 h1 { margin-top: 46px; font-size: 132px; line-height: 1.02; font-weight: 700; letter-spacing: -2px; }
+  #s1 h1 em { font-style: normal; color: #f97316; }
+  #s1 p { margin-top: 40px; font-size: 46px; font-weight: 500; color: rgba(255,255,255,.75); }
+  #s1 .tease { margin-top: 90px; padding: 34px 54px; border-radius: 34px; background: rgba(255,255,255,.06); border: 2px solid rgba(249,115,22,.5); }
+  #s1 .tease small { display: block; font-size: 30px; font-weight: 700; letter-spacing: 2px; color: #fdba74; text-transform: uppercase; }
+  #s1 .tease b { display: block; margin-top: 10px; font-size: 84px; line-height: 1; font-weight: 700; }
+  #s1 .tease b span { color: #f97316; }
+  /* Scène 2 */
+  #s2 { padding: 0 48px 120px; display: flex; flex-direction: column; justify-content: center; }
+  #s2 .head { text-align: center; font-weight: 700; font-size: 40px; letter-spacing: 3px; color: #fdba74; text-transform: uppercase; }
+  #rows { margin-top: 44px; display: flex; flex-direction: column; gap: var(--gap); }
+  .row { position: relative; height: var(--rh); border-radius: 30px; background: rgba(255,255,255,.055); border: 2px solid rgba(255,255,255,.07);
+      display: grid; grid-template-columns: minmax(0, 1fr) 300px minmax(0, 1fr); align-items: center; padding: 0 22px; }
+  .row.hl { border-color: #f97316; background: rgba(249,115,22,.12); box-shadow: 0 0 60px rgba(249,115,22,.25); }
+  .team { display: flex; align-items: center; gap: 18px; min-width: 0; }
+  .team.home { justify-content: flex-end; text-align: right; }
+  .dot { flex: none; width: var(--dot); height: var(--dot); border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: calc(var(--dot) * .3); color: #fff;
+      border: 3px solid rgba(255,255,255,.25); }
+  .tn { font-weight: 700; font-size: var(--tn); line-height: 1.05; white-space: nowrap; overflow: hidden; min-width: 0; }
+  .fav .tn { color: #fff; }
+  .dog .tn { color: rgba(255,255,255,.55); }
+  .mid { display: flex; flex-direction: column; align-items: stretch; gap: 12px; padding: 0 14px; }
+  .nums { display: flex; justify-content: space-between; font-weight: 700; font-size: var(--pct); line-height: 1; }
+  .nums .f { color: #f97316; }
+  .nums .o { color: rgba(255,255,255,.45); }
+  .bar { height: 16px; border-radius: 999px; background: rgba(255,255,255,.12); overflow: hidden; display: flex; }
+  .bar b { display: block; height: 100%; background: rgba(255,255,255,.35); }
+  .bar b.f { background: linear-gradient(90deg, #fb923c, #f97316); }
+  .time { position: absolute; left: 50%; top: 10px; transform: translateX(-50%); font-size: 22px; font-weight: 500; color: rgba(255,255,255,.45); letter-spacing: 1px; }
+  .tag { position: absolute; right: 22px; top: -20px; padding: 6px 16px; border-radius: 999px; background: #f97316; color: #111; font-weight: 700; font-size: 22px; letter-spacing: 1.5px; }
+  /* Scène 3 */
+  #s3 { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 70px; }
+  #s3 .rec { font-size: 50px; font-weight: 700; color: #86efac; margin-bottom: 70px; }
+  #s3 h2 { font-size: 96px; line-height: 1.05; font-weight: 700; letter-spacing: -1px; }
+  #s3 .url { margin-top: 44px; display: inline-block; padding: 26px 46px; border-radius: 26px; background: #f97316; color: #111; font-weight: 700; font-size: 64px; }
+  #s3 .promo { margin-top: 30px; font-size: 34px; font-weight: 500; color: rgba(255,255,255,.7); }
+  #s3 .ask { margin-top: 80px; font-size: 54px; font-weight: 700; color: rgba(255,255,255,.9); }
+</style>
+</head>
+<body>
+  <div class="bg"></div><div class="court"></div>
+  <section class="scene" id="s1"><div class="pill" id="pill"></div><h1 id="title"></h1><p id="sub"></p><div class="tease"><small id="teaseL"></small><b id="tease"></b></div></section>
+  <section class="scene" id="s2"><div class="head" id="head"></div><div id="rows"></div></section>
+  <section class="scene" id="s3"><div class="rec" id="rec"></div><h2 id="end"></h2><div class="url">basketlog-app.com</div><div class="promo" id="promo"></div><div class="ask" id="ask"></div></section>
+  <div class="brand">basket<i>log</i></div>
+<script>
+const T = {
+  en: {
+    loc: "en-US", tz: "America/New_York", tzName: "ET",
+    title: "TONIGHT'S<br><em>NBA</em> GAMES", sub: "Win probability for every game",
+    head: (n) => `Win probability · ${n} game${n > 1 ? "s" : ""}`,
+    fav: "BIGGEST FAVORITE", close: "CLOSEST GAME",
+    rec: (ok, n) => `Last night: ${ok}/${n} favorites won ✅`,
+    end: "Every game,<br>free", ask: "Who's your pick tonight? 👇",
+    tease: "Biggest favorite tonight", promo: "Full analysis: 3 days free, then $9.99/mo + tax",
+  },
+  fr: {
+    loc: "fr-FR", tz: "Europe/Paris", tzName: "",
+    title: "LES MATCHS<br><em>NBA</em> DE LA NUIT", sub: "La probabilité de victoire de chaque match",
+    head: (n) => `Probabilité de victoire · ${n} match${n > 1 ? "s" : ""}`,
+    fav: "PLUS GROS FAVORI", close: "LE PLUS SERRÉ",
+    rec: (ok, n) => `Hier : ${ok} favoris sur ${n} ont gagné ✅`,
+    end: "Tous les matchs,<br>gratuit", ask: "Qui gagne cette nuit ? 👇",
+    tease: "Plus gros favori de la nuit", promo: "Analyse complète : 3 jours offerts, puis 9,99 €/mois + taxes",
+  },
+};
+let D = null, L = null, rows = [], timing = null;
+const ease = (x) => 1 - Math.pow(1 - Math.min(Math.max(x, 0), 1), 3);
+const pct = (p) => `${Math.round(p * 100)}${L === T.fr ? " %" : "%"}`;
+function dateLabel(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString(L.loc, { weekday: "short", month: "short", day: "numeric", timeZone: L.tz }).replace(/\.$/, "");
+}
+function timeLabel(iso) {
+  const s = new Date(iso).toLocaleTimeString(L.loc, { hour: "numeric", minute: "2-digit", timeZone: L.tz });
+  return L.tzName ? `${s} ${L.tzName}` : s;
+}
+// Couleur de pastille lisible sur fond sombre (les équipes au noir ou au bleu nuit passent en gris clair).
+function dotColor(hex) {
+  const n = parseInt(String(hex || "#666").replace("#", ""), 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return (0.299 * r + 0.587 * g + 0.114 * b) < 45 ? "#3b4458" : `#${n.toString(16).padStart(6, "0")}`;
+}
+window.setup = (data, lang) => {
+  D = data; L = T[lang] || T.en;
+  const games = (D.games || []).slice(0, 9);
+  const n = games.length;
+  document.getElementById("pill").textContent = `NBA · ${dateLabel(games[0]?.date || D.generated)}`;
+  document.getElementById("title").innerHTML = L.title;
+  document.getElementById("sub").textContent = L.sub;
+  document.getElementById("head").textContent = L.head(n);
+  const rh = n <= 4 ? 250 : n <= 6 ? 215 : n <= 8 ? 172 : 150, gap = n <= 6 ? 30 : 20;
+  const box = document.getElementById("rows");
+  box.style.setProperty("--rh", `${rh}px`); box.style.setProperty("--gap", `${gap}px`);
+  box.style.setProperty("--dot", `${Math.round(rh * 0.5)}px`); box.style.setProperty("--tn", `${n <= 6 ? 42 : 36}px`); box.style.setProperty("--pct", `${n <= 6 ? 52 : 44}px`);
+  let best = -1, bestP = 0, closest = -1, closeD = 1;
+  games.forEach((g, i) => {
+    const pf = Math.max(g.pHome, 1 - g.pHome);
+    if (pf > bestP) { bestP = pf; best = i; }
+    if (Math.abs(g.pHome - 0.5) < closeD) { closeD = Math.abs(g.pHome - 0.5); closest = i; }
+  });
+  rows = games.map((g, i) => {
+    const homeFav = g.pHome >= 0.5, pa = 1 - g.pHome, ph = g.pHome;
+    const el = document.createElement("div");
+    el.className = "row";
+    el.innerHTML = `
+      <div class="team away ${homeFav ? "dog" : "fav"}"><div class="dot" style="background:${dotColor(g.away.color)}">${g.away.abbr}</div><div class="tn">${g.away.short}</div></div>
+      <div class="mid"><div class="nums"><span class="${homeFav ? "o" : "f"}" data-p="${pa}">0</span><span class="${homeFav ? "f" : "o"}" data-p="${ph}">0</span></div>
+        <div class="bar"><b class="${homeFav ? "" : "f"}" style="width:0"></b><b class="${homeFav ? "f" : ""}" style="width:0"></b></div></div>
+      <div class="team home ${homeFav ? "fav" : "dog"}"><div class="tn">${g.home.short}</div><div class="dot" style="background:${dotColor(g.home.color)}">${g.home.abbr}</div></div>
+      <div class="time">${timeLabel(g.date)}</div>`;
+    box.appendChild(el);
+    return { el, pa, ph, tag: i === best ? L.fav : i === closest && closest !== best ? L.close : null };
+  });
+  // Noms trop longs : police réduite jusqu'à ce qu'ils tiennent (jamais de nom coupé).
+  for (const el of box.querySelectorAll(".tn")) {
+    let size = parseFloat(getComputedStyle(el).fontSize);
+    while (el.scrollWidth > el.clientWidth + 1 && size > 22) { size -= 1; el.style.fontSize = `${size}px`; }
+  }
+  const top = games[best];
+  if (top) {
+    const fav = top.pHome >= 0.5 ? top.home : top.away;
+    document.getElementById("teaseL").textContent = L.tease;
+    document.getElementById("tease").innerHTML = `${fav.short} <span>${pct(Math.max(top.pHome, 1 - top.pHome))}</span>`;
+  }
+  document.getElementById("promo").textContent = L.promo;
+  const rate = D.lastNight && D.lastNight.n ? D.lastNight.ok / D.lastNight.n : 0;
+  document.getElementById("rec").textContent = rate >= 0.7 ? L.rec(D.lastNight.ok, D.lastNight.n) : "";
+  document.getElementById("end").innerHTML = L.end;
+  document.getElementById("ask").textContent = L.ask;
+  // Minutage : titre 2,6 s ; une ligne toutes les 0,75 s ; 2,6 s de pause avec les étiquettes ; fin 3,8 s.
+  const s2 = 2.6, step = 0.75, listEnd = s2 + 0.4 + n * step, tags = listEnd + 0.2, s3 = tags + 2.6, end = s3 + 3.8;
+  timing = { s2, step, listEnd, tags, s3, end };
+  return end;
+};
+function fade(id, t, a, b, fi = 0.35, fo = 0.35) {
+  const el = document.getElementById(id);
+  const o = t < a || t > b ? 0 : Math.min(1, (t - a) / fi, (b - t) / fo);
+  el.style.opacity = Math.max(0, o);
+  return el;
+}
+window.render = (t) => {
+  const { s2, step, tags, s3, end } = timing;
+  // Scène 1
+  const e1 = fade("s1", t, 0, s2 + 0.1, 0.01, 0.3);
+  const k1 = ease(t / 0.6);
+  e1.style.transform = `translateY(${(1 - k1) * 60}px) scale(${1 + 0.04 * Math.min(t / s2, 1)})`;
+  // Scène 2
+  fade("s2", t, s2, s3 + 0.05, 0.3, 0.3);
+  rows.forEach((r, i) => {
+    const t0 = s2 + 0.4 + i * step, k = ease((t - t0) / 0.45), kb = ease((t - t0 - 0.15) / 0.7);
+    r.el.style.opacity = Math.max(0, Math.min(1, (t - t0) / 0.25));
+    r.el.style.transform = `translateX(${(1 - k) * (i % 2 ? 120 : -120)}px)`;
+    const bars = r.el.querySelectorAll(".bar b"), nums = r.el.querySelectorAll(".nums span");
+    bars[0].style.width = `${r.pa * 100 * kb}%`; bars[1].style.width = `${r.ph * 100 * kb}%`;
+    nums[0].textContent = pct(r.pa * kb); nums[1].textContent = pct(r.ph * kb);
+    const on = r.tag && t >= tags;
+    r.el.classList.toggle("hl", !!on);
+    let tag = r.el.querySelector(".tag");
+    if (on && !tag) { tag = document.createElement("div"); tag.className = "tag"; tag.textContent = r.tag; r.el.appendChild(tag); }
+    if (!on && tag) tag.remove();
+    if (tag) tag.style.transform = `scale(${0.6 + 0.4 * ease((t - tags) / 0.3)})`;
+  });
+  // Scène 3
+  const e3 = fade("s3", t, s3, end + 1, 0.35, 0.01);
+  const k3 = ease((t - s3) / 0.6);
+  e3.style.transform = `translateY(${(1 - k3) * 50}px)`;
+};
+</script>
+</body>
+</html>

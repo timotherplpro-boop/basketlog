@@ -1,0 +1,9 @@
+{
+  "name": "basketlog-short",
+  "private": true,
+  "type": "module",
+  "description": "Short quotidien « les matchs de ce soir » (images Chrome + ffmpeg). Hors du site : pas installé par Vercel.",
+  "dependencies": {
+    "puppeteer-core": "^24.0.0"
+  }
+}
