@@ -1892,3 +1892,9 @@ html { scroll-behavior: smooth; }
 .push-actions { display: flex; align-items: center; gap: 8px; }
 .sb-link.push-link { background: none; border: 0; width: 100%; text-align: left; cursor: pointer; font: inherit; }
 .sb-link.push-link span { width: 18px; display: inline-block; text-align: center; }
+
+/* Citer cette page, réponse « joue-t-il ce soir ? », exemple d'API */
+.cite-box summary { cursor: pointer; font-weight: 700; }
+.cite-box textarea { display: block; width: 100%; box-sizing: border-box; margin: 8px 0 12px; padding: 10px; resize: none; border-radius: 10px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: inherit; font-family: var(--mono); font-size: 12px; }
+.pl-answer { margin: 8px 0 0; font-size: 16px; line-height: 1.45; }
+.code-sample { margin: 0; padding: 12px; border-radius: 10px; background: rgba(255,255,255,.04); font-family: var(--mono); font-size: 12px; line-height: 1.5; white-space: pre; }

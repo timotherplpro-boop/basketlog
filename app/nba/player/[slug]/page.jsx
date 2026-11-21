@@ -11,6 +11,8 @@ import AppTabs from "../../../../components/AppTabs";
 import JsonLd from "../../../../components/JsonLd";
 import Crumbs from "../../../../components/Crumbs";
 import { SITE } from "../../../../lib/site";
+import { injuryStatus } from "../../../../lib/injury-status";
+import CiteBox from "../../../../components/CiteBox";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +41,24 @@ async function nextGame(team) {
 
 const n1 = (x, L) => (x == null ? "–" : numOf(x, L));
 
+// Réponse directe à « X joue-t-il ce soir ? » (recherche très fréquente), en tête de page et dans la FAQ.
+function playingAnswer(L, p, team, status, nx) {
+  const st = status ? injuryStatus(status.status, L) : null;
+  const out = st?.k === "out";
+  if (!nx) return (st ? L.t(`Statut : ${st.t.toLowerCase()}. `, `Status: ${status.status}. `, `Estado: ${st.t.toLowerCase()}. `, `Status: ${st.t.toLowerCase()}. `) : "") + L.t("Pas de match prévu pour l'instant.", "No game scheduled right now.", "Sin partido previsto por ahora.", "Nenhum jogo previsto por enquanto.");
+  const tonight = nbaDateOf(nx.g.date) === nbaToday();
+  const opp = nx.opp.short, me = team.short;
+  const vs = L.t(nx.home ? "contre" : "chez", nx.home ? "vs." : "at", nx.home ? "contra" : "en casa de", nx.home ? "contra o" : "na casa do");
+  const time = `${fmtTime(L, nx.g.date)} ${L.tzLabel}`;
+  if (tonight && out) return L.t(`Non : ${p.name} est annoncé absent pour le match des ${me} ce soir ${vs} les ${opp} (${time}).`, `No: ${p.name} is ruled out for tonight's ${me} game ${vs} the ${opp} (${time}).`, `No: ${p.name} es baja para el partido de hoy de los ${me} ${vs} los ${opp} (${time}).`, `Não: ${p.name} está fora do jogo de hoje do ${me} ${vs} ${opp} (${time}).`);
+  if (tonight && st?.k === "prob") return L.t(`Oui, très probablement : ${p.name} est annoncé « probable » pour le match de ce soir ${vs} les ${opp} (${time}).`, `Very likely: ${p.name} is listed as probable for tonight's game ${vs} the ${opp} (${time}).`, `Sí, muy probablemente: ${p.name} figura como «probable» para el partido de hoy ${vs} los ${opp} (${time}).`, `Sim, muito provavelmente: ${p.name} aparece como "provável" para o jogo de hoje ${vs} ${opp} (${time}).`);
+  if (tonight && st) return L.t(`Incertain : ${p.name} est annoncé « ${st.t.toLowerCase()} » pour le match de ce soir ${vs} les ${opp} (${time}). La décision tombe en général peu avant le coup d'envoi.`, `Uncertain: ${p.name} is listed as ${status.status} for tonight's game ${vs} the ${opp} (${time}). The final call usually comes shortly before tip-off.`, `En duda: ${p.name} figura como «${st.t.toLowerCase()}» para el partido de hoy ${vs} los ${opp} (${time}). La decisión suele llegar poco antes del inicio.`, `Em dúvida: ${p.name} aparece como "${st.t.toLowerCase()}" para o jogo de hoje ${vs} ${opp} (${time}). A decisão costuma sair pouco antes do início.`);
+  if (tonight) return L.t(`Oui, a priori : les ${me} jouent ce soir ${vs} les ${opp} à ${time}, et ${p.name} ne figure pas sur le rapport des blessures.`, `Expected to, yes: the ${me} ${nx.home ? "host" : "visit"} the ${opp} tonight at ${time}, and ${p.name} is not on the injury report.`, `Sí, en principio: los ${me} juegan hoy ${vs} los ${opp} a las ${time}, y ${p.name} no figura en el parte de lesiones.`, `Sim, a princípio: o ${me} joga hoje ${vs} ${opp} às ${time}, e ${p.name} não está no boletim de lesões.`);
+  const when = `${fmtDate(L, nx.g.date, { weekday: "long", day: "numeric", month: "long" })} · ${time}`;
+  return L.t(`Non, les ${me} ne jouent pas ce soir. Prochain match : ${when}, ${vs} les ${opp}.`, `No, the ${me} don't play tonight. Next game: ${when}, ${vs} the ${opp}.`, `No, los ${me} no juegan hoy. Próximo partido: ${when}, ${vs} los ${opp}.`, `Não, o ${me} não joga hoje. Próximo jogo: ${when}, ${vs} ${opp}.`)
+    + (out ? " " + L.t(`${p.name} est actuellement absent (blessure).`, `${p.name} is currently out (injury).`, `${p.name} está de baja actualmente.`, `${p.name} está fora no momento (lesão).`) : "");
+}
+
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const L = await getL();
@@ -49,13 +69,13 @@ export async function generateMetadata({ params }) {
   const line = `${n1(p.ppg, L)} pts, ${n1(p.reb, L)} reb, ${n1(p.ast, L)} ${L.t("pd", "ast", "ast", "ast")}`;
   return pageMeta({
     title: L.t(
-      fitTitle(`${p.name} : stats ${s} et prochain match${team ? ` (${team.short})` : ""}`, `${p.name} : stats ${s} et prochain match`),
-      fitTitle(`${p.name} stats ${s}: points, rebounds, next game${team ? ` (${team.short})` : ""}`, `${p.name} stats ${s} and next game`),
-      fitTitle(`${p.name}: estadísticas ${s} y próximo partido${team ? ` (${team.short})` : ""}`, `${p.name}: estadísticas ${s} y próximo partido`), fitTitle(`${p.name}: estatísticas ${s} e próximo jogo${team ? ` (${team.short})` : ""}`, `${p.name}: estatísticas ${s} e próximo jogo`)
+      fitTitle(`${p.name} joue-t-il ce soir ? Blessure, stats ${s} et prochain match`, `${p.name} joue-t-il ce soir ? Statut et stats ${s}`, `${p.name} joue-t-il ce soir ? Stats ${s}`),
+      fitTitle(`Is ${p.name} playing tonight? Injury status, ${s} stats`, `Is ${p.name} playing tonight? Status and stats`, `Is ${p.name} playing tonight?`),
+      fitTitle(`¿Juega ${p.name} hoy? Lesión, estadísticas ${s} y próximo partido`, `¿Juega ${p.name} hoy? Estado y estadísticas ${s}`, `¿Juega ${p.name} hoy? Estadísticas ${s}`), fitTitle(`${p.name} joga hoje? Lesão, estatísticas ${s} e próximo jogo`, `${p.name} joga hoje? Status e estatísticas ${s}`, `${p.name} joga hoje? Estatísticas ${s}`)
     ),
     description: L.t(
-      `${p.name}${team ? ` (${team.name})` : ""} cette saison : ${line} en ${p.gp} matchs. Statut médical du jour et prochain match avec la probabilité de victoire Basketlog.`,
-      `${p.name}${team ? ` (${team.name})` : ""} this season: ${line} in ${p.gp} games. Today's injury status and next game with the Basketlog win probability.`,
+      `${p.name} joue-t-il ce soir ? Statut médical du jour, prochain match${team ? ` des ${team.short}` : ""} et probabilité de victoire. Saison : ${line} en ${p.gp} matchs.`,
+      `Is ${p.name} playing tonight? Today's injury status, the${team ? ` ${team.short}'` : ""} next game and win probability. Season: ${line} in ${p.gp} games.`,
       `${p.name}${team ? ` (${team.name})` : ""} esta temporada: ${line} en ${p.gp} partidos. Estado físico de hoy y próximo partido con la probabilidad de victoria de Basketlog.`, `${p.name}${team ? ` (${team.name})` : ""} nesta temporada: ${line} em ${p.gp} jogos. Condição física de hoje e próximo jogo com a probabilidade de vitória do Basketlog.`
     ),
     path: playerPath(p.name),
@@ -75,6 +95,7 @@ export default async function PlayerPage({ params }) {
   const rankTeam = mates.findIndex((x) => x.id === p.id) + 1;
   const s = seasonLabel();
   const when = (g) => `${fmtDate(L, g.date, { weekday: "long", day: "numeric", month: "long" })} · ${fmtTime(L, g.date)} ${L.tzLabel}`;
+  const answer = playingAnswer(L, p, team, status, nx);
   const stTxt = status ? L.t(`Statut du jour : ${/out/i.test(status.status) ? "absent" : "incertain"}${status.detail && L.en ? ` (${status.detail})` : ""}.`, `Today's status: ${status.status}${status.detail ? ` (${status.detail})` : ""}.`, `Estado de hoy: ${/out/i.test(status.status) ? "baja" : "en duda"}.`, `Status de hoje: ${/out/i.test(status.status) ? "fora" : "em dúvida"}.`) : L.t("Aucune blessure signalée aujourd'hui.", "No injury reported today.", "Sin lesión comunicada hoy.", "Nenhuma lesão informada hoje.");
 
   const faq = [
@@ -86,7 +107,7 @@ export default async function PlayerPage({ params }) {
     },
     {
       q: L.t(`${p.name} joue-t-il ce soir ?`, `Is ${p.name} playing tonight?`, `¿Juega ${p.name} hoy?`, `${p.name} joga hoje?`),
-      a: stTxt + (nx ? " " + L.t(`Prochain match des ${team.short} : ${nx.home ? "contre" : "chez"} les ${nx.opp.short}, ${when(nx.g)}.`, `The ${team.short}' next game: ${nx.home ? "vs" : "at"} the ${nx.opp.short}, ${when(nx.g)}.`, `Próximo partido de los ${team.short}: ${nx.home ? "contra" : "en casa de"} los ${nx.opp.short}, el ${when(nx.g)}.`, `Próximo jogo do ${team.short}: ${nx.home ? "contra o" : "na casa do"} ${nx.opp.short}, em ${when(nx.g)}.`) : ""),
+      a: answer,
     },
   ];
   if (nx && nx.p != null) faq.push({
@@ -116,9 +137,10 @@ export default async function PlayerPage({ params }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {p.head && <img className="pl-photo" src={p.head} alt={p.name} width="120" height="88" />}
         <div>
-          <h1>{L.t(`${p.name} : stats ${s} et prochain match`, `${p.name} stats ${s} and next game`, `${p.name}: estadísticas ${s} y próximo partido`, `${p.name}: estatísticas ${s} e próximo jogo`)}</h1>
+          <h1>{L.t(`${p.name} joue-t-il ce soir ? Stats ${s}`, `Is ${p.name} playing tonight? ${s} stats`, `¿Juega ${p.name} hoy? Estadísticas ${s}`, `${p.name} joga hoje? Estatísticas ${s}`)}</h1>
           <p>{p.pos}{p.jersey ? ` · #${p.jersey}` : ""}{team ? <> · <Link href={L.href(`/app/equipe/${team.id}`)}>{team.name}</Link></> : null}</p>
-          <p className="note">{stTxt}</p>
+          <p className="pl-answer"><b>{answer}</b></p>
+          {status && <p className="note">{stTxt}</p>}
         </div>
       </div>
       <div className="kpis">
@@ -143,6 +165,7 @@ export default async function PlayerPage({ params }) {
         </section>
       )}
       <p className="team-rec"><Link href={L.href("/app/leaders")}>{L.t("Meilleurs marqueurs NBA", "NBA scoring leaders", "Máximos anotadores NBA", "Cestinhas da NBA")}</Link>{" · "}<Link href={L.href("/app/leaders/rebounds")}>{L.t("Meilleurs rebondeurs", "Rebounding leaders", "Máximos reboteadores", "Líderes em rebotes")}</Link>{" · "}<Link href={L.href("/app/leaders/assists")}>{L.t("Meilleurs passeurs", "Assists leaders", "Máximos asistentes", "Líderes em assistências")}</Link></p>
+      <CiteBox url={url} title={L.t(`${p.name} : stats et statut du jour`, `${p.name}: stats and today's status`, `${p.name}: estadísticas y estado de hoy`, `${p.name}: estatísticas e status de hoje`)} lang={L.lang} />
       <p className="disclaimer">{L.t("Statistiques de la saison régulière (source : ESPN), mises à jour chaque jour.", "Regular-season stats (source: ESPN), updated daily.", "Estadísticas de la temporada regular (fuente: ESPN), actualizadas cada día.", "Estatísticas da temporada regular (fonte: ESPN), atualizadas todo dia.")}</p>
     </main>
   );

@@ -5,7 +5,8 @@ import { notFound } from "next/navigation";
 import { teamById } from "../../../../lib/teams";
 import { sized } from "../../../../lib/img";
 import { conferenceStandings, upcomingAnalyses } from "../../../../lib/data";
-import { getTeamStats, getTeamSchedule, getRoster, getSummary, nbaDateOf, nbaToday, seasonForDate } from "../../../../lib/espn";
+import { getTeamStats, getTeamSchedule, getRoster, getSummary, getInjuries, nbaDateOf, nbaToday, seasonForDate } from "../../../../lib/espn";
+import { injuryStatus } from "../../../../lib/injury-status";
 import AppTabs from "../../../../components/AppTabs";
 import { teamSummary } from "../../../../lib/summary";
 import { pageMeta, fitTitle } from "../../../../lib/seo";
@@ -49,9 +50,9 @@ export async function generateMetadata({ params }) {
       fitTitle(`Pronóstico ${t.name}: próximos partidos y estadísticas – Basketlog`, `Pronóstico ${t.name}: próximos partidos y estadísticas`), fitTitle(`Palpite ${t.name}: próximos jogos e estatísticas – Basketlog`, `Palpite ${t.name}: próximos jogos e estatísticas`)
     ),
     description: nx && pTxt ? L.t(
-      `${t.name} ${nx.home ? "reçoit" : "joue chez"} les ${nx.opp.short} le ${d} : ${pTxt} de chances de victoire selon le modèle Basketlog. Bilan, stats de la saison NBA, joueurs clés et calendrier.`,
-      `${t.name} ${nx.home ? "host" : "visit"} the ${nx.opp.short} on ${d}: ${pTxt} win probability per the Basketlog model. Record, NBA season stats, key players and schedule.`,
-      `Los ${t.name} ${nx.home ? "reciben a" : "visitan a"} los ${nx.opp.short} el ${d}: ${pTxt} de probabilidades de victoria según el modelo de Basketlog. Balance, estadísticas de la temporada NBA, jugadores clave y calendario.`, `O ${t.name} ${nx.home ? "recebe o" : "visita o"} ${nx.opp.short} em ${d}: ${pTxt} de probabilidade de vitória segundo o modelo do Basketlog. Campanha, estatísticas da temporada da NBA, jogadores-chave e calendário.`
+      `${t.name} ${nx.home ? "reçoit" : "joue chez"} les ${nx.opp.short} le ${d} : ${pTxt} de chances de victoire selon le modèle Basketlog. Blessés du jour, bilan, stats, joueurs clés et calendrier.`,
+      `${t.name} ${nx.home ? "host" : "visit"} the ${nx.opp.short} on ${d}: ${pTxt} win probability per the Basketlog model. Injury report, record, stats, key players and schedule.`,
+      `Los ${t.name} ${nx.home ? "reciben a" : "visitan a"} los ${nx.opp.short} el ${d}: ${pTxt} de probabilidades de victoria según el modelo de Basketlog. Lesionados de hoy, balance, estadísticas, jugadores clave y calendario.`, `O ${t.name} ${nx.home ? "recebe o" : "visita o"} ${nx.opp.short} em ${d}: ${pTxt} de probabilidade de vitória segundo o modelo do Basketlog. Campanha, estatísticas da temporada da NBA, jogadores-chave e calendário.`
     ) : L.t(
       `${t.name} : bilan, stats de la saison NBA, joueurs clés, calendrier et pronostic Basketlog pour chaque prochain match.`,
       `${t.name}: record, NBA season stats, key players, schedule and a Basketlog prediction for every upcoming game.`, `${t.name}: balance, estadísticas de la temporada NBA, jugadores clave, calendario y un pronóstico de Basketlog para cada próximo partido.`, `${t.name}: campanha, estatísticas da temporada da NBA, jogadores-chave, calendário e um palpite do Basketlog para cada próximo jogo.`
@@ -74,9 +75,11 @@ export default async function TeamPage({ params }) {
   const dfmt = (iso, o) => fmtDate(L, iso, o);
   const confName = team.conf === "E" ? L.t("Est", "East", "Este", "Leste") : L.t("Ouest", "West", "Oeste", "Oeste");
 
-  const [std, stats, sched, roster, up] = await Promise.all([
-    conferenceStandings(), getTeamStats(team.id), getTeamSchedule(team.id), getRoster(team.id, L.lang), upcomingAnalyses(7),
+  const [std, stats, sched, roster, up, injAll] = await Promise.all([
+    conferenceStandings(), getTeamStats(team.id), getTeamSchedule(team.id), getRoster(team.id, L.lang), upcomingAnalyses(7), getInjuries().catch(() => ({})),
   ]);
+  // Rapport des blessures de l'équipe (« lakers injury report », « blessés lakers »).
+  const injuries = (injAll[String(team.id)] || []).map((i) => ({ ...i, st: injuryStatus(i.status, L) }));
   let simT = null;
   try { simT = (await simulateSeason()).teams[team.id] || null; } catch {}
   const confRows = team.conf === "E" ? std.east : std.west;
@@ -114,7 +117,12 @@ export default async function TeamPage({ params }) {
   const mineOf = (g) => (probs[g.id] == null ? null : g.home.id === team.id ? probs[g.id] : 1 - probs[g.id]);
   const withP = next.filter((g) => mineOf(g) != null);
   const favN = withP.filter((g) => mineOf(g) >= 0.5).length;
-  const faq = [];
+  const faq = [{
+    q: L.t(`Qui est blessé chez les ${team.short} ?`, `Who is injured for the ${team.short}?`, `¿Quién está lesionado en los ${team.short}?`, `Quem está lesionado no ${team.short}?`),
+    a: injuries.length
+      ? L.t(`Rapport du jour : ${injuries.map((i) => `${i.player} (${i.st.t.toLowerCase()})`).join(", ")}.`, `Today's injury report: ${injuries.map((i) => `${i.player} (${i.st.t.toLowerCase()})`).join(", ")}.`, `Parte de hoy: ${injuries.map((i) => `${i.player} (${i.st.t.toLowerCase()})`).join(", ")}.`, `Boletim de hoje: ${injuries.map((i) => `${i.player} (${i.st.t.toLowerCase()})`).join(", ")}.`)
+      : L.t(`Aucun joueur des ${team.short} n'est sur le rapport des blessures aujourd'hui.`, `No ${team.short} player is on today's injury report.`, `Ningún jugador de los ${team.short} figura hoy en el parte de lesiones.`, `Nenhum jogador do ${team.short} está no boletim de lesões hoje.`),
+  }];
   if (nextG) {
     faq.push({
       q: L.t(`Les ${team.short} vont-ils gagner leur prochain match ?`, `Will the ${team.short} win their next game?`, `¿Ganarán los ${team.short} su próximo partido?`, `O ${team.short} vai vencer o próximo jogo?`),
@@ -197,6 +205,18 @@ export default async function TeamPage({ params }) {
       <div className="card block">
         <h2>{L.t("En bref", "At a glance", "En resumen", "Resumo")}</h2>
         <p className="narr">{teamSummary({ team, me: { ...me, streak: streak || null }, rank, conf: team.conf, next, probs, stats, L }).join(" ")}</p>
+      </div>
+
+      <div className="card block">
+        <h2>{L.t(`Blessés des ${team.short} (rapport du jour)`, `${team.short} injury report`, `Lesionados de los ${team.short} (parte de hoy)`, `Lesionados do ${team.short} (boletim de hoje)`)}</h2>
+        {injuries.length ? (
+          <ul className="wk-list">
+            {injuries.map((i) => (
+              <li key={i.player}><Link href={L.href(playerPath(i.player))}>{i.player}</Link>{i.pos ? <span className="mono"> · {i.pos}</span> : null} · <b className={i.st.k === "out" ? "neg" : ""}>{i.st.t}</b>{L.en && i.detail ? <small> · {i.detail}</small> : null}</li>
+            ))}
+          </ul>
+        ) : <p className="narr">{L.t("Aucun joueur sur le rapport des blessures aujourd'hui.", "No player on the injury report today.", "Ningún jugador en el parte de lesiones hoy.", "Nenhum jogador no boletim de lesões hoje.")}</p>}
+        <p className="note"><Link href={L.href("/app/blessures")}>{L.t("Toutes les blessures NBA du jour →", "All NBA injuries today →", "Todas las lesiones NBA de hoy →", "Todas as lesões da NBA hoje →")}</Link></p>
       </div>
 
       {leaders.length > 0 && (

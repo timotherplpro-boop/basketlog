@@ -5,6 +5,7 @@ import JsonLd from "../../../components/JsonLd";
 import { pageMeta } from "../../../lib/seo";
 import { getL } from "../../../lib/lang-server";
 import { SITE } from "../../../lib/site";
+import CiteBox from "../../../components/CiteBox";
 
 export const dynamic = "force-dynamic";
 
@@ -90,6 +91,10 @@ export default async function PowerRankingsPage() {
         {" · "}
         <Link href={L.href("/app/champion")}>{L.t("favoris au titre", "title favorites", "favoritos al título", "favoritos ao título")}</Link>
         {" · "}
+        <Link href={L.href("/app/mvp")}>{L.t("course au MVP", "MVP ladder", "carrera al MVP", "corrida pelo MVP")}</Link>
+        {" · "}
+        <Link href={L.href("/app/calendrier-restant")}>{L.t("calendrier restant", "remaining schedule", "calendario restante", "calendário restante")}</Link>
+        {" · "}
         <Link href={L.href(L.es || L.pt ? "/app/espagnols" : "/app/francais")}>{L.t("les Français en NBA", "French players in the NBA", "españoles y latinos en la NBA", "espanhóis e latinos na NBA")}</Link>
       </p>
       <JsonLd data={{
@@ -97,6 +102,7 @@ export default async function PowerRankingsPage() {
         name: L.t("Power ranking NBA", "NBA power rankings", "Power ranking NBA", "Power ranking NBA"),
         itemListElement: rows.map((r, i) => ({ "@type": "ListItem", position: i + 1, name: r.team.name, url: `${SITE}${L.href(`/app/equipe/${r.team.id}`)}` })),
       }} />
+      <CiteBox url={`${SITE}${L.href("/app/power-rankings")}`} title={L.t("Power ranking NBA du modèle Basketlog", "Basketlog NBA power rankings", "Power ranking NBA de Basketlog", "Power ranking NBA do Basketlog")} lang={L.lang} />
     </main>
   );
 }

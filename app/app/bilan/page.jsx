@@ -11,6 +11,9 @@ import { nbaPath, elPath } from "../../../lib/slug.js";
 import JsonLd from "../../../components/JsonLd";
 import { SITE } from "../../../lib/site";
 import { csvName } from "../../../lib/picks-csv.js";
+import { monthsOf } from "../../../lib/months.js";
+import { fmtDate } from "../../../lib/i18n";
+import CiteBox from "../../../components/CiteBox";
 
 export const dynamic = "force-dynamic";
 export async function generateMetadata() {
@@ -205,6 +208,10 @@ export default async function BilanPage({ searchParams }) {
         </>)}
       </div>
       <section className="card block">
+        <h2>{L.t("Bilan mois par mois", "Month by month", "Mes a mes", "Mês a mês")}</h2>
+        <p className="team-rec">{monthsOf(season, nbaToday()).slice().reverse().map((m, i) => <span key={m}>{i ? " · " : ""}<Link href={L.href(`/app/bilan/${m}`)}>{fmtDate(L, `${m}-15T12:00:00Z`, { month: "long", year: "numeric" })}</Link></span>)}{" · "}<Link href={L.href("/app/surprises")}>{L.t("Plus grosses surprises", "Biggest upsets", "Mayores sorpresas", "Maiores zebras")}</Link></p>
+      </section>
+      <section className="card block">
         <h2>{L.t("Télécharger les données", "Download the data", "Descargar los datos", "Baixar os dados")}</h2>
         <p>{L.t(
           "Tous les pronostics NBA de la saison, match par match : probabilité de victoire, score projeté, score final et réussite. Format CSV, mis à jour chaque heure. Réutilisation libre (licence CC BY 4.0) avec un lien vers Basketlog.",
@@ -229,6 +236,7 @@ export default async function BilanPage({ searchParams }) {
         distribution: [season, season - 1].map((s) => ({ "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: `${SITE}/data/${csvName(s)}` })),
       }} />
       <p className="disclaimer">{L.t("Basketlog n'est pas un service de paris. Un bon taux de réussite passé ne garantit pas les résultats futurs.", "Basketlog is not a betting service. A good past track record does not guarantee future results.", "Basketlog no es un servicio de apuestas. Un buen porcentaje de acierto en el pasado no garantiza resultados futuros.", "O Basketlog não é um serviço de apostas. Uma boa taxa de acerto no passado não garante resultados futuros.")}</p>
+      <CiteBox url={`${SITE}${L.href("/app/bilan")}`} title={L.t("Bilan des pronostics NBA Basketlog", "Basketlog NBA prediction track record", "Balance de pronósticos NBA de Basketlog", "Desempenho dos palpites NBA do Basketlog")} lang={L.lang} />
     </main>
   );
 }

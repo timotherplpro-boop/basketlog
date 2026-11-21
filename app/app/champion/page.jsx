@@ -10,6 +10,8 @@ import { nbaToday, seasonForDate } from "../../../lib/espn";
 import { teamById } from "../../../lib/teams";
 import { simulateSeason } from "../../../lib/sim";
 import { probTxt } from "../../../lib/probtxt";
+import CiteBox from "../../../components/CiteBox";
+import { SITE as SITE_URL } from "../../../lib/site";
 
 // « Qui va être champion NBA 2027 ? », « favoritos al anillo NBA », « quem vai ser campeão da NBA » : les favoris au
 // titre selon la simulation de la saison (lib/sim.js), avec le chemin de chacun (playoffs, finale de conférence, Finales).
@@ -101,6 +103,7 @@ export default async function ChampionPage() {
       )}
       <p className="disclaimer">{L.t("Probabilités estimées par le modèle statistique Basketlog (4 000 simulations), jamais une certitude. Les équipes sous 0,1 % ne sont pas affichées.", "Probabilities estimated by the Basketlog statistical model (4,000 simulations), never a certainty. Teams under 0.1% are not shown.", "Probabilidades estimadas por el modelo estadístico de Basketlog (4.000 simulaciones), nunca una certeza. No se muestran los equipos por debajo del 0,1 %.", "Probabilidades estimadas pelo modelo estatístico do Basketlog (4.000 simulações), nunca uma certeza. Times abaixo de 0,1 % não aparecem.")}</p>
       <PrefSource L={L} />
+      <CiteBox url={`${SITE_URL}${L.href("/app/champion")}`} title={L.t("Favoris au titre NBA (Basketlog)", "NBA title chances (Basketlog)", "Favoritos al título NBA (Basketlog)", "Favoritos ao título da NBA (Basketlog)")} lang={L.lang} />
     </main>
   );
 }

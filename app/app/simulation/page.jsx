@@ -9,6 +9,8 @@ import { nbaToday, seasonForDate } from "../../../lib/espn";
 import { teamById } from "../../../lib/teams";
 import { simulateSeason } from "../../../lib/sim";
 import { probTxt } from "../../../lib/probtxt";
+import CiteBox from "../../../components/CiteBox";
+import { SITE as SITE_URL } from "../../../lib/site";
 
 // Chances de playoffs et de titre de chaque équipe NBA, par simulation de la fin de saison (lib/sim.js).
 // Recherches visées : « nba playoff odds », « chances playoffs NBA », « probabilidades playoffs NBA », « favorito título NBA ».
@@ -138,6 +140,7 @@ export default async function SimulationPage() {
         </section>
       )}
       <p className="disclaimer">{L.t("Probabilités estimées par le modèle statistique Basketlog, jamais une certitude. Égalités au classement départagées au hasard (règles officielles simplifiées).", "Probabilities estimated by the Basketlog statistical model, never a certainty. Ties in the standings are broken at random (simplified official rules).", "Probabilidades estimadas por el modelo estadístico de Basketlog, nunca una certeza. Empates en la clasificación resueltos al azar (reglas oficiales simplificadas).", "Probabilidades estimadas pelo modelo estatístico do Basketlog, nunca uma certeza. Empates na classificação decididos ao acaso (regras oficiais simplificadas).")}</p>
+      <CiteBox url={`${SITE_URL}${L.href("/app/simulation")}`} title={L.t("Chances de playoffs NBA (simulation Basketlog)", "NBA playoff odds (Basketlog simulation)", "Opciones de playoffs NBA (simulación de Basketlog)", "Chances de playoffs da NBA (simulação do Basketlog)")} lang={L.lang} />
     </main>
   );
 }
