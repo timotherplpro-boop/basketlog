@@ -36,10 +36,10 @@ export async function generateMetadata({ params }) {
       fitTitle(`${a} vs ${h} (${d}): resultado final ${g.as}-${g.hs} y pronóstico`, `${a} vs ${h}: resultado y pronóstico`),
       fitTitle(`${a} x ${h} (${d}): resultado final ${g.as}-${g.hs} e palpite`, `${a} x ${h}: resultado e palpite`)
     ) : L.t(
-      fitTitle(`Pronostic ${a} – ${h} (${d}) : ${nm(fav)} ${pf}`, `Pronostic ${a} – ${h} (${d})`),
-      fitTitle(`${a} vs ${h} prediction (${d}): ${nm(fav)} ${pf} to win`, `${a} vs ${h} prediction (${d})`),
-      fitTitle(`Pronóstico ${a} vs ${h} (${d}): ${nm(fav)} ${pf}`, `Pronóstico ${a} vs ${h} (${d})`),
-      fitTitle(`Palpite ${a} x ${h} (${d}): ${nm(fav)} ${pf}`, `Palpite ${a} x ${h} (${d})`)
+      fitTitle(`Pronostic ${a} – ${h} (${d}) : ${nm(fav)} ${pf}`, `Pronostic ${a} – ${h} : ${nm(fav)} ${pf}`, `Pronostic ${a} – ${h} (${d})`),
+      fitTitle(`${a} vs ${h} prediction (${d}): ${nm(fav)} ${pf} to win`, `${a} vs ${h} prediction (${d}): ${nm(fav)} ${pf}`, `${a} vs ${h} prediction: ${nm(fav)} ${pf}`, `${a} vs ${h} prediction (${d})`),
+      fitTitle(`Pronóstico ${a} vs ${h} (${d}): ${nm(fav)} ${pf}`, `Pronóstico ${a} vs ${h}: ${nm(fav)} ${pf}`, `Pronóstico ${a} vs ${h} (${d})`),
+      fitTitle(`Palpite ${a} x ${h} (${d}): ${nm(fav)} ${pf}`, `Palpite ${a} x ${h}: ${nm(fav)} ${pf}`, `Palpite ${a} x ${h} (${d})`)
     ),
     description: L.t(
       `${g.away.name} ${g.n ? "contre" : "chez"} ${g.home.name}, basket universitaire américain (NCAA) : ${nm(fav)} favori à ${pf}, écart prévu ${numOf(Math.abs(g.margin), L, 1)} points. Notes, bilans et derniers résultats.`,

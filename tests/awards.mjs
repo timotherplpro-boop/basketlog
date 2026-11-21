@@ -91,6 +91,7 @@ export async function awardsTests({ ok, ko, eq }) {
   eq("NCAA : adresse d'un match", ncaaGamePath({ d: "20261121", away: { loc: "Michigan State", short: "Michigan St" }, home: { loc: "Duke" } }), "/ncaa/michigan-state-vs-duke-2026-11-21");
   eq("NCAA : lecture de l'adresse", JSON.stringify(parseNcaaSlug("miami-oh-vs-saint-mary-s-2026-11-21")), JSON.stringify({ away: "miami-oh", home: "saint-mary-s", date: "20261121" }));
   eq("NCAA : nom d'école sans mascotte", ncaaSlug({ loc: "Miami (OH)", name: "Miami (OH) RedHawks" }), "miami-oh");
+  eq("NCAA : apostrophe et esperluette", [ncaaSlug({ loc: "St. John's" }), ncaaSlug({ loc: "Texas A&M" }), ncaaSlug({ loc: "Saint Mary's" })].join(","), "st-johns,texas-am,saint-marys");
   if (parseNcaaSlug("duke-2026-11-21") === null) ok("NCAA : adresse invalide refusée"); else ko("NCAA : adresse invalide", "");
   eq("NCAA : bilan de C", JSON.stringify(ncaaRecords(ng).C), JSON.stringify({ w: 1, l: 1 }));
   eq("lexique : adresses uniques", new Set(TERMS.map((x) => x.slug)).size, TERMS.length);
