@@ -93,6 +93,7 @@ export default async function DraftPage() {
               <th>{L.t("Équipe", "Team", "Equipo", "Time")}</th><th>{L.t("Bilan", "Record", "Balance", "Campanha")}</th>
               <th>{L.t("Victoires projetées", "Projected wins", "Victorias proyectadas", "Vitórias projetadas")}</th>
               <th>{L.t("Dans la loterie", "In lottery", "En la lotería", "Na loteria")}</th>
+              <th title={L.t("Chances d'être parmi les 3 plus mauvais bilans (2 boules au lieu de 3)", "Chance of a bottom-3 record (2 balls instead of 3)", "Opciones de estar entre los 3 peores balances (2 bolas en vez de 3)", "Chance de ficar entre as 3 piores campanhas (2 bolas em vez de 3)")}>{L.t("Relégué", "Relegated", "Relegado", "Rebaixado")}</th>
               <th>{L.t("1er choix", "No. 1 pick", "N.º 1", "1ª escolha")}</th><th>{L.t("Top 4", "Top 4", "Top 4", "Top 4")}</th>
               <th>{L.t("Choix moyen", "Avg. pick", "Elección media", "Escolha média")}</th>
             </tr></thead>
@@ -103,6 +104,7 @@ export default async function DraftPage() {
                   <td>{r.record[0]}-{r.record[1]}</td>
                   <td>{numOf(r.projWins, L, 1)}</td>
                   <td>{pc(r.lottery)}</td>
+                  <td>{pc(r.relegated)}</td>
                   <td className="pos">{pc(r.pick1)}</td>
                   <td>{pc(r.top4)}</td>
                   <td>{r.avgPick == null ? "–" : numOf(r.avgPick, L, 1)}</td>
