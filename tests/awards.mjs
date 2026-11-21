@@ -4,7 +4,9 @@ import { mvpRace, royRace, rookiesOf, production } from "../lib/awards.js";
 import { monthsOf, monthOk, seasonOfMonth } from "../lib/months.js";
 import { apiPredictions } from "../lib/api-v1.js";
 import { TERMS, termOf, tr } from "../lib/glossary.js";
-import { ncaaRatings, ncaaProb, ncaaRecord, ncaaRecords, NCAA, ncaaSlug, ncaaGamePath, parseNcaaSlug } from "../lib/ncaa-model.js";
+import { ncaaRatings, ncaaProb, ncaaRecord, ncaaRecords, NCAA, NCAAW, LEAGUES, ncaaWords, ncaaSlug, ncaaGamePath, ncaaTeamPath, parseNcaaSlug } from "../lib/ncaa-model.js";
+import { mk } from "../lib/i18n.js";
+import PRIOR_W from "../lib/ncaaw-prior.json" with { type: "json" };
 
 function rng(seed) {
   let a = seed >>> 0;
@@ -94,6 +96,16 @@ export async function awardsTests({ ok, ko, eq }) {
   eq("NCAA : apostrophe et esperluette", [ncaaSlug({ loc: "St. John's" }), ncaaSlug({ loc: "Texas A&M" }), ncaaSlug({ loc: "Saint Mary's" })].join(","), "st-johns,texas-am,saint-marys");
   if (parseNcaaSlug("duke-2026-11-21") === null) ok("NCAA : adresse invalide refusée"); else ko("NCAA : adresse invalide", "");
   eq("NCAA : bilan de C", JSON.stringify(ncaaRecords(ng).C), JSON.stringify({ w: 1, l: 1 }));
+  // Basket universitaire féminin
+  eq("NCAA F : adresse d'un match", ncaaGamePath({ d: "20261123", away: { loc: "South Carolina" }, home: { loc: "UConn" } }, LEAGUES.w.base), "/ncaaw/south-carolina-vs-uconn-2026-11-23");
+  eq("NCAA F : adresse d'une école", ncaaTeamPath({ loc: "UConn" }, LEAGUES.w.base), "/ncaaw/team/uconn");
+  eq("NCAA H : adresse inchangée par défaut", ncaaTeamPath({ loc: "Duke" }), "/ncaa/team/duke");
+  const pw = ncaaProb({ A: 5, B: 0 }, "A", "B", true, NCAAW).pHome, pm = ncaaProb({ A: 5, B: 0 }, "A", "B", true).pHome;
+  if (pw > pm && pm > 0.5 && NCAAW.SD < NCAA.SD) ok("NCAA F : écart-type plus serré, probabilité plus nette"); else ko("NCAA F : écart-type", [pw, pm]);
+  eq("NCAA F : libellé anglais", ncaaWords(mk("en"), "w").name, "Women's college basketball");
+  eq("NCAA H : libellé anglais", ncaaWords(mk("en"), "m").name, "College basketball");
+  const nw = Object.keys(PRIOR_W).length;
+  if (nw > 340 && nw < 380 && Object.values(PRIOR_W).every((x) => Math.abs(x) < 40)) ok("NCAA F : notes de départ (" + nw + " écoles)"); else ko("NCAA F : notes de départ", nw);
   eq("lexique : adresses uniques", new Set(TERMS.map((x) => x.slug)).size, TERMS.length);
   eq("lexique : traduction", tr(termOf("play-in").t, "es"), "Play-in");
   if (!TERMS.some((x) => x.d.some((d) => /\b(IA|AI|paris|bet|apuesta|aposta)\b/i.test(d)))) ok("lexique : ni « IA » ni vocabulaire de pari"); else ko("lexique : ni « IA » ni vocabulaire de pari", "condition fausse");

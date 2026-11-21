@@ -50,6 +50,7 @@ export async function GET() {
     `- Open data (CC BY 4.0): every NBA prediction of the season as CSV: ${SITE}/data/${csvName(seasonForDate(nbaToday()))}`,
     `- [NBA power rankings](${SITE}/en/app/power-rankings): all 30 teams ranked by model strength, updated daily`,
     `- [College basketball (NCAA Division I) predictions today](${SITE}/en/app/ncaa): win probability and projected margin for every game, model top 25, season track record · [College basketball power rankings, all 365 Division I teams](${SITE}/en/app/ncaa/classement)`,
+    `- [Women's college basketball predictions today](${SITE}/en/app/ncaaw): same model for NCAA women's Division I (backtest: 81% of favorites won, 718 games in November 2026) · [Women's college basketball power rankings](${SITE}/en/app/ncaaw/classement)`,
     `- [NBA MVP ladder](${SITE}/en/app/mvp) · [Rookie of the Year ladder](${SITE}/en/app/rookie): daily top players by a public production × wins index`,
     `- [2027 NBA draft lottery odds under the new 3-2-1 system](${SITE}/en/app/draft): each team's chance at the No. 1 and top-4 picks, from season simulations`,
     `- [NBA remaining strength of schedule](${SITE}/en/app/calendrier-restant) · [NBA back-to-backs tonight](${SITE}/en/app/back-to-back) · [Biggest upsets of the season](${SITE}/en/app/surprises)`,

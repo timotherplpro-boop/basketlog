@@ -9,8 +9,8 @@ import { nbaPath, elPath, playerPath } from "../lib/slug.js";
 import { pairPath } from "../lib/matchup.js";
 import { TERMS } from "../lib/glossary.js";
 import { monthsOf } from "../lib/months.js";
-import { ncaaState, ncaaDay } from "../lib/ncaa";
-import { ncaaGamePath } from "../lib/ncaa-model.js";
+import { ncaaState, ncaaStateOf, ncaaDay } from "../lib/ncaa";
+import { ncaaGamePath, ncaaTeamPath } from "../lib/ncaa-model.js";
 
 export const revalidate = 3600; // régénéré chaque heure, avec les matchs à venir
 
@@ -30,7 +30,7 @@ const both = ({ path, ...rest }) => {
 
 export default async function sitemap() {
   const pages = [
-    u("", 1, "daily"), u("/analyse-basket", 0.9, "daily"), u("/pronostic-basket", 0.9, "hourly"), u("/app/matchs", 0.9, "hourly"), u("/app/demain", 0.8, "hourly"), u("/app/power-rankings", 0.8, "daily"), u("/app/semaine", 0.8, "daily"), u("/app/blessures", 0.8, "hourly"), u("/app/nba-cup", 0.8, "daily"), u("/app/simulation", 0.8, "daily"), u("/app/champion", 0.8, "daily"), u("/app/resultats", 0.8, "hourly"), u("/app/noel", 0.8, "daily"), u("/app/francais", 0.8, "daily"), u("/app/espagnols", 0.8, "daily"), u("/app/ncaa", 0.8, "hourly"), u("/app/ncaa/classement", 0.8, "daily"), u("/app/mvp", 0.8, "daily"), u("/app/rookie", 0.7, "daily"), u("/app/draft", 0.8, "daily"), u("/app/calendrier-restant", 0.7, "daily"), u("/app/back-to-back", 0.7, "daily"), u("/app/surprises", 0.7, "daily"), u("/app/donnees", 0.6, "weekly"), u("/meilleurs-sites-pronostics-nba", 0.7, "weekly"), u("/app/lexique", 0.5, "monthly"), u("/app/defi", 0.8, "daily"), u("/fivethirtyeight-nba", 0.7, "weekly"), u("/app/classement/east", 0.8, "daily"), u("/app/euroleague/simulation", 0.7, "daily"), u("/app/classement/west", 0.8, "daily"), u("/app/programme", 0.8, "hourly"), u("/app/leaders", 0.7, "daily"), u("/app/leaders/rebounds", 0.6, "daily"), u("/app/leaders/assists", 0.6, "daily"), u("/app", 0.8, "daily"), u("/app/classement", 0.8, "daily"),
+    u("", 1, "daily"), u("/analyse-basket", 0.9, "daily"), u("/pronostic-basket", 0.9, "hourly"), u("/app/matchs", 0.9, "hourly"), u("/app/demain", 0.8, "hourly"), u("/app/power-rankings", 0.8, "daily"), u("/app/semaine", 0.8, "daily"), u("/app/blessures", 0.8, "hourly"), u("/app/nba-cup", 0.8, "daily"), u("/app/simulation", 0.8, "daily"), u("/app/champion", 0.8, "daily"), u("/app/resultats", 0.8, "hourly"), u("/app/noel", 0.8, "daily"), u("/app/francais", 0.8, "daily"), u("/app/espagnols", 0.8, "daily"), u("/app/ncaa", 0.8, "hourly"), u("/app/ncaa/classement", 0.8, "daily"), u("/app/ncaaw", 0.7, "hourly"), u("/app/ncaaw/classement", 0.6, "daily"), u("/app/mvp", 0.8, "daily"), u("/app/rookie", 0.7, "daily"), u("/app/draft", 0.8, "daily"), u("/app/calendrier-restant", 0.7, "daily"), u("/app/back-to-back", 0.7, "daily"), u("/app/surprises", 0.7, "daily"), u("/app/donnees", 0.6, "weekly"), u("/meilleurs-sites-pronostics-nba", 0.7, "weekly"), u("/app/lexique", 0.5, "monthly"), u("/app/defi", 0.8, "daily"), u("/fivethirtyeight-nba", 0.7, "weekly"), u("/app/classement/east", 0.8, "daily"), u("/app/euroleague/simulation", 0.7, "daily"), u("/app/classement/west", 0.8, "daily"), u("/app/programme", 0.8, "hourly"), u("/app/leaders", 0.7, "daily"), u("/app/leaders/rebounds", 0.6, "daily"), u("/app/leaders/assists", 0.6, "daily"), u("/app", 0.8, "daily"), u("/app/classement", 0.8, "daily"),
     u("/app/euroleague", 0.8, "daily"), u("/app/competitions", 0.7, "daily"), u("/app/bilan", 0.8, "daily"), u("/methode", 0.7, "monthly"), u("/pro", 0.6, "weekly"), u("/avis", 0.5, "weekly"), u("/widget", 0.5, "monthly"),
     u("/mentions-legales", 0.2, "yearly"), u("/cgu", 0.2, "yearly"), u("/cgv", 0.2, "yearly"), u("/confidentialite", 0.2, "yearly"), u("/cookies", 0.2, "yearly"),
   ];
@@ -44,6 +44,15 @@ export default async function sitemap() {
     const today = nbaToday();
     const lists = await Promise.all([0, 1, 2].map((i) => ncaaDay(shiftDate(today, i)).catch(() => [])));
     for (const g of lists.flat()) if (d1.has(g.home.id) && d1.has(g.away.id)) ncaa.push(u(ncaaGamePath(g), 0.6, "hourly"));
+  } catch {}
+  // Basket universitaire féminin : les 100 écoles les mieux notées (exploration limitée) et les matchs d'aujourd'hui à après-demain.
+  try {
+    const st = await ncaaStateOf("w");
+    const d1 = new Set(st.d1);
+    ncaa.push(...st.d1.filter((id) => st.meta[id]?.slug).sort((a, b) => st.ratings[b] - st.ratings[a]).slice(0, 100).map((id) => u(ncaaTeamPath(st.meta[id], "/ncaaw"), 0.4, "daily")));
+    const today = nbaToday();
+    const lists = await Promise.all([0, 1, 2].map((i) => ncaaDay(shiftDate(today, i), "w").catch(() => [])));
+    for (const g of lists.flat()) if (d1.has(g.home.id) && d1.has(g.away.id)) ncaa.push(u(ncaaGamePath(g, "/ncaaw"), 0.5, "hourly"));
   } catch {}
   // NCAA : version anglaise seulement dans le sitemap (recherches américaines) ; les autres langues restent liées par hreflang.
   const ncaaEn = ncaa.map((e) => both(e)[1]);

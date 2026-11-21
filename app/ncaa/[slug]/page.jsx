@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ncaaGameBySlug } from "../../../lib/ncaa";
-import { ncaaGamePath, ncaaTeamPath } from "../../../lib/ncaa-model";
+import { ncaaGameBySlug, ncaaLg } from "../../../lib/ncaa";
+import { ncaaGamePath, ncaaTeamPath, LEAGUES, ncaaWords } from "../../../lib/ncaa-model";
 import AppTabs from "../../../components/AppTabs";
 import Crumbs from "../../../components/Crumbs";
 import QuickFaq from "../../../components/QuickFaq";
@@ -22,7 +22,8 @@ const rk = (t) => (t.rank ? `#${t.rank} ` : "");
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const L = await getL();
-  const f = await ncaaGameBySlug(slug).catch(() => null);
+  const lg = await ncaaLg(), C = LEAGUES[lg], W = ncaaWords(L, lg), fem = lg === "w";
+  const f = await ncaaGameBySlug(slug, lg).catch(() => null);
   if (!f) return { title: L.t("Match NCAA – Basketlog", "College basketball game – Basketlog", "Partido NCAA – Basketlog", "Jogo NCAA – Basketlog"), robots: { index: false } };
   const { g } = f;
   const d = fmtDate(L, isoOf(g.d), L.en ? { month: "short", day: "numeric" } : { day: "numeric", month: "short" }).replace(/\.$/, "");
@@ -31,23 +32,23 @@ export async function generateMetadata({ params }) {
   const a = nm(g.away), h = nm(g.home);
   return pageMeta({
     title: done ? L.t(
-      fitTitle(`${a} – ${h} (${d}) : score final ${g.as}-${g.hs} et pronostic`, `${a} – ${h} : score final et pronostic`),
-      fitTitle(`${a} vs ${h} (${d}): final score ${g.as}-${g.hs} and pregame prediction`, `${a} vs ${h}: final score and prediction`),
-      fitTitle(`${a} vs ${h} (${d}): resultado final ${g.as}-${g.hs} y pronóstico`, `${a} vs ${h}: resultado y pronóstico`),
-      fitTitle(`${a} x ${h} (${d}): resultado final ${g.as}-${g.hs} e palpite`, `${a} x ${h}: resultado e palpite`)
+      fitTitle(`${a} – ${h}${W.tag} (${d}) : score final ${g.as}-${g.hs} et pronostic`, `${a} – ${h}${W.tag} : score final et pronostic`),
+      fitTitle(`${a} vs ${h}${W.tag} (${d}): final score ${g.as}-${g.hs} and pregame prediction`, `${a} vs ${h}${W.tag}: final score and prediction`),
+      fitTitle(`${a} vs ${h}${W.tag} (${d}): resultado final ${g.as}-${g.hs} y pronóstico`, `${a} vs ${h}${W.tag}: resultado y pronóstico`),
+      fitTitle(`${a} x ${h}${W.tag} (${d}): resultado final ${g.as}-${g.hs} e palpite`, `${a} x ${h}${W.tag}: resultado e palpite`)
     ) : L.t(
-      fitTitle(`Pronostic ${a} – ${h} (${d}) : ${nm(fav)} ${pf}`, `Pronostic ${a} – ${h} : ${nm(fav)} ${pf}`, `Pronostic ${a} – ${h} (${d})`),
-      fitTitle(`${a} vs ${h} prediction (${d}): ${nm(fav)} ${pf} to win`, `${a} vs ${h} prediction (${d}): ${nm(fav)} ${pf}`, `${a} vs ${h} prediction: ${nm(fav)} ${pf}`, `${a} vs ${h} prediction (${d})`),
-      fitTitle(`Pronóstico ${a} vs ${h} (${d}): ${nm(fav)} ${pf}`, `Pronóstico ${a} vs ${h}: ${nm(fav)} ${pf}`, `Pronóstico ${a} vs ${h} (${d})`),
-      fitTitle(`Palpite ${a} x ${h} (${d}): ${nm(fav)} ${pf}`, `Palpite ${a} x ${h}: ${nm(fav)} ${pf}`, `Palpite ${a} x ${h} (${d})`)
+      fitTitle(`Pronostic ${a} – ${h}${W.tag} (${d}) : ${nm(fav)} ${pf}`, `Pronostic ${a} – ${h}${W.tag} : ${nm(fav)} ${pf}`, `Pronostic ${a} – ${h}${W.tag} (${d})`),
+      fitTitle(`${a} vs ${h}${W.tag} prediction (${d}): ${nm(fav)} ${pf} to win`, `${a} vs ${h}${W.tag} prediction (${d}): ${nm(fav)} ${pf}`, `${a} vs ${h}${W.tag} prediction: ${nm(fav)} ${pf}`, `${a} vs ${h}${W.tag} prediction (${d})`),
+      fitTitle(`Pronóstico ${a} vs ${h}${W.tag} (${d}): ${nm(fav)} ${pf}`, `Pronóstico ${a} vs ${h}${W.tag}: ${nm(fav)} ${pf}`, `Pronóstico ${a} vs ${h}${W.tag} (${d})`),
+      fitTitle(`Palpite ${a} x ${h}${W.tag} (${d}): ${nm(fav)} ${pf}`, `Palpite ${a} x ${h}${W.tag}: ${nm(fav)} ${pf}`, `Palpite ${a} x ${h}${W.tag} (${d})`)
     ),
     description: L.t(
-      `${g.away.name} ${g.n ? "contre" : "chez"} ${g.home.name}, basket universitaire américain (NCAA) : ${nm(fav)} favori à ${pf}, écart prévu ${numOf(Math.abs(g.margin), L, 1)} points. Notes, bilans et derniers résultats.`,
-      `${g.away.name} ${g.n ? "vs." : "at"} ${g.home.name}, men's college basketball: ${nm(fav)} favored at ${pf}, projected margin ${numOf(Math.abs(g.margin), L, 1)} points. Ratings, records and recent results.`,
-      `${g.away.name} ${g.n ? "contra" : "en casa de"} ${g.home.name}, baloncesto universitario (NCAA): ${nm(fav)} favorito al ${pf}, margen previsto de ${numOf(Math.abs(g.margin), L, 1)} puntos. Notas, balances y últimos resultados.`,
-      `${g.away.name} ${g.n ? "contra" : "na casa do"} ${g.home.name}, basquete universitário (NCAA): ${nm(fav)} favorito com ${pf}, margem prevista de ${numOf(Math.abs(g.margin), L, 1)} pontos. Notas, campanhas e últimos resultados.`
+      `${g.away.name} ${g.n ? "contre" : "chez"} ${g.home.name}, basket universitaire ${fem ? "féminin " : ""}américain (NCAA) : ${nm(fav)} favori à ${pf}, écart prévu ${numOf(Math.abs(g.margin), L, 1)} points. Notes, bilans et derniers résultats.`,
+      `${g.away.name} ${g.n ? "vs." : "at"} ${g.home.name}, ${fem ? "women's" : "men's"} college basketball: ${nm(fav)} favored at ${pf}, projected margin ${numOf(Math.abs(g.margin), L, 1)} points. Ratings, records and recent results.`,
+      `${g.away.name} ${g.n ? "contra" : "en casa de"} ${g.home.name}, baloncesto universitario${fem ? " femenino" : ""} (NCAA): ${nm(fav)} favorito al ${pf}, margen previsto de ${numOf(Math.abs(g.margin), L, 1)} puntos. Notas, balances y últimos resultados.`,
+      `${g.away.name} ${g.n ? "contra" : "na casa do"} ${g.home.name}, basquete universitário${fem ? " feminino" : ""} (NCAA): ${nm(fav)} favorito com ${pf}, margem prevista de ${numOf(Math.abs(g.margin), L, 1)} pontos. Notas, campanhas e últimos resultados.`
     ),
-    path: ncaaGamePath(g),
+    path: ncaaGamePath(g, C.base),
     L,
   });
 }
@@ -62,7 +63,8 @@ function recent(st, id, n = 5) {
 export default async function NcaaGamePage({ params }) {
   const { slug } = await params;
   const L = await getL();
-  const f = await ncaaGameBySlug(slug);
+  const lg = await ncaaLg(), C = LEAGUES[lg], W = ncaaWords(L, lg);
+  const f = await ncaaGameBySlug(slug, lg);
   if (!f) notFound();
   const { st, g } = f;
   const fav = g.pHome >= 0.5 ? g.home : g.away, dog = fav === g.home ? g.away : g.home;
@@ -73,7 +75,7 @@ export default async function NcaaGamePage({ params }) {
   const side = (t) => ({ t, rating: st.ratings[t.id], rank: rankOf(t.id), rec: st.records[t.id] || { w: 0, l: 0 }, last: recent(st, t.id) });
   const A = side(g.away), H = side(g.home);
   const day = fmtDate(L, isoOf(g.d), { weekday: "long", day: "numeric", month: "long" });
-  const url = `${SITE}${L.href(ncaaGamePath(g))}`;
+  const url = `${SITE}${L.href(ncaaGamePath(g, C.base))}`;
   const faq = [
     {
       q: L.t(`Qui va gagner ${nm(g.away)} – ${nm(g.home)} ?`, `Who will win ${nm(g.away)} vs ${nm(g.home)}?`, `¿Quién ganará ${nm(g.away)} vs ${nm(g.home)}?`, `Quem vai vencer ${nm(g.away)} x ${nm(g.home)}?`),
@@ -90,7 +92,7 @@ export default async function NcaaGamePage({ params }) {
   ];
   const Col = ({ s }) => (
     <div className="card block">
-      <h2><Link href={L.href(ncaaTeamPath(s.t))}>{rk(s.t)}{s.t.name}</Link></h2>
+      <h2><Link href={L.href(ncaaTeamPath(s.t, C.base))}>{rk(s.t)}{s.t.name}</Link></h2>
       <ul className="wk-list">
         <li>{L.t("Bilan", "Record", "Balance", "Campanha")} : <b>{s.rec.w}-{s.rec.l}</b></li>
         <li>{L.t("Note Basketlog", "Basketlog rating", "Nota Basketlog", "Nota Basketlog")} : <b>{numOf(s.rating, L, 1)}</b> ({L.t(`${s.rank}e sur ${st.d1.length}`, `No. ${s.rank} of ${st.d1.length}`, `${s.rank}.º de ${st.d1.length}`, `${s.rank}º de ${st.d1.length}`)})</li>
@@ -100,10 +102,10 @@ export default async function NcaaGamePage({ params }) {
   );
   return (
     <main className="app-page">
-      <Crumbs L={L} items={[[L.t("Accueil", "Home", "Inicio", "Início"), "/"], [L.t("Basket NCAA", "College basketball", "Baloncesto NCAA", "Basquete NCAA"), "/app/ncaa"], [`${nm(g.away)} – ${nm(g.home)}`, ncaaGamePath(g)]]} />
+      <Crumbs L={L} items={[[L.t("Accueil", "Home", "Inicio", "Início"), "/"], [W.name, C.hub], [`${nm(g.away)} – ${nm(g.home)}`, ncaaGamePath(g, C.base)]]} />
       <AppTabs active="matchs" />
       <div className="app-head">
-        <h1>{done ? L.t(`${nm(g.away)} – ${nm(g.home)} : score final ${g.as}-${g.hs}`, `${nm(g.away)} vs ${nm(g.home)}: final score ${g.as}-${g.hs}`, `${nm(g.away)} vs ${nm(g.home)}: resultado final ${g.as}-${g.hs}`, `${nm(g.away)} x ${nm(g.home)}: resultado final ${g.as}-${g.hs}`) : L.t(`Pronostic ${nm(g.away)} – ${nm(g.home)}`, `${nm(g.away)} vs ${nm(g.home)} prediction`, `Pronóstico ${nm(g.away)} vs ${nm(g.home)}`, `Palpite ${nm(g.away)} x ${nm(g.home)}`)}</h1>
+        <h1>{done ? L.t(`${nm(g.away)} – ${nm(g.home)} : score final ${g.as}-${g.hs}`, `${nm(g.away)} vs ${nm(g.home)}: final score ${g.as}-${g.hs}`, `${nm(g.away)} vs ${nm(g.home)}: resultado final ${g.as}-${g.hs}`, `${nm(g.away)} x ${nm(g.home)}: resultado final ${g.as}-${g.hs}`) : L.t(`Pronostic ${nm(g.away)} – ${nm(g.home)}${W.tag}`, `${nm(g.away)} vs ${nm(g.home)}${W.tag} prediction`, `Pronóstico ${nm(g.away)} vs ${nm(g.home)}${W.tag}`, `Palpite ${nm(g.away)} x ${nm(g.home)}${W.tag}`)}</h1>
         <p>{day}{g.state === "pre" ? <> · <LocalTime iso={g.date} lang={L.lang} label={L.en} /></> : null}{g.tv ? ` · ${g.tv}` : ""}{g.n ? ` · ${L.t("terrain neutre", "neutral court", "campo neutral", "quadra neutra")}` : ""}{g.note ? ` · ${g.note}` : ""}</p>
       </div>
       <div className="card block">
@@ -123,9 +125,9 @@ export default async function NcaaGamePage({ params }) {
       </div>
       <QuickFaq L={L} items={faq} />
       <p className="team-rec">
-        <Link href={L.href("/app/ncaa")}>{L.t("Tous les matchs NCAA du jour", "All college basketball games today", "Todos los partidos NCAA de hoy", "Todos os jogos NCAA de hoje")}</Link>{" · "}
-        <Link href={L.href(ncaaTeamPath(g.away))}>{nm(g.away)}</Link>{" · "}
-        <Link href={L.href(ncaaTeamPath(g.home))}>{nm(g.home)}</Link>{" · "}
+        <Link href={L.href(C.hub)}>{lg === "w" ? L.t("Tous les matchs NCAA féminins du jour", "All women's college basketball games today", "Todos los partidos NCAA femeninos de hoy", "Todos os jogos NCAA femininos de hoje") : L.t("Tous les matchs NCAA du jour", "All college basketball games today", "Todos los partidos NCAA de hoy", "Todos os jogos NCAA de hoje")}</Link>{" · "}
+        <Link href={L.href(ncaaTeamPath(g.away, C.base))}>{nm(g.away)}</Link>{" · "}
+        <Link href={L.href(ncaaTeamPath(g.home, C.base))}>{nm(g.home)}</Link>{" · "}
         <Link href={L.href("/app/matchs")}>{L.t("Pronostics NBA", "NBA predictions", "Pronósticos NBA", "Palpites NBA")}</Link>
       </p>
       <JsonLd data={{ "@context": "https://schema.org", "@type": "SportsEvent", name: `${g.away.name} ${g.n ? "vs" : "at"} ${g.home.name}`, startDate: g.date, sport: "Basketball", url, eventStatus: "https://schema.org/EventScheduled", homeTeam: { "@type": "SportsTeam", name: g.home.name }, awayTeam: { "@type": "SportsTeam", name: g.away.name }, location: { "@type": "Place", name: g.n ? "Neutral site" : g.home.name } }} />

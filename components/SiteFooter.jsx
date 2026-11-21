@@ -50,6 +50,7 @@ export default function SiteFooter({ L, compact = false }) {
           <Link href={L.href("/app/francais")}>{L.t("Les Français en NBA", "French players in the NBA", "Franceses en la NBA", "Franceses na NBA")}</Link>
           <Link href={L.href("/app/espagnols")}>{L.t("Espagnols et Latinos en NBA", "Spanish and Latino NBA players", "Españoles y latinos en la NBA", "Espanhóis e latinos na NBA")}</Link>
           <Link href={L.href("/app/ncaa")}>{L.t("Pronostics basket NCAA", "College basketball predictions", "Pronósticos NCAA", "Palpites NCAA")}</Link>
+          <Link href={L.href("/app/ncaaw")}>{L.t("Basket NCAA féminin", "Women's college basketball", "NCAA femenino", "NCAA feminino")}</Link>
           <Link href={L.href("/app/mvp")}>{L.t("Course au MVP NBA", "NBA MVP ladder", "Carrera al MVP NBA", "Corrida pelo MVP da NBA")}</Link>
           <Link href={L.href("/app/rookie")}>{L.t("Rookie de l'année NBA", "NBA Rookie of the Year ladder", "Novato del año NBA", "Calouro do ano da NBA")}</Link>
           <Link href={L.href("/app/draft")}>{L.t("Loterie de la draft 2027", "2027 NBA draft lottery odds", "Lotería del draft 2027", "Loteria do draft 2027")}</Link>

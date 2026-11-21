@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { ncaaGames } from "../../../lib/ncaa";
-import { ncaaGamePath, ncaaTeamPath } from "../../../lib/ncaa-model";
+import { ncaaGames, ncaaLg } from "../../../lib/ncaa";
+import { ncaaGamePath, ncaaTeamPath, LEAGUES, ncaaWords } from "../../../lib/ncaa-model";
 import { nbaToday, shiftDate } from "../../../lib/espn";
 import AppTabs from "../../../components/AppTabs";
 import QuickFaq from "../../../components/QuickFaq";
 import CiteBox from "../../../components/CiteBox";
 import LocalTime from "../../../components/LocalTime";
 import JsonLd from "../../../components/JsonLd";
-import { pageMeta } from "../../../lib/seo";
+import { pageMeta, fitTitle } from "../../../lib/seo";
 import { getL } from "../../../lib/lang-server";
 import { fmtDate, numOf, pctOf } from "../../../lib/i18n";
 import { SITE } from "../../../lib/site";
@@ -19,31 +19,37 @@ export const dynamic = "force-dynamic";
 const isoOf = (d) => `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6)}T16:00:00Z`;
 const nm = (t) => `${t.rank ? `#${t.rank} ` : ""}${t.short}`;
 
-async function load() {
+async function load(lg) {
   const today = nbaToday();
-  const [{ st, games }, next] = await Promise.all([ncaaGames(today), ncaaGames(shiftDate(today, 1)).catch(() => ({ games: [] }))]);
+  const [{ st, games }, next] = await Promise.all([ncaaGames(today, lg), ncaaGames(shiftDate(today, 1), lg).catch(() => ({ games: [] }))]);
   return { today, st, games, tomorrow: next.games };
 }
 
 export async function generateMetadata() {
   const L = await getL();
+  const lg = await ncaaLg();
   let n = 0;
-  try { n = (await load()).games.length; } catch {}
+  try { n = (await load(lg)).games.length; } catch {}
   const d = fmtDate(L, isoOf(nbaToday()), L.en ? { weekday: "long", month: "long", day: "numeric" } : { weekday: "long", day: "numeric", month: "long" });
   return pageMeta({
-    title: L.t(`Pronostics basket NCAA aujourd'hui (${d}) : ${n} matchs`, `College Basketball Predictions Today (${d}): ${n} games`, `Pronósticos baloncesto NCAA hoy (${d}): ${n} partidos`, `Palpites basquete NCAA hoje (${d}): ${n} jogos`),
+    title: lg === "w" ? L.t(
+      fitTitle(`Pronostics basket NCAA féminin (${d}) : ${n} matchs`, `Pronostics basket NCAA féminin : ${n} matchs`),
+      fitTitle(`Women's College Basketball Predictions Today (${d}): ${n} games`, `Women's College Basketball Predictions Today: ${n} games`),
+      fitTitle(`Pronósticos baloncesto NCAA femenino hoy (${d}): ${n} partidos`, `Pronósticos NCAA femenino hoy: ${n} partidos`),
+      fitTitle(`Palpites basquete NCAA feminino hoje (${d}): ${n} jogos`, `Palpites NCAA feminino hoje: ${n} jogos`)
+    ) : L.t(`Pronostics basket NCAA aujourd'hui (${d}) : ${n} matchs`, `College Basketball Predictions Today (${d}): ${n} games`, `Pronósticos baloncesto NCAA hoy (${d}): ${n} partidos`, `Palpites basquete NCAA hoje (${d}): ${n} jogos`),
     description: L.t(
-      "Basket universitaire américain (NCAA, 1re division) : probabilité de victoire et écart prévu pour chaque match du jour, classement du modèle Basketlog et bilan public.",
-      "Men's college basketball (NCAA Division I): win probability and projected margin for every game today, the Basketlog model's top 25 and a public track record.",
-      "Baloncesto universitario de EE. UU. (NCAA, primera división): probabilidad de victoria y margen previsto de cada partido de hoy, el top 25 del modelo de Basketlog y balance público.",
-      "Basquete universitário dos EUA (NCAA, primeira divisão): probabilidade de vitória e margem prevista de cada jogo de hoje, o top 25 do modelo do Basketlog e histórico público."
+      `${lg === "w" ? "Basket universitaire féminin américain" : "Basket universitaire américain"} (NCAA, 1re division) : probabilité de victoire et écart prévu pour chaque match du jour, classement du modèle Basketlog et bilan public.`,
+      `${lg === "w" ? "Women's" : "Men's"} college basketball (NCAA Division I): win probability and projected margin for every game today, the Basketlog model's top 25 and a public track record.`,
+      `Baloncesto universitario${lg === "w" ? " femenino" : ""} de EE. UU. (NCAA, primera división): probabilidad de victoria y margen previsto de cada partido de hoy, el top 25 del modelo de Basketlog y balance público.`,
+      `Basquete universitário${lg === "w" ? " feminino" : ""} dos EUA (NCAA, primeira divisão): probabilidade de vitória e margem prevista de cada jogo de hoje, o top 25 do modelo do Basketlog e histórico público.`
     ),
-    path: "/app/ncaa",
+    path: LEAGUES[lg].hub,
     L,
   });
 }
 
-function GameRow({ g, L }) {
+function GameRow({ g, L, C }) {
   const favHome = g.pHome >= 0.5;
   const fav = favHome ? g.home : g.away;
   const pf = Math.max(g.pHome, 1 - g.pHome);
@@ -51,7 +57,7 @@ function GameRow({ g, L }) {
   const ok = done ? (favHome === g.hs > g.as) : null;
   return (
     <tr>
-      <td className="tm"><Link href={L.href(ncaaGamePath(g))}><span>{nm(g.away)} {g.n ? "vs" : "@"} {nm(g.home)}</span></Link>{g.note ? <small> · {g.note}</small> : null}</td>
+      <td className="tm"><Link href={L.href(ncaaGamePath(g, C.base))}><span>{nm(g.away)} {g.n ? "vs" : "@"} {nm(g.home)}</span></Link>{g.note ? <small> · {g.note}</small> : null}</td>
       <td>{done ? `${g.as}-${g.hs}` : g.state === "in" ? L.t("En cours", "Live", "En juego", "Ao vivo") : <LocalTime iso={g.date} lang={L.lang} label={L.en} />}</td>
       <td className={done ? (ok ? "pos" : "neg") : "pos"}>{fav.abbr || fav.short} {pctOf(pf, L)}{done ? (ok ? " ✓" : " ✗") : ""}</td>
       <td>{numOf(Math.abs(g.margin), L, 1)}</td>
@@ -60,12 +66,12 @@ function GameRow({ g, L }) {
   );
 }
 
-function Games({ list, L }) {
+function Games({ list, L, C }) {
   return (
     <div className="panel tbl-scroll">
       <table className="std-table">
         <thead><tr><th>{L.t("Match", "Game", "Partido", "Jogo")}</th><th>{L.t("Heure / score", "Time / score", "Hora / resultado", "Hora / placar")}</th><th>{L.t("Favori", "Favorite", "Favorito", "Favorito")}</th><th>{L.t("Écart prévu", "Proj. margin", "Margen previsto", "Margem prevista")}</th><th>TV</th></tr></thead>
-        <tbody>{list.map((g) => <GameRow key={g.id} g={g} L={L} />)}</tbody>
+        <tbody>{list.map((g) => <GameRow key={g.id} g={g} L={L} C={C} />)}</tbody>
       </table>
     </div>
   );
@@ -73,10 +79,12 @@ function Games({ list, L }) {
 
 export default async function NcaaPage() {
   const L = await getL();
+  const lg = await ncaaLg();
+  const C = LEAGUES[lg], W = ncaaWords(L, lg);
   let data = null;
-  try { data = await load(); } catch {}
-  const url = `${SITE}${L.href("/app/ncaa")}`;
-  const title = L.t("Pronostics basket NCAA du jour", "College basketball predictions today", "Pronósticos de baloncesto NCAA de hoy", "Palpites de basquete NCAA de hoje");
+  try { data = await load(lg); } catch {}
+  const url = `${SITE}${L.href(C.hub)}`;
+  const title = lg === "w" ? L.t("Pronostics basket NCAA féminin du jour", "Women's college basketball predictions today", "Pronósticos de baloncesto NCAA femenino de hoy", "Palpites de basquete NCAA feminino de hoje") : L.t("Pronostics basket NCAA du jour", "College basketball predictions today", "Pronósticos de baloncesto NCAA de hoy", "Palpites de basquete NCAA de hoje");
   if (!data) {
     return (
       <main className="app-page wide"><AppTabs active="matchs" /><div className="app-head"><h1>{title}</h1><p>{L.t("Données momentanément indisponibles, réessaie dans quelques minutes.", "Data temporarily unavailable, try again in a few minutes.", "Datos no disponibles por ahora, vuelve a intentarlo en unos minutos.", "Dados indisponíveis no momento, tente de novo em alguns minutos.")}</p></div></main>
@@ -113,26 +121,27 @@ export default async function NcaaPage() {
       <AppTabs active="matchs" />
       <div className="app-head">
         <h1>{title}</h1>
-        <p>{L.t(`Basket universitaire américain, 1re division : ${games.length} matchs aujourd'hui.`, `NCAA men's Division I: ${games.length} games today.`, `Baloncesto universitario de EE. UU., primera división: ${games.length} partidos hoy.`, `Basquete universitário dos EUA, primeira divisão: ${games.length} jogos hoje.`)}
+        <p>{L.t(`${W.div} : ${games.length} matchs aujourd'hui.`, `${W.div}: ${games.length} games today.`, `${W.div}: ${games.length} partidos hoy.`, `${W.div}: ${games.length} jogos hoje.`)}
           {rec.n > 0 ? " " + L.t(`Bilan de la saison : ${pctOf(rec.ok / rec.n, L)} de favoris gagnants sur ${rec.n} matchs.`, `Season record: the favorite won ${pctOf(rec.ok / rec.n, L)} of ${rec.n} games.`, `Balance de la temporada: ${pctOf(rec.ok / rec.n, L)} de favoritos ganadores en ${rec.n} partidos.`, `Desempenho da temporada: ${pctOf(rec.ok / rec.n, L)} de favoritos vencedores em ${rec.n} jogos.`) : ""}</p>
       </div>
-      {ranked.length > 0 && <section><h2>{L.t("Matchs du Top 25", "Top 25 games", "Partidos del Top 25", "Jogos do Top 25")}</h2><Games list={ranked} L={L} /></section>}
-      {others.length > 0 && <section><h2>{L.t("Tous les autres matchs", "All other games", "Todos los demás partidos", "Todos os outros jogos")}</h2><Games list={others} L={L} /></section>}
+      {ranked.length > 0 && <section><h2>{L.t("Matchs du Top 25", "Top 25 games", "Partidos del Top 25", "Jogos do Top 25")}</h2><Games list={ranked} L={L} C={C} /></section>}
+      {others.length > 0 && <section><h2>{L.t("Tous les autres matchs", "All other games", "Todos los demás partidos", "Todos os outros jogos")}</h2><Games list={others} L={L} C={C} /></section>}
       {!games.length && <p className="narr">{L.t("Pas de match de 1re division aujourd'hui.", "No Division I games today.", "Sin partidos de primera división hoy.", "Nenhum jogo da primeira divisão hoje.")}</p>}
-      {tmrRanked.length > 0 && <section><h2>{L.t("Demain : matchs du Top 25", "Tomorrow: Top 25 games", "Mañana: partidos del Top 25", "Amanhã: jogos do Top 25")}</h2><Games list={tmrRanked} L={L} /></section>}
+      {tmrRanked.length > 0 && <section><h2>{L.t("Demain : matchs du Top 25", "Tomorrow: Top 25 games", "Mañana: partidos del Top 25", "Amanhã: jogos do Top 25")}</h2><Games list={tmrRanked} L={L} C={C} /></section>}
       <section>
         <h2>{L.t("Top 25 du modèle Basketlog", "Basketlog model top 25", "Top 25 del modelo de Basketlog", "Top 25 do modelo do Basketlog")}</h2>
         <div className="panel tbl-scroll">
           <table className="std-table">
             <thead><tr><th>#</th><th>{L.t("Équipe", "Team", "Equipo", "Time")}</th><th>{L.t("Bilan", "Record", "Balance", "Campanha")}</th><th>{L.t("Classement AP", "AP rank", "Ranking AP", "Ranking AP")}</th><th>{L.t("Note", "Rating", "Nota", "Nota")}</th></tr></thead>
-            <tbody>{top.map((x, i) => <tr key={x.id}><td className="rk">{i + 1}</td><td className="tm"><Link href={L.href(ncaaTeamPath(x.t))}><span>{/* eslint-disable-next-line @next/next/no-img-element */}{x.t.logo ? <img src={x.t.logo} alt="" /> : null}{x.t.name}</span></Link></td><td>{x.rec.w}-{x.rec.l}</td><td>{x.t.rank ?? "–"}</td><td className="pos">{numOf(x.r, L, 1)}</td></tr>)}</tbody>
+            <tbody>{top.map((x, i) => <tr key={x.id}><td className="rk">{i + 1}</td><td className="tm"><Link href={L.href(ncaaTeamPath(x.t, C.base))}><span>{/* eslint-disable-next-line @next/next/no-img-element */}{x.t.logo ? <img src={x.t.logo} alt="" /> : null}{x.t.name}</span></Link></td><td>{x.rec.w}-{x.rec.l}</td><td>{x.t.rank ?? "–"}</td><td className="pos">{numOf(x.r, L, 1)}</td></tr>)}</tbody>
           </table>
         </div>
-        <p className="narr"><Link href={L.href("/app/ncaa/classement")}>{L.t("Classement complet des 365 équipes →", "Full rankings of all 365 teams →", "Ranking completo de los 365 equipos →", "Ranking completo dos 365 times →")}</Link></p>
+        <p className="narr"><Link href={L.href(`${C.hub}/classement`)}>{L.t("Classement complet des 365 équipes →", "Full rankings of all 365 teams →", "Ranking completo de los 365 equipos →", "Ranking completo dos 365 times →")}</Link></p>
         <p className="note">{L.t("Note : écart de points attendu, corrigé de la force des adversaires. Classement AP : sondage des journalistes, repris par ESPN.", "Rating: expected point margin adjusted for opponent strength. AP rank: the media poll, via ESPN.", "Nota: diferencia de puntos esperada, corregida por la fuerza de los rivales. Ranking AP: encuesta de periodistas, vía ESPN.", "Nota: saldo de pontos esperado, corrigido pela força dos adversários. Ranking AP: pesquisa de jornalistas, via ESPN.")}</p>
       </section>
       <QuickFaq L={L} items={faq} />
       <p className="team-rec">
+        <Link href={L.href(lg === "w" ? "/app/ncaa" : "/app/ncaaw")}>{lg === "w" ? L.t("Basket NCAA masculin", "Men's college basketball", "Baloncesto NCAA masculino", "Basquete NCAA masculino") : ncaaWords(L, "w").name}</Link>{" · "}
         <Link href={L.href("/app/matchs")}>{L.t("Pronostics NBA du soir", "Tonight's NBA predictions", "Pronósticos NBA de hoy", "Palpites NBA de hoje")}</Link>{" · "}
         <Link href={L.href("/app/euroleague")}>{L.t("Pronostics EuroLeague", "EuroLeague predictions", "Pronósticos Euroliga", "Palpites Euroliga")}</Link>{" · "}
         <Link href={L.href("/app/lexique/probabilite-de-victoire")}>{L.t("Lire une probabilité", "How to read a probability", "Cómo leer una probabilidad", "Como ler uma probabilidade")}</Link>

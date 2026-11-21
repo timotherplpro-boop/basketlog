@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ncaaTeamBySlug } from "../../../../lib/ncaa";
-import { ncaaGamePath, ncaaTeamPath } from "../../../../lib/ncaa-model";
+import { ncaaTeamBySlug, ncaaLg } from "../../../../lib/ncaa";
+import { ncaaGamePath, ncaaTeamPath, LEAGUES, ncaaWords } from "../../../../lib/ncaa-model";
 import { nbaToday, seasonForDate } from "../../../../lib/espn";
 import AppTabs from "../../../../components/AppTabs";
 import Crumbs from "../../../../components/Crumbs";
@@ -18,12 +18,15 @@ export const dynamic = "force-dynamic";
 // Fiche d'une école NCAA (/ncaa/team/duke) : « duke basketball prediction », « duke basketball schedule », « duke record ».
 const isoOf = (d) => `${d.slice(0, 4)}-${d.slice(4, 6)}-${d.slice(6)}T16:00:00Z`;
 const nm = (t) => t.loc || t.short || t.name;
+// Sport dans les titres : « Duke basketball » ou « UConn women's basketball ».
+const sportOf = (L, lg) => (lg === "w" ? L.t("basket féminin", "women's basketball", "baloncesto femenino", "basquete feminino") : L.t("basket", "basketball", "baloncesto", "basquete"));
 const seasonLabel = () => { const y = seasonForDate(nbaToday()); return `${y - 1}-${String(y).slice(2)}`; };
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const L = await getL();
-  const f = await ncaaTeamBySlug(slug).catch(() => null);
+  const lg = await ncaaLg(), C = LEAGUES[lg], SP = sportOf(L, lg), fem = lg === "w";
+  const f = await ncaaTeamBySlug(slug, lg).catch(() => null);
   if (!f) return { title: L.t("Équipe NCAA – Basketlog", "College basketball team – Basketlog", "Equipo NCAA – Basketlog", "Time NCAA – Basketlog"), robots: { index: false } };
   const { t, rec, rank, upcoming, st } = f;
   const s = seasonLabel(), n = nm(t);
@@ -32,23 +35,23 @@ export async function generateMetadata({ params }) {
   const p = nx ? (nx.home.id === t.id ? nx.pHome : 1 - nx.pHome) : null;
   return pageMeta({
     title: nx ? L.t(
-      fitTitle(`${n} basket (NCAA) : pronostic contre ${opp}, bilan ${rec.w}-${rec.l}`, `${n} : pronostic contre ${opp}, bilan ${rec.w}-${rec.l}`),
-      fitTitle(`${n} basketball: ${opp} prediction, ${rec.w}-${rec.l} record (${s})`, `${n} basketball prediction vs ${opp}`),
-      fitTitle(`${n} baloncesto (NCAA): pronóstico ante ${opp}, balance ${rec.w}-${rec.l}`, `${n}: pronóstico ante ${opp}`),
-      fitTitle(`${n} basquete (NCAA): palpite contra ${opp}, campanha ${rec.w}-${rec.l}`, `${n}: palpite contra ${opp}`)
+      fitTitle(`${n} ${SP} (NCAA) : pronostic contre ${opp}, bilan ${rec.w}-${rec.l}`, `${n} ${SP} : pronostic contre ${opp}`, `${n} : pronostic contre ${opp}, bilan ${rec.w}-${rec.l}`),
+      fitTitle(`${n} ${SP}: ${opp} prediction, ${rec.w}-${rec.l} record (${s})`, `${n} ${SP}: ${opp} prediction, ${rec.w}-${rec.l} record`, `${n} ${SP} prediction vs ${opp}`),
+      fitTitle(`${n} ${SP} (NCAA): pronóstico ante ${opp}, balance ${rec.w}-${rec.l}`, `${n} ${SP}: pronóstico ante ${opp}`, `${n}: pronóstico ante ${opp}`),
+      fitTitle(`${n} ${SP} (NCAA): palpite contra ${opp}, campanha ${rec.w}-${rec.l}`, `${n} ${SP}: palpite contra ${opp}`, `${n}: palpite contra ${opp}`)
     ) : L.t(
-      `${n} basket (NCAA) : bilan ${rec.w}-${rec.l}, note et résultats ${s}`,
-      `${n} basketball ${s}: ${rec.w}-${rec.l} record, rating and results`,
-      `${n} baloncesto (NCAA): balance ${rec.w}-${rec.l}, nota y resultados ${s}`,
-      `${n} basquete (NCAA): campanha ${rec.w}-${rec.l}, nota e resultados ${s}`
+      fitTitle(`${n} ${SP} (NCAA) : bilan ${rec.w}-${rec.l}, note et résultats ${s}`, `${n} ${SP} : bilan ${rec.w}-${rec.l} et résultats ${s}`),
+      fitTitle(`${n} ${SP} ${s}: ${rec.w}-${rec.l} record, rating and results`, `${n} ${SP} ${s}: ${rec.w}-${rec.l} record and results`),
+      fitTitle(`${n} ${SP} (NCAA): balance ${rec.w}-${rec.l}, nota y resultados ${s}`, `${n} ${SP}: balance ${rec.w}-${rec.l} y resultados`),
+      fitTitle(`${n} ${SP} (NCAA): campanha ${rec.w}-${rec.l}, nota e resultados ${s}`, `${n} ${SP}: campanha ${rec.w}-${rec.l} e resultados`)
     ),
     description: L.t(
-      `${t.name}, basket universitaire américain ${s} : bilan ${rec.w}-${rec.l}, ${rank}e sur ${st.d1.length} au classement du modèle Basketlog${nx && p != null ? `, ${pctOf(p, L)} de chances contre ${opp}` : ""}. Prochains matchs et résultats.`,
-      `${t.name} men's basketball ${s}: ${rec.w}-${rec.l} record, No. ${rank} of ${st.d1.length} in the Basketlog ratings${nx && p != null ? `, ${pctOf(p, L)} to beat ${opp}` : ""}. Upcoming games and results.`,
-      `${t.name}, baloncesto universitario ${s}: balance ${rec.w}-${rec.l}, ${rank}.º de ${st.d1.length} en el ranking de Basketlog${nx && p != null ? `, ${pctOf(p, L)} ante ${opp}` : ""}. Próximos partidos y resultados.`,
-      `${t.name}, basquete universitário ${s}: campanha ${rec.w}-${rec.l}, ${rank}º de ${st.d1.length} no ranking do Basketlog${nx && p != null ? `, ${pctOf(p, L)} contra ${opp}` : ""}. Próximos jogos e resultados.`
+      `${t.name}, basket universitaire ${fem ? "féminin " : ""}américain ${s} : bilan ${rec.w}-${rec.l}, ${rank}e sur ${st.d1.length} au classement du modèle Basketlog${nx && p != null ? `, ${pctOf(p, L)} de chances contre ${opp}` : ""}. Prochains matchs et résultats.`,
+      `${t.name} ${fem ? "women's" : "men's"} basketball ${s}: ${rec.w}-${rec.l} record, No. ${rank} of ${st.d1.length} in the Basketlog ratings${nx && p != null ? `, ${pctOf(p, L)} to beat ${opp}` : ""}. Upcoming games and results.`,
+      `${t.name}, baloncesto universitario${fem ? " femenino" : ""} ${s}: balance ${rec.w}-${rec.l}, ${rank}.º de ${st.d1.length} en el ranking de Basketlog${nx && p != null ? `, ${pctOf(p, L)} ante ${opp}` : ""}. Próximos partidos y resultados.`,
+      `${t.name}, basquete universitário${fem ? " feminino" : ""} ${s}: campanha ${rec.w}-${rec.l}, ${rank}º de ${st.d1.length} no ranking do Basketlog${nx && p != null ? `, ${pctOf(p, L)} contra ${opp}` : ""}. Próximos jogos e resultados.`
     ),
-    path: ncaaTeamPath(t),
+    path: ncaaTeamPath(t, C.base),
     L,
   });
 }
@@ -56,12 +59,14 @@ export async function generateMetadata({ params }) {
 export default async function NcaaTeamPage({ params }) {
   const { slug } = await params;
   const L = await getL();
-  const f = await ncaaTeamBySlug(slug);
+  const lg = await ncaaLg(), C = LEAGUES[lg], W = ncaaWords(L, lg);
+  const f = await ncaaTeamBySlug(slug, lg);
   if (!f) notFound();
   const { t, rec, rank, rating, past, upcoming, st } = f;
   const s = seasonLabel(), n = nm(t);
   const day = (d) => fmtDate(L, isoOf(d), { day: "numeric", month: "short" });
-  const url = `${SITE}${L.href(ncaaTeamPath(t))}`;
+  const url = `${SITE}${L.href(ncaaTeamPath(t, C.base))}`;
+  const tn = lg === "w" ? L.t(`${t.name} (féminin)`, `${t.name} women's basketball`, `${t.name} (femenino)`, `${t.name} (feminino)`) : t.name;
   const nx = upcoming[0];
   const pOf = (g) => (g.home.id === t.id ? g.pHome : 1 - g.pHome);
   const oppOf = (g) => (g.home.id === t.id ? g.away : g.home);
@@ -78,14 +83,14 @@ export default async function NcaaTeamPage({ params }) {
   ];
   return (
     <main className="app-page">
-      <Crumbs L={L} items={[[L.t("Accueil", "Home", "Inicio", "Início"), "/"], [L.t("Basket NCAA", "College basketball", "Baloncesto NCAA", "Basquete NCAA"), "/app/ncaa"], [n, ncaaTeamPath(t)]]} />
+      <Crumbs L={L} items={[[L.t("Accueil", "Home", "Inicio", "Início"), "/"], [W.name, C.hub], [n, ncaaTeamPath(t, C.base)]]} />
       <AppTabs active="matchs" />
       <div className="app-head pl-head-row">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {t.logo ? <img className="pl-photo" src={t.logo} alt="" width="88" height="88" /> : null}
         <div>
-          <h1>{L.t(`${t.name} : pronostics et résultats ${s}`, `${t.name}: predictions and results ${s}`, `${t.name}: pronósticos y resultados ${s}`, `${t.name}: palpites e resultados ${s}`)}</h1>
-          <p>{L.t("Basket universitaire américain, 1re division", "NCAA men's Division I basketball", "Baloncesto universitario de EE. UU., primera división", "Basquete universitário dos EUA, primeira divisão")}</p>
+          <h1>{L.t(`${tn} : pronostics et résultats ${s}`, `${tn}: predictions and results ${s}`, `${tn}: pronósticos y resultados ${s}`, `${tn}: palpites e resultados ${s}`)}</h1>
+          <p>{W.div}</p>
         </div>
       </div>
       <div className="kpis">
@@ -98,7 +103,7 @@ export default async function NcaaTeamPage({ params }) {
         <section className="card block">
           <h2>{L.t("Prochains matchs", "Upcoming games", "Próximos partidos", "Próximos jogos")}</h2>
           <ul className="wk-list">
-            {upcoming.map((g) => <li key={g.id}><Link href={L.href(ncaaGamePath(g))}>{day(g.d)} · {g.home.id === t.id ? L.t("contre", "vs.", "contra", "contra") : g.n ? L.t("contre", "vs.", "contra", "contra") : L.t("chez", "at", "en casa de", "na casa do")} {nm(oppOf(g))}</Link><span className="mono"> · {where(g)} · <LocalTime iso={g.date} lang={L.lang} label={L.en} /> · {n} {pctOf(pOf(g), L)}</span></li>)}
+            {upcoming.map((g) => <li key={g.id}><Link href={L.href(ncaaGamePath(g, C.base))}>{day(g.d)} · {g.home.id === t.id ? L.t("contre", "vs.", "contra", "contra") : g.n ? L.t("contre", "vs.", "contra", "contra") : L.t("chez", "at", "en casa de", "na casa do")} {nm(oppOf(g))}</Link><span className="mono"> · {where(g)} · <LocalTime iso={g.date} lang={L.lang} label={L.en} /> · {n} {pctOf(pOf(g), L)}</span></li>)}
           </ul>
         </section>
       )}
@@ -109,14 +114,14 @@ export default async function NcaaTeamPage({ params }) {
             {[...past].reverse().map((g) => {
               const home = g.h === t.id, me = home ? g.hs : g.as, op = home ? g.as : g.hs, o = home ? g.away : g.home;
               const line = <>{day(g.d)} · {me > op ? L.t("V", "W", "V", "V") : L.t("D", "L", "D", "D")} {me}-{op}</>;
-              return <li key={g.d + o.id} className="mono">{o.slug && g.home.slug && g.away.slug ? <Link href={L.href(ncaaGamePath(g))}>{line}</Link> : line} {g.n ? "vs" : home ? "vs" : "@"} {o.slug ? <Link href={L.href(`/ncaa/team/${o.slug}`)}>{nm(o)}</Link> : nm(o)}</li>;
+              return <li key={g.d + o.id} className="mono">{o.slug && g.home.slug && g.away.slug ? <Link href={L.href(ncaaGamePath(g, C.base))}>{line}</Link> : line} {g.n ? "vs" : home ? "vs" : "@"} {o.slug ? <Link href={L.href(`${C.base}/team/${o.slug}`)}>{nm(o)}</Link> : nm(o)}</li>;
             })}
           </ul>
         </section>
       )}
       <QuickFaq L={L} items={faq} />
-      <p className="team-rec"><Link href={L.href("/app/ncaa/classement")}>{L.t("Classement des 365 équipes", "All 365 teams ranked", "Ranking de los 365 equipos", "Ranking dos 365 times")}</Link>{" · "}<Link href={L.href("/app/ncaa")}>{L.t("Matchs NCAA du jour et top 25 du modèle", "Today's college basketball games and model top 25", "Partidos NCAA de hoy y top 25 del modelo", "Jogos NCAA de hoje e top 25 do modelo")}</Link></p>
-      <JsonLd data={{ "@context": "https://schema.org", "@type": "SportsTeam", name: t.name, sport: "Basketball", url, ...(t.logo ? { logo: t.logo } : {}), memberOf: { "@type": "SportsOrganization", name: "NCAA Division I" } }} />
+      <p className="team-rec"><Link href={L.href(`${C.hub}/classement`)}>{L.t("Classement des 365 équipes", "All 365 teams ranked", "Ranking de los 365 equipos", "Ranking dos 365 times")}</Link>{" · "}<Link href={L.href(C.hub)}>{L.t("Matchs NCAA du jour et top 25 du modèle", "Today's college basketball games and model top 25", "Partidos NCAA de hoy y top 25 del modelo", "Jogos NCAA de hoje e top 25 do modelo")}</Link></p>
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "SportsTeam", name: t.name, sport: "Basketball", url, ...(t.logo ? { logo: t.logo } : {}), memberOf: { "@type": "SportsOrganization", name: lg === "w" ? "NCAA Division I women's basketball" : "NCAA Division I men's basketball" } }} />
       <p className="disclaimer">{L.t("Données ESPN. Basketlog n'est pas affilié à la NCAA.", "Data from ESPN. Basketlog is not affiliated with the NCAA.", "Datos de ESPN. Basketlog no está afiliado a la NCAA.", "Dados da ESPN. O Basketlog não é afiliado à NCAA.")}</p>
     </main>
   );
