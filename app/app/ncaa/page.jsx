@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ncaaGames } from "../../../lib/ncaa";
+import { ncaaGamePath, ncaaTeamPath } from "../../../lib/ncaa-model";
 import { nbaToday, shiftDate } from "../../../lib/espn";
 import AppTabs from "../../../components/AppTabs";
 import QuickFaq from "../../../components/QuickFaq";
@@ -50,7 +51,7 @@ function GameRow({ g, L }) {
   const ok = done ? (favHome === g.hs > g.as) : null;
   return (
     <tr>
-      <td className="tm"><span>{nm(g.away)} {g.n ? "vs" : "@"} {nm(g.home)}</span>{g.note ? <small> · {g.note}</small> : null}</td>
+      <td className="tm"><Link href={L.href(ncaaGamePath(g))}><span>{nm(g.away)} {g.n ? "vs" : "@"} {nm(g.home)}</span></Link>{g.note ? <small> · {g.note}</small> : null}</td>
       <td>{done ? `${g.as}-${g.hs}` : g.state === "in" ? L.t("En cours", "Live", "En juego", "Ao vivo") : <LocalTime iso={g.date} lang={L.lang} label={L.en} />}</td>
       <td className={done ? (ok ? "pos" : "neg") : "pos"}>{fav.abbr || fav.short} {pctOf(pf, L)}{done ? (ok ? " ✓" : " ✗") : ""}</td>
       <td>{numOf(Math.abs(g.margin), L, 1)}</td>
@@ -124,7 +125,7 @@ export default async function NcaaPage() {
         <div className="panel tbl-scroll">
           <table className="std-table">
             <thead><tr><th>#</th><th>{L.t("Équipe", "Team", "Equipo", "Time")}</th><th>{L.t("Bilan", "Record", "Balance", "Campanha")}</th><th>{L.t("Classement AP", "AP rank", "Ranking AP", "Ranking AP")}</th><th>{L.t("Note", "Rating", "Nota", "Nota")}</th></tr></thead>
-            <tbody>{top.map((x, i) => <tr key={x.id}><td className="rk">{i + 1}</td><td className="tm"><span>{/* eslint-disable-next-line @next/next/no-img-element */}{x.t.logo ? <img src={x.t.logo} alt="" /> : null}{x.t.name}</span></td><td>{x.rec.w}-{x.rec.l}</td><td>{x.t.rank ?? "–"}</td><td className="pos">{numOf(x.r, L, 1)}</td></tr>)}</tbody>
+            <tbody>{top.map((x, i) => <tr key={x.id}><td className="rk">{i + 1}</td><td className="tm"><Link href={L.href(ncaaTeamPath(x.t))}><span>{/* eslint-disable-next-line @next/next/no-img-element */}{x.t.logo ? <img src={x.t.logo} alt="" /> : null}{x.t.name}</span></Link></td><td>{x.rec.w}-{x.rec.l}</td><td>{x.t.rank ?? "–"}</td><td className="pos">{numOf(x.r, L, 1)}</td></tr>)}</tbody>
           </table>
         </div>
         <p className="note">{L.t("Note : écart de points attendu, corrigé de la force des adversaires. Classement AP : sondage des journalistes, repris par ESPN.", "Rating: expected point margin adjusted for opponent strength. AP rank: the media poll, via ESPN.", "Nota: diferencia de puntos esperada, corregida por la fuerza de los rivales. Ranking AP: encuesta de periodistas, vía ESPN.", "Nota: saldo de pontos esperado, corrigido pela força dos adversários. Ranking AP: pesquisa de jornalistas, via ESPN.")}</p>

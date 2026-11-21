@@ -9,6 +9,8 @@ import { nbaPath, elPath, playerPath } from "../lib/slug.js";
 import { pairPath } from "../lib/matchup.js";
 import { TERMS } from "../lib/glossary.js";
 import { monthsOf } from "../lib/months.js";
+import { ncaaState, ncaaDay } from "../lib/ncaa";
+import { ncaaGamePath } from "../lib/ncaa-model.js";
 
 export const revalidate = 3600; // régénéré chaque heure, avec les matchs à venir
 
@@ -33,6 +35,17 @@ export default async function sitemap() {
     u("/mentions-legales", 0.2, "yearly"), u("/cgu", 0.2, "yearly"), u("/cgv", 0.2, "yearly"), u("/confidentialite", 0.2, "yearly"), u("/cookies", 0.2, "yearly"),
   ];
   pages.push(...TERMS.map((x) => u(`/app/lexique/${x.slug}`, 0.4, "monthly")), ...monthsOf(seasonForDate(nbaToday()), nbaToday()).map((m) => u(`/app/bilan/${m}`, 0.5, "daily")));
+  // NCAA : fiches des écoles de 1re division et matchs d'aujourd'hui à après-demain.
+  let ncaa = [];
+  try {
+    const st = await ncaaState();
+    const d1 = new Set(st.d1);
+    ncaa = Object.values(st.meta).filter((t) => t.slug && d1.has(t.id)).map((t) => u(`/ncaa/team/${t.slug}`, 0.5, "daily"));
+    const today = nbaToday();
+    const lists = await Promise.all([0, 1, 2].map((i) => ncaaDay(shiftDate(today, i)).catch(() => [])));
+    for (const g of lists.flat()) if (d1.has(g.home.id) && d1.has(g.away.id)) ncaa.push(u(ncaaGamePath(g), 0.6, "hourly"));
+  } catch {}
+  pages.push(...ncaa);
   const teams = TEAMS.flatMap((t) => [u(`/app/equipe/${t.id}`, 0.6, "daily"), u(`/app/equipe/${t.id}/calendrier`, 0.5, "daily")]);
 
   // Matchs NBA : les 7 prochains jours et les 3 derniers (fiches avec score final).

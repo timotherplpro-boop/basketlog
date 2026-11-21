@@ -4,7 +4,7 @@ import { mvpRace, royRace, rookiesOf, production } from "../lib/awards.js";
 import { monthsOf, monthOk, seasonOfMonth } from "../lib/months.js";
 import { apiPredictions } from "../lib/api-v1.js";
 import { TERMS, termOf, tr } from "../lib/glossary.js";
-import { ncaaRatings, ncaaProb, ncaaRecord, ncaaRecords, NCAA } from "../lib/ncaa-model.js";
+import { ncaaRatings, ncaaProb, ncaaRecord, ncaaRecords, NCAA, ncaaSlug, ncaaGamePath, parseNcaaSlug } from "../lib/ncaa-model.js";
 
 function rng(seed) {
   let a = seed >>> 0;
@@ -88,6 +88,10 @@ export async function awardsTests({ ok, ko, eq }) {
   if (np.pHome > 0.5 && Math.abs(ncaaProb(nr, "C", "A", true).pHome - (1 - np.pHome)) < 1e-9) ok("NCAA : probabilités symétriques sur terrain neutre"); else ko("NCAA : symétrie", np.pHome);
   if (Math.abs(npH.margin - (nr.C - nr.A + NCAA.H)) < 1e-9) ok("NCAA : 3 points pour l'équipe qui reçoit"); else ko("NCAA : terrain", npH.margin);
   eq("NCAA : bilan public sans les 3 premiers jours", ncaaRecord([{ d: "1", games: ng }, { d: "2", games: [] }, { d: "3", games: [] }, { d: "4", games: [{ h: "A", a: "C", hs: 70, as: 60, n: true }] }], d1n, {}).n, 1);
+  eq("NCAA : adresse d'un match", ncaaGamePath({ d: "20261121", away: { loc: "Michigan State", short: "Michigan St" }, home: { loc: "Duke" } }), "/ncaa/michigan-state-vs-duke-2026-11-21");
+  eq("NCAA : lecture de l'adresse", JSON.stringify(parseNcaaSlug("miami-oh-vs-saint-mary-s-2026-11-21")), JSON.stringify({ away: "miami-oh", home: "saint-mary-s", date: "20261121" }));
+  eq("NCAA : nom d'école sans mascotte", ncaaSlug({ loc: "Miami (OH)", name: "Miami (OH) RedHawks" }), "miami-oh");
+  if (parseNcaaSlug("duke-2026-11-21") === null) ok("NCAA : adresse invalide refusée"); else ko("NCAA : adresse invalide", "");
   eq("NCAA : bilan de C", JSON.stringify(ncaaRecords(ng).C), JSON.stringify({ w: 1, l: 1 }));
   eq("lexique : adresses uniques", new Set(TERMS.map((x) => x.slug)).size, TERMS.length);
   eq("lexique : traduction", tr(termOf("play-in").t, "es"), "Play-in");

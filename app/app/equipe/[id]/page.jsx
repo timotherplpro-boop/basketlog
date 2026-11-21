@@ -38,6 +38,26 @@ export async function generateMetadata({ params }) {
   } catch {}
   const d = nx ? fmtDate(L, nx.g.date, L.en ? { month: "short", day: "numeric" } : { day: "numeric", month: "short" }).replace(/\.$/, "") : "";
   const pTxt = nx && nx.p != null ? `${Math.round(nx.p * 100)}${L.en ? "%" : "\u202f%"}` : null;
+  // Recherches réelles (Search Console) : « lakers pronostico hoy », « miami heat pronostico », « toronto raptors pronostico » :
+  // pages déjà dans le top 10 mais sans clic. La probabilité et « ce soir / tonight / hoy / hoje » dans le titre.
+  const tonight = nx && nbaDateOf(nx.g.date) === nbaToday();
+  const when = (fr, en, es, pt) => (tonight ? L.t(fr, en, es, pt) : `(${d})`);
+  if (nx && pTxt) return pageMeta({
+    title: L.t(
+      fitTitle(`Pronostic ${t.name} – ${nx.opp.short} ${when("ce soir", "", "", "")} : ${pTxt} de victoire`, `Pronostic ${t.short} – ${nx.opp.short} ${when("ce soir", "", "", "")} : ${pTxt} de victoire`),
+      fitTitle(`${t.name} vs ${nx.opp.short} prediction ${when("", "tonight", "", "")}: ${pTxt} win probability`, `${t.short} vs ${nx.opp.short} prediction ${when("", "tonight", "", "")}: ${pTxt} to win`),
+      fitTitle(`Pronóstico ${t.name} vs ${nx.opp.short} ${when("", "", "hoy", "")}: ${pTxt} de victoria`, `Pronóstico ${t.short} vs ${nx.opp.short} ${when("", "", "hoy", "")}: ${pTxt} de victoria`),
+      fitTitle(`Palpite ${t.name} x ${nx.opp.short} ${when("", "", "", "hoje")}: ${pTxt} de vitória`, `Palpite ${t.short} x ${nx.opp.short} ${when("", "", "", "hoje")}: ${pTxt} de vitória`)
+    ),
+    description: L.t(
+      `${t.name} ${nx.home ? "reçoit" : "joue chez"} les ${nx.opp.short} ${tonight ? "ce soir" : `le ${d}`} : ${pTxt} de chances de victoire selon le modèle Basketlog. Blessés du jour, bilan, stats, joueurs clés et calendrier.`,
+      `${t.name} ${nx.home ? "host" : "visit"} the ${nx.opp.short} ${tonight ? "tonight" : `on ${d}`}: ${pTxt} win probability per the Basketlog model. Injury report, record, stats, key players and schedule.`,
+      `Los ${t.name} ${nx.home ? "reciben a" : "visitan a"} los ${nx.opp.short} ${tonight ? "hoy" : `el ${d}`}: ${pTxt} de probabilidades de victoria según el modelo de Basketlog. Lesionados de hoy, balance, estadísticas, jugadores clave y calendario.`,
+      `O ${t.name} ${nx.home ? "recebe o" : "visita o"} ${nx.opp.short} ${tonight ? "hoje" : `em ${d}`}: ${pTxt} de probabilidade de vitória segundo o modelo do Basketlog. Lesionados de hoje, campanha, estatísticas, jogadores-chave e calendário.`
+    ),
+    path: `/app/equipe/${t.id}`,
+    L,
+  });
   return pageMeta({
     // « Pronostic » en tête : c'est ce que tapent ceux qui cherchent le prochain match d'une équipe.
     title: nx ? L.t(
