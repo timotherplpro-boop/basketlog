@@ -56,7 +56,7 @@ const SITE_LD = [
     "@type": "Organization",
     "@id": `${SITE}/#organisation`,
     name: "Basketlog",
-    alternateName: ["Basket Log", "basketlog-app.com"],
+    alternateName: ["Basketlog App", "Basket Log", "basketlog-app.com"],
     url: SITE,
     // Logo carré en PNG (512 px) : format conseillé par Google pour le logo de marque dans les résultats.
     logo: { "@type": "ImageObject", url: `${SITE}/icons/icon-512.png`, width: 512, height: 512 },
@@ -69,7 +69,7 @@ const SITE_LD = [
     "@type": "WebSite",
     "@id": `${SITE}/#site`,
     name: "Basketlog",
-    alternateName: ["Basket Log", "basketlog-app.com"],
+    alternateName: ["Basketlog App", "Basket Log", "basketlog-app.com"],
     url: SITE,
     inLanguage: ["fr-FR", "en-US", "es-ES"],
     publisher: { "@id": `${SITE}/#organisation` },
