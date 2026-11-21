@@ -34,7 +34,7 @@ export default async function HistoriquePage() {
       {!m ? (
         <div className="panel hist-empty">
           <b>{L.t("Connecte-toi pour retrouver tes analyses", "Log in to find your analyses", "Inicia sesión para encontrar tus análisis", "Faça login para encontrar suas análises")}</b>
-          <p>{L.t("Les analyses complètes que tu lances (1 offerte avec le compte gratuit, illimitées avec Pro ou Lifetime) s'affichent ici, sur tous tes appareils.", "The full analyses you run (1 free with a free account, unlimited with Pro or Lifetime) show up here, on all your devices.", "Los análisis completos que lanzas (1 de regalo con la cuenta gratis, ilimitados con Pro o Lifetime) aparecen aquí, en todos tus dispositivos.", "As análises completas que você abre (1 de presente com a conta grátis, ilimitadas com Pro ou Lifetime) aparecem aqui, em todos os seus dispositivos.")}</p>
+          <p>{L.t("Les analyses que tu lances avec Pro ou Lifetime s'affichent ici, sur tous tes appareils.", "The analyses you run with Pro or Lifetime show up here, on all your devices.", "Los análisis que lanzas con Pro o Lifetime aparecen aquí, en todos tus dispositivos.", "As análises que você abre com Pro ou Lifetime aparecem aqui, em todos os seus dispositivos.")}</p>
           <Link href={L.href("/pro")} className="btn-solid">{L.t("Voir les formules", "See the plans", "Ver los planes", "Ver os planos")}</Link>
           <AuthButton mode="connexion" source="historique" next={L.href("/app/historique")} className="comp-more">{L.t("Déjà un compte ? Se connecter", "Already have an account? Log in", "¿Ya tienes cuenta? Inicia sesión", "Já tem conta? Entre")} →</AuthButton>
         </div>
@@ -43,9 +43,9 @@ export default async function HistoriquePage() {
       ) : !list.length && m.tier === "compte" ? (
         <div className="panel hist-empty">
           <b>{L.t("Aucune analyse complète pour l'instant", "No full analyses yet", "Todavía no hay análisis completos", "Ainda não há análises completas")}</b>
-          <p>{L.t("Ton compte gratuit inclut 1 analyse complète offerte : lance-la sur le match de ton choix, elle s'affichera ici. Avec Pro ou Lifetime, elles sont illimitées.", "Your free account includes 1 free full analysis: run it on any game you like and it will show up here. With Pro or Lifetime, they're unlimited.", "Tu cuenta gratis incluye 1 análisis completo de regalo: lánzalo en el partido que quieras y aparecerá aquí. Con Pro o Lifetime, son ilimitados.", "Sua conta grátis inclui 1 análise completa de presente: abra no jogo que quiser e ela aparecerá aqui. Com Pro ou Lifetime, são ilimitadas.")}</p>
-          <Link href={L.href("/app/matchs")} className="btn-solid">🎁 {L.t("Choisir mon match", "Pick my game", "Elegir mi partido", "Escolher meu jogo")}</Link>
-          <Link href={L.href("/pro")} className="comp-more">{L.t("Voir les formules", "See the plans", "Ver los planes", "Ver os planos")} →</Link>
+          <p>{L.t("Avec le compte gratuit, tu vois l'aperçu de chaque analyse. L'analyse complète est incluse dans Pro et Lifetime, et elle s'affiche ici.", "With the free account, you see a preview of every analysis. The full analysis comes with Pro and Lifetime, and shows up here.", "Con la cuenta gratis, ves un avance de cada análisis. El análisis completo está incluido en Pro y Lifetime, y aparece aquí.", "Com a conta grátis, você vê uma prévia de cada análise. A análise completa está incluída no Pro e no Lifetime, e aparece aqui.")}</p>
+          <Link href={L.href("/pro")} className="btn-solid">{L.t("Voir les formules", "See the plans", "Ver los planes", "Ver os planos")}</Link>
+          <Link href={L.href("/app")} className="comp-more">{L.t("Analyser un match", "Analyze a game", "Analizar un partido", "Analisar um jogo")} →</Link>
         </div>
       ) : !list.length ? (
         <div className="panel hist-empty">

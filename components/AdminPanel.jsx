@@ -41,7 +41,7 @@ function formules(L) {
     ] },
     { id: "compte", name: t("Compte gratuit", "Free account", "Cuenta gratuita", "Conta grátis"), price: money(0, "EUR", L), lines: [
       t("Tout ce que voit un visiteur", "Everything a visitor sees", "Todo lo que ve un visitante", "Tudo o que um visitante vê"),
-      t("1 analyse complète offerte, une seule fois (depuis le 20/11/2026), puis l'aperçu", "1 free full analysis, once (since 20/11/2026), then the preview", "1 análisis completo de regalo, una sola vez (desde el 20/11/2026), luego la vista previa", "1 análise completa de presente, uma única vez (desde 20/11/2026), depois a prévia"),
+      t("Aucune analyse complète (0 par jour) : l'aperçu seulement", "No full analysis (0 per day): preview only", "Ningún análisis completo (0 al día): solo la vista previa", "Nenhuma análise completa (0 por dia): só a prévia"),
       t("Compte Whop : e-mail, Google ou Apple", "Whop account: email, Google or Apple", "Cuenta de Whop: correo, Google o Apple", "Conta da Whop: e-mail, Google ou Apple"),
     ] },
     { id: "starter", name: "Starter", price: both("starter", monthly), lines: [
