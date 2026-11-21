@@ -14,9 +14,19 @@ const seasonLabel = () => { const y = seasonForDate(nbaToday()); return `${y - 1
 export const dynamic = "force-dynamic";
 export async function generateMetadata() {
   const L = await getL();
+  // Leaders des deux conférences en tête de la description (extrait Google) : montre un classement à jour.
+  let top = "";
+  try {
+    const { east, west } = await conferenceStandings();
+    const e = east.find((t) => t.gp) && east[0], w = west.find((t) => t.gp) && west[0];
+    if (e && w) {
+      const day = fmtDate(L, new Date().toISOString(), L.en ? { month: "long", day: "numeric" } : { day: "numeric", month: "long" });
+      top = L.t(`Au ${day} : ${e.short} (${e.wins}-${e.losses}) en tête à l'Est, ${w.short} (${w.wins}-${w.losses}) à l'Ouest. `, `As of ${day}: the ${e.short} (${e.wins}-${e.losses}) lead the East, the ${w.short} (${w.wins}-${w.losses}) the West. `, `Al ${day}: ${e.short} (${e.wins}-${e.losses}) lidera el Este y ${w.short} (${w.wins}-${w.losses}) el Oeste. `, `Em ${day}: ${e.short} (${e.wins}-${e.losses}) lidera o Leste e ${w.short} (${w.wins}-${w.losses}) o Oeste. `);
+    }
+  } catch {}
   return pageMeta({
     title: L.t(`Classement NBA ${seasonLabel()} : conférence Est et conférence Ouest à jour`, `NBA standings ${seasonLabel()}: Eastern and Western Conference (updated daily)`, `Clasificación NBA ${seasonLabel()}: Conferencia Este y Oeste actualizada`, `Classificação NBA ${seasonLabel()}: Conferência Leste e Oeste atualizada`),
-    description: L.t(
+    description: top + L.t(
       "Classement NBA à jour de la conférence Est et de la conférence Ouest : bilan, pourcentage de victoires, écart de points, série en cours, places en playoffs et en play-in.",
       "Up-to-date NBA standings for the Eastern and Western Conference: record, win percentage, point differential, streak, playoff and play-in spots.", "Clasificación NBA actualizada de la Conferencia Este y la Conferencia Oeste: balance, porcentaje de victorias, diferencia de puntos, racha, puestos de playoffs y play-in.", "Classificação NBA atualizada da Conferência Leste e da Conferência Oeste: campanha, aproveitamento, saldo de pontos, sequência, vagas nos playoffs e no play-in."
     ),
