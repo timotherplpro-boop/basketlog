@@ -22,7 +22,7 @@ const dayOf = (L) => fmtDate(L, new Date().toISOString(), { day: "numeric", mont
 async function load() {
   const season = seasonForDate(nbaToday());
   const [cur, prev, prev2, rec] = await Promise.all([getPlayerStats(season), getPlayerStats(season - 1), getPlayerStats(season - 2), getStandings(season).catch(() => ({}))]);
-  return { season, rows: royRace(cur, prev, prev2, rec, 12) };
+  return { season, rows: royRace(cur, prev, prev2, rec, 12, season) };
 }
 
 export async function generateMetadata() {

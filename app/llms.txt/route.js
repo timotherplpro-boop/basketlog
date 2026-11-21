@@ -49,6 +49,7 @@ export async function GET() {
     `- [French players in the NBA tonight: times, opponents, team win probabilities and stats](${SITE}/en/app/francais) · [Spanish and Latino NBA players (Spain, Mexico, Dominican Republic, Puerto Rico)](${SITE}/es/app/espagnols)`,
     `- Open data (CC BY 4.0): every NBA prediction of the season as CSV: ${SITE}/data/${csvName(seasonForDate(nbaToday()))}`,
     `- [NBA power rankings](${SITE}/en/app/power-rankings): all 30 teams ranked by model strength, updated daily`,
+    `- [College basketball (NCAA Division I) predictions today](${SITE}/en/app/ncaa): win probability and projected margin for every game, model top 25, season track record`,
     `- [NBA MVP ladder](${SITE}/en/app/mvp) · [Rookie of the Year ladder](${SITE}/en/app/rookie): daily top players by a public production × wins index`,
     `- [2027 NBA draft lottery odds under the new 3-2-1 system](${SITE}/en/app/draft): each team's chance at the No. 1 and top-4 picks, from season simulations`,
     `- [NBA remaining strength of schedule](${SITE}/en/app/calendrier-restant) · [NBA back-to-backs tonight](${SITE}/en/app/back-to-back) · [Biggest upsets of the season](${SITE}/en/app/surprises)`,

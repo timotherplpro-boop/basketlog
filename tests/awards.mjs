@@ -4,6 +4,7 @@ import { mvpRace, royRace, rookiesOf, production } from "../lib/awards.js";
 import { monthsOf, monthOk, seasonOfMonth } from "../lib/months.js";
 import { apiPredictions } from "../lib/api-v1.js";
 import { TERMS, termOf, tr } from "../lib/glossary.js";
+import { ncaaRatings, ncaaProb, ncaaRecord, ncaaRecords, NCAA } from "../lib/ncaa-model.js";
 
 function rng(seed) {
   let a = seed >>> 0;
@@ -61,6 +62,7 @@ export async function awardsTests({ ok, ko, eq }) {
   eq("rookie : production d'abord (joueurs éligibles)", royRace(cur, prev, prev2, rec).map((r) => r.p.id)[0], "a");
   if (!royRace(cur, prev, prev2, rec).some((r) => r.p.id === "r2")) ok("rookie : moins de la moitié des matchs = exclu"); else ko("rookie : moins de la moitié des matchs = exclu", "condition fausse");
   eq("stats de la saison passée indisponibles : aucun faux rookie", rookiesOf(cur, {}, prev2).length, 0);
+  eq("vétéran revenu d'Europe (débuts en 2015) : pas rookie", rookiesOf({ ...cur, h: { id: "h", name: "Vétéran", team: "1", gp: 10, debut: 2015 } }, prev, prev2, 2027).length, 4);
 
   if (monthOk("2026-11") && !monthOk("2026-13") && !monthOk("x")) ok("mois valides"); else ko("mois valides", "condition fausse");
   eq("novembre 2026 = saison 2027", seasonOfMonth("2026-11"), 2027);
@@ -77,6 +79,16 @@ export async function awardsTests({ ok, ko, eq }) {
   eq("API : licence", api.license, "CC BY 4.0");
 
   if (TERMS.every((x) => x.t.length === 4 && x.d.length === 4 && x.d.every((d) => d.length > 150))) ok("lexique : 4 langues, définitions complètes"); else ko("lexique : 4 langues, définitions complètes", "condition fausse");
+  // NCAA : A bat B de 20, B bat C de 10 (terrain neutre) ; X hors 1re division.
+  const d1n = new Set(["A", "B", "C"]);
+  const ng = [{ h: "A", a: "B", hs: 80, as: 60, n: true }, { h: "B", a: "C", hs: 70, as: 60, n: true }, { h: "C", a: "X", hs: 90, as: 50, n: false }];
+  const nr = ncaaRatings(ng.slice(0, 2), d1n, {});
+  if (nr.A > nr.B && nr.B > nr.C) ok("NCAA : notes dans l'ordre des résultats"); else ko("NCAA : notes", JSON.stringify(nr));
+  const np = ncaaProb(nr, "A", "C", true), npH = ncaaProb(nr, "C", "A", false);
+  if (np.pHome > 0.5 && Math.abs(ncaaProb(nr, "C", "A", true).pHome - (1 - np.pHome)) < 1e-9) ok("NCAA : probabilités symétriques sur terrain neutre"); else ko("NCAA : symétrie", np.pHome);
+  if (Math.abs(npH.margin - (nr.C - nr.A + NCAA.H)) < 1e-9) ok("NCAA : 3 points pour l'équipe qui reçoit"); else ko("NCAA : terrain", npH.margin);
+  eq("NCAA : bilan public sans les 3 premiers jours", ncaaRecord([{ d: "1", games: ng }, { d: "2", games: [] }, { d: "3", games: [] }, { d: "4", games: [{ h: "A", a: "C", hs: 70, as: 60, n: true }] }], d1n, {}).n, 1);
+  eq("NCAA : bilan de C", JSON.stringify(ncaaRecords(ng).C), JSON.stringify({ w: 1, l: 1 }));
   eq("lexique : adresses uniques", new Set(TERMS.map((x) => x.slug)).size, TERMS.length);
   eq("lexique : traduction", tr(termOf("play-in").t, "es"), "Play-in");
   if (!TERMS.some((x) => x.d.some((d) => /\b(IA|AI|paris|bet|apuesta|aposta)\b/i.test(d)))) ok("lexique : ni « IA » ni vocabulaire de pari"); else ko("lexique : ni « IA » ni vocabulaire de pari", "condition fausse");
