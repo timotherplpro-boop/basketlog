@@ -12,6 +12,7 @@ import { getL } from "../../../../lib/lang-server";
 import { fmtDate, pctOf } from "../../../../lib/i18n";
 import { SITE } from "../../../../lib/site";
 import { monthsOf, monthOk, seasonOfMonth } from "../../../../lib/months";
+import { calibration } from "../../../../lib/calibration";
 
 export const dynamic = "force-dynamic";
 
@@ -65,6 +66,10 @@ export default async function MonthRecordPage({ params }) {
   const i = months.indexOf(mois);
   const dayName = (d) => fmtDate(L, isoOf(d), { weekday: "long", day: "numeric" });
   const winner = (p) => (p.home.score > p.away.score ? p.home : p.away);
+  // Calibration du mois : probabilité annoncée au favori contre taux de victoire réel, par tranche de 10 points.
+  const cal = calibration(list).filter((b) => b.n > 0);
+  const binLabel = (b) => `${Math.round(b.lo * 100)}-${Math.round(b.hi * 100)} %`.replace(" %", L.en ? "%" : " %");
+  const calText = cal.filter((b) => b.n >= 10).map((b) => L.t(`${binLabel(b)} annoncés : ${pctOf(b.actual, L)} de victoires (${b.n} matchs)`, `${binLabel(b)} predicted: won ${pctOf(b.actual, L)} (${b.n} games)`, `${binLabel(b)} anunciado: ganó el ${pctOf(b.actual, L)} (${b.n} partidos)`, `${binLabel(b)} anunciados: venceu ${pctOf(b.actual, L)} (${b.n} jogos)`)).join(" ; ");
   const faq = [
     {
       q: L.t(`Quel est le taux de réussite des pronostics NBA Basketlog en ${mn} ?`, `How accurate were Basketlog's NBA predictions in ${mn}?`, `¿Cuál es el porcentaje de acierto de Basketlog en ${mn}?`, `Qual é a taxa de acerto do Basketlog em ${mn}?`),
@@ -73,6 +78,10 @@ export default async function MonthRecordPage({ params }) {
     s.sure.n > 0 && {
       q: L.t("Et les pronostics à confiance très élevée ?", "What about the very high confidence picks?", "¿Y los pronósticos de confianza muy alta?", "E os palpites de confiança muito alta?"),
       a: L.t(`${s.sure.ok} sur ${s.sure.n} (favori à 88 % ou plus).`, `${s.sure.ok} of ${s.sure.n} (favorite at 88% or more).`, `${s.sure.ok} de ${s.sure.n} (favorito al 88 % o más).`, `${s.sure.ok} de ${s.sure.n} (favorito com 88 % ou mais).`),
+    },
+    calText && {
+      q: L.t(`Les probabilités annoncées en ${mn} étaient-elles fiables ?`, `Were the predicted probabilities reliable in ${mn}?`, `¿Fueron fiables las probabilidades anunciadas en ${mn}?`, `As probabilidades anunciadas em ${mn} foram confiáveis?`),
+      a: L.t(`Par tranche de probabilité du favori : ${calText}.`, `By the favorite's probability: ${calText}.`, `Por tramo de probabilidad del favorito: ${calText}.`, `Por faixa de probabilidade do favorito: ${calText}.`),
     },
   ];
   const url = `${SITE}${L.href(`/app/bilan/${mois}`)}`;
@@ -91,6 +100,18 @@ export default async function MonthRecordPage({ params }) {
         <div className="card kpi"><span>{L.t("Matchs", "Games", "Partidos", "Jogos")}</span><strong>{s.n}</strong></div>
         <div className="card kpi"><span>{L.t("Confiance très élevée", "Very high confidence", "Confianza muy alta", "Confiança muito alta")}</span><strong>{s.sure.n ? `${s.sure.ok}/${s.sure.n}` : "–"}</strong></div>
       </div>
+      {cal.length > 0 && (
+        <section className="card block">
+          <h2>{L.t("Les probabilités tiennent-elles leurs promesses ?", "Do the probabilities hold up?", "¿Se cumplen las probabilidades?", "As probabilidades se confirmam?")}</h2>
+          <p className="narr">{L.t("Quand le modèle donne 70 % au favori, celui-ci devrait gagner environ 7 fois sur 10. Voici ce qui s'est passé ce mois-ci, par tranche de probabilité.", "When the model gives the favorite 70%, it should win about 7 times out of 10. Here is what happened this month, by probability range.", "Cuando el modelo da un 70 % al favorito, debería ganar unas 7 de cada 10 veces. Esto es lo que pasó este mes, por tramo de probabilidad.", "Quando o modelo dá 70 % ao favorito, ele deveria vencer cerca de 7 em cada 10 vezes. Veja o que aconteceu neste mês, por faixa de probabilidade.")}</p>
+          <div className="tbl-scroll">
+            <table className="std-table">
+              <thead><tr><th>{L.t("Probabilité du favori", "Favorite's probability", "Probabilidad del favorito", "Probabilidade do favorito")}</th><th>{L.t("Moyenne annoncée", "Average predicted", "Media anunciada", "Média anunciada")}</th><th>{L.t("Victoires réelles", "Actual wins", "Victorias reales", "Vitórias reais")}</th><th>{L.t("Matchs", "Games", "Partidos", "Jogos")}</th></tr></thead>
+              <tbody>{cal.map((b) => <tr key={b.lo}><td>{binLabel(b)}</td><td>{pctOf(b.announced, L)}</td><td>{pctOf(b.actual, L)} ({b.ok}/{b.n})</td><td>{b.n}</td></tr>)}</tbody>
+            </table>
+          </div>
+        </section>
+      )}
       {upsets.length > 0 && (
         <section className="card block">
           <h2>{L.t("Les plus grosses surprises du mois", "Biggest upsets of the month", "Las mayores sorpresas del mes", "As maiores zebras do mês")}</h2>

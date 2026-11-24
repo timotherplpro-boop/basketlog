@@ -7,6 +7,7 @@ import { TERMS, termOf, tr } from "../lib/glossary.js";
 import { ncaaRatings, ncaaProb, ncaaRecord, ncaaRecords, NCAA, NCAAW, LEAGUES, ncaaWords, ncaaSlug, ncaaGamePath, ncaaTeamPath, parseNcaaSlug } from "../lib/ncaa-model.js";
 import { mk } from "../lib/i18n.js";
 import PRIOR_W from "../lib/ncaaw-prior.json" with { type: "json" };
+import { calibration } from "../lib/calibration.js";
 
 function rng(seed) {
   let a = seed >>> 0;
@@ -110,4 +111,10 @@ export async function awardsTests({ ok, ko, eq }) {
   eq("lexique : adresses uniques", new Set(TERMS.map((x) => x.slug)).size, TERMS.length);
   eq("lexique : traduction", tr(termOf("play-in").t, "es"), "Play-in");
   if (!TERMS.some((x) => x.d.some((d) => /\b(IA|AI|paris|bet|apuesta|aposta)\b/i.test(d)))) ok("lexique : ni « IA » ni vocabulaire de pari"); else ko("lexique : ni « IA » ni vocabulaire de pari", "condition fausse");
+  // Calibration : favori lu des deux côtés (pHome 0,25 = visiteur favori à 75 %), tranches de 10 points, 100 % dans la dernière.
+  const cb = calibration([{ pHome: 0.55, ok: true }, { pHome: 0.25, ok: false }, { pHome: 0.72, ok: true }, { pHome: 1, ok: true }, { pHome: null, ok: true }]);
+  eq("calibration : 5 tranches", cb.length, 5);
+  eq("calibration : 50-60 %", JSON.stringify([cb[0].n, cb[0].ok]), JSON.stringify([1, 1]));
+  eq("calibration : 70-80 % (visiteur favori compris)", JSON.stringify([cb[2].n, cb[2].ok, Math.round(cb[2].announced * 1000)]), JSON.stringify([2, 1, 735]));
+  eq("calibration : 100 % dans 90-100 %", cb[4].n, 1);
 }
