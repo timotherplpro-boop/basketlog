@@ -7,6 +7,7 @@ export async function relanceTests({ ok, ko, eq }) {
   const now = Date.parse("2026-11-24T10:43:00Z");
   const pay = (over) => ({ id: "pay_1", status: "open", substatus: "failed", membership: { id: "mem_1" }, user: { id: "user_1", email: "fan@example.com" }, created_at: "2026-11-24T02:00:00Z", ...over });
   eq("Échec de la nuit, abonnement en retard : premier e-mail", paymentsToRemind([pay()], ["mem_1"], { now }).map((x) => x.step), [1]);
+  eq("Paiement « pending » (affiché « En attente » chez Whop) : premier e-mail aussi", paymentsToRemind([pay({ status: "pending", substatus: null })], ["mem_1"], { now }).map((x) => x.step), [1]);
   eq("3 jours après, toujours en retard : rappel", paymentsToRemind([pay({ created_at: "2026-11-21T02:00:00Z" })], ["mem_1"], { now }).map((x) => x.step), [2]);
   eq("Entre les deux (38 h) : rien", paymentsToRemind([pay({ created_at: "2026-11-22T20:00:00Z" })], ["mem_1"], { now }), []);
   eq("Abonnement réglé depuis (plus en retard) : rien", paymentsToRemind([pay()], [], { now }), []);
