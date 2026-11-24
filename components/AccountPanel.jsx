@@ -475,7 +475,7 @@ export default function AccountPanel() {
                     {p.state === "renews" && (until
                       ? T(`Se renouvelle automatiquement. Prochain paiement le ${until}.`, `Renews automatically. Next payment on ${until}.`, `Se renueva automáticamente. Próximo pago el ${until}.`)
                       : T("Se renouvelle automatiquement.", "Renews automatically.", "Se renueva automáticamente."))}
-                    {p.state === "past_due" && T("Le dernier paiement a échoué. Mets à jour ton moyen de paiement pour garder ton accès.", "The last payment failed. Update your payment method to keep your access.", "El último pago ha fallado. Actualiza tu medio de pago para conservar tu acceso.")}
+                    {p.state === "past_due" && T("Le dernier paiement a échoué : tes analyses complètes sont en pause. Mets à jour ton moyen de paiement pour les retrouver.", "The last payment failed: your full analyses are paused. Update your payment method to get them back.", "El último pago ha fallado: tus análisis completos están en pausa. Actualiza tu medio de pago para recuperarlos.")}
                     {p.state === "ends" && (until
                       ? T(`Résilié : tu gardes ton accès jusqu'au ${until}, puis plus aucun prélèvement.`, `Cancelled: you keep your access until ${until}, then no more charges.`, `Cancelada: conservas tu acceso hasta el ${until} y después no habrá más cobros.`)
                       : T("Résilié : plus aucun prélèvement.", "Cancelled: no more charges.", "Cancelada: no habrá más cobros."))}

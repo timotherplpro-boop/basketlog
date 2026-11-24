@@ -1,5 +1,6 @@
 // Relance des paiements refusés : qui reçoit quoi, et quand (lib/lifecycle-mail.js).
 import { paymentsToRemind, paymentFailedEmail, paymentMailsOn } from "../lib/lifecycle-mail.js";
+import { onlyPastDue } from "../lib/account.js";
 
 export async function relanceTests({ ok, ko, eq }) {
   console.log("Relance des paiements refusés");
@@ -19,4 +20,10 @@ export async function relanceTests({ ok, ko, eq }) {
   eq("Rappel français", paymentFailedEmail({ lang: "fr", step: 2 }).subject, "Rappel : ton paiement Basketlog n'est toujours pas passé");
   if (!/\bAI\b|\bIA\b/.test(en.text + paymentFailedEmail({ lang: "fr" }).text + paymentFailedEmail({ lang: "es" }).text)) ok("Jamais « AI » ni « IA »"); else ko("AI/IA", "présent");
   eq("Coupé par défaut (PAYMENT_EMAILS absent)", paymentMailsOn({}), false);
+  const m = (status, product = "prod_pro") => ({ status, product: { id: product } });
+  eq("Accès : Pro en retard seul => coupé", onlyPastDue([m("past_due")], "prod_pro"), true);
+  eq("Accès : Pro actif => gardé", onlyPastDue([m("active")], "prod_pro"), false);
+  eq("Accès : essai en cours => gardé", onlyPastDue([m("trialing")], "prod_pro"), false);
+  eq("Accès : Pro en retard + Pass 24 h payé (même produit) => gardé", onlyPastDue([m("past_due"), m("completed")], "prod_pro"), false);
+  eq("Accès : retard sur un autre produit => sans effet", onlyPastDue([m("past_due", "prod_st")], "prod_pro"), false);
 }
