@@ -15,7 +15,6 @@ export async function generateMetadata() {
 const TRACEURS = [
   ["bl_consent", "Stockage local", "Mémoriser ton choix sur les cookies", "Nécessaire", "6 mois"],
   ["bl_pro", "Cookie", "Garder ta session connectée (compte Basketlog ou Whop ; cookie signé, inaccessible aux scripts)", "Nécessaire", "60 jours"],
-  ["bl_cur", "Cookie", "Afficher les prix dans ta monnaie (euros en zone euro, dollars ailleurs), déduite du pays de connexion ; aucune donnée personnelle", "Nécessaire", "30 jours"],
   ["bl_switch", "Cookie", "Retenir un changement de formule en cours pendant que tu paies chez Whop (cookie signé, inaccessible aux scripts ; supprimé dès que le changement est terminé ou annulé)", "Nécessaire", "12 heures"],
   ["whop_state, whop_pkce", "Cookie", "Sécuriser la connexion avec Whop", "Nécessaire", "10 minutes"],
   ["g_state, g_pkce, g_nonce, g_next, g_lang", "Cookie", "Sécuriser la connexion avec Google et te ramener sur la page d'où tu viens", "Nécessaire", "10 minutes"],
@@ -69,7 +68,6 @@ function CookiesFr() {
 const TRACKERS_EN = [
   ["bl_consent", "Local storage", "Remember your cookie choice", "Necessary", "6 months"],
   ["bl_pro", "Cookie", "Keep your session logged in (Basketlog or Whop account; signed cookie, not accessible to scripts)", "Necessary", "60 days"],
-  ["bl_cur", "Cookie", "Show prices in your currency (euros in the euro area, dollars elsewhere), based on your connection's country; no personal data", "Necessary", "30 days"],
   ["bl_switch", "Cookie", "Remember a plan change in progress while you pay on Whop (signed cookie, not accessible to scripts; deleted as soon as the change is completed or cancelled)", "Necessary", "12 hours"],
   ["whop_state, whop_pkce", "Cookie", "Secure the login with Whop", "Necessary", "10 minutes"],
   ["g_state, g_pkce, g_nonce, g_next, g_lang", "Cookie", "Secure the login with Google and bring you back to the page you came from", "Necessary", "10 minutes"],
@@ -124,7 +122,6 @@ function CookiesEn({ L }) {
 const TRACKERS_ES = [
   ["bl_consent", "Almacenamiento local", "Recordar tu elección sobre las cookies", "Necesaria", "6 meses"],
   ["bl_pro", "Cookie", "Mantener abierta tu sesión (cuenta de Basketlog o de Whop; cookie firmada, inaccesible para los scripts)", "Necesaria", "60 días"],
-  ["bl_cur", "Cookie", "Mostrar los precios en tu moneda (euros en la zona euro, dólares fuera), según el país de conexión; ningún dato personal", "Necesaria", "30 días"],
   ["bl_switch", "Cookie", "Recordar un cambio de plan en curso mientras pagas en Whop (cookie firmada, inaccesible para los scripts; se elimina en cuanto el cambio se completa o se cancela)", "Necesaria", "12 horas"],
   ["whop_state, whop_pkce", "Cookie", "Proteger el inicio de sesión con Whop", "Necesaria", "10 minutos"],
   ["g_state, g_pkce, g_nonce, g_next, g_lang", "Cookie", "Proteger el inicio de sesión con Google y devolverte a la página de la que vienes", "Necesaria", "10 minutos"],

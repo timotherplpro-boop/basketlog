@@ -34,7 +34,7 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
   const [here, setHere] = useState("");
   const [modal, setModal] = useState(false);
   const box = useRef(null);
-  const cur = useCurrency(L); // monnaie d'affichage (cookie bl_cur posé par le middleware)
+  const cur = useCurrency(); // monnaie d'affichage choisie par le serveur (lib/currency-server.js)
   useEffect(() => { setState(access.state); }, [access.state]);
   useEffect(() => { setHere(encodeURIComponent(location.pathname + location.search)); }, []);
   useEffect(() => {

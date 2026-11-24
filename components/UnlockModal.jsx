@@ -34,7 +34,7 @@ function left(ms, L) {
 
 export default function UnlockModal({ state, tier, href, proof, match, league = "NBA", onClose, onCta }) {
   const L = useL();
-  const tt = trialTexts(L, useCurrency(L));
+  const tt = trialTexts(L, useCurrency());
   const boxRef = useRef(null);
   const [now, setNow] = useState(() => Date.now());
   const [mounted, setMounted] = useState(false);

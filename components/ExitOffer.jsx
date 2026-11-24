@@ -41,7 +41,7 @@ const Cross = () => (
 // applique elle-même le code).
 export function ExitOfferBody({ offer, href, onAccept, onDecline, titleId = "exo-title", trial = 0 }) {
   const L = useL();
-  const tt = trialTexts(L, useCurrency(L));
+  const tt = trialTexts(L, useCurrency());
   // 20/11/2026 : dans la fenêtre « analyse complète », l'offre de sortie propose l'essai gratuit Pro (plus parlant que
   // la remise : 2 clics sur 30 affichages) ; la page /pro garde la remise.
   if (trial > 0) {

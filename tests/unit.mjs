@@ -27,7 +27,7 @@ import { awardsTests } from "./awards.mjs";
 import { pushTests } from "./push.mjs";
 import { passTests } from "./pass.mjs";
 import { relanceTests } from "./relance.mjs";
-import { currencyTests } from "./currency.mjs";
+import { currencyTests, fxTests } from "./currency.mjs";
 
 export async function unit() {
   let passed = 0, failed = 0;
@@ -598,6 +598,7 @@ export async function unit() {
   await passTests({ ok, ko, eq });
   await relanceTests({ ok, ko, eq });
 await currencyTests({ ok, ko, eq });
+await fxTests({ ok, ko, eq });
 
   return { passed, failed };
 }

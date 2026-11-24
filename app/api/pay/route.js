@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { SITE } from "../../../lib/site";
 import { checkoutFor } from "../../../lib/pricing";
-import { getCurrency } from "../../../lib/currency-server";
 import { mk } from "../../../lib/i18n";
 import { safeNext } from "../../../lib/pro";
 import { sameOrigin, clientIp } from "../../../lib/auth-utils";
@@ -24,7 +23,7 @@ export async function POST(req) {
   const plan = PAY_PLANS.includes(body?.plan) ? body.plan : null;
   if (!plan) return no(400, "formule");
   if (!(await allowed("paiement-ip", clientIp(req.headers), 30, 60))) return no(429, "trop");
-  const cur = await getCurrency(L);
+  const cur = "EUR"; // paiement toujours en euros (24/11/2026) ; hors zone euro, le site affiche seulement la conversion
   const planId = planIdOf(checkoutFor(cur)[plan]);
   if (!planId) return no(503, "config");
   const token = newPayToken();

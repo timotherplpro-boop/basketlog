@@ -23,6 +23,8 @@ import JsonLd from "../components/JsonLd";
 import { SITE, GOOGLE_SITE_VERIFICATION, BING_SITE_VERIFICATION } from "../lib/site";
 import { getL, getPath } from "../lib/lang-server";
 import LangProvider from "../components/LangProvider";
+import { FxProvider } from "../lib/use-currency";
+import { getCurrency } from "../lib/currency-server";
 import InstallApp from "../components/InstallApp";
 import SiteFooter from "../components/SiteFooter";
 import SiteChrome from "../components/SiteChrome";
@@ -79,6 +81,7 @@ const SITE_LD = [
 export default async function RootLayout({ children }) {
   const L = await getL();
   const path = await getPath();
+  const fx = await getCurrency(L); // euros, ou dollars convertis au taux du jour hors zone euro
   // Membre connecté : dans l'espace analyse (/app, /pro), la barre latérale remplace l'en-tête et le pied de page du site.
   const sess = decodeSession((await cookies()).get(COOKIE)?.value);
   const member = !!sess?.uid;
@@ -101,6 +104,7 @@ export default async function RootLayout({ children }) {
       </head>
       <body>
         <LangProvider lang={L.lang} path={path}>
+          <FxProvider fx={fx}>
           <JsonLd data={SITE_LD} />
           <Analytics />
           <SiteChrome member={member}><Nav /></SiteChrome>
@@ -116,6 +120,7 @@ export default async function RootLayout({ children }) {
           <CookieBanner />
           <InstallApp />
           {preview && <PreviewBar tier={preview} />}
+          </FxProvider>
         </LangProvider>
       </body>
     </html>

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useProStatus } from "../lib/useProStatus";
 import { track } from "../lib/analytics";
 import { useL } from "./LangProvider";
-import { price, money, PRICES, PRO_TRIAL_DAYS, PRO_TRIAL_PRICE } from "../lib/pricing";
+import { price, money, amountOf, curOf, shown, fxNote, PRO_TRIAL_DAYS, PRO_TRIAL_PRICE } from "../lib/pricing";
 import { pctOf } from "../lib/i18n";
 import { CODE_RE, cleanCode, discounted, withPromo } from "../lib/promo";
 import SwitchWatch from "./SwitchWatch";
@@ -20,14 +20,15 @@ const Icon = ({ name }) => {
 
 // Mêmes offres que Visifoot, ligne par ligne. Les questions personnelles à l'IA n'apparaissent que si l'IA est
 // configurée : on n'affiche jamais une fonction qui ne marche pas.
-// Prix dans la monnaie du visiteur (`cur` : EUR dans la zone euro, USD ailleurs), choisie côté serveur.
+// Prix dans la monnaie du visiteur (`cur` : { cur: "EUR" } dans la zone euro, ailleurs { cur: "USD", rate } = euros convertis
+// au taux du jour), choisie côté serveur. Le paiement reste en euros.
 // `promo` : code promo de créateur appliqué sur la page ({ pct, mois } : remise en % et nombre de paiements remisés, 0 = tous) ;
 // le prix plein s'affiche alors barré (`old`). Quand la remise ne couvre que les premiers paiements d'un abonnement, la carte
 // l'annonce comme telle (« 11,19 € le 1er mois », puis « puis 13,99 €/mois ») : jamais un prix remisé présenté comme définitif.
 const PLANS = (L, ai, cur, promo = null) => {
   const pct = promo?.pct || 0;
   const mois = promo?.mois ?? 0;
-  const show = (id) => (pct ? money(discounted(PRICES[cur][id], pct), cur, L) : price(id, cur, L));
+  const show = (id) => (pct ? money(discounted(amountOf(id, cur), pct), curOf(cur), L) : price(id, cur, L));
   const was = (id) => (pct ? price(id, cur, L) : null);
   const limited = pct > 0 && mois >= 1;
   const per = !limited ? L.t("/mois", "/month", "/mes", "/mês")
@@ -38,7 +39,7 @@ const PLANS = (L, ai, cur, promo = null) => {
   return [
   {
     // 19/11/2026 : Starter n'est plus vendu (choix de Tim) ; la carte Gratuit le remplace. Les abonnés Starter gardent leur accès.
-    id: "free", name: L.t("Gratuit", "Free", "Gratis", "Grátis"), icon: "bolt", price: money(0, cur, L), per: L.t("pour toujours", "forever", "para siempre", "para sempre"),
+    id: "free", name: L.t("Gratuit", "Free", "Gratis", "Grátis"), icon: "bolt", price: money(0, curOf(cur), L), per: L.t("pour toujours", "forever", "para siempre", "para sempre"),
     sub: L.t("Pour suivre la NBA chaque soir", "To follow the NBA every night", "Para seguir la NBA cada noche", "Para acompanhar a NBA toda noite"),
     cta: L.t("Voir les matchs du jour", "See today's games", "Ver los partidos de hoy", "Ver os jogos de hoje"), href: "/app/matchs",
     items: [
@@ -50,8 +51,8 @@ const PLANS = (L, ai, cur, promo = null) => {
   },
   {
     id: "pro", name: "Pro", icon: "crown", price: show("pro"), old: was("pro"), per, then: then("pro"), sub: L.t("Pour les passionnés de basket", "For basketball fans", "Para los apasionados del baloncesto", "Para os apaixonados por basquete"), badge: L.t("Populaire", "Popular", "Popular", "Popular"),
-    trial: PRO_TRIAL_DAYS ? L.t(`${PRO_TRIAL_DAYS} jours à ${money(PRO_TRIAL_PRICE, cur, L)}, puis ${show("pro")}${sep}${per} + taxes. Résiliable à tout moment.`, `${PRO_TRIAL_DAYS} days for ${money(PRO_TRIAL_PRICE, cur, L)}, then ${show("pro")}${sep}${per} + tax. Cancel anytime.`, `${PRO_TRIAL_DAYS} días por ${money(PRO_TRIAL_PRICE, cur, L)}, luego ${show("pro")}${sep}${per} + impuestos. Cancela cuando quieras.`, `${PRO_TRIAL_DAYS} dias por ${money(PRO_TRIAL_PRICE, cur, L)}, depois ${show("pro")}${sep}${per} + impostos. Cancele quando quiser.`) : null,
-    ctaTrial: PRO_TRIAL_DAYS ? L.t(`Essai ${PRO_TRIAL_DAYS} jours à ${money(PRO_TRIAL_PRICE, cur, L)}`, `Start ${PRO_TRIAL_DAYS}-day trial for ${money(PRO_TRIAL_PRICE, cur, L)}`, `Prueba ${PRO_TRIAL_DAYS} días por ${money(PRO_TRIAL_PRICE, cur, L)}`, `Teste ${PRO_TRIAL_DAYS} dias por ${money(PRO_TRIAL_PRICE, cur, L)}`) : null,
+    trial: PRO_TRIAL_DAYS ? L.t(`${PRO_TRIAL_DAYS} jours à ${shown(PRO_TRIAL_PRICE, cur, L)}, puis ${show("pro")}${sep}${per} + taxes. Résiliable à tout moment.`, `${PRO_TRIAL_DAYS} days for ${shown(PRO_TRIAL_PRICE, cur, L)}, then ${show("pro")}${sep}${per} + tax. Cancel anytime.`, `${PRO_TRIAL_DAYS} días por ${shown(PRO_TRIAL_PRICE, cur, L)}, luego ${show("pro")}${sep}${per} + impuestos. Cancela cuando quieras.`, `${PRO_TRIAL_DAYS} dias por ${shown(PRO_TRIAL_PRICE, cur, L)}, depois ${show("pro")}${sep}${per} + impostos. Cancele quando quiser.`) : null,
+    ctaTrial: PRO_TRIAL_DAYS ? L.t(`Essai ${PRO_TRIAL_DAYS} jours à ${shown(PRO_TRIAL_PRICE, cur, L)}`, `Start ${PRO_TRIAL_DAYS}-day trial for ${shown(PRO_TRIAL_PRICE, cur, L)}`, `Prueba ${PRO_TRIAL_DAYS} días por ${shown(PRO_TRIAL_PRICE, cur, L)}`, `Teste ${PRO_TRIAL_DAYS} dias por ${shown(PRO_TRIAL_PRICE, cur, L)}`) : null,
     cta: `${L.t("Débloquer", "Unlock", "Desbloquear", "Desbloquear")} - ${show("pro")}${sep}${per}`,
     items: [
       ["ok", L.t("Analyses illimitées", "Unlimited analyses", "Análisis ilimitados", "Análises ilimitadas")],
@@ -159,7 +160,7 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
   const buy = (id) => (e) => {
     if (!agree) { e.preventDefault(); setNudge(true); document.getElementById("pro-agree")?.focus(); return; }
     if (!embed) { try { localStorage.setItem("bl_paiement", JSON.stringify({ plan: id, at: Date.now() })); } catch {} }
-    track("Clic abonnement", { formule: id, devise: cur, integre: embed, ...(promo ? { code_promo: promo.code } : {}) });
+    track("Clic abonnement", { formule: id, devise: curOf(cur), integre: embed, ...(promo ? { code_promo: promo.code } : {}) });
   };
   // embed : paiement intégré activé (PAY_EMBED=1 dans Vercel, ou /pro?paiement=test pour l'essayer avant). Sinon, lien de
   // paiement Whop habituel (avec le code promo), sans compte Basketlog à créer avant.
@@ -294,6 +295,7 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
           );
         })}
       </div>
+      {fxNote(L, cur) && <p className="pro-legal pro-fx">{fxNote(L, cur)}</p>}
       <p className="pro-legal">
         {L.t(
           <>Pro est sans engagement : tu arrêtes quand tu veux depuis la page Mon compte de ce site, et tu gardes l&apos;accès jusqu&apos;à la fin du mois payé. Une période commencée n&apos;est pas remboursée. Réservé aux 18 ans et plus. </>,

@@ -19,9 +19,9 @@ export async function generateMetadata() {
 
 // Contenu des formules (comme Visifoot). Les questions à l'IA ne figurent que si l'IA est configurée.
 const OFFRES = (ai) => [
-  ["Starter (plus proposé depuis le 19/11/2026, maintenu pour les abonnés en cours)", `${price("starter", "EUR", FR)} par mois (${price("starter", "USD", FR)} hors zone euro)`, "1 analyse réduite par jour : probabilités exactes, score projeté et stats clés du match", "Abonnement mensuel, renouvelé automatiquement chaque mois"],
-  ["Pro", `${price("pro", "EUR", FR)} par mois (${price("pro", "USD", FR)} hors zone euro)`, `Analyses complètes illimitées, actualités en temps réel${ai ? ", 1 question personnelle par jour à l'IA" : ""}`, "Abonnement mensuel, renouvelé automatiquement chaque mois. Premier abonnement Pro : essai de 3 jours à 1 € (1 $ hors zone euro) + taxes (payé à l'inscription ; essai gratuit de 3 jours pour les abonnements pris avant le 24/11/2026), puis prélèvement du prix mensuel à la fin de l'essai sauf résiliation avant ; un seul essai par compte"],
-  ["Lifetime", `${price("lifetime", "EUR", FR)} une seule fois (${price("lifetime", "USD", FR)} hors zone euro)`, `Analyses complètes illimitées, comme Pro${ai ? ", questions personnelles à l'IA illimitées dans la limite d'un usage raisonnable (50 par jour)" : ""}`, "Paiement unique, sans renouvellement, pour toute la durée d'exploitation du service"],
+  ["Starter (plus proposé depuis le 19/11/2026, maintenu pour les abonnés en cours)", `${price("starter", "EUR", FR)} par mois`, "1 analyse réduite par jour : probabilités exactes, score projeté et stats clés du match", "Abonnement mensuel, renouvelé automatiquement chaque mois"],
+  ["Pro", `${price("pro", "EUR", FR)} par mois (9,99 $ pour les abonnements souscrits en dollars avant le 23/11/2026)`, `Analyses complètes illimitées, actualités en temps réel${ai ? ", 1 question personnelle par jour à l'IA" : ""}`, "Abonnement mensuel, renouvelé automatiquement chaque mois. Premier abonnement Pro : essai de 3 jours à 1 € + taxes (payé à l'inscription ; essai gratuit de 3 jours pour les abonnements pris avant le 24/11/2026), puis prélèvement du prix mensuel à la fin de l'essai sauf résiliation avant ; un seul essai par compte"],
+  ["Lifetime", `${price("lifetime", "EUR", FR)} une seule fois`, `Analyses complètes illimitées, comme Pro${ai ? ", questions personnelles à l'IA illimitées dans la limite d'un usage raisonnable (50 par jour)" : ""}`, "Paiement unique, sans renouvellement, pour toute la durée d'exploitation du service"],
 ];
 
 function CGVFr() {
@@ -44,7 +44,7 @@ function CGVFr() {
           </table>
         </div>
         <p>Une analyse réduite (Starter) comprend les probabilités exactes, le score projeté et les stats clés du match. Une analyse complète (Pro et Lifetime) est la fiche détaillée d&apos;un match : argumentation du modèle, facteurs, tous les scénarios, stats comparées, joueurs à suivre, forme récente, confrontations, absences et actualités en temps réel. Les probabilités de victoire de la liste des matchs et l&apos;aperçu de chaque analyse restent gratuits pour tous.</p>
-        <p>Les prix sont en euros dans la zone euro et en dollars américains ailleurs, hors taxes. Basketlog n'ajoute aucun frais ({e.tva.charAt(0).toLowerCase() + e.tva.slice(1)}) ; la TVA ou la taxe de vente applicable dans ton pays est calculée et ajoutée par Whop, la plateforme de paiement, sur la page de paiement. Le prix total, taxes comprises et dans la monnaie de paiement, y est affiché avant validation. Les prix peuvent évoluer ; un changement de prix ne s&apos;applique jamais à une période déjà payée, et les abonnés sont prévenus avant toute hausse.</p>
+        <p>Les prix sont en euros, hors taxes. Hors zone euro, le site affiche aussi leur équivalent en dollars américains au taux de change du jour (Banque centrale européenne), à titre indicatif : le paiement se fait en euros et ta banque le convertit dans ta monnaie. Basketlog n'ajoute aucun frais ({e.tva.charAt(0).toLowerCase() + e.tva.slice(1)}) ; la TVA ou la taxe de vente applicable dans ton pays est calculée et ajoutée par Whop, la plateforme de paiement, sur la page de paiement. Le prix total, taxes comprises et dans la monnaie de paiement, y est affiché avant validation. Les prix peuvent évoluer ; un changement de prix ne s&apos;applique jamais à une période déjà payée, et les abonnés sont prévenus avant toute hausse.</p>
       </Sec>
 
       <Sec n={3} title="Commande et paiement">
@@ -108,9 +108,9 @@ function CGVFr() {
 }
 
 const OFFERS_EN = (ai) => [
-  ["Starter (no longer sold since 11/19/2026, kept for current subscribers)", `${price("starter", "EUR", EN)} per month (${price("starter", "USD", EN)} outside the euro area)`, "1 reduced analysis per day: exact probabilities, projected score and key stats for the game", "Monthly subscription, renewed automatically every month"],
-  ["Pro", `${price("pro", "EUR", EN)} per month (${price("pro", "USD", EN)} outside the euro area)`, `Unlimited full analyses, real-time news${ai ? ", 1 personal question a day to the AI" : ""}`, "Monthly subscription, renewed automatically every month. First Pro subscription: 3-day trial for €1 ($1 outside the euro area) + tax (paid at sign-up; 3-day free trial for subscriptions taken before 11/24/2026), then the monthly price is charged when the trial ends unless cancelled before; one trial per account"],
-  ["Lifetime", `${price("lifetime", "EUR", EN)} one-time (${price("lifetime", "USD", EN)} outside the euro area)`, `Unlimited full analyses, same as Pro${ai ? ", unlimited personal questions to the AI within fair use (50 per day)" : ""}`, "One-time payment, no renewal, for as long as the service is operated"],
+  ["Starter (no longer sold since 11/19/2026, kept for current subscribers)", `${price("starter", "EUR", EN)} per month`, "1 reduced analysis per day: exact probabilities, projected score and key stats for the game", "Monthly subscription, renewed automatically every month"],
+  ["Pro", `${price("pro", "EUR", EN)} per month ($9.99 for subscriptions taken in dollars before 11/23/2026)`, `Unlimited full analyses, real-time news${ai ? ", 1 personal question a day to the AI" : ""}`, "Monthly subscription, renewed automatically every month. First Pro subscription: 3-day trial for €1 + tax (paid at sign-up; 3-day free trial for subscriptions taken before 11/24/2026), then the monthly price is charged when the trial ends unless cancelled before; one trial per account"],
+  ["Lifetime", `${price("lifetime", "EUR", EN)} one-time`, `Unlimited full analyses, same as Pro${ai ? ", unlimited personal questions to the AI within fair use (50 per day)" : ""}`, "One-time payment, no renewal, for as long as the service is operated"],
 ];
 
 function CGVEn({ L }) {
@@ -134,7 +134,7 @@ function CGVEn({ L }) {
           </table>
         </div>
         <p>A reduced analysis (Starter) includes the exact probabilities, projected score and key stats for the game. A full analysis (Pro and Lifetime) is the detailed page for a game: the model&apos;s reasoning, factors, every scenario, stat comparison, players to watch, recent form, head-to-head, injuries and real-time news. Win probabilities in the games list and the preview of every analysis remain free for everyone.</p>
-        <p>Prices are in euros in the euro area and in US dollars elsewhere, excluding taxes. Basketlog adds no fees of its own (VAT not applicable); the VAT or sales tax that applies in your country is calculated and added by Whop, the payment platform, on the checkout page. The total price, taxes included and in the payment currency, is shown there before you confirm. Prices may change; a price change never applies to a period already paid, and subscribers are notified before any increase.</p>
+        <p>Prices are in euros, excluding taxes. Outside the euro area, the site also shows their US dollar equivalent at today's exchange rate (European Central Bank), for information only: you pay in euros and your bank converts the amount into your currency. Basketlog adds no fees of its own (VAT not applicable); the VAT or sales tax that applies in your country is calculated and added by Whop, the payment platform, on the checkout page. The total price, taxes included and in the payment currency, is shown there before you confirm. Prices may change; a price change never applies to a period already paid, and subscribers are notified before any increase.</p>
       </Sec>
 
       <Sec n={3} title="Ordering and payment">
@@ -198,9 +198,9 @@ function CGVEn({ L }) {
 }
 
 const OFFERS_ES = (ai) => [
-  ["Starter (ya no se vende desde el 19/11/2026, se mantiene para los suscriptores actuales)", `${price("starter", "EUR", ES)} al mes (${price("starter", "USD", ES)} fuera de la zona euro)`, "1 análisis reducido al día: probabilidades exactas, marcador proyectado y estadísticas clave del partido", "Suscripción mensual, renovada automáticamente cada mes"],
-  ["Pro", `${price("pro", "EUR", ES)} al mes (${price("pro", "USD", ES)} fuera de la zona euro)`, `Análisis completos ilimitados, noticias en tiempo real${ai ? ", 1 pregunta personal al día a la IA" : ""}`, "Suscripción mensual, renovada automáticamente cada mes. Primera suscripción Pro: prueba de 3 días por 1 € (1 $ fuera de la zona euro) + impuestos (pagada al suscribirse; prueba gratuita de 3 días para las suscripciones contratadas antes del 24/11/2026), luego se cobra el precio mensual al terminar la prueba salvo cancelación antes; una sola prueba por cuenta"],
-  ["Lifetime", `${price("lifetime", "EUR", ES)} en un solo pago (${price("lifetime", "USD", ES)} fuera de la zona euro)`, `Análisis completos ilimitados, como Pro${ai ? ", preguntas personales a la IA ilimitadas dentro de un uso razonable (50 al día)" : ""}`, "Pago único, sin renovación, mientras se preste el servicio"],
+  ["Starter (ya no se vende desde el 19/11/2026, se mantiene para los suscriptores actuales)", `${price("starter", "EUR", ES)} al mes`, "1 análisis reducido al día: probabilidades exactas, marcador proyectado y estadísticas clave del partido", "Suscripción mensual, renovada automáticamente cada mes"],
+  ["Pro", `${price("pro", "EUR", ES)} al mes (9,99 $ para las suscripciones contratadas en dólares antes del 23/11/2026)`, `Análisis completos ilimitados, noticias en tiempo real${ai ? ", 1 pregunta personal al día a la IA" : ""}`, "Suscripción mensual, renovada automáticamente cada mes. Primera suscripción Pro: prueba de 3 días por 1 € + impuestos (pagada al suscribirse; prueba gratuita de 3 días para las suscripciones contratadas antes del 24/11/2026), luego se cobra el precio mensual al terminar la prueba salvo cancelación antes; una sola prueba por cuenta"],
+  ["Lifetime", `${price("lifetime", "EUR", ES)} en un solo pago`, `Análisis completos ilimitados, como Pro${ai ? ", preguntas personales a la IA ilimitadas dentro de un uso razonable (50 al día)" : ""}`, "Pago único, sin renovación, mientras se preste el servicio"],
 ];
 
 function CGVEs({ L }) {
@@ -224,7 +224,7 @@ function CGVEs({ L }) {
           </table>
         </div>
         <p>Un análisis reducido (Starter) incluye las probabilidades exactas, el marcador proyectado y las estadísticas clave del partido. Un análisis completo (Pro y Lifetime) es la ficha detallada de un partido: argumentación del modelo, factores, todos los escenarios, estadísticas comparadas, jugadores a seguir, forma reciente, enfrentamientos, bajas y noticias en tiempo real. Las probabilidades de victoria de la lista de partidos y el avance de cada análisis siguen siendo gratis para todos.</p>
-        <p>Los precios están en euros en la zona euro y en dólares estadounidenses fuera de ella, sin impuestos. Basketlog no añade ningún gasto propio (IVA no aplicable); el IVA o el impuesto sobre las ventas de tu país lo calcula y lo añade Whop, la plataforma de pago, en la página de pago. El precio total, con impuestos y en la moneda de pago, se muestra allí antes de confirmar. Los precios pueden cambiar; un cambio de precio nunca se aplica a un periodo ya pagado, y los suscriptores reciben aviso antes de cualquier subida.</p>
+        <p>Los precios están en euros, sin impuestos. Fuera de la zona euro, el sitio muestra también su equivalente en dólares estadounidenses al tipo de cambio del día (Banco Central Europeo), a título indicativo: el pago se hace en euros y tu banco lo convierte a tu moneda. Basketlog no añade ningún gasto propio (IVA no aplicable); el IVA o el impuesto sobre las ventas de tu país lo calcula y lo añade Whop, la plataforma de pago, en la página de pago. El precio total, con impuestos y en la moneda de pago, se muestra allí antes de confirmar. Los precios pueden cambiar; un cambio de precio nunca se aplica a un periodo ya pagado, y los suscriptores reciben aviso antes de cualquier subida.</p>
       </Sec>
 
       <Sec n={3} title="Pedido y pago">

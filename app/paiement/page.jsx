@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import PayCheckout from "../../components/PayCheckout";
 import { getL } from "../../lib/lang-server";
 import { getCurrency } from "../../lib/currency-server";
-import { price } from "../../lib/pricing";
+import { price, curOf } from "../../lib/pricing";
 import { cleanCode, CODE_RE } from "../../lib/promo";
 import { PAY_PLANS } from "../../lib/whop-pay";
 
@@ -31,7 +31,7 @@ export default async function PaiementPage({ searchParams }) {
         <div className="pill-tag">Basketlog {name}</div>
         <h1>{L.t("Débloque l'analyse complète", "Unlock the full analysis", "Desbloquea el análisis completo", "Desbloqueie a análise completa")}</h1>
       </section>
-      <PayCheckout plan={plan} planName={name} priceText={price(plan, cur, L)} perText={per} code={code} />
+      <PayCheckout plan={plan} planName={name} priceText={curOf(cur) === "USD" ? `${price(plan, cur, L)} (${price(plan, "EUR", L)})` : price(plan, cur, L)} perText={per} code={code} />
     </main>
   );
 }
