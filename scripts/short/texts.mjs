@@ -11,8 +11,8 @@ const data = JSON.parse(readFileSync(file, "utf8"));
 const games = data.games || [];
 if (!games.length) { console.log(JSON.stringify({ empty: true })); process.exit(0); }
 
-const PROMO = "🎁 Full analysis: 3 days free, then €9.99/mo (+ tax) 👉 basketlog-app.com/en/pro";
-const PROMO_LONG = "🎁 Full analysis: 3 days free, then €9.99/mo (+ tax) 👉 https://basketlog-app.com/en/pro";
+const PROMO = "🎁 Full analysis: 3 days for €1, then €9.99/mo (+ tax) 👉 basketlog-app.com/en/pro";
+const PROMO_LONG = "🎁 Full analysis: 3 days for €1, then €9.99/mo (+ tax) 👉 https://basketlog-app.com/en/pro";
 const pct = (p) => Math.round(p * 100);
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const day = `${MONTHS[Number(data.d.slice(4, 6)) - 1]} ${Number(data.d.slice(6, 8))}`;

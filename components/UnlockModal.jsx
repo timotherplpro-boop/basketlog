@@ -119,7 +119,7 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
   const foot = state !== "visitor" && tier === "starter"
     ? L.t("Accès instantané avec Pro, analyses illimitées", "Instant access with Pro, unlimited analyses", "Acceso inmediato con Pro, análisis ilimitados", "Acesso imediato com o Pro, análises ilimitadas")
     : trial
-      ? L.t(`${PRO_TRIAL_DAYS} jours offerts, puis 9,99 €/mois + taxes. Résiliable à tout moment.`, `${PRO_TRIAL_DAYS} days free, then €9.99/mo (+ tax). Cancel anytime.`, `${PRO_TRIAL_DAYS} días gratis, luego 9,99 €/mes + impuestos. Cancela cuando quieras.`, `${PRO_TRIAL_DAYS} dias grátis, depois 9,99 €/mês + impostos. Cancele quando quiser.`)
+      ? L.t(`${PRO_TRIAL_DAYS} jours à 1 €, puis 9,99 €/mois + taxes. Résiliable à tout moment.`, `${PRO_TRIAL_DAYS} days for €1, then €9.99/mo (+ tax). Cancel anytime.`, `${PRO_TRIAL_DAYS} días por 1 €, luego 9,99 €/mes + impuestos. Cancela cuando quieras.`, `${PRO_TRIAL_DAYS} dias por 1 €, depois 9,99 €/mês + impostos. Cancele quando quiser.`)
       : L.t("Accès instantané après l'abonnement", "Instant access once you subscribe", "Acceso inmediato al suscribirte", "Acesso imediato ao assinar");
 
   return createPortal(
@@ -155,7 +155,7 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
           </div>
         )}
 
-        <a href={href} className="btn-solid ulk-cta" onClick={onCta}>{trial ? `🎁 ${L.t(`Essai gratuit ${PRO_TRIAL_DAYS} jours`, `Start ${PRO_TRIAL_DAYS}-day free trial`, `Prueba gratis ${PRO_TRIAL_DAYS} días`, `Teste grátis por ${PRO_TRIAL_DAYS} dias`)}` : L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo", "Desbloquear a análise completa")}</a>
+        <a href={href} className="btn-solid ulk-cta" onClick={onCta}>{trial ? `🎁 ${L.t(`Essai ${PRO_TRIAL_DAYS} jours à 1 €`, `Start ${PRO_TRIAL_DAYS}-day trial for €1`, `Prueba ${PRO_TRIAL_DAYS} días por 1 €`, `Teste ${PRO_TRIAL_DAYS} dias por 1 €`)}` : L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo", "Desbloquear a análise completa")}</a>
         <a href={`${String(href || "/pro").split("#")[0]}#pass`} className="gate-pass" onClick={() => track("Clic pass 24 h", { source: "fenetre" })}>
           {L.t("ou juste pour ce soir : pass 24 h à 1,99 € →", "or just for tonight: 24-hour pass for €1.99 →", "o solo para esta noche: pase 24 h por 1,99 € →", "ou só para esta noite: passe 24 h por 1,99 € →")}
         </a>

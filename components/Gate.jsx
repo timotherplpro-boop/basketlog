@@ -113,14 +113,14 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
   const free = tier === "compte"; // compte gratuit : aucune analyse complète, comme Visifoot
   // Essai Pro (20/11/2026) : sur les écrans verrouillés, le bouton annonce l'essai gratuit plutôt qu'un simple « Débloquer ».
   const trial = PRO_TRIAL_DAYS > 0 && tier !== "starter";
-  const trialCta = L.t(`Essai gratuit ${PRO_TRIAL_DAYS} jours`, `Start ${PRO_TRIAL_DAYS}-day free trial`, `Prueba gratis ${PRO_TRIAL_DAYS} días`, `Teste grátis por ${PRO_TRIAL_DAYS} dias`);
+  const trialCta = L.t(`Essai ${PRO_TRIAL_DAYS} jours à 1 €`, `Start ${PRO_TRIAL_DAYS}-day trial for €1`, `Prueba ${PRO_TRIAL_DAYS} días por 1 €`, `Teste ${PRO_TRIAL_DAYS} dias por 1 €`);
   // Pass 24 h (21/11/2026) : lien discret sous le bouton d'essai, vers la carte du pass sur /pro (case des CGV à cocher là-bas).
   const passLink = (source) => (
     <Link href={`${L.href("/pro")}#pass`} className="gate-pass" onClick={() => { rememberHere(); track("Clic pass 24 h", { source }); }}>
       {L.t("ou juste pour ce soir : pass 24 h à 1,99 € →", "or just for tonight: 24-hour pass for €1.99 →", "o solo para esta noche: pase 24 h por 1,99 € →", "ou só para esta noite: passe 24 h por 1,99 € →")}
     </Link>
   );
-  const trialLine = L.t(`${PRO_TRIAL_DAYS} jours offerts, puis 9,99 €/mois + taxes. Résiliable à tout moment.`, `${PRO_TRIAL_DAYS} days free, then €9.99/mo (+ tax). Cancel anytime.`, `${PRO_TRIAL_DAYS} días gratis, luego 9,99 €/mes + impuestos. Cancela cuando quieras.`, `${PRO_TRIAL_DAYS} dias grátis, depois 9,99 €/mês + impostos. Cancele quando quiser.`);
+  const trialLine = L.t(`${PRO_TRIAL_DAYS} jours à 1 €, puis 9,99 €/mois + taxes. Résiliable à tout moment.`, `${PRO_TRIAL_DAYS} days for €1, then €9.99/mo (+ tax). Cancel anytime.`, `${PRO_TRIAL_DAYS} días por 1 €, luego 9,99 €/mes + impuestos. Cancela cuando quieras.`, `${PRO_TRIAL_DAYS} dias por 1 €, depois 9,99 €/mês + impostos. Cancele quando quiser.`);
 
   return (
     <div className="gated locked ar-locked">

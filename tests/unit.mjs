@@ -273,7 +273,7 @@ export async function unit() {
   eq("Comptes : l'état public ne montre aucun code d'accès", [socPub.includes("secret"), socPub.includes("@basketlog_es"), socPub.includes("basketlog.bsky.social")], [false, true, true]);
 
   // --- Offre Pro (20/11/2026) : ligne promo des posts du jour et post de lancement
-  eq("Promo : Telegram du jour avec l'essai 3 jours et le lien /pro de la langue", [telegramText(socPicks, "fr", { d: SD }).includes("3 jours offerts, puis Pro à 9,99 €/mois + taxes"), telegramText(socPicks, "en", { d: SD }).includes("https://basketlog-app.com/en/pro")], [true, true]);
+  eq("Promo : Telegram du jour avec l'essai 3 jours et le lien /pro de la langue", [telegramText(socPicks, "fr", { d: SD }).includes("3 jours à 1 €, puis Pro à 9,99 €/mois + taxes"), telegramText(socPicks, "en", { d: SD }).includes("https://basketlog-app.com/en/pro")], [true, true]);
   const lp = launchPosts();
   eq("Lancement : trois langues, Bluesky ≤ 300, lien /pro cliquable, prix et taxes", Object.keys(lp).map((l) => [l, graphemes(lp[l].bluesky.text) <= BSKY_MAX, lp[l].bluesky.facets[0].features[0].uri.endsWith("/pro"), /9,99|9\.99/.test(lp[l].bluesky.text) && /tax|impuestos/.test(lp[l].bluesky.text)]), [["en", true, true, true], ["fr", true, true, true], ["es", true, true, true]]);
 

@@ -45,9 +45,9 @@ export function ExitOfferBody({ offer, href, onAccept, onDecline, titleId = "exo
     return (
       <div className="exo">
         <span className="exo-eyebrow">{L.t("Avant de partir", "Before you go", "Antes de irte", "Antes de você ir")}</span>
-        <h3 id={titleId}>{L.t(`Essaie Pro gratuitement pendant ${trial} jours`, `Try Pro free for ${trial} days`, `Prueba Pro gratis durante ${trial} días`, `Teste o Pro grátis por ${trial} dias`)}</h3>
-        <p className="exo-sub">{L.t("Toutes les analyses complètes, sur tous les matchs. Rien à payer aujourd'hui, puis 9,99 €/mois + taxes. Résiliable à tout moment avant la fin de l'essai.", "Every full analysis, on every game. Nothing to pay today, then €9.99/mo (+ tax). Cancel anytime before the trial ends.", "Todos los análisis completos, en todos los partidos. Nada que pagar hoy, luego 9,99 €/mes + impuestos. Cancela cuando quieras antes de que acabe la prueba.", "Todas as análises completas, em todos os jogos. Nada a pagar hoje, depois 9,99 €/mês + impostos. Cancele quando quiser antes do fim do teste.")}</p>
-        <a href={href} className="btn-solid exo-cta" onClick={onAccept}>🎁 {L.t("Démarrer l'essai gratuit", "Start the free trial", "Empezar la prueba gratis", "Começar o teste grátis")}</a>
+        <h3 id={titleId}>{L.t(`Essaie Pro ${trial} jours pour 1 €`, `Try Pro for ${trial} days for €1`, `Prueba Pro ${trial} días por 1 €`, `Teste o Pro por ${trial} dias por 1 €`)}</h3>
+        <p className="exo-sub">{L.t("Toutes les analyses complètes, sur tous les matchs. 1 € aujourd'hui (+ taxes), puis 9,99 €/mois + taxes. Résiliable à tout moment avant la fin de l'essai.", "Every full analysis, on every game. €1 today (+ tax), then €9.99/mo (+ tax). Cancel anytime before the trial ends.", "Todos los análisis completos, en todos los partidos. 1 € hoy (+ impuestos), luego 9,99 €/mes + impuestos. Cancela cuando quieras antes de que acabe la prueba.", "Todas as análises completas, em todos os jogos. 1 € hoje (+ impostos), depois 9,99 €/mês + impostos. Cancele quando quiser antes do fim do teste.")}</p>
+        <a href={href} className="btn-solid exo-cta" onClick={onAccept}>🎁 {L.t("Démarrer l'essai à 1 €", "Start the €1 trial", "Empezar la prueba por 1 €", "Começar o teste por 1 €")}</a>
         <button type="button" className="exo-no" onClick={onDecline}>{L.t("Non merci", "No thanks", "No, gracias", "Não, obrigado")}</button>
       </div>
     );
