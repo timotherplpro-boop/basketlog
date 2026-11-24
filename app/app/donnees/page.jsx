@@ -85,6 +85,18 @@ export default async function DataPage() {
       </section>
       <QuickFaq L={L} items={faq} />
       <p className="team-rec"><Link href={L.href("/methode")}>{L.t("La méthode", "The method", "El método", "A metodologia")}</Link>{" · "}<Link href={L.href("/app/bilan")}>{L.t("Le bilan public", "The public track record", "El balance público", "O desempenho público")}</Link></p>
+      {/* Fiche « Dataset » : rend l'API et les fichiers CSV trouvables dans Google Dataset Search. */}
+      <JsonLd data={{
+        "@context": "https://schema.org", "@type": "Dataset",
+        name: "Basketlog NBA win probabilities (daily, free API)",
+        description: "Pre-game win probability and projected score for every NBA game of the day from the Basketlog model, as free JSON (no key, CORS enabled), plus season files in CSV with final scores and whether the favorite won.",
+        url: `${SITE}${L.href("/app/donnees")}`,
+        creator: { "@id": `${SITE}/#organisation` },
+        license: "https://creativecommons.org/licenses/by/4.0/",
+        isAccessibleForFree: true,
+        keywords: ["NBA", "basketball", "win probability", "predictions", "sports analytics", "API"],
+        distribution: [{ "@type": "DataDownload", encodingFormat: "application/json", contentUrl: `${SITE}/api/v1/predictions` }],
+      }} />
       <JsonLd data={{ "@context": "https://schema.org", "@type": "WebAPI", name: "Basketlog NBA predictions API", url: `${SITE}${L.href("/app/donnees")}`, documentation: `${SITE}${L.href("/app/donnees")}`, termsOfService: "https://creativecommons.org/licenses/by/4.0/", provider: { "@id": `${SITE}/#organisation` } }} />
     </main>
   );

@@ -37,7 +37,7 @@ export async function generateMetadata({ params }) {
   const s = summarize(list), mn = monthName(mois, L);
   const ongoing = mois === `${nbaToday().slice(0, 4)}-${nbaToday().slice(4, 6)}`;
   return pageMeta({
-    title: L.t(`Pronostics NBA ${mn} : ${pctOf(s.pct, L)} de réussite (${s.ok} sur ${s.n})`, `NBA predictions, ${mn}: ${pctOf(s.pct, L)} correct (${s.ok} of ${s.n})`, `Pronósticos NBA ${mn}: ${pctOf(s.pct, L)} de acierto (${s.ok} de ${s.n})`, `Palpites NBA ${mn}: ${pctOf(s.pct, L)} de acerto (${s.ok} de ${s.n})`),
+    title: L.t(`Pronostics NBA ${mn} : ${pctOf(s.pct, L)} de réussite (${s.ok} sur ${s.n})`, `NBA prediction accuracy, ${mn}: ${pctOf(s.pct, L)} correct (${s.ok} of ${s.n})`, `Pronósticos NBA ${mn}: ${pctOf(s.pct, L)} de acierto (${s.ok} de ${s.n})`, `Palpites NBA ${mn}: ${pctOf(s.pct, L)} de acerto (${s.ok} de ${s.n})`),
     description: L.t(
       `Bilan des pronostics NBA Basketlog en ${mn}${ongoing ? " (mois en cours)" : ""} : ${s.ok} favoris gagnants sur ${s.n} matchs, jour par jour, avec les plus grosses surprises.`,
       `Basketlog NBA prediction record for ${mn}${ongoing ? " (month in progress)" : ""}: the favorite won ${s.ok} of ${s.n} games, day by day, with the biggest upsets.`,
