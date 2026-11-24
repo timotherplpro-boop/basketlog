@@ -39,6 +39,10 @@
     {
       "path": "/api/cron/essai",
       "schedule": "25 14 * * *"
+    },
+    {
+      "path": "/api/cron/relance",
+      "schedule": "43 10 * * *"
     }
   ]
 }
