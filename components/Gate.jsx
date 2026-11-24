@@ -114,12 +114,6 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
   // Essai Pro (20/11/2026) : sur les écrans verrouillés, le bouton annonce l'essai gratuit plutôt qu'un simple « Débloquer ».
   const trial = PRO_TRIAL_DAYS > 0 && tier !== "starter";
   const trialCta = L.t(`Essai ${PRO_TRIAL_DAYS} jours à 1 €`, `Start ${PRO_TRIAL_DAYS}-day trial for €1`, `Prueba ${PRO_TRIAL_DAYS} días por 1 €`, `Teste ${PRO_TRIAL_DAYS} dias por 1 €`);
-  // Pass 24 h (21/11/2026) : lien discret sous le bouton d'essai, vers la carte du pass sur /pro (case des CGV à cocher là-bas).
-  const passLink = (source) => (
-    <Link href={`${L.href("/pro")}#pass`} className="gate-pass" onClick={() => { rememberHere(); track("Clic pass 24 h", { source }); }}>
-      {L.t("ou juste pour ce soir : pass 24 h à 1,99 € →", "or just for tonight: 24-hour pass for €1.99 →", "o solo para esta noche: pase 24 h por 1,99 € →", "ou só para esta noite: passe 24 h por 1,99 € →")}
-    </Link>
-  );
   const trialLine = L.t(`${PRO_TRIAL_DAYS} jours à 1 €, puis 9,99 €/mois + taxes. Résiliable à tout moment.`, `${PRO_TRIAL_DAYS} days for €1, then €9.99/mo (+ tax). Cancel anytime.`, `${PRO_TRIAL_DAYS} días por 1 €, luego 9,99 €/mes + impuestos. Cancela cuando quieras.`, `${PRO_TRIAL_DAYS} dias por 1 €, depois 9,99 €/mês + impostos. Cancele quando quiser.`);
 
   return (
@@ -163,7 +157,6 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
                   <p>{contents} {L.t("Elle est incluse dans Pro et Lifetime.", "It comes with Pro and Lifetime.", "Está incluido en Pro y Lifetime.", "Está incluída no Pro e no Lifetime.")}</p>
                   <Link href={L.href("/pro")} className="btn-solid" onClick={() => { rememberHere(); track("Clic Passer Pro", { source: "visiteur" }); }}>{trial ? `🎁 ${trialCta}` : <>🔓 {L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo", "Desbloquear a análise completa")}</>}</Link>
                   {trial && <small className="gate-trial">{trialLine}</small>}
-                  {passLink("visiteur")}
                   <button type="button" className="gate-login" onClick={() => openAuth({ mode: "connexion", source: "analyse" })}>{L.t("Déjà abonné ? Se connecter", "Already subscribed? Log in", "¿Ya estás suscrito? Inicia sesión", "Já é assinante? Entre")}</button>
                 </>
               ) : (
@@ -173,7 +166,6 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
                     : L.t("Elle est incluse dans Pro et Lifetime.", "It comes with Pro and Lifetime.", "Está incluido en Pro y Lifetime.", "Está incluída no Pro e no Lifetime.")}</p>
                   <Link href={L.href("/pro")} className="btn-solid" onClick={() => { rememberHere(); track("Clic Passer Pro", { source: free ? "compte_gratuit" : "limite" }); }}>{trial ? `🎁 ${trialCta}` : <>🔓 {L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo", "Desbloquear a análise completa")}</>}</Link>
                   {trial && <small className="gate-trial">{trialLine}</small>}
-                  {passLink(free ? "compte_gratuit" : "limite")}
                   {!free && <small className="gate-reset">{L.t("Ou reviens demain : le compteur repart à minuit.", "Or come back tomorrow: the counter resets at midnight (Paris time).", "O vuelve mañana: el contador se reinicia a medianoche (hora de París).", "Ou volte amanhã: o contador zera à meia-noite (horário de Paris).")}</small>}
                   <a href={`/api/whop/login?next=${here}`} className="gate-login" onClick={() => track("Connexion Whop", { etape: "actualiser", source: "analyse_bloquee" })}>{L.t("Tu viens de payer ? Activer mon abonnement", "Just paid? Activate my subscription", "¿Acabas de pagar? Activar mi suscripción", "Acabou de pagar? Ativar minha assinatura")}</a>
                 </>

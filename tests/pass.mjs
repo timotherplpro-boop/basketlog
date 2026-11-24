@@ -14,6 +14,5 @@ export async function passTests({ ok, ko, eq }) {
   const both = buildPlans([normalizeMembership(raw(), ids), normalizeMembership({ ...raw({ id: "mem_2", plan: { id: "plan_pro" }, renewal_price: 9.99 }), current_period_end: "2026-12-21T11:00:00Z" }, ids)], now);
   eq("Pass + Pro : pas d'alerte de doublon", both.map((x) => [x.state, x.duplicate]), [["renews", false], ["pass", false]]);
   eq("Prix 1,99 € et 1,99 $", [PRICES.EUR.pass, PRICES.USD.pass], [1.99, 1.99]);
-  eq("Liens de paiement du pass", [planIdOf(CHECKOUT_EUR.pass), planIdOf(CHECKOUT_USD.pass)], PASS_PLAN_IDS);
-  if (PAY_PLANS.includes("pass")) ok("Paiement intégré : formule « pass » acceptée"); else ko("PAY_PLANS", "pass absent");
+  eq("Pass retiré du site (24/11) : plus de lien de paiement ni de formule « pass »", [CHECKOUT_EUR.pass, CHECKOUT_USD.pass, PAY_PLANS.includes("pass")], [undefined, undefined, false]);
 }
