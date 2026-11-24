@@ -268,6 +268,7 @@ export async function unit() {
   eq("Comptes : rien de branché sans variables, publication coupée", [socNone.enabled, socNone.telegram, socNone.bluesky], [false, null, null]);
   const cfgFull = socialConfig({ SOCIAL_ENABLED: " 1 ", TELEGRAM_BOT_TOKEN: "123:secret-telegram", TELEGRAM_CHAT_FR: "@basketlog", TELEGRAM_CHAT_ES: " @basketlog_es ", BLUESKY_HANDLE: "@basketlog.bsky.social", BLUESKY_APP_PASSWORD: "abcd-efgh-secret", BLUESKY_LANGS: "fr, de ,es" });
   eq("Comptes : chaînes par langue, nom Bluesky sans @, langues inconnues ignorées", [cfgFull.enabled, cfgFull.telegram.chats, cfgFull.bluesky.handle, cfgFull.bluesky.langs], [true, { fr: "@basketlog", es: "@basketlog_es" }, "basketlog.bsky.social", ["fr", "es"]]);
+  eq("Bluesky : français seul par défaut (24/11/2026)", socialConfig({ SOCIAL_ENABLED: "1", BLUESKY_APP_PASSWORD: "x" }).bluesky.langs, ["fr"]);
   eq("Comptes : sans code d'accès = non branché (Telegram sans code, Bluesky sans mot de passe)", [socialConfig({ TELEGRAM_CHAT_FR: "@x" }).telegram, socialConfig({ BLUESKY_HANDLE: "a" }).bluesky], [null, null]);
   eq("Comptes : noms par défaut (@basketlog en français, basketlog.bsky.social) quand seuls les codes sont donnés", [socialConfig({ TELEGRAM_BOT_TOKEN: "x" }).telegram.chats, socialConfig({ BLUESKY_APP_PASSWORD: "y" }).bluesky.handle], [{ fr: "@basketlog" }, "basketlog.bsky.social"]);
   const socPub = JSON.stringify(socialStatus(cfgFull));
@@ -280,7 +281,7 @@ export async function unit() {
 
   // --- Profil Bluesky : texte (lib/social.js) et écriture (lib/social-send.js, appels simulés)
   const bp = blueskyProfile();
-  eq(`Profil Bluesky : nom (${BSKY_NAME_MAX}) et présentation (${BSKY_BIO_MAX}) dans les limites, en trois langues`, [bp.displayName, graphemes(bp.displayName) <= BSKY_NAME_MAX, graphemes(bp.description) <= BSKY_BIO_MAX, bp.description.split("\n").length], ["Basketlog", true, true, 4]);
+  eq(`Profil Bluesky : nom (${BSKY_NAME_MAX}) et présentation (${BSKY_BIO_MAX}) dans les limites, en français seulement (24/11/2026)`, [bp.displayName, graphemes(bp.displayName) <= BSKY_NAME_MAX, graphemes(bp.description) <= BSKY_BIO_MAX, bp.description.split("\n").length, /Free|gratis/.test(bp.description)], ["Basketlog", true, true, 3, false]);
   eq("Profil Bluesky : adresse du site avec https:// (cliquable) et logo du site", [bp.description.endsWith("https://basketlog-app.com"), bp.avatarUrl], [true, "https://basketlog-app.com/icons/icon-512.png"]);
   eq("Profil Bluesky : ni vocabulaire de paris, ni « IA »", /\b(paris|parier|mise|cotes?|bets?|betting|odds|apuestas?|cuotas?)\b/i.test(bp.description) || /\bIA\b/.test(bp.description), false);
   const realFetch = globalThis.fetch;

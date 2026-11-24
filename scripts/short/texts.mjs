@@ -1,7 +1,7 @@
 // Textes du Short quotidien et des posts « favoris du soir », tirés du même data.json que la vidéo
 // (GET https://basketlog-app.com/api/short). Créé le 21/11/2026.
-// Usage : node texts.mjs data.json [lien_du_short_youtube]  → JSON { title, description, x, long, tiktok_en, tiktok_fr }
-// Règles de Tim : pas de vocabulaire de paris, jamais « AI » ni « IA », liens anglais vers basketlog-app.com/en,
+// Usage : node texts.mjs data.json [lien_du_short_youtube]  → JSON { lang, title, description, x, long, tiktok_fr } (+ x_en, title_en, tiktok_en)
+// Règles de Tim : pas de vocabulaire de paris, jamais « AI » ni « IA », textes et liens en français depuis le 24/11/2026,
 // ligne de l'offre Pro mot pour mot (validée le 20/11/2026), jamais raccourcie.
 import { readFileSync } from "node:fs";
 
@@ -11,24 +11,30 @@ const data = JSON.parse(readFileSync(file, "utf8"));
 const games = data.games || [];
 if (!games.length) { console.log(JSON.stringify({ empty: true })); process.exit(0); }
 
-const PROMO = "🎁 Full analysis: 3 days for €1, then €9.99/mo (+ tax) 👉 basketlog-app.com/en/pro";
-const PROMO_LONG = "🎁 Full analysis: 3 days for €1, then €9.99/mo (+ tax) 👉 https://basketlog-app.com/en/pro";
+// 24/11/2026 : Tim repasse tous ses réseaux en français (« tout ») : posts X / Facebook / LinkedIn, titre et description du
+// Short YouTube en français, liens vers la version française du site. Les textes anglais restent en *_en au besoin.
+const PROMO = "🎁 Analyse complète : 3 jours à 1 €, puis 9,99 €/mois (+ taxes) 👉 basketlog-app.com/pro";
+const PROMO_LONG = "🎁 Analyse complète : 3 jours à 1 €, puis 9,99 €/mois (+ taxes) 👉 https://basketlog-app.com/pro";
+const PROMO_EN = "🎁 Full analysis: 3 days for €1, then €9.99/mo (+ tax) 👉 basketlog-app.com/en/pro";
 const pct = (p) => Math.round(p * 100);
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MOIS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
 const day = `${MONTHS[Number(data.d.slice(4, 6)) - 1]} ${Number(data.d.slice(6, 8))}`;
+const jour = `${Number(data.d.slice(6, 8))} ${MOIS[Number(data.d.slice(4, 6)) - 1]}`;
 
 const rows = games.map((g) => {
   const homeFav = g.pHome >= 0.5;
   const fav = homeFav ? g.home : g.away;
   const opp = homeFav ? g.away : g.home;
   const p = pct(Math.max(g.pHome, 1 - g.pHome));
-  return { g, fav, opp, p, line: `${fav.short} ${p}% ${homeFav ? "vs" : "at"} ${opp.short}`, gap: Math.abs(g.pHome - 0.5) };
+  return { g, fav, opp, p, line: `${fav.short} ${p}% ${homeFav ? "vs" : "at"} ${opp.short}`, ligne: `${fav.short} ${p} % ${homeFav ? "vs" : "@"} ${opp.short}`, gap: Math.abs(g.pHome - 0.5) };
 });
 const byFav = [...rows].sort((a, b) => b.p - a.p);
 const top = byFav[0];
 const closest = [...rows].sort((a, b) => a.gap - b.gap)[0];
 const n = games.length;
 const gamesWord = n === 1 ? "game" : "games";
+const matchsMot = n === 1 ? "Le match" : `Les ${n} matchs`;
 
 // Longueur comptée comme X : une adresse = 23, un emoji = 2.
 const xLen = (s) => {
@@ -40,10 +46,10 @@ const xLen = (s) => {
 
 function xPost(nFav, withClosest, withQuestion) {
   const favs = byFav.slice(0, nFav);
-  const parts = ["Tonight's biggest NBA favorites 🏀", "", ...favs.map((r) => r.line)];
-  if (withClosest && closest && !favs.includes(closest)) parts.push("", `Closest game: ${closest.line}`);
-  parts.push("", `All ${n} ${gamesWord}, free → basketlog-app.com/en/app/matchs`);
-  if (withQuestion) parts.push("Who's your pick tonight? 👇");
+  const parts = ["Les plus gros favoris NBA de cette nuit 🏀", "", ...favs.map((r) => r.ligne)];
+  if (withClosest && closest && !favs.includes(closest)) parts.push("", `Match le plus serré : ${closest.ligne}`);
+  parts.push("", `${matchsMot}, gratuit${n === 1 ? "" : "s"} → basketlog-app.com/app/matchs`);
+  if (withQuestion) parts.push("Qui gagne selon toi ? 👇");
   parts.push("", PROMO);
   return parts.join("\n");
 }
@@ -53,34 +59,44 @@ for (let k = Math.min(4, n); k >= 1; k--) {
 }
 const x = xCandidates.find((t) => xLen(t) <= 280) || xPost(1, false, false);
 
+// Ancienne version anglaise (avant le 24/11/2026), gardée au besoin.
+function xPostEn(nFav) {
+  const parts = ["Tonight's biggest NBA favorites 🏀", "", ...byFav.slice(0, nFav).map((r) => r.line), "", `All ${n} ${gamesWord}, free → basketlog-app.com/en/app/matchs`, "", PROMO_EN];
+  return parts.join("\n");
+}
+const x_en = [4, 3, 2, 1].map((k) => xPostEn(Math.min(k, n))).find((t) => xLen(t) <= 280) || xPostEn(1);
+
 const ln = data.lastNight;
-const lastNightLine = ln && ln.n && ln.ok / ln.n >= 0.7 ? `Last night: ${ln.ok}/${ln.n} favorites won ✅` : null;
-const longParts = ["Tonight's biggest NBA favorites 🏀", "", ...byFav.slice(0, Math.min(4, n)).map((r) => r.line)];
-if (closest && n > 4 && !byFav.slice(0, 4).includes(closest)) longParts.push("", `Closest game: ${closest.line}`);
-if (lastNightLine) longParts.push("", lastNightLine);
-longParts.push("", `Win probabilities for all ${n} ${gamesWord}, free → https://basketlog-app.com/en/app/matchs`);
-if (shortUrl) longParts.push(`Tonight's games in 15 seconds ▶️ ${shortUrl}`);
-longParts.push("", "Who's your pick tonight? 👇", "", PROMO_LONG);
+const bilanNuit = ln && ln.n && ln.ok / ln.n >= 0.7 ? `La nuit dernière : ${ln.ok}/${ln.n} favoris ont gagné ✅` : null;
+const longParts = ["Les plus gros favoris NBA de cette nuit 🏀", "", ...byFav.slice(0, Math.min(4, n)).map((r) => r.ligne)];
+if (closest && n > 4 && !byFav.slice(0, 4).includes(closest)) longParts.push("", `Match le plus serré : ${closest.ligne}`);
+if (bilanNuit) longParts.push("", bilanNuit);
+longParts.push("", `Probabilités de victoire des ${n} match${n === 1 ? "" : "s"}, gratuites → https://basketlog-app.com/app/matchs`);
+if (shortUrl) longParts.push(`Les matchs de cette nuit en 15 secondes ▶️ ${shortUrl}`);
+longParts.push("", "Qui gagne selon toi ? 👇", "", PROMO_LONG);
 
 const description = [
-  "Win probability for every NBA game tonight, saved before tip-off:",
-  ...rows.map((r) => `• ${r.g.away.short} @ ${r.g.home.short}: ${r.fav.short} ${r.p}%`),
+  "Probabilité de victoire de chaque match NBA de cette nuit, enregistrée avant le coup d'envoi :",
+  ...rows.map((r) => `• ${r.g.away.short} @ ${r.g.home.short} : ${r.fav.short} ${r.p} %`),
   "",
-  "Every game, free 👉 https://basketlog-app.com/en/app/matchs",
+  "Tous les matchs, gratuits 👉 https://basketlog-app.com/app/matchs",
   PROMO_LONG,
   "",
-  "#NBA #basketball #shorts #Basketlog",
+  "#NBA #basket #nbafrance #shorts #Basketlog",
 ].join("\n");
 
 const out = {
   d: data.d,
-  title: `NBA win probabilities tonight (${day}): ${top.fav.short} ${top.p}%? 🏀 | Basketlog #shorts`,
+  lang: "fr", // vidéo du Short à publier sur YouTube : la version française (render.mjs data.json fr sortie.mp4)
+  title: `Probabilités NBA de cette nuit (${jour}) : ${top.fav.short} ${top.p} % ? 🏀 | Basketlog #shorts`,
   description,
   x,
   xLength: xLen(x),
   long: longParts.join("\n"),
+  tiktok_fr: `Les probabilités NBA de cette nuit 🏀 Plus gros favori : ${top.fav.short} ${top.p} %. Qui gagne selon toi ? 👇\nTous les matchs gratuits 👉 basketlog-app.com\n#NBA #basket #basketball #nbafrance`,
+  x_en,
+  title_en: `NBA win probabilities tonight (${day}): ${top.fav.short} ${top.p}%? 🏀 | Basketlog #shorts`,
   tiktok_en: `NBA win probabilities tonight 🏀 Biggest favorite: ${top.fav.short} ${top.p}%. Who's your pick? 👇\nEvery game free 👉 basketlog-app.com/en\n#NBA #nbatiktok #basketball #nbanews`,
-  tiktok_fr: `Les probabilités NBA de ce soir 🏀 Plus gros favori : ${top.fav.short} ${top.p} %. Qui gagne selon toi ? 👇\nTous les matchs gratuits 👉 basketlog-app.com\n#NBA #basket #basketball #nbafrance`,
 };
-if (out.title.length > 100) out.title = `NBA win probabilities tonight (${day}) 🏀 | Basketlog #shorts`;
+if (out.title.length > 100) out.title = `Probabilités NBA de cette nuit (${jour}) 🏀 | Basketlog #shorts`;
 console.log(JSON.stringify(out, null, 2));
