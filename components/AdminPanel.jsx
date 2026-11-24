@@ -31,7 +31,7 @@ function formules(L) {
   const monthly = t("par mois", "per month", "al mes", "por mês");
   const once = t("une seule fois", "one time only", "en un solo pago", "em pagamento único");
   const noCommit = t("Sans engagement, résiliable depuis Whop", "No commitment, cancel anytime from Whop", "Sin permanencia, se puede cancelar desde Whop", "Sem fidelidade, pode cancelar pela Whop");
-  const both = (plan, tail) => `${price(plan, "EUR", L)} ${tail}`; // euros pour tout le monde depuis le 23/11/2026
+  const both = (plan, tail) => `${price(plan, "EUR", L)} ${tail} · ${price(plan, "USD", L)} ${t("hors zone euro", "outside the euro area", "fuera de la zona euro", "fora da zona do euro")}`;
   return [
     { id: null, name: t("Visiteur", "Visitor", "Visitante", "Visitante"), price: t("Gratuit, sans compte", "Free, no account", "Gratis, sin cuenta", "Grátis, sem conta"), lines: [
       t("Probabilités de victoire et chiffres clés de chaque match", "Win probabilities and key figures for every game", "Probabilidades de victoria y cifras clave de cada partido", "Probabilidades de vitória e números-chave de cada jogo"),

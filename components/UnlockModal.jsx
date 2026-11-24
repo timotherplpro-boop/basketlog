@@ -10,7 +10,8 @@ import { localStore } from "../lib/safe-store";
 import { useL } from "./LangProvider";
 import { useFocusTrap } from "./useFocusTrap";
 import { ExitOfferBody, useExitOffer } from "./ExitOffer";
-import { PRO_TRIAL_DAYS } from "../lib/pricing";
+import { PRO_TRIAL_DAYS, trialTexts } from "../lib/pricing";
+import { useCurrency } from "../lib/use-currency";
 
 const Svg = ({ children, size = 18 }) => (
   <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>{children}</svg>
@@ -33,6 +34,7 @@ function left(ms, L) {
 
 export default function UnlockModal({ state, tier, href, proof, match, league = "NBA", onClose, onCta }) {
   const L = useL();
+  const tt = trialTexts(L, useCurrency(L));
   const boxRef = useRef(null);
   const [now, setNow] = useState(() => Date.now());
   const [mounted, setMounted] = useState(false);
@@ -119,7 +121,7 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
   const foot = state !== "visitor" && tier === "starter"
     ? L.t("Accès instantané avec Pro, analyses illimitées", "Instant access with Pro, unlimited analyses", "Acceso inmediato con Pro, análisis ilimitados", "Acesso imediato com o Pro, análises ilimitadas")
     : trial
-      ? L.t(`${PRO_TRIAL_DAYS} jours à 1 €, puis 9,99 €/mois + taxes. Résiliable à tout moment.`, `${PRO_TRIAL_DAYS} days for €1, then €9.99/mo (+ tax). Cancel anytime.`, `${PRO_TRIAL_DAYS} días por 1 €, luego 9,99 €/mes + impuestos. Cancela cuando quieras.`, `${PRO_TRIAL_DAYS} dias por 1 €, depois 9,99 €/mês + impostos. Cancele quando quiser.`)
+      ? tt.line
       : L.t("Accès instantané après l'abonnement", "Instant access once you subscribe", "Acceso inmediato al suscribirte", "Acesso imediato ao assinar");
 
   return createPortal(
@@ -155,7 +157,7 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
           </div>
         )}
 
-        <a href={href} className="btn-solid ulk-cta" onClick={onCta}>{trial ? `🎁 ${L.t(`Essai ${PRO_TRIAL_DAYS} jours à 1 €`, `Start ${PRO_TRIAL_DAYS}-day trial for €1`, `Prueba ${PRO_TRIAL_DAYS} días por 1 €`, `Teste ${PRO_TRIAL_DAYS} dias por 1 €`)}` : L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo", "Desbloquear a análise completa")}</a>
+        <a href={href} className="btn-solid ulk-cta" onClick={onCta}>{trial ? `🎁 ${tt.cta}` : L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo", "Desbloquear a análise completa")}</a>
         <small className="ulk-foot">{foot}</small>
         </>)}
       </div>

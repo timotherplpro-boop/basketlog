@@ -7,7 +7,8 @@ import { useL } from "./LangProvider";
 import AnalysisProgress, { useAnalysisRun } from "./AnalysisProgress";
 import UnlockModal from "./UnlockModal";
 import { openAuth } from "../lib/auth-client";
-import { PRO_TRIAL_DAYS } from "../lib/pricing";
+import { PRO_TRIAL_DAYS, trialTexts } from "../lib/pricing";
+import { useCurrency } from "../lib/use-currency";
 
 // Robots d'indexation : pas de fenêtre par-dessus le contenu.
 const BOT = /bot|crawl|spider|slurp|lighthouse/i;
@@ -33,6 +34,7 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
   const [here, setHere] = useState("");
   const [modal, setModal] = useState(false);
   const box = useRef(null);
+  const cur = useCurrency(L); // monnaie d'affichage (cookie bl_cur posé par le middleware)
   useEffect(() => { setState(access.state); }, [access.state]);
   useEffect(() => { setHere(encodeURIComponent(location.pathname + location.search)); }, []);
   useEffect(() => {
@@ -113,8 +115,7 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
   const free = tier === "compte"; // compte gratuit : aucune analyse complète, comme Visifoot
   // Essai Pro (20/11/2026) : sur les écrans verrouillés, le bouton annonce l'essai gratuit plutôt qu'un simple « Débloquer ».
   const trial = PRO_TRIAL_DAYS > 0 && tier !== "starter";
-  const trialCta = L.t(`Essai ${PRO_TRIAL_DAYS} jours à 1 €`, `Start ${PRO_TRIAL_DAYS}-day trial for €1`, `Prueba ${PRO_TRIAL_DAYS} días por 1 €`, `Teste ${PRO_TRIAL_DAYS} dias por 1 €`);
-  const trialLine = L.t(`${PRO_TRIAL_DAYS} jours à 1 €, puis 9,99 €/mois + taxes. Résiliable à tout moment.`, `${PRO_TRIAL_DAYS} days for €1, then €9.99/mo (+ tax). Cancel anytime.`, `${PRO_TRIAL_DAYS} días por 1 €, luego 9,99 €/mes + impuestos. Cancela cuando quieras.`, `${PRO_TRIAL_DAYS} dias por 1 €, depois 9,99 €/mês + impostos. Cancele quando quiser.`);
+  const { cta: trialCta, line: trialLine } = trialTexts(L, cur);
 
   return (
     <div className="gated locked ar-locked">

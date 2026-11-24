@@ -14,10 +14,10 @@ export async function generateMetadata() {
   const L = await getL();
   return pageMeta({
     // Résultats de recherche : euros pour les pages française et espagnole, dollars pour la page anglaise.
-    title: L.t(`Basketlog Pro : analyses NBA dès ${price("pro", "EUR", L)}/mois`, `Basketlog Pro: NBA analyses from ${price("pro", "EUR", L)}/month`, `Basketlog Pro: análisis NBA desde ${price("pro", "EUR", L)}/mes`, `Basketlog Pro: análises NBA a partir de ${price("pro", "EUR", L)}/mês`),
+    title: L.t(`Basketlog Pro : analyses NBA dès ${price("pro", "EUR", L)}/mois`, `Basketlog Pro: NBA analyses from ${price("pro", "USD", L)}/month`, `Basketlog Pro: análisis NBA desde ${price("pro", "EUR", L)}/mes`, `Basketlog Pro: análises NBA a partir de ${price("pro", "EUR", L)}/mês`),
     description: L.t(
       `Pro ${price("pro", "EUR", L)}/mois ou Lifetime ${price("lifetime", "EUR", L)} une seule fois : débloque les analyses des matchs NBA et EuroLeague. Paiement sécurisé par Whop.`,
-      `Pro ${price("pro", "EUR", L)}/month or Lifetime ${price("lifetime", "EUR", L)} one-time: unlock NBA and EuroLeague game analyses. Secure payment by Whop.`, `Pro ${price("pro", "EUR", L)}/mes o Lifetime ${price("lifetime", "EUR", L)} en un solo pago: desbloquea los análisis de los partidos de la NBA y la Euroliga. Pago seguro con Whop.`, `Pro ${price("pro", "EUR", L)}/mês ou Lifetime ${price("lifetime", "EUR", L)} em pagamento único: desbloqueie as análises dos jogos da NBA e da Euroliga. Pagamento seguro com a Whop.`
+      `Pro ${price("pro", "USD", L)}/month or Lifetime ${price("lifetime", "USD", L)} one-time: unlock NBA and EuroLeague game analyses. Secure payment by Whop.`, `Pro ${price("pro", "EUR", L)}/mes o Lifetime ${price("lifetime", "EUR", L)} en un solo pago: desbloquea los análisis de los partidos de la NBA y la Euroliga. Pago seguro con Whop.`, `Pro ${price("pro", "EUR", L)}/mês ou Lifetime ${price("lifetime", "EUR", L)} em pagamento único: desbloqueie as análises dos jogos da NBA e da Euroliga. Pagamento seguro com a Whop.`
     ),
     path: "/pro",
     L,

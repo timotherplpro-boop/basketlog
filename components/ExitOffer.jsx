@@ -3,6 +3,8 @@
 // sans s'abonner. Deux endroits : la fenêtre « analyse complète » (UnlockModal, quand on la ferme, sur téléphone comme sur
 // ordinateur) et la page /pro (sortie de la souris par le haut de la fenêtre, ordinateur seulement). Éteinte par défaut :
 // /api/offre ne répond un code que si l'offre est réglée ET confirmée par Whop. Jamais de fausse urgence : pas de minuteur.
+import { trialTexts } from "../lib/pricing";
+import { useCurrency } from "../lib/use-currency";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { track } from "../lib/analytics";
@@ -39,15 +41,16 @@ const Cross = () => (
 // applique elle-même le code).
 export function ExitOfferBody({ offer, href, onAccept, onDecline, titleId = "exo-title", trial = 0 }) {
   const L = useL();
+  const tt = trialTexts(L, useCurrency(L));
   // 20/11/2026 : dans la fenêtre « analyse complète », l'offre de sortie propose l'essai gratuit Pro (plus parlant que
   // la remise : 2 clics sur 30 affichages) ; la page /pro garde la remise.
   if (trial > 0) {
     return (
       <div className="exo">
         <span className="exo-eyebrow">{L.t("Avant de partir", "Before you go", "Antes de irte", "Antes de você ir")}</span>
-        <h3 id={titleId}>{L.t(`Essaie Pro ${trial} jours pour 1 €`, `Try Pro for ${trial} days for €1`, `Prueba Pro ${trial} días por 1 €`, `Teste o Pro por ${trial} dias por 1 €`)}</h3>
-        <p className="exo-sub">{L.t("Toutes les analyses complètes, sur tous les matchs. 1 € aujourd'hui (+ taxes), puis 9,99 €/mois + taxes. Résiliable à tout moment avant la fin de l'essai.", "Every full analysis, on every game. €1 today (+ tax), then €9.99/mo (+ tax). Cancel anytime before the trial ends.", "Todos los análisis completos, en todos los partidos. 1 € hoy (+ impuestos), luego 9,99 €/mes + impuestos. Cancela cuando quieras antes de que acabe la prueba.", "Todas as análises completas, em todos os jogos. 1 € hoje (+ impostos), depois 9,99 €/mês + impostos. Cancele quando quiser antes do fim do teste.")}</p>
-        <a href={href} className="btn-solid exo-cta" onClick={onAccept}>🎁 {L.t("Démarrer l'essai à 1 €", "Start the €1 trial", "Empezar la prueba por 1 €", "Começar o teste por 1 €")}</a>
+        <h3 id={titleId}>{L.t(`Essaie Pro ${trial} jours pour ${tt.one}`, `Try Pro for ${trial} days for ${tt.one}`, `Prueba Pro ${trial} días por ${tt.one}`, `Teste o Pro por ${trial} dias por ${tt.one}`)}</h3>
+        <p className="exo-sub">{L.t(`Toutes les analyses complètes, sur tous les matchs. ${tt.one} aujourd'hui (+ taxes), puis ${tt.pro}/mois + taxes. Résiliable à tout moment avant la fin de l'essai.`, `Every full analysis, on every game. ${tt.one} today (+ tax), then ${tt.pro}/mo (+ tax). Cancel anytime before the trial ends.`, `Todos los análisis completos, en todos los partidos. ${tt.one} hoy (+ impuestos), luego ${tt.pro}/mes + impuestos. Cancela cuando quieras antes de que termine la prueba.`, `Todas as análises completas, em todos os jogos. ${tt.one} hoje (+ impostos), depois ${tt.pro}/mês + impostos. Cancele quando quiser antes do fim do teste.`)}</p>
+        <a href={href} className="btn-solid exo-cta" onClick={onAccept}>🎁 {L.t(`Démarrer l'essai à ${tt.one}`, `Start the ${tt.one} trial`, `Empezar la prueba por ${tt.one}`, `Começar o teste por ${tt.one}`)}</a>
         <button type="button" className="exo-no" onClick={onDecline}>{L.t("Non merci", "No thanks", "No, gracias", "Não, obrigado")}</button>
       </div>
     );

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useProStatus } from "../lib/useProStatus";
 import { track } from "../lib/analytics";
 import { useL } from "./LangProvider";
-import { price, money, PRICES, PRO_TRIAL_DAYS } from "../lib/pricing";
+import { price, money, PRICES, PRO_TRIAL_DAYS, PRO_TRIAL_PRICE } from "../lib/pricing";
 import { pctOf } from "../lib/i18n";
 import { CODE_RE, cleanCode, discounted, withPromo } from "../lib/promo";
 import SwitchWatch from "./SwitchWatch";
@@ -50,8 +50,8 @@ const PLANS = (L, ai, cur, promo = null) => {
   },
   {
     id: "pro", name: "Pro", icon: "crown", price: show("pro"), old: was("pro"), per, then: then("pro"), sub: L.t("Pour les passionnés de basket", "For basketball fans", "Para los apasionados del baloncesto", "Para os apaixonados por basquete"), badge: L.t("Populaire", "Popular", "Popular", "Popular"),
-    trial: PRO_TRIAL_DAYS ? L.t(`${PRO_TRIAL_DAYS} jours à 1 €, puis ${show("pro")}${sep}${per} + taxes. Résiliable à tout moment.`, `${PRO_TRIAL_DAYS} days for €1, then ${show("pro")}${sep}${per} + tax. Cancel anytime.`, `${PRO_TRIAL_DAYS} días por 1 €, luego ${show("pro")}${sep}${per} + impuestos. Cancela cuando quieras.`, `${PRO_TRIAL_DAYS} dias por 1 €, depois ${show("pro")}${sep}${per} + impostos. Cancele quando quiser.`) : null,
-    ctaTrial: PRO_TRIAL_DAYS ? L.t(`Essai ${PRO_TRIAL_DAYS} jours à 1 €`, `Start ${PRO_TRIAL_DAYS}-day trial for €1`, `Prueba ${PRO_TRIAL_DAYS} días por 1 €`, `Teste ${PRO_TRIAL_DAYS} dias por 1 €`) : null,
+    trial: PRO_TRIAL_DAYS ? L.t(`${PRO_TRIAL_DAYS} jours à ${money(PRO_TRIAL_PRICE, cur, L)}, puis ${show("pro")}${sep}${per} + taxes. Résiliable à tout moment.`, `${PRO_TRIAL_DAYS} days for ${money(PRO_TRIAL_PRICE, cur, L)}, then ${show("pro")}${sep}${per} + tax. Cancel anytime.`, `${PRO_TRIAL_DAYS} días por ${money(PRO_TRIAL_PRICE, cur, L)}, luego ${show("pro")}${sep}${per} + impuestos. Cancela cuando quieras.`, `${PRO_TRIAL_DAYS} dias por ${money(PRO_TRIAL_PRICE, cur, L)}, depois ${show("pro")}${sep}${per} + impostos. Cancele quando quiser.`) : null,
+    ctaTrial: PRO_TRIAL_DAYS ? L.t(`Essai ${PRO_TRIAL_DAYS} jours à ${money(PRO_TRIAL_PRICE, cur, L)}`, `Start ${PRO_TRIAL_DAYS}-day trial for ${money(PRO_TRIAL_PRICE, cur, L)}`, `Prueba ${PRO_TRIAL_DAYS} días por ${money(PRO_TRIAL_PRICE, cur, L)}`, `Teste ${PRO_TRIAL_DAYS} dias por ${money(PRO_TRIAL_PRICE, cur, L)}`) : null,
     cta: `${L.t("Débloquer", "Unlock", "Desbloquear", "Desbloquear")} - ${show("pro")}${sep}${per}`,
     items: [
       ["ok", L.t("Analyses illimitées", "Unlimited analyses", "Análisis ilimitados", "Análises ilimitadas")],

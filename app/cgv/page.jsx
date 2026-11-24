@@ -19,9 +19,9 @@ export async function generateMetadata() {
 
 // Contenu des formules (comme Visifoot). Les questions à l'IA ne figurent que si l'IA est configurée.
 const OFFRES = (ai) => [
-  ["Starter (plus proposé depuis le 19/11/2026, maintenu pour les abonnés en cours)", `${price("starter", "EUR", FR)} par mois`, "1 analyse réduite par jour : probabilités exactes, score projeté et stats clés du match", "Abonnement mensuel, renouvelé automatiquement chaque mois"],
-  ["Pro", `${price("pro", "EUR", FR)} par mois (9,99 $ pour les abonnements souscrits en dollars avant le 23/11/2026)`, `Analyses complètes illimitées, actualités en temps réel${ai ? ", 1 question personnelle par jour à l'IA" : ""}`, "Abonnement mensuel, renouvelé automatiquement chaque mois. Premier abonnement Pro : essai de 3 jours à 1 € + taxes (payé à l'inscription ; essai gratuit de 3 jours pour les abonnements pris avant le 24/11/2026), puis prélèvement du prix mensuel à la fin de l'essai sauf résiliation avant ; un seul essai par compte"],
-  ["Lifetime", `${price("lifetime", "EUR", FR)} une seule fois`, `Analyses complètes illimitées, comme Pro${ai ? ", questions personnelles à l'IA illimitées dans la limite d'un usage raisonnable (50 par jour)" : ""}`, "Paiement unique, sans renouvellement, pour toute la durée d'exploitation du service"],
+  ["Starter (plus proposé depuis le 19/11/2026, maintenu pour les abonnés en cours)", `${price("starter", "EUR", FR)} par mois (${price("starter", "USD", FR)} hors zone euro)`, "1 analyse réduite par jour : probabilités exactes, score projeté et stats clés du match", "Abonnement mensuel, renouvelé automatiquement chaque mois"],
+  ["Pro", `${price("pro", "EUR", FR)} par mois (${price("pro", "USD", FR)} hors zone euro)`, `Analyses complètes illimitées, actualités en temps réel${ai ? ", 1 question personnelle par jour à l'IA" : ""}`, "Abonnement mensuel, renouvelé automatiquement chaque mois. Premier abonnement Pro : essai de 3 jours à 1 € (1 $ hors zone euro) + taxes (payé à l'inscription ; essai gratuit de 3 jours pour les abonnements pris avant le 24/11/2026), puis prélèvement du prix mensuel à la fin de l'essai sauf résiliation avant ; un seul essai par compte"],
+  ["Lifetime", `${price("lifetime", "EUR", FR)} une seule fois (${price("lifetime", "USD", FR)} hors zone euro)`, `Analyses complètes illimitées, comme Pro${ai ? ", questions personnelles à l'IA illimitées dans la limite d'un usage raisonnable (50 par jour)" : ""}`, "Paiement unique, sans renouvellement, pour toute la durée d'exploitation du service"],
 ];
 
 function CGVFr() {
@@ -108,9 +108,9 @@ function CGVFr() {
 }
 
 const OFFERS_EN = (ai) => [
-  ["Starter (no longer sold since 11/19/2026, kept for current subscribers)", `${price("starter", "EUR", EN)} per month`, "1 reduced analysis per day: exact probabilities, projected score and key stats for the game", "Monthly subscription, renewed automatically every month"],
-  ["Pro", `${price("pro", "EUR", EN)} per month ($9.99 for subscriptions taken in dollars before 11/23/2026)`, `Unlimited full analyses, real-time news${ai ? ", 1 personal question a day to the AI" : ""}`, "Monthly subscription, renewed automatically every month. First Pro subscription: 3-day trial for €1 + tax (paid at sign-up; 3-day free trial for subscriptions taken before 11/24/2026), then the monthly price is charged when the trial ends unless cancelled before; one trial per account"],
-  ["Lifetime", `${price("lifetime", "EUR", EN)} one-time`, `Unlimited full analyses, same as Pro${ai ? ", unlimited personal questions to the AI within fair use (50 per day)" : ""}`, "One-time payment, no renewal, for as long as the service is operated"],
+  ["Starter (no longer sold since 11/19/2026, kept for current subscribers)", `${price("starter", "EUR", EN)} per month (${price("starter", "USD", EN)} outside the euro area)`, "1 reduced analysis per day: exact probabilities, projected score and key stats for the game", "Monthly subscription, renewed automatically every month"],
+  ["Pro", `${price("pro", "EUR", EN)} per month (${price("pro", "USD", EN)} outside the euro area)`, `Unlimited full analyses, real-time news${ai ? ", 1 personal question a day to the AI" : ""}`, "Monthly subscription, renewed automatically every month. First Pro subscription: 3-day trial for €1 ($1 outside the euro area) + tax (paid at sign-up; 3-day free trial for subscriptions taken before 11/24/2026), then the monthly price is charged when the trial ends unless cancelled before; one trial per account"],
+  ["Lifetime", `${price("lifetime", "EUR", EN)} one-time (${price("lifetime", "USD", EN)} outside the euro area)`, `Unlimited full analyses, same as Pro${ai ? ", unlimited personal questions to the AI within fair use (50 per day)" : ""}`, "One-time payment, no renewal, for as long as the service is operated"],
 ];
 
 function CGVEn({ L }) {
@@ -198,9 +198,9 @@ function CGVEn({ L }) {
 }
 
 const OFFERS_ES = (ai) => [
-  ["Starter (ya no se vende desde el 19/11/2026, se mantiene para los suscriptores actuales)", `${price("starter", "EUR", ES)} al mes`, "1 análisis reducido al día: probabilidades exactas, marcador proyectado y estadísticas clave del partido", "Suscripción mensual, renovada automáticamente cada mes"],
-  ["Pro", `${price("pro", "EUR", ES)} al mes (9,99 $ para las suscripciones contratadas en dólares antes del 23/11/2026)`, `Análisis completos ilimitados, noticias en tiempo real${ai ? ", 1 pregunta personal al día a la IA" : ""}`, "Suscripción mensual, renovada automáticamente cada mes. Primera suscripción Pro: prueba de 3 días por 1 € + impuestos (pagada al suscribirse; prueba gratuita de 3 días para las suscripciones contratadas antes del 24/11/2026), luego se cobra el precio mensual al terminar la prueba salvo cancelación antes; una sola prueba por cuenta"],
-  ["Lifetime", `${price("lifetime", "EUR", ES)} en un solo pago`, `Análisis completos ilimitados, como Pro${ai ? ", preguntas personales a la IA ilimitadas dentro de un uso razonable (50 al día)" : ""}`, "Pago único, sin renovación, mientras se preste el servicio"],
+  ["Starter (ya no se vende desde el 19/11/2026, se mantiene para los suscriptores actuales)", `${price("starter", "EUR", ES)} al mes (${price("starter", "USD", ES)} fuera de la zona euro)`, "1 análisis reducido al día: probabilidades exactas, marcador proyectado y estadísticas clave del partido", "Suscripción mensual, renovada automáticamente cada mes"],
+  ["Pro", `${price("pro", "EUR", ES)} al mes (${price("pro", "USD", ES)} fuera de la zona euro)`, `Análisis completos ilimitados, noticias en tiempo real${ai ? ", 1 pregunta personal al día a la IA" : ""}`, "Suscripción mensual, renovada automáticamente cada mes. Primera suscripción Pro: prueba de 3 días por 1 € (1 $ fuera de la zona euro) + impuestos (pagada al suscribirse; prueba gratuita de 3 días para las suscripciones contratadas antes del 24/11/2026), luego se cobra el precio mensual al terminar la prueba salvo cancelación antes; una sola prueba por cuenta"],
+  ["Lifetime", `${price("lifetime", "EUR", ES)} en un solo pago (${price("lifetime", "USD", ES)} fuera de la zona euro)`, `Análisis completos ilimitados, como Pro${ai ? ", preguntas personales a la IA ilimitadas dentro de un uso razonable (50 al día)" : ""}`, "Pago único, sin renovación, mientras se preste el servicio"],
 ];
 
 function CGVEs({ L }) {
