@@ -1,6 +1,6 @@
 "use client";
 // Rubrique « Mes gains » des créateurs (page /app/gains) : combien de personnes ont utilisé son code promo, sur quelle formule
-// (Starter, Pro, Lifetime), et ce que cela lui rapporte, en euros et en dollars (jamais convertis).
+// (Pro, Lifetime ; Starter seulement s'il a encore des abonnés Starter d'avant), et ce que cela lui rapporte, en euros et en dollars (jamais convertis).
 // Les chiffres viennent de /api/gains (Whop, lu en direct, gardé 60 s côté serveur). Le créateur n'y voit que ses propres codes,
 // jamais le nom d'un abonné. La page se rafraîchit toute seule une fois par minute tant qu'elle est visible, au plus AUTO_MAX fois
 // de suite sans que le créateur y touche (ménage le serveur), et le bouton « Actualiser » relance la lecture à tout moment.
@@ -16,7 +16,8 @@ import { PRICES } from "../lib/pricing";
 const REFRESH_MS = 60e3;
 const AUTO_MAX = 20;
 const CONTACT = "contact@basketlog-app.com";
-const PLAN_ORDER = ["starter", "pro", "lifetime", "other"];
+const PLAN_ORDER = ["pro", "lifetime", "starter", "other"];
+const ALWAYS = new Set(["pro", "lifetime"]); // les formules en vente s'affichent toujours ; Starter (abandonné le 19/11) et « autre » seulement s'il y a des personnes
 
 export default function CreatorEarnings() {
   const L = useL();
@@ -145,12 +146,12 @@ export default function CreatorEarnings() {
   // ---------- chiffres ----------
   const { total, codes, recent } = data;
   const demo = !!data.demo;
-  const plans = PLAN_ORDER.filter((k) => total.plans[k]);
+  const plans = PLAN_ORDER.filter((k) => total.plans[k] && (ALWAYS.has(k) || total.plans[k].people > 0));
   const hasMonthly = Object.keys(total.monthly || {}).length > 0;
-  // Exemple chiffré de la règle (prix Starter du moment) : payé -> hors TVA -> ce que touche le créateur.
+  // Exemple chiffré de la règle (prix Pro du moment, affiché hors taxes ; la TVA s'ajoute au paiement) : payé -> hors TVA -> ce que touche le créateur.
   const vat = data.vat ?? VAT_RATE;
-  const exCur = L.en ? "USD" : "EUR";
-  const exPaid = PRICES[exCur]?.starter || 13.99;
+  const exCur = "EUR"; // le site ne vend plus qu'en euros (23/11)
+  const exPaid = Math.round((PRICES[exCur]?.pro || 9.99) * (1 + vat) * 100) / 100;
   const exHt = exVat(exPaid, vat);
   const exGain = commissionOf(exPaid, data.rate ?? data.ratePct / 100, vat);
   const ofVat = T(`${pct(data.ratePct)} du montant hors TVA`, `${pct(data.ratePct)} of the ex-VAT amount`, `${pct(data.ratePct)} del importe sin IVA`); // précision sous « Ta commission »
@@ -240,9 +241,9 @@ export default function CreatorEarnings() {
         <p className="earn-how">
           <b>{T("Comment ton gain est calculé", "How your earnings are calculated", "Cómo se calcula tu ganancia")}</b>
           {T(
-            ` : on prend ce que l'abonné a payé, on retire la TVA (${pct(Math.round(vat * 100))}), puis tu touches ${pct(data.ratePct)} du reste. Exemple : un paiement Starter de ${cur(exPaid, exCur)} = ${cur(exHt, exCur)} hors TVA, soit ${cur(exGain, exCur)} pour toi.`,
-            `: we take what the subscriber paid, remove the VAT (${pct(Math.round(vat * 100))}), and you get ${pct(data.ratePct)} of what's left. Example: a Starter payment of ${cur(exPaid, exCur)} = ${cur(exHt, exCur)} excluding VAT, so ${cur(exGain, exCur)} for you.`,
-            `: tomamos lo que pagó el suscriptor, quitamos el IVA (${pct(Math.round(vat * 100))}) y tú recibes el ${pct(data.ratePct)} del resto. Ejemplo: un pago Starter de ${cur(exPaid, exCur)} = ${cur(exHt, exCur)} sin IVA, es decir ${cur(exGain, exCur)} para ti.`
+            ` : on prend ce que l'abonné a payé, on retire la TVA (${pct(Math.round(vat * 100))}), puis tu touches ${pct(data.ratePct)} du reste. Exemple : un paiement Pro de ${cur(exPaid, exCur)} = ${cur(exHt, exCur)} hors TVA, soit ${cur(exGain, exCur)} pour toi.`,
+            `: we take what the subscriber paid, remove the VAT (${pct(Math.round(vat * 100))}), and you get ${pct(data.ratePct)} of what's left. Example: a Pro payment of ${cur(exPaid, exCur)} = ${cur(exHt, exCur)} excluding VAT, so ${cur(exGain, exCur)} for you.`,
+            `: tomamos lo que pagó el suscriptor, quitamos el IVA (${pct(Math.round(vat * 100))}) y tú recibes el ${pct(data.ratePct)} del resto. Ejemplo: un pago Pro de ${cur(exPaid, exCur)} = ${cur(exHt, exCur)} sin IVA, es decir ${cur(exGain, exCur)} para ti.`
           )}
         </p>
       </section>

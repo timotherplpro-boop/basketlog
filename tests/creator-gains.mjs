@@ -115,9 +115,9 @@ export async function creatorGainsTests({ ok, ko, eq }) {
 
   // Aperçu avec chiffres d'exemple (admin et « voir comme ») : même calcul, dates calées sur « maintenant », jamais de vrai code.
   const demo = demoReport(NOW);
-  eq("démo : un code d'exemple, 7 personnes dont 5 actives (Starter 4, Pro 2, Lifetime 1)", [demo.codes.map((c) => c.code), demo.total.people, demo.total.active, demo.total.plans.starter.people, demo.total.plans.pro.people, demo.total.plans.lifetime.people], [[DEMO_CODE], 7, 5, 4, 2, 1]);
-  eq("démo : commission du mois et du mois précédent (hors TVA puis 40 %)", [sorted(demo.total.commission.month), sorted(demo.total.commission.prev)], [{ EUR: 48.32, USD: 4.2 }, { EUR: 8.39, USD: 9 }]);
-  eq("démo : euros et dollars, un paiement remboursé, des renouvellements", [Object.keys(demo.total.paid.all).sort(), demo.recent.some((r) => r.state === "refunded"), demo.recent.some((r) => !r.first), demo.recent.some((r) => r.first)], [["EUR", "USD"], true, true, true]);
+  eq("démo : un code d'exemple, 7 personnes dont 5 actives (Pro 6, Lifetime 1, plus aucun Starter)", [demo.codes.map((c) => c.code), demo.total.people, demo.total.active, demo.total.plans.starter.people, demo.total.plans.pro.people, demo.total.plans.lifetime.people], [[DEMO_CODE], 7, 5, 0, 6, 1]);
+  eq("démo : commission du mois et du mois précédent (hors TVA puis 40 %)", [sorted(demo.total.commission.month), sorted(demo.total.commission.prev)], [{ EUR: 51.18 }, { EUR: 10.79 }]);
+  eq("démo : en euros (seule monnaie en vente), un paiement remboursé, des renouvellements", [Object.keys(demo.total.paid.all).sort(), demo.recent.some((r) => r.state === "refunded"), demo.recent.some((r) => !r.first), demo.recent.some((r) => r.first)], [["EUR"], true, true, true]);
   eq("démo : aucun identifiant d'abonné ni de paiement", /mem_|pay_|user_|promo_|"d[0-9]"|"p[0-9]"/.test(JSON.stringify(demo)), false);
   for (const iso of ["2026-11-01T00:30:00Z", "2026-10-31T23:30:00Z", "2026-01-01T09:00:00Z", "2026-03-31T21:30:00Z", "2026-07-15T10:00:00Z"]) {
     const d = demoReport(T(iso));
