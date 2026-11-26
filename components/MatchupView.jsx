@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cache } from "react";
 import AppTabs from "./AppTabs";
 import JsonLd from "./JsonLd";
 import { getL } from "../lib/lang-server";
@@ -11,7 +12,8 @@ import { fmtDate, fmtTime, pctOf } from "../lib/i18n";
 import Crumbs from "./Crumbs";
 
 // Page duel sans date (/nba/celtics-vs-lakers) : voir lib/matchup.js.
-export async function matchupData(x, y) {
+// cache() : generateMetadata et la page partagent le même calcul (x et y sont les objets de TEAMS, même référence).
+export const matchupData = cache(async function matchupData(x, y) {
   const today = nbaToday();
   const [sched, picks, up, st] = await Promise.all([
     getTeamSchedule(x.id).catch(() => []),
@@ -32,7 +34,7 @@ export async function matchupData(x, y) {
   });
   const rec = (t) => [...(st?.east || []), ...(st?.west || [])].find((r) => r.id === t.id) || null;
   return { rows, recX: rec(x), recY: rec(y) };
-}
+});
 
 export default async function MatchupView({ x, y, data }) {
   const L = await getL();
