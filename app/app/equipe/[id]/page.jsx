@@ -13,6 +13,7 @@ import { pageMeta, fitTitle } from "../../../../lib/seo";
 import { getL } from "../../../../lib/lang-server";
 import { fmtDate, fmtTime, numOf } from "../../../../lib/i18n";
 import { nbaPath, playerPath } from "../../../../lib/slug.js";
+import { pairPath } from "../../../../lib/matchup.js";
 import JsonLd from "../../../../components/JsonLd";
 import { SITE } from "../../../../lib/site";
 import Crumbs from "../../../../components/Crumbs";
@@ -272,6 +273,14 @@ export default async function TeamPage({ params }) {
               </Link>
             );
           }) : <p className="team-rec">{L.t("Aucun match à venir.", "No upcoming games.", "No hay partidos próximos.", "Nenhum jogo próximo.")}</p>}
+          {/* Pages « duel » sans date (toutes les rencontres de la saison) : pages durables, à pousser plutôt que les fiches datées. */}
+          {next.length > 0 && (
+            <p className="team-rec">{L.t("Face-à-face de la saison : ", "Season head-to-head: ", "Duelos de la temporada: ", "Confrontos da temporada: ")}
+              {[...new Map(next.map((g) => { const opp = g.home.id === team.id ? g.away : g.home; return [opp.id, opp]; })).values()].map((opp, i) => (
+                <span key={opp.id}>{i ? " · " : ""}<Link href={L.href(pairPath(team, opp))}>{team.short} vs {opp.short}</Link></span>
+              ))}
+            </p>
+          )}
         </div>
         <div className="card block">
           <h2>{L.t("Derniers résultats", "Recent results", "Últimos resultados", "Últimos resultados")}</h2>

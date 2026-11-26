@@ -2,7 +2,7 @@ import { switchPath } from "../lib/i18n";
 import { TEAMS } from "../lib/teams";
 import { SITE } from "../lib/site";
 import { upcomingGames } from "../lib/data";
-import { nbaToday, shiftDate, getScoreboardRange, nbaDateOf, getPlayerStats, seasonForDate } from "../lib/espn";
+import { nbaToday, shiftDate, getScoreboardRange, getPlayerStats, seasonForDate } from "../lib/espn";
 import { articleDates, articlePath } from "../lib/articles";
 import { elContext } from "../lib/euroleague";
 import { nbaPath, elPath, playerPath } from "../lib/slug.js";
@@ -25,7 +25,9 @@ const both = ({ path, ...rest }) => {
   const pt = `${SITE}${switchPath(path, "pt")}`;
   const alternates = { languages: { fr, en, es, "pt-BR": pt, "x-default": en } }; // x-default : anglais (visiteurs d'une autre langue)
   const p2 = Math.round(rest.priority * 0.9 * 100) / 100;
-  return [{ url: fr, ...rest, alternates }, { url: en, ...rest, priority: p2, alternates }, { url: es, ...rest, priority: p2, alternates }, { url: pt, ...rest, priority: p2, alternates }];
+  // Sitemap allégé (26 nov.) : les pages portugaises restent liées par hreflang mais ne sont plus listées, pour concentrer
+  // l'exploration de Google (134 pages indexées sur ~2 680 adresses listées).
+  return [{ url: fr, ...rest, alternates }, { url: en, ...rest, priority: p2, alternates }, { url: es, ...rest, priority: p2, alternates }];
 };
 
 export default async function sitemap() {
@@ -63,18 +65,12 @@ export default async function sitemap() {
   try {
     const up = await upcomingGames(7);
     const today = nbaToday();
-    const past = (await getScoreboardRange(shiftDate(today, -3), shiftDate(today, -1))).filter((g) => g.state === "post");
+    const past = (await getScoreboardRange(shiftDate(today, -7), shiftDate(today, -1))).filter((g) => g.state === "post");
     nba = [
-      ...up.map((g) => u(nbaPath(g, g.d), 0.7, "hourly")),
-      // Pages duel sans date (/nba/celtics-vs-lakers) des affiches de la semaine.
-      ...[...new Set(up.map((g) => pairPath(g.home, g.away)))].map((p) => u(p, 0.6, "daily")),
-      ...past.map((g) => u(nbaPath(g, nbaDateOf(g.date)), 0.4, "weekly")),
-      // Pronostics d'un jour précis (/app/matchs?d=…, titre avec le jour et la date, bilan du favori une fois joués) :
-      // les 3 derniers jours et les jours à venir. Aujourd'hui (/app/matchs) et demain (/app/demain) ont leur propre adresse.
-      ...[...new Set([...past.map((g) => nbaDateOf(g.date)), ...up.map((g) => g.d)])]
-        .filter((d) => d && d !== today && d !== shiftDate(today, 1))
-        .sort()
-        .map((d) => u(`/app/matchs?d=${d}`, d < today ? 0.4 : 0.5, d < today ? "weekly" : "hourly")),
+      // Fiches datées : aujourd'hui et demain seulement (26 nov. : 0 impression en 28 jours, jamais découvertes à temps).
+      ...up.filter((g) => g.d === today || g.d === shiftDate(today, 1)).map((g) => u(nbaPath(g, g.d), 0.7, "hourly")),
+      // Pages duel sans date (/nba/celtics-vs-lakers) : pages durables, affiches des 7 prochains et des 7 derniers jours.
+      ...[...new Set([...up, ...past].map((g) => pairPath(g.home, g.away)))].map((p) => u(p, 0.7, "daily")),
     ];
   } catch {}
 
@@ -91,16 +87,16 @@ export default async function sitemap() {
   } catch {}
 
   // Articles quotidiens (Google Discover) : la page liste et les 14 derniers jours.
-  const arts = [u("/articles", 0.7, "daily"), ...articleDates(14).map((d, i) => u(articlePath(d), i === 0 ? 0.8 : 0.5, i === 0 ? "hourly" : "weekly"))];
+  const arts = [u("/articles", 0.7, "daily"), ...articleDates(7).map((d, i) => u(articlePath(d), i === 0 ? 0.8 : 0.5, i === 0 ? "hourly" : "weekly"))];
 
-  // Pages joueurs (« X joue-t-il ce soir ? ») : les 200 meilleurs marqueurs de la saison (au moins 3 matchs).
+  // Pages joueurs (« X joue-t-il ce soir ? ») : les 100 meilleurs marqueurs de la saison (au moins 3 matchs).
   // Pas plus : Google laisse déjà 260 pages « détectées, non indexées » (Search Console, 21 nov.), inutile de diluer l'exploration.
   let players = [];
   try {
     const st = await getPlayerStats(seasonForDate(nbaToday()));
     const seen = new Set();
     players = Object.values(st || {}).filter((p) => (p.gp || 0) >= 3 && p.ppg != null).sort((a, b) => b.ppg - a.ppg)
-      .map((p) => playerPath(p.name)).filter((p) => !seen.has(p) && seen.add(p)).slice(0, 200).map((p) => u(p, 0.5, "daily"));
+      .map((p) => playerPath(p.name)).filter((p) => !seen.has(p) && seen.add(p)).slice(0, 100).map((p) => u(p, 0.5, "daily"));
   } catch {}
 
   return [...[...pages, ...teams, ...nba, ...el, ...arts, ...players].flatMap(both), ...ncaaEn];
