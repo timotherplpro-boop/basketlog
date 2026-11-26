@@ -85,6 +85,23 @@ export async function GET(req) {
       return json({ ok: false, handle: cfg.bluesky.handle, profile, error: e.message });
     }
   }
+  // Jeu de Noël sur la chaîne Telegram française (?concourstg=1, compte admin seulement), texte validé par Tim le 26/11
+  // (20 h 55, « Fais-moi le chantier ») : achat du Pro obligatoire, mots-dièse en bas. À n'appeler qu'une fois.
+  if (sp.get("concourstg") === "1") {
+    if (who !== "admin") return json({ error: "interdit" }, 401);
+    if (!cfg.telegram) return json({ ok: false, skipped: "bot Telegram non branché" });
+    const chat = cfg.telegram.chats.fr || Object.values(cfg.telegram.chats)[0];
+    const url = "https://basketlog-app.com/concours";
+    const html = `🎄 JEU DE NOËL 🎁\n\n1 PS5 + 1 maillot de Victor Wembanyama à gagner !\n\nPour participer : passe Pro (9,99 €/mois) 👉 <a href="${url}">basketlog-app.com/concours</a>\nDéjà Pro ? Tu participes.\n\nTirage le 20 décembre.\n\nPS5 ou maillot de Wemby ? 👇\n\n#JeuConcours #NBA #Wembanyama #PS5 #Basket`;
+    if (sp.get("dry") === "1") return json({ ok: true, dry: true, chat, html });
+    try {
+      const r = await sendTelegram(cfg.telegram.token, chat, html, url);
+      return json({ ok: true, chat, result: r });
+    } catch (e) {
+      return json({ ok: false, chat, error: e.message });
+    }
+  }
+
   // Titre de la chaîne Telegram française (?tgtitle=1, compte admin seulement) : « Basketlog – Probabilités NBA »
   // (demande de Tim, 26/11/2026 20 h 54 : plus de mot « pronostics »). Renvoie aussi la description de la chaîne.
   if (sp.get("tgtitle") === "1") {
