@@ -1974,3 +1974,8 @@ html { scroll-behavior: smooth; }
 .home-contest-card strong { font-size: clamp(20px, 3.2vw, 28px); line-height: 1.2; }
 .home-contest-card > span:not(.home-contest-badge):not(.home-contest-cta) { color: var(--muted); font-size: 15px; }
 .home-contest-cta { color: var(--orange); font-weight: 800; }
+/* Actu du jour (page /actu) */
+.actu-page article { max-width: 640px; margin: 0 auto; padding: 24px 20px 48px; }
+.actu-page .actu-visuel { width: 100%; height: auto; border-radius: 18px; display: block; margin-bottom: 20px; }
+.actu-page h1 { font-size: clamp(24px, 4vw, 34px); line-height: 1.15; margin: 0 0 14px; }
+.actu-page p { color: var(--muted); line-height: 1.55; }

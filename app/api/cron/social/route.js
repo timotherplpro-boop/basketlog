@@ -4,6 +4,8 @@ import { blueskyProfile, ogImageUrl, RECAP_MARK, launchPosts, POWER_MARK, powerP
 import { powerRankings } from "../../../../lib/data";
 import { GROUPS, nationalPosts } from "../../../../lib/nationals.js";
 import { nationalBase, nationalFrom } from "../../../../lib/nationals-data";
+import { sendTelegramPhoto } from "../../../../lib/social-send";
+import { actuToken, readActu, actuUrls } from "../../../../lib/actu";
 import { socialConfig, socialStatus, sendTelegram, telegramCheck, blueskySession, blueskyThumb, sendBluesky, blueskyPostedSince, blueskySetProfile } from "../../../../lib/social-send";
 import { COOKIE, currentSession } from "../../../../lib/pro";
 
@@ -85,6 +87,61 @@ export async function GET(req) {
       return json({ ok: false, handle: cfg.bluesky.handle, profile, error: e.message });
     }
   }
+  // Actu du jour (?actu=1, compte admin seulement ; demande de Tim, 26/11/2026 21 h 45 : un visuel fait par IA sur
+  // l'actualité, chaque jour, sur chaque réseau, avec des mots-dièse). Paramètres : t (titre sur l'image), x (texte de la
+  // page et de Telegram), i (adresse https de l'image de fond), b (texte Bluesky, 300 signes au plus, mots-dièse compris).
+  // &dry=1 : rend seulement le jeton et les adresses (page /actu, images og, portrait, thumb) sans rien publier.
+  // Publie sur Bluesky (carte avec l'image, lien vers la page) et sur la chaîne Telegram (photo + légende).
+  if (sp.get("actu") === "1") {
+    if (who !== "admin") return json({ error: "interdit" }, 401);
+    let k;
+    try {
+      k = actuToken({ t: sp.get("t"), x: sp.get("x") || "", i: sp.get("i") });
+    } catch (e) {
+      return json({ ok: false, error: e.message }, 400);
+    }
+    const a = readActu(k);
+    const urls = actuUrls(k);
+    const b = String(sp.get("b") || "").trim();
+    const seg = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter("fr", { granularity: "grapheme" }) : null;
+    const len = seg ? [...seg.segment(b)].length : [...b].length;
+    if (sp.get("dry") === "1") return json({ ok: true, dry: true, k, ...urls, blueskyLength: len });
+    const out = { ok: true, ...urls, bluesky: null, telegram: null, errors: [] };
+    const enc = new TextEncoder();
+    if (b && len <= 300 && cfg.bluesky) {
+      try {
+        const facets = [];
+        for (const m of b.matchAll(/https?:\/\/[^\s]+/g)) {
+          const s0 = enc.encode(b.slice(0, m.index)).length;
+          facets.push({ index: { byteStart: s0, byteEnd: s0 + enc.encode(m[0]).length }, features: [{ $type: "app.bsky.richtext.facet#link", uri: m[0] }] });
+        }
+        for (const m of b.matchAll(/(^|\s)#([\p{L}\p{N}_]+)/gu)) {
+          const at = m.index + m[1].length;
+          const s0 = enc.encode(b.slice(0, at)).length;
+          facets.push({ index: { byteStart: s0, byteEnd: s0 + enc.encode(`#${m[2]}`).length }, features: [{ $type: "app.bsky.richtext.facet#tag", tag: m[2] }] });
+        }
+        const sess = await blueskySession(cfg.bluesky);
+        const thumb = await blueskyThumb(sess, urls.thumb);
+        out.bluesky = await sendBluesky(sess, { text: b, facets, langs: ["fr"], url: urls.page, title: a.t, description: a.x.replace(/\s+/g, " ").slice(0, 200) }, thumb);
+      } catch (e) {
+        out.errors.push(`bluesky : ${e.message}`);
+      }
+    } else if (b) out.errors.push(`bluesky : texte de ${len} signes (300 au plus) ou compte non branché`);
+    if (cfg.telegram) {
+      const chat = cfg.telegram.chats.fr || Object.values(cfg.telegram.chats)[0];
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const tags = (b.match(/#[\p{L}\p{N}_]+/gu) || []).join(" ");
+      const cap = `<b>${esc(a.t)}</b>\n\n${esc(a.x).slice(0, 760)}\n\n👉 <a href="${urls.page}">basketlog-app.com</a>${tags ? `\n${esc(tags)}` : ""}`;
+      try {
+        out.telegram = await sendTelegramPhoto(cfg.telegram.token, chat, urls.portrait, cap);
+      } catch (e) {
+        out.errors.push(`telegram : ${e.message}`);
+      }
+    }
+    out.ok = out.errors.length === 0;
+    return json(out);
+  }
+
   // Jeu de Noël sur la chaîne Telegram française (?concourstg=1, compte admin seulement), texte validé par Tim le 26/11
   // (20 h 55, « Fais-moi le chantier ») : achat du Pro obligatoire, mots-dièse en bas. À n'appeler qu'une fois.
   if (sp.get("concourstg") === "1") {

@@ -300,3 +300,50 @@ export async function concoursOgImage(format = "og", init = {}, lang = "fr") {
     { ...size, ...(fontList.length ? { fonts: fontList } : {}), ...init }
   );
 }
+
+// ---------- Actu du jour (visuel quotidien des réseaux, lib/actu.js) ----------
+// Image de fond faite par IA (Canva, sans vrais joueurs ni logos), titre de l'actu par-dessus, logo et adresse du site.
+// og 1200×630 (aperçu X, LinkedIn), portrait 1080×1350 (Facebook, Instagram, Telegram), thumb 800×420 (carte Bluesky,
+// moins d'un Mo). Si l'image source ne répond plus (lien d'export Canva expiré), fond orange et bleu nuit à la place.
+const ACTU_SIZES = { og: { width: 1200, height: 630 }, portrait: { width: 1080, height: 1350 }, thumb: { width: 800, height: 420 } };
+async function actuBackground(url) {
+  try {
+    const r = await fetch(url, { signal: AbortSignal.timeout(9000) });
+    if (!r.ok) return null;
+    const type = (r.headers.get("content-type") || "image/jpeg").split(";")[0].trim();
+    if (!/^image\/(jpeg|png|webp)$/.test(type)) return null;
+    const buf = Buffer.from(await r.arrayBuffer());
+    if (!buf.length || buf.length > 8_000_000) return null;
+    return `data:${type};base64,${buf.toString("base64")}`;
+  } catch {
+    return null;
+  }
+}
+export async function actuOgImage(a, format = "og", init = {}) {
+  const fmt = ACTU_SIZES[format] ? format : "og";
+  const { width, height } = ACTU_SIZES[fmt];
+  const [f, tf, bg] = await Promise.all([fonts(), titleFont(), actuBackground(a.i)]);
+  const tall = fmt === "portrait";
+  const k = tall ? 1 : fmt === "thumb" ? 0.68 : 1;
+  const px = (n) => Math.round(n * k);
+  const title = String(a.t || "");
+  const titleSize = tall ? (title.length > 70 ? 58 : title.length > 45 ? 68 : 80) : px(title.length > 70 ? 44 : title.length > 45 ? 52 : 60);
+  return new ImageResponse(
+    (
+      <div style={{ display: "flex", position: "relative", width, height, background: "radial-gradient(circle at 70% 30%, #5a2608 0%, #040817 65%)", fontFamily: "Inter" }}>
+        {bg && <img src={bg} width={width} height={height} style={{ position: "absolute", left: 0, top: 0, width, height, objectFit: "cover" }} alt="" />}
+        <div style={{ position: "absolute", left: 0, top: 0, width, height, display: "flex", background: tall ? "linear-gradient(180deg, rgba(4,8,23,.55) 0%, rgba(4,8,23,0) 22%, rgba(4,8,23,0) 42%, rgba(4,8,23,.88) 70%, #040817 100%)" : "linear-gradient(90deg, rgba(4,8,23,.94) 0%, rgba(4,8,23,.78) 48%, rgba(4,8,23,.1) 100%)" }} />
+        <div style={{ position: "absolute", left: px(tall ? 56 : 60), top: px(tall ? 52 : 46), display: "flex", alignItems: "center", gap: px(14) }}>
+          <img src={BALL} width={px(54)} height={px(54)} alt="" />
+          <div style={{ display: "flex", fontSize: px(38), fontWeight: 800, color: "#ff8c3a" }}>Basketlog</div>
+        </div>
+        <div style={{ position: "absolute", left: px(tall ? 56 : 60), right: tall ? 56 : Math.round(width * 0.42), bottom: px(tall ? 70 : 52), display: "flex", flexDirection: "column", gap: px(18) }}>
+          <div style={{ display: "flex", alignSelf: "flex-start", padding: `${px(7)}px ${px(16)}px`, borderRadius: 999, border: "2px solid rgba(255,140,58,.75)", background: "rgba(255,122,26,.18)", color: "#ffb27a", fontSize: px(22), fontWeight: 800, letterSpacing: 2 }}>ACTU NBA</div>
+          <div style={{ display: "flex", fontFamily: tf ? "Tilt Warp" : "Inter", fontSize: titleSize, fontWeight: tf ? 400 : 800, lineHeight: 1.08, color: "#ffffff" }}>{title}</div>
+          <div style={{ display: "flex", fontSize: px(tall ? 34 : 28), fontWeight: 800, color: "#ff8c3a" }}>basketlog-app.com</div>
+        </div>
+      </div>
+    ),
+    { width, height, fonts: [...(f || []), ...(tf ? [tf] : [])], ...init }
+  );
+}
