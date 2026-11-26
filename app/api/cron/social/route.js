@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { socialDay, recapDay } from "../../../../lib/social-day";
-import { blueskyProfile, ogImageUrl, RECAP_MARK, launchPosts, POWER_MARK, powerPosts } from "../../../../lib/social";
+import { blueskyProfile, ogImageUrl, RECAP_MARK, launchPosts, POWER_MARK, powerPosts, CONCOURS_MARK, concoursPost } from "../../../../lib/social";
 import { powerRankings } from "../../../../lib/data";
 import { GROUPS, nationalPosts } from "../../../../lib/nationals.js";
 import { nationalBase, nationalFrom } from "../../../../lib/nationals-data";
@@ -112,6 +112,22 @@ export async function GET(req) {
       }
     }
     return json({ ok: out.every((x) => x.ok !== false), sent: out, at: new Date().toISOString() });
+  }
+  // Jeu de Noël (?concours=1, compte admin seulement ; ?concours=1&dry=1 : aperçu) : Bluesky en français seulement,
+  // une seule fois (un message du compte qui commence par « 🎄 JEU DE NOËL » dans les 7 derniers jours bloque l'envoi).
+  if (sp.get("concours") === "1") {
+    if (who !== "admin") return json({ error: "interdit" }, 401);
+    const post = concoursPost();
+    if (sp.get("dry") === "1") return json({ ok: true, dry: true, post, bluesky: !!cfg.bluesky });
+    if (!cfg.bluesky) return json({ ok: false, skipped: "compte Bluesky non branché (BLUESKY_APP_PASSWORD manquant)" });
+    try {
+      const s = await blueskySession(cfg.bluesky);
+      if (await blueskyPostedSince(s, new Date(Date.now() - 7 * 86400e3).toISOString(), CONCOURS_MARK)) return json({ ok: true, skipped: "déjà publié" });
+      const thumb = await blueskyThumb(s, post.image);
+      return json({ ok: true, handle: cfg.bluesky.handle, uri: await sendBluesky(s, post, thumb), thumb: !!thumb, at: new Date().toISOString() });
+    } catch (e) {
+      return json({ ok: false, error: e.message });
+    }
   }
   if (sp.get("check") === "1") {
     const check = { status: socialStatus(cfg), telegram: {}, bluesky: null };
