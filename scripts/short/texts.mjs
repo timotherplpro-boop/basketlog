@@ -44,13 +44,17 @@ const xLen = (s) => {
   return len;
 };
 
+// Mots-dièse sous chaque post (demande de Tim, 26/11/2026 : « n'oublie pas les hashtags »).
+const TAGS_X = "#NBA #Basket";
+const TAGS_LONG = "#NBA #Basket #Basketball #nbafrance";
+
 function xPost(nFav, withClosest, withQuestion) {
   const favs = byFav.slice(0, nFav);
   const parts = ["Les plus gros favoris NBA de cette nuit 🏀", "", ...favs.map((r) => r.ligne)];
   if (withClosest && closest && !favs.includes(closest)) parts.push("", `Match le plus serré : ${closest.ligne}`);
   parts.push("", `${matchsMot}, gratuit${n === 1 ? "" : "s"} → basketlog-app.com/app/matchs`);
   if (withQuestion) parts.push("Qui gagne selon toi ? 👇");
-  parts.push("", PROMO);
+  parts.push("", PROMO, "", TAGS_X);
   return parts.join("\n");
 }
 const xCandidates = [];
@@ -73,7 +77,7 @@ if (closest && n > 4 && !byFav.slice(0, 4).includes(closest)) longParts.push("",
 if (bilanNuit) longParts.push("", bilanNuit);
 longParts.push("", `Probabilités de victoire des ${n} match${n === 1 ? "" : "s"}, gratuites → https://basketlog-app.com/app/matchs`);
 if (shortUrl) longParts.push(`Les matchs de cette nuit en 15 secondes ▶️ ${shortUrl}`);
-longParts.push("", "Qui gagne selon toi ? 👇", "", PROMO_LONG);
+longParts.push("", "Qui gagne selon toi ? 👇", "", PROMO_LONG, "", TAGS_LONG);
 
 const description = [
   "Probabilité de victoire de chaque match NBA de cette nuit, enregistrée avant le coup d'envoi :",
