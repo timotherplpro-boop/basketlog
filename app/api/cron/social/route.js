@@ -95,7 +95,10 @@ export async function GET(req) {
     const tg = (method, body) => fetch(`https://api.telegram.org/bot${cfg.telegram.token}/${method}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).then((r) => r.json()).catch((e) => ({ ok: false, description: e.message }));
     const before = await tg("getChat", { chat_id: chat });
     const set = before.result?.title === title ? { ok: true, unchanged: true } : await tg("setChatTitle", { chat_id: chat, title });
-    return json({ ok: !!set.ok, chat, title, before: before.result?.title || null, description: before.result?.description || null, error: set.ok ? undefined : set.description });
+    const desc0 = before.result?.description || "";
+    const desc = desc0.replace(/Les pronostics/g, "Les probabilités").replace(/pronostics/gi, "probabilités");
+    const setDesc = desc && desc !== desc0 ? await tg("setChatDescription", { chat_id: chat, description: desc }) : { ok: true, unchanged: true };
+    return json({ ok: !!set.ok && !!setDesc.ok, chat, title, before: before.result?.title || null, description: desc || null, error: set.ok ? (setDesc.ok ? undefined : setDesc.description) : set.description });
   }
 
   // Post de lancement de l'offre Pro (?promo=1, compte admin seulement ; ?promo=1&dry=1 : aperçu). Une fois par langue :
