@@ -490,6 +490,7 @@ export async function actuOgImage(a, format = "og", init = {}) {
         <div style={{ position: "absolute", left: 0, top: 0, width, height, display: "flex", background: tall
           ? (rich ? "linear-gradient(180deg, rgba(4,8,23,.6) 0%, rgba(4,8,23,0) 16%, rgba(4,8,23,0) 30%, rgba(4,8,23,.82) 47%, #040817 62%)" : "linear-gradient(180deg, rgba(4,8,23,.55) 0%, rgba(4,8,23,0) 22%, rgba(4,8,23,0) 42%, rgba(4,8,23,.88) 70%, #040817 100%)")
           : (rich ? "linear-gradient(90deg, #040817 0%, #040817 40%, rgba(4,8,23,.7) 52%, rgba(4,8,23,.05) 75%)" : "linear-gradient(90deg, rgba(4,8,23,.94) 0%, rgba(4,8,23,.78) 48%, rgba(4,8,23,.1) 100%)") }} />
+        {bg && <div style={{ position: "absolute", right: px(tall ? 56 : 24), top: tall ? 600 : undefined, bottom: tall ? undefined : px(14), display: "flex", fontSize: px(tall ? 18 : 15), fontWeight: 500, color: "rgba(255,255,255,.55)", letterSpacing: 1 }}>Image d'illustration</div>}
         <div style={{ position: "absolute", left: px(tall ? 56 : 52), right: px(tall ? 56 : 52), top: px(tall ? 50 : 40), display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: px(14) }}>
             <img src={BALL} width={px(tall ? 54 : 46)} height={px(tall ? 54 : 46)} alt="" />
