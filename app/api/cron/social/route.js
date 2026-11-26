@@ -85,6 +85,19 @@ export async function GET(req) {
       return json({ ok: false, handle: cfg.bluesky.handle, profile, error: e.message });
     }
   }
+  // Titre de la chaîne Telegram française (?tgtitle=1, compte admin seulement) : « Basketlog – Probabilités NBA »
+  // (demande de Tim, 26/11/2026 20 h 54 : plus de mot « pronostics »). Renvoie aussi la description de la chaîne.
+  if (sp.get("tgtitle") === "1") {
+    if (who !== "admin") return json({ error: "interdit" }, 401);
+    if (!cfg.telegram) return json({ ok: false, skipped: "bot Telegram non branché" });
+    const chat = cfg.telegram.chats.fr || Object.values(cfg.telegram.chats)[0];
+    const title = "Basketlog – Probabilités NBA";
+    const tg = (method, body) => fetch(`https://api.telegram.org/bot${cfg.telegram.token}/${method}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).then((r) => r.json()).catch((e) => ({ ok: false, description: e.message }));
+    const before = await tg("getChat", { chat_id: chat });
+    const set = before.result?.title === title ? { ok: true, unchanged: true } : await tg("setChatTitle", { chat_id: chat, title });
+    return json({ ok: !!set.ok, chat, title, before: before.result?.title || null, description: before.result?.description || null, error: set.ok ? undefined : set.description });
+  }
+
   // Post de lancement de l'offre Pro (?promo=1, compte admin seulement ; ?promo=1&dry=1 : aperçu). Une fois par langue :
   // un message Bluesky qui commence pareil dans les 12 dernières heures bloque la langue (Telegram compris).
   if (sp.get("promo") === "1") {
