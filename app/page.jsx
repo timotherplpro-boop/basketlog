@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CONCOURS, concoursOuvert } from "../lib/concours";
 import { recentAccuracy, upcomingAnalyses, conferenceStandings } from "../lib/data";
 import { TEAMS, teamById } from "../lib/teams";
 import { sized } from "../lib/img";
@@ -279,6 +280,18 @@ export default async function Home() {
           })}
         </div>
       </section>
+
+      {/* ================= JEU DE NOËL (jusqu'au 19/12/2026, demande de Tim du 26/11) ================= */}
+      {!L.pt && concoursOuvert() && (
+        <section className="home-contest">
+          <Link href={L.href(CONCOURS.path)} className="home-contest-card">
+            <span className="home-contest-badge">{L.t("🎄 Jeu de Noël", "🎄 Christmas giveaway", "🎄 Sorteo de Navidad", "")}</span>
+            <strong>{L.t("1 PS5 + 1 maillot de Victor Wembanyama à gagner", "Win a PS5 + a Victor Wembanyama jersey", "Gana una PS5 + una camiseta de Victor Wembanyama", "")}</strong>
+            <span>{L.t("Réservé aux abonnés Pro (9,99 €/mois) · Tirage le 20 décembre", "For Pro subscribers (€9.99/month) · Drawing on December 20", "Para suscriptores Pro (9,99 €/mes) · Sorteo el 20 de diciembre", "")}</span>
+            <span className="home-contest-cta">{L.t("Voir le jeu →", "See the giveaway →", "Ver el sorteo →", "")}</span>
+          </Link>
+        </section>
+      )}
 
       {/* ================= ÉQUIPES COUVERTES ================= */}
       <section className="cover">

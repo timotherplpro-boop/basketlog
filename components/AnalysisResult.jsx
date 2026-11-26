@@ -11,6 +11,7 @@ import { formLabel, briefSummary, scenarioOne } from "../lib/freepart";
 import { factorText, scenarioText, confText } from "../lib/matchtext";
 import Link from "next/link";
 import NewsSection from "./NewsSection";
+import ContestNote from "./ContestNote";
 import AskAI from "./AskAI";
 import { aiReady, QUESTIONS } from "../lib/pro";
 import { analysisAccess, memberSession, questionUsage } from "../lib/usage";
@@ -213,6 +214,7 @@ export default async function AnalysisResult({ a, league = "NBA", L, mode = "pag
                       `Tu análisis Starter muestra las probabilidades exactas y las estadísticas clave. Con Pro o Lifetime: la argumentación del modelo, todos los escenarios, las estadísticas comparadas, los jugadores a seguir, el parte médico, las noticias en tiempo real${aiOn ? " y tus preguntas a la IA" : ""}, en todos los partidos y sin límite.`, `Sua análise Starter mostra as probabilidades exatas e as estatísticas-chave. Com Pro ou Lifetime: a argumentação do modelo, todos os cenários, as estatísticas comparadas, os jogadores para acompanhar, o boletim médico, as notícias em tempo real${aiOn ? " e suas perguntas à IA" : ""}, em todos os jogos e sem limite.`
                     )}</p>
                     <Link href={L.href("/pro")} className="btn-solid">🔓 {L.t("Passer Pro", "Go Pro", "Hazte Pro", "Assine o Pro")}</Link>
+                    <ContestNote L={L} />
                   </div>
                 </div>
               </div>

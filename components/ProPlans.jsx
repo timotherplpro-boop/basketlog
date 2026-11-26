@@ -8,6 +8,7 @@ import { price, money, amountOf, curOf, shown, fxNote, PRO_TRIAL_DAYS, PRO_TRIAL
 import { pctOf } from "../lib/i18n";
 import { CODE_RE, cleanCode, discounted, withPromo } from "../lib/promo";
 import SwitchWatch from "./SwitchWatch";
+import ContestNote from "./ContestNote";
 import { ProExitIntent } from "./ExitOffer";
 import { openAuth } from "../lib/auth-client";
 
@@ -261,6 +262,7 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
         )}
       </label>
       {nudge && !agree && <p className="pro-agree-hint" role="alert">{L.t("Coche la case ci-dessus pour continuer vers le paiement.", "Tick the box above to continue to checkout.", "Marca la casilla de arriba para continuar con el pago.", "Marque a caixa acima para continuar com o pagamento.")}</p>}
+      <ContestNote L={L} className="contest-note contest-note-plans" />
       <div className="plans" id="plans">
         {PLANS(L, ai, cur, promo).map((p, i) => {
           const url = checkout[p.id];

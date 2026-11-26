@@ -9,6 +9,7 @@ import UnlockModal from "./UnlockModal";
 import { openAuth } from "../lib/auth-client";
 import { PRO_TRIAL_DAYS, trialTexts } from "../lib/pricing";
 import { useCurrency } from "../lib/use-currency";
+import ContestNote from "./ContestNote";
 
 // Robots d'indexation : pas de fenêtre par-dessus le contenu.
 const BOT = /bot|crawl|spider|slurp|lighthouse/i;
@@ -158,6 +159,7 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
                   <p>{contents} {L.t("Elle est incluse dans Pro et Lifetime.", "It comes with Pro and Lifetime.", "Está incluido en Pro y Lifetime.", "Está incluída no Pro e no Lifetime.")}</p>
                   <Link href={L.href("/pro")} className="btn-solid" onClick={() => { rememberHere(); track("Clic Passer Pro", { source: "visiteur" }); }}>{trial ? `🎁 ${trialCta}` : <>🔓 {L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo", "Desbloquear a análise completa")}</>}</Link>
                   {trial && <small className="gate-trial">{trialLine}</small>}
+                  <ContestNote L={L} />
                   <button type="button" className="gate-login" onClick={() => openAuth({ mode: "connexion", source: "analyse" })}>{L.t("Déjà abonné ? Se connecter", "Already subscribed? Log in", "¿Ya estás suscrito? Inicia sesión", "Já é assinante? Entre")}</button>
                 </>
               ) : (
@@ -167,6 +169,7 @@ export default function Gate({ access, target, pct = 30, proof = null, match = n
                     : L.t("Elle est incluse dans Pro et Lifetime.", "It comes with Pro and Lifetime.", "Está incluido en Pro y Lifetime.", "Está incluída no Pro e no Lifetime.")}</p>
                   <Link href={L.href("/pro")} className="btn-solid" onClick={() => { rememberHere(); track("Clic Passer Pro", { source: free ? "compte_gratuit" : "limite" }); }}>{trial ? `🎁 ${trialCta}` : <>🔓 {L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo", "Desbloquear a análise completa")}</>}</Link>
                   {trial && <small className="gate-trial">{trialLine}</small>}
+                  <ContestNote L={L} />
                   {!free && <small className="gate-reset">{L.t("Ou reviens demain : le compteur repart à minuit.", "Or come back tomorrow: the counter resets at midnight (Paris time).", "O vuelve mañana: el contador se reinicia a medianoche (hora de París).", "Ou volte amanhã: o contador zera à meia-noite (horário de Paris).")}</small>}
                   <a href={`/api/whop/login?next=${here}`} className="gate-login" onClick={() => track("Connexion Whop", { etape: "actualiser", source: "analyse_bloquee" })}>{L.t("Tu viens de payer ? Activer mon abonnement", "Just paid? Activate my subscription", "¿Acabas de pagar? Activar mi suscripción", "Acabou de pagar? Ativar minha assinatura")}</a>
                 </>

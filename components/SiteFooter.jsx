@@ -3,6 +3,7 @@ import CookieSettingsButton from "./CookieSettingsButton";
 import LangSwitch from "./LangSwitch";
 import { InstallButton } from "./InstallApp";
 import { LEGAL, LEGAL_PAGES } from "../lib/legal";
+import { CONCOURS, concoursOuvert } from "../lib/concours";
 
 const LEGAL_EN = { "/mentions-legales": "Legal notice", "/cgu": "Terms of use", "/cgv": "Terms of sale", "/confidentialite": "Privacy", "/cookies": "Cookies" };
 const LEGAL_ES = { "/mentions-legales": "Aviso legal", "/cgu": "Condiciones de uso", "/cgv": "Condiciones de venta", "/confidentialite": "Privacidad", "/cookies": "Cookies" };
@@ -69,6 +70,7 @@ export default function SiteFooter({ L, compact = false }) {
           <Link href={L.href("/app/donnees")}>{L.t("API et données gratuites", "Free API and data", "API y datos gratis", "API e dados grátis")}</Link>
           <Link href={L.href("/fivethirtyeight-nba")}>{L.t("Alternative à FiveThirtyEight", "FiveThirtyEight alternative", "Alternativa a FiveThirtyEight", "Alternativa ao FiveThirtyEight")}</Link>
           <Link href={L.href("/pro")}>Basketlog Pro</Link>
+          {!L.pt && concoursOuvert() && <Link href={L.href(CONCOURS.path)}>{L.t("Jeu de Noël : PS5 à gagner", "Christmas giveaway: win a PS5", "Sorteo de Navidad: gana una PS5", "")}</Link>}
           <Link href={L.href("/avis")}>{L.t("Avis", "Reviews", "Opiniones", "Avaliações")}</Link>
           <Link href={L.href("/widget")}>{L.t("Widget pour votre site", "Widget for your site", "Widget para tu web", "Widget para o seu site")}</Link>
           {/* Comptes officiels (mêmes adresses que sameAs dans app/layout.jsx) : liens visibles pour que Google
