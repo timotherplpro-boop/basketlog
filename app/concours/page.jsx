@@ -76,7 +76,7 @@ C.pt = {
 // Règlement : [titre, paragraphes]. e = éditeur du site (lib/legal.js), mail = lien vers l'adresse de contact.
 function rules(lang, e, mail, privacy) {
   if (lang === "fr") return [
-    ["Organisateur", [<>{e.nom}, {e.statut}, {e.adresse}, SIRET {e.siret}, éditeur du site Basketlog ({LEGAL.url}) (« l&apos;Organisateur »), organise un jeu gratuit et sans obligation d&apos;achat intitulé « Jeu de Noël Basketlog » (« le Jeu »).</>]],
+    ["Organisateur", [<>Basketlog ({LEGAL.url}), {e.adresse}, SIRET {e.siret}, contact : {mail} (« l&apos;Organisateur »), organise un jeu gratuit et sans obligation d&apos;achat intitulé « Jeu de Noël Basketlog » (« le Jeu »).</>]],
     ["Durée", ["Le Jeu est ouvert du 26 novembre 2026 au 19 décembre 2026 à 23 h 59 (heure de Paris). Le tirage au sort a lieu le 20 décembre 2026."]],
     ["Qui peut participer et comment", [
       "Le Jeu est ouvert à toute personne physique majeure (18 ans révolus, ou l'âge de la majorité de son pays ou État de résidence s'il est plus élevé), quel que soit son pays de résidence, à l'exception : des résidents du Brésil, d'Italie et de la province de Québec, où ce type de jeu demande une autorisation ou un enregistrement préalable ; des résidents de Cuba, d'Iran, de Corée du Nord, de Syrie, de Russie, de Biélorussie et des territoires occupés d'Ukraine, soumis à des sanctions internationales ; de l'Organisateur et des membres de son foyer. Le Jeu est nul là où la loi l'interdit. Un gagnant résidant au Canada doit répondre correctement à une question d'arithmétique avant de recevoir son lot.",
@@ -102,7 +102,7 @@ function rules(lang, e, mail, privacy) {
     ]],
   ];
   if (lang === "es") return [
-    ["Organizador", [<>{e.nom}, empresario individual (micro-entreprise francesa), {e.adresse}, SIRET {e.siret}, editor de Basketlog ({LEGAL.url}) (el «Organizador»), organiza un sorteo gratuito y sin obligación de compra llamado «Sorteo de Navidad de Basketlog» (el «Sorteo»).</>]],
+    ["Organizador", [<>Basketlog ({LEGAL.url}), {e.adresse}, SIRET {e.siret}, contacto: {mail} (el «Organizador»), organiza un sorteo gratuito y sin obligación de compra llamado «Sorteo de Navidad de Basketlog» (el «Sorteo»).</>]],
     ["Duración", ["El Sorteo está abierto del 26 de noviembre de 2026 al 19 de diciembre de 2026 a las 23:59 (hora de Madrid). El sorteo se realiza el 20 de diciembre de 2026."]],
     ["Quién puede participar y cómo", [
       "El Sorteo está abierto en todo el mundo a toda persona física mayor de edad (18 años, o la mayoría de edad de su país o estado de residencia si es superior), salvo: los residentes en Brasil, Italia y la provincia de Quebec, donde este tipo de sorteo requiere una autorización o un registro previo; los residentes en Cuba, Irán, Corea del Norte, Siria, Rusia, Bielorrusia y los territorios ocupados de Ucrania, sujetos a sanciones internacionales; y el Organizador y los miembros de su hogar. El Sorteo es nulo donde la ley lo prohíba. Un ganador residente en Canadá debe responder correctamente a una pregunta de cálculo antes de recibir su premio.",
@@ -128,7 +128,7 @@ function rules(lang, e, mail, privacy) {
     ]],
   ];
   return [
-    ["Sponsor", [<>{e.nom}, sole trader (French micro-entreprise), {e.adresse}, SIRET {e.siret}, publisher of Basketlog ({LEGAL.url}) (the “Sponsor”), runs a free giveaway called “Basketlog Christmas Giveaway” (the “Giveaway”).</>]],
+    ["Sponsor", [<>Basketlog ({LEGAL.url}), {e.adresse}, SIRET {e.siret}, contact: {mail} (the “Sponsor”), runs a free giveaway called “Basketlog Christmas Giveaway” (the “Giveaway”).</>]],
     ["Entry period", ["The Giveaway runs from November 26, 2026 to December 19, 2026 at 11:59 p.m. Paris time (5:59 p.m. ET). The drawing takes place on December 20, 2026."]],
     ["Eligibility and how to enter", [
       "Open worldwide to individuals who are 18 or older (or the age of majority in their country or state of residence, if higher), except: residents of Brazil, Italy and the province of Quebec, where this type of giveaway requires prior authorization or registration; residents of Cuba, Iran, North Korea, Syria, Russia, Belarus and the occupied territories of Ukraine, which are subject to international sanctions; and the Sponsor and members of the Sponsor's household. Void where prohibited. A winner residing in Canada must correctly answer a mathematical skill-testing question before receiving a prize.",
