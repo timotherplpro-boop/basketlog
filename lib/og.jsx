@@ -319,13 +319,146 @@ async function actuBackground(url) {
     return null;
   }
 }
+// Version « stats » (Tim, 26/11 22 h 14 : « c'est pas Wemby ça » → choix « Visuel stats sans joueur ») : quand il n'y a
+// pas d'image de fond (i vide), aucun joueur à l'image : couleurs des deux équipes, nom en très grand, stat principale
+// géante, autres stats, score, titre. Rien qui puisse passer pour la photo d'un vrai joueur.
+const hexRgba = (hex, al) => {
+  const h = String(hex || "").replace("#", "");
+  if (!/^[0-9a-f]{6}$/i.test(h)) return `rgba(255,140,58,${al})`;
+  return `rgba(${parseInt(h.slice(0, 2), 16)},${parseInt(h.slice(2, 4), 16)},${parseInt(h.slice(4, 6), 16)},${al})`;
+};
+function actuStatsImage(a, fmt, f, tf, init) {
+  const { width, height } = ACTU_SIZES[fmt];
+  const tall = fmt === "portrait";
+  const k = fmt === "thumb" ? 0.68 : 1;
+  const px = (n) => Math.round(n * k);
+  const stats = String(a.n || "").split("|").map((s) => s.trim()).filter(Boolean).slice(0, 3)
+    .map((s) => { const m = s.match(/^([+-]?[\d.,]+\s?%?)\s*(.*)$/); return m ? { v: m[1].trim(), u: m[2].trim() } : { v: s, u: "" }; });
+  const hero = stats[0];
+  const rest = stats.slice(1);
+  const sc = String(a.m || "").split("|").map((s) => s.trim());
+  const score = sc.length === 4 && sc.every(Boolean) ? sc : null;
+  const cols = String(a.c || "").split(",").map((h) => h.trim());
+  const ca = /^[0-9a-f]{6}$/i.test(cols[0] || "") ? cols[0] : "ff8c3a";
+  const cb = /^[0-9a-f]{6}$/i.test(cols[1] || "") ? cols[1] : "3a7bff";
+  const winA = score ? Number(score[1]) >= Number(score[2]) : true;
+  const who = String(a.w || "").trim().slice(0, 40);
+  const parts = who.split(/\s+/).filter(Boolean);
+  const last = (parts.length ? parts[parts.length - 1] : "").toUpperCase();
+  const first = parts.slice(0, -1).join(" ").toUpperCase();
+  const label = String(a.l || "ACTU NBA").slice(0, 28);
+  const title = String(a.t || "");
+  const lastMax = tall ? 968 : 560;
+  const lastSize = px(Math.min(tall ? 124 : 84, Math.floor(lastMax / Math.max(1, last.length * 0.74))));
+  const heroSize = px(tall ? (String(hero?.v || "").length > 3 ? 220 : 300) : (String(hero?.v || "").length > 3 ? 140 : 190));
+  const glow = (color, al, size, pos) => <div style={{ position: "absolute", ...pos, width: size, height: size, display: "flex", borderRadius: size, background: `radial-gradient(circle, ${hexRgba(color, al)} 0%, rgba(4,8,23,0) 65%)` }} />;
+  const ring = (size, pos, al) => <div style={{ position: "absolute", ...pos, width: size, height: size, display: "flex", borderRadius: size, border: `${px(3)}px solid rgba(255,255,255,${al})` }} />;
+  const teamRow = (name, pts, color, win) => (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: px(14) }}>
+      <div style={{ display: "flex", alignItems: "center", gap: px(14) }}>
+        <div style={{ display: "flex", width: px(10), height: px(tall ? 48 : 40), borderRadius: 6, background: `#${color}` }} />
+        <div style={{ display: "flex", fontSize: px(tall ? 32 : 28), fontWeight: 800, color: win ? "#ffffff" : "#8f98ab", letterSpacing: 1 }}>{name.toUpperCase()}</div>
+      </div>
+      <div style={{ display: "flex", fontSize: px(tall ? 54 : 46), fontWeight: 800, color: win ? "#ffffff" : "#8f98ab" }}>{pts}</div>
+    </div>
+  );
+  const heroBlock = hero && (
+    <div style={{ display: "flex", alignItems: "flex-end", gap: px(tall ? 28 : 20) }}>
+      <div style={{ display: "flex", fontSize: heroSize, fontWeight: 800, color: "#ffffff", lineHeight: 0.8, letterSpacing: -6 }}>{hero.v}</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: px(tall ? 12 : 8), paddingBottom: px(tall ? 10 : 6) }}>
+        {hero.u && <div style={{ display: "flex", fontSize: px(tall ? 46 : 32), fontWeight: 800, color: "#ff8c3a", letterSpacing: px(3) }}>{hero.u.toUpperCase()}</div>}
+        {rest.map((r, idx) => (
+          <div key={idx} style={{ display: "flex", alignItems: "baseline", gap: px(10) }}>
+            <div style={{ display: "flex", fontSize: px(tall ? 52 : 36), fontWeight: 800, color: "#ffffff" }}>{r.v}</div>
+            <div style={{ display: "flex", fontSize: px(tall ? 28 : 20), fontWeight: 800, color: "#c9d0dd", letterSpacing: px(2) }}>{r.u.toUpperCase()}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+  const nameBlock = (
+    <div style={{ display: "flex", flexDirection: "column", gap: px(4) }}>
+      {first && <div style={{ display: "flex", fontSize: px(tall ? 34 : 24), fontWeight: 800, color: "#c9d0dd", letterSpacing: px(6) }}>{first}</div>}
+      {last && <div style={{ display: "flex", fontSize: lastSize, fontWeight: 800, color: "#ffffff", lineHeight: 1, letterSpacing: -1 }}>{last}</div>}
+    </div>
+  );
+  const scoreCard = score && (
+    <div style={{ display: "flex", flexDirection: "column", gap: px(10), padding: `${px(tall ? 20 : 16)}px ${px(tall ? 28 : 20)}px`, borderRadius: px(22), border: "2px solid rgba(255,255,255,.14)", background: "rgba(255,255,255,.06)" }}>
+      <div style={{ display: "flex", fontSize: px(tall ? 20 : 16), fontWeight: 800, color: "#8f98ab", letterSpacing: 3 }}>SCORE FINAL</div>
+      {teamRow(score[0], score[1], ca, winA)}
+      {teamRow(score[3], score[2], cb, !winA)}
+    </div>
+  );
+  const titleEl = <div style={{ display: "flex", fontFamily: tf ? "Tilt Warp" : "Inter", fontSize: px(tall ? (title.length > 60 ? 50 : 56) : (title.length > 60 ? 30 : 34)), fontWeight: tf ? 400 : 800, lineHeight: 1.1, color: "#ffffff" }}>{title}</div>;
+  const top = (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: px(14) }}>
+        <img src={BALL} width={px(tall ? 54 : 46)} height={px(tall ? 54 : 46)} alt="" />
+        <div style={{ display: "flex", fontSize: px(tall ? 38 : 32), fontWeight: 800, color: "#ff8c3a" }}>Basketlog</div>
+      </div>
+      <div style={{ display: "flex", padding: `${px(8)}px ${px(18)}px`, borderRadius: 999, border: "2px solid rgba(255,140,58,.75)", background: "rgba(4,8,23,.55)", color: "#ffb27a", fontSize: px(tall ? 24 : 20), fontWeight: 800, letterSpacing: 2 }}>{label}</div>
+    </div>
+  );
+  const foot = (
+    <div style={{ display: "flex", alignItems: "center", gap: px(14) }}>
+      {tall && <div style={{ display: "flex", fontSize: 24, fontWeight: 500, color: "#c9d0dd" }}>Probabilités de victoire gratuites chaque soir</div>}
+      <div style={{ display: "flex", fontSize: px(tall ? 28 : 24), fontWeight: 800, color: "#ff8c3a" }}>basketlog-app.com</div>
+    </div>
+  );
+  return new ImageResponse(
+    (
+      <div style={{ display: "flex", position: "relative", width, height, background: "#040817", fontFamily: "Inter", overflow: "hidden" }}>
+        {glow(ca, 0.58, px(tall ? 1100 : 900), { right: px(tall ? -320 : -240), top: px(tall ? -300 : -380) })}
+        {glow(cb, 0.52, px(tall ? 1100 : 900), { left: px(tall ? -380 : -340), bottom: px(tall ? -360 : -460) })}
+        {ring(px(tall ? 620 : 520), { right: px(tall ? -240 : -160), top: px(tall ? 330 : 60) }, 0.07)}
+        {ring(px(tall ? 1500 : 1200), { left: px(tall ? -980 : -900), top: px(tall ? 620 : 250) }, 0.05)}
+        <div style={{ position: "absolute", left: 0, top: px(tall ? 640 : 0), width: tall ? width : px(3), height: tall ? px(3) : height, display: "flex", background: "rgba(255,255,255,.05)", ...(tall ? {} : { left: Math.round(width * 0.56) }) }} />
+        {tall ? (
+          <div style={{ position: "absolute", left: 56, right: 56, top: 50, bottom: 50, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            {top}
+            <div style={{ display: "flex", flexDirection: "column", gap: 34 }}>
+              {nameBlock}
+              {heroBlock}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 26 }}>
+              {scoreCard}
+              {titleEl}
+              {foot}
+            </div>
+          </div>
+        ) : (
+          <div style={{ position: "absolute", left: px(52), right: px(52), top: px(40), bottom: px(36), display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            {top}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: px(40) }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: px(22), width: px(560) }}>
+                {nameBlock}
+                {heroBlock}
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: px(16), width: px(470) }}>
+                {scoreCard}
+                {titleEl}
+                {foot}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    ),
+    { width, height, fonts: [...(f || []), ...(tf ? [tf] : [])], ...init }
+  );
+}
+
 // Version 2 (Tim, 26/11 22 h 08 : « des posts plus qualitatifs avec un visuel qui parle du sujet ») : en plus du titre,
 // le joueur ou l'équipe du jour (w), 1 à 3 stats en très gros (n : « 44 PTS|16 REB »), le score (m : « Spurs|111|116|Blazers »,
 // le vainqueur ressort en blanc) et les couleurs des deux équipes (c : « C4CED4,E03A3E »). Tous facultatifs.
 export async function actuOgImage(a, format = "og", init = {}) {
   const fmt = ACTU_SIZES[format] ? format : "og";
   const { width, height } = ACTU_SIZES[fmt];
-  const [f, tf, bg] = await Promise.all([fonts(), titleFont(), actuBackground(a.i)]);
+  if (!a.i && (a.n || a.m || a.w)) {
+    const [f0, tf0] = await Promise.all([fonts(), titleFont()]);
+    return actuStatsImage(a, fmt, f0, tf0, init);
+  }
+  const [f, tf, bg] = await Promise.all([fonts(), titleFont(), a.i ? actuBackground(a.i) : null]);
   const tall = fmt === "portrait";
   const k = tall ? 1 : fmt === "thumb" ? 0.68 : 1;
   const px = (n) => Math.round(n * k);

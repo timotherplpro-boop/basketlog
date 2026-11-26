@@ -179,6 +179,34 @@ export async function GET(req) {
     return json({ ok: !!set.ok && !!setDesc.ok, chat, title, before: before.result?.title || null, description: desc || null, error: set.ok ? (setDesc.ok ? undefined : setDesc.description) : set.description });
   }
 
+  // Suppression d'un post du compte (compte admin seulement) : ?tgdel=<n° du message de la chaîne Telegram française>
+  // et/ou ?bskydel=<identifiant du post Bluesky, la fin de l'adresse at://…/app.bsky.feed.post/…>. Sert à remplacer un
+  // post raté (Tim, 26/11 22 h 15 : « Remplacer et publier partout »).
+  if (sp.get("tgdel") || sp.get("bskydel")) {
+    if (who !== "admin") return json({ error: "interdit" }, 401);
+    const out = { ok: true, telegram: null, bluesky: null, errors: [] };
+    const tgId = Number(sp.get("tgdel"));
+    if (tgId > 0 && cfg.telegram) {
+      const chat = cfg.telegram.chats.fr || Object.values(cfg.telegram.chats)[0];
+      const j = await fetch(`https://api.telegram.org/bot${cfg.telegram.token}/deleteMessage`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ chat_id: chat, message_id: tgId }) }).then((r) => r.json()).catch((e) => ({ ok: false, description: e.message }));
+      out.telegram = j.ok ? `message ${tgId} supprimé` : null;
+      if (!j.ok) out.errors.push(`telegram : ${j.description}`);
+    }
+    const rkey = String(sp.get("bskydel") || "").trim();
+    if (/^[a-z0-9]{10,20}$/.test(rkey) && cfg.bluesky) {
+      try {
+        const sess = await blueskySession(cfg.bluesky);
+        const r = await fetch(`${sess.pds}/xrpc/com.atproto.repo.deleteRecord`, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${sess.jwt}` }, body: JSON.stringify({ repo: sess.did, collection: "app.bsky.feed.post", rkey }) });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        out.bluesky = `post ${rkey} supprimé`;
+      } catch (e) {
+        out.errors.push(`bluesky : ${e.message}`);
+      }
+    }
+    out.ok = !out.errors.length;
+    return json(out);
+  }
+
   // Post de lancement de l'offre Pro (?promo=1, compte admin seulement ; ?promo=1&dry=1 : aperçu). Une fois par langue :
   // un message Bluesky qui commence pareil dans les 12 dernières heures bloque la langue (Telegram compris).
   if (sp.get("promo") === "1") {
