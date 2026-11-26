@@ -99,7 +99,7 @@ export default async function sitemap() {
       .map((p) => playerPath(p.name)).filter((p) => !seen.has(p) && seen.add(p)).slice(0, 100).map((p) => u(p, 0.5, "daily"));
   } catch {}
 
-  // Jeu de Noël 2026 : ouvert à la France, à l'Espagne et aux États-Unis (la page portugaise, Brésil, est en noindex).
+  // Jeu de Noël 2026 : ouvert au monde entier sauf quelques pays ; la page portugaise (surtout lue au Brésil, exclu) est en noindex.
   const cAlt = { languages: { fr: `${SITE}/concours`, en: `${SITE}/en/concours`, es: `${SITE}/es/concours`, "x-default": `${SITE}/en/concours` } };
   const concours = ["/concours", "/en/concours", "/es/concours"].map((p, i) => ({ url: `${SITE}${p}`, lastModified: new Date(), changeFrequency: "daily", priority: i ? 0.7 : 0.8, alternates: cAlt }));
   return [...[...pages, ...teams, ...nba, ...el, ...arts, ...players].flatMap(both), ...ncaaEn, ...concours];

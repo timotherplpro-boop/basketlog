@@ -8,9 +8,10 @@ import { COOKIE, decodeSession } from "../../lib/pro";
 import { CONCOURS, concoursOuvert } from "../../lib/concours";
 import { GAMEPAD_SVG, JERSEY_SVG } from "../../lib/concours-art";
 
-// Jeu de Noël 2026 (décision de Tim, 26/11/2026 ; ouvert à la France, à l'Espagne et aux États-Unis le soir même) :
-// présentation, bouton de participation et règlement complet, en français, anglais et espagnol. La page portugaise
-// (Brésil, où un tirage au sort promotionnel demande une autorisation de l'État) explique que le Brésil n'est pas éligible.
+// Jeu de Noël 2026 (décision de Tim, 26/11/2026 ; ouvert au monde entier à sa demande, 18 h 36) : présentation, bouton de
+// participation et règlement complet en français, anglais et espagnol. Exclus : Brésil, Italie et Québec (tirage promotionnel
+// soumis à autorisation ou enregistrement préalable) et pays sous sanctions internationales. La page portugaise (surtout
+// lue au Brésil) n'est pas indexée et le règlement y est en anglais.
 const C = {
   fr: {
     metaTitle: "Jeu de Noël : 1 PS5 et 1 maillot de Wembanyama à gagner – Basketlog",
@@ -21,7 +22,7 @@ const C = {
     cta: "Créer mon compte gratuit et participer", already: "Déjà un compte ? Tu participes déjà.",
     member: "✅ Tu participes : ton compte est inscrit au tirage du 20 décembre.", memberLink: "Voir les matchs de ce soir",
     closed: "Les inscriptions sont closes. Les gagnants du tirage du 20 décembre sont prévenus par e-mail.",
-    small: "Gratuit et sans obligation d'achat · Personnes majeures résidant en France métropolitaine, en Espagne (péninsule et Baléares) ou aux États-Unis · Un abonnement ne donne aucune chance de plus.",
+    small: "Gratuit et sans obligation d'achat · Ouvert aux personnes majeures du monde entier, sauf exceptions du règlement · Un abonnement ne donne aucune chance de plus.",
     stepsTitle: "Comment participer",
     steps: [["Crée ton compte", "Gratuit, en 30 secondes, avec ton adresse e-mail."], ["C'est tout", "Ton compte est inscrit tout seul au tirage. Abonné ou non, chaque membre a une seule chance."], ["Tirage le 20 décembre", "Deux gagnants sont tirés au sort et prévenus par e-mail le jour même."]],
     rulesTitle: "Règlement du jeu", rulesToggle: "Lire le règlement complet",
@@ -35,7 +36,7 @@ const C = {
     cta: "Create my free account and enter", already: "Already have an account? You're already in.",
     member: "✅ You're in: your account is entered in the December 20 drawing.", memberLink: "See tonight's games",
     closed: "Entries are closed. Winners of the December 20 drawing are notified by email.",
-    small: "No purchase necessary · Open to adults living in mainland France, Spain (mainland and Balearic Islands) or the United States · A subscription does not increase your chances.",
+    small: "No purchase necessary · Open to adults worldwide, with the exceptions listed in the rules · A subscription does not increase your chances.",
     stepsTitle: "How to enter",
     steps: [["Create your account", "Free, in 30 seconds, with your email address."], ["That's it", "Your account is entered automatically. Subscriber or not, every member gets one chance."], ["Drawing on December 20", "Two winners are drawn at random and notified by email the same day."]],
     rulesTitle: "Official rules", rulesToggle: "Read the official rules",
@@ -49,26 +50,26 @@ const C = {
     cta: "Crear mi cuenta gratis y participar", already: "¿Ya tienes cuenta? Ya participas.",
     member: "✅ Participas: tu cuenta está inscrita en el sorteo del 20 de diciembre.", memberLink: "Ver los partidos de esta noche",
     closed: "La participación está cerrada. Los ganadores del sorteo del 20 de diciembre reciben un correo.",
-    small: "Gratis y sin obligación de compra · Mayores de edad residentes en la Francia metropolitana, España (península y Baleares) o Estados Unidos · Una suscripción no da más posibilidades.",
+    small: "Gratis y sin obligación de compra · Abierto a mayores de edad de todo el mundo, salvo las excepciones de las bases · Una suscripción no da más posibilidades.",
     stepsTitle: "Cómo participar",
     steps: [["Crea tu cuenta", "Gratis, en 30 segundos, con tu correo electrónico."], ["Ya está", "Tu cuenta entra sola en el sorteo. Suscriptor o no, cada miembro tiene una sola oportunidad."], ["Sorteo el 20 de diciembre", "Se eligen dos ganadores al azar y se les avisa por correo el mismo día."]],
     rulesTitle: "Bases legales", rulesToggle: "Leer las bases legales",
   },
 };
-// Brésil : page d'information seulement (règlement anglais).
+// Portugais : surtout lu au Brésil, exclu du jeu ; règlement en anglais.
 C.pt = {
   ...C.en,
-  metaTitle: "Sorteio de Natal da Basketlog – não disponível no Brasil",
-  metaDesc: "O sorteio de Natal da Basketlog (um PS5 e uma camisa de Victor Wembanyama) é aberto apenas a residentes na França, na Espanha e nos Estados Unidos.",
+  metaTitle: "Sorteio de Natal da Basketlog: um PS5 e uma camisa de Wembanyama",
+  metaDesc: "Sorteio de Natal da Basketlog (um PS5 e uma camisa de Victor Wembanyama), aberto no mundo todo, exceto no Brasil, na Itália e no Québec.",
   badge: "Sorteio de Natal", label: "Prêmios", head: "Um PS5", subA: "+ uma camisa de", c1: "Console PS5", c2: "Camisa do Wemby",
   date: "Sorteio em 20 de dezembro de 2026",
-  intro: "Este sorteio é aberto apenas a maiores de idade residentes na França metropolitana, na Espanha (península e Baleares) e nos Estados Unidos. Residentes no Brasil não podem participar.",
-  cta: "Criar minha conta grátis", already: "",
-  member: "Sua conta Basketlog está ativa. Este sorteio não é aberto a residentes no Brasil.", memberLink: "Ver os jogos desta noite",
+  intro: "Para participar, basta ter uma conta grátis da Basketlog criada até 19 de dezembro de 2026. O sorteio é aberto a maiores de idade no mundo todo, exceto no Brasil, onde esse tipo de sorteio exige autorização prévia do governo.",
+  cta: "Criar minha conta grátis e participar", already: "Já tem conta? Você já participa.",
+  member: "✅ Sua conta está inscrita no sorteio de 20 de dezembro (exceto residentes no Brasil).", memberLink: "Ver os jogos desta noite",
   closed: "As inscrições estão encerradas.",
-  small: "Sem obrigação de compra · Aberto apenas a residentes na França, na Espanha e nos Estados Unidos.",
+  small: "Sem obrigação de compra · Aberto no mundo todo, exceto Brasil, Itália, Québec e países sob sanções · Uma assinatura não dá mais chances.",
   stepsTitle: "Como funciona",
-  steps: [["Conta grátis", "Qualquer conta Basketlog criada até 19 de dezembro de 2026 participa (fora do Brasil)."], ["Uma chance por pessoa", "Assinante ou não, cada membro tem uma única chance."], ["Sorteio em 20 de dezembro", "Dois ganhadores são sorteados e avisados por e-mail no mesmo dia."]],
+  steps: [["Crie sua conta", "Grátis, em 30 segundos, com seu e-mail."], ["Pronto", "Sua conta entra sozinha no sorteio. Assinante ou não, cada membro tem uma única chance."], ["Sorteio em 20 de dezembro", "Dois ganhadores são sorteados e avisados por e-mail no mesmo dia."]],
   rulesTitle: "Regulamento oficial (em inglês)", rulesToggle: "Ler o regulamento oficial",
 };
 
@@ -78,18 +79,18 @@ function rules(lang, e, mail, privacy) {
     ["Organisateur", [<>{e.nom}, {e.statut}, {e.adresse}, SIRET {e.siret}, éditeur du site Basketlog ({LEGAL.url}) (« l&apos;Organisateur »), organise un jeu gratuit et sans obligation d&apos;achat intitulé « Jeu de Noël Basketlog » (« le Jeu »).</>]],
     ["Durée", ["Le Jeu est ouvert du 26 novembre 2026 au 19 décembre 2026 à 23 h 59 (heure de Paris). Le tirage au sort a lieu le 20 décembre 2026."]],
     ["Qui peut participer et comment", [
-      "Le Jeu est ouvert à toute personne physique majeure (18 ans révolus, ou l'âge de la majorité de son État de résidence s'il est plus élevé) résidant en France métropolitaine (Corse comprise), en Espagne péninsulaire ou aux îles Baléares, ou aux États-Unis (50 États et district de Columbia), à l'exception de l'Organisateur et des membres de son foyer. Le Jeu est nul là où la loi l'interdit.",
+      "Le Jeu est ouvert à toute personne physique majeure (18 ans révolus, ou l'âge de la majorité de son pays ou État de résidence s'il est plus élevé), quel que soit son pays de résidence, à l'exception : des résidents du Brésil, d'Italie et de la province de Québec, où ce type de jeu demande une autorisation ou un enregistrement préalable ; des résidents de Cuba, d'Iran, de Corée du Nord, de Syrie, de Russie, de Biélorussie et des territoires occupés d'Ukraine, soumis à des sanctions internationales ; de l'Organisateur et des membres de son foyer. Le Jeu est nul là où la loi l'interdit. Un gagnant résidant au Canada doit répondre correctement à une question d'arithmétique avant de recevoir son lot.",
       <>Pour participer, il faut détenir un compte Basketlog, gratuit ou payant, créé au plus tard le 19 décembre 2026 à 23 h 59 avec une adresse e-mail valide. Les comptes ouverts avant le début du Jeu participent automatiquement. Un membre qui ne souhaite pas participer peut le signaler à {mail}.</>,
       "Une seule participation par personne : un même participant ne peut gagner qu'un lot, même avec plusieurs comptes. Les comptes créés en série, avec des adresses jetables ou de façon automatisée sont exclus. Un abonnement payant (Pro ou Lifetime) n'est pas nécessaire et ne donne aucune chance supplémentaire.",
     ]],
     ["Lots", [
       "Lot n° 1 : une console PlayStation 5, édition standard (valeur commerciale indicative en France : 649,99 € TTC).",
       "Lot n° 2 : un maillot NBA Swingman de Victor Wembanyama (San Antonio Spurs), taille au choix du gagnant parmi celles disponibles (valeur commerciale indicative en France : 104,99 € TTC).",
-      "Chaque lot est fourni dans le modèle vendu dans le pays de résidence du gagnant. Les lots ne peuvent être ni échangés ni remboursés en espèces ; s'il est impossible de fournir un lot, l'Organisateur le remplace par un lot de valeur égale ou supérieure. Les éventuels impôts et taxes liés au lot dans le pays du gagnant sont à sa charge.",
+      "Chaque lot est commandé auprès d'un vendeur du pays du gagnant, dans le modèle qui y est vendu, ou expédié depuis la France. Les lots ne peuvent être ni échangés ni remboursés en espèces ; s'il est impossible de fournir ou de livrer un lot dans le pays du gagnant, l'Organisateur le remplace par un lot ou un bon d'achat de valeur équivalente. Les éventuels droits de douane, impôts et taxes liés au lot dans le pays du gagnant sont à sa charge.",
     ]],
     ["Tirage au sort", ["Le 20 décembre 2026, l'Organisateur tire au sort, de façon aléatoire, deux gagnants parmi les comptes qui remplissent les conditions : le premier gagne le lot n° 1, le second le lot n° 2. Deux suppléants sont tirés de la même façon, dans le même ordre. Les chances de gagner dépendent du nombre de participations valables."]],
     ["Information des gagnants et remise des lots", [
-      "Les gagnants sont prévenus le 20 décembre 2026 par e-mail, à l'adresse de leur compte Basketlog. Ils ont 7 jours pour répondre en donnant leurs nom et prénom, une adresse postale dans l'une des zones du Jeu et, pour le maillot, la taille choisie. Une pièce d'identité peut être demandée pour vérifier l'âge et le lieu de résidence.",
+      "Les gagnants sont prévenus le 20 décembre 2026 par e-mail, à l'adresse de leur compte Basketlog. Ils ont 7 jours pour répondre en donnant leurs nom et prénom, une adresse postale dans un pays éligible et, pour le maillot, la taille choisie. Une pièce d'identité peut être demandée pour vérifier l'âge et le lieu de résidence.",
       "Sans réponse dans ce délai, ou si les conditions ne sont pas remplies, le lot revient au suppléant. Les lots sont envoyés gratuitement à l'adresse indiquée dans les 30 jours qui suivent la réponse du gagnant. L'Organisateur ne garantit pas une livraison avant Noël.",
       "Avec l'accord des gagnants, leur prénom et l'initiale de leur nom peuvent être annoncés sur le site et les réseaux sociaux de Basketlog.",
     ]],
@@ -104,18 +105,18 @@ function rules(lang, e, mail, privacy) {
     ["Organizador", [<>{e.nom}, empresario individual (micro-entreprise francesa), {e.adresse}, SIRET {e.siret}, editor de Basketlog ({LEGAL.url}) (el «Organizador»), organiza un sorteo gratuito y sin obligación de compra llamado «Sorteo de Navidad de Basketlog» (el «Sorteo»).</>]],
     ["Duración", ["El Sorteo está abierto del 26 de noviembre de 2026 al 19 de diciembre de 2026 a las 23:59 (hora de Madrid). El sorteo se realiza el 20 de diciembre de 2026."]],
     ["Quién puede participar y cómo", [
-      "El Sorteo está abierto a toda persona física mayor de edad (18 años, o la mayoría de edad de su estado de residencia si es superior) residente en la Francia metropolitana (incluida Córcega), en la España peninsular o en las Islas Baleares, o en Estados Unidos (50 estados y Distrito de Columbia), salvo el Organizador y los miembros de su hogar. El Sorteo es nulo donde la ley lo prohíba.",
+      "El Sorteo está abierto en todo el mundo a toda persona física mayor de edad (18 años, o la mayoría de edad de su país o estado de residencia si es superior), salvo: los residentes en Brasil, Italia y la provincia de Quebec, donde este tipo de sorteo requiere una autorización o un registro previo; los residentes en Cuba, Irán, Corea del Norte, Siria, Rusia, Bielorrusia y los territorios ocupados de Ucrania, sujetos a sanciones internacionales; y el Organizador y los miembros de su hogar. El Sorteo es nulo donde la ley lo prohíba. Un ganador residente en Canadá debe responder correctamente a una pregunta de cálculo antes de recibir su premio.",
       <>Para participar, basta con tener una cuenta de Basketlog, gratuita o de pago, creada como muy tarde el 19 de diciembre de 2026 a las 23:59 con una dirección de correo válida. Las cuentas abiertas antes del inicio del Sorteo participan automáticamente. Quien no desee participar puede indicarlo en {mail}.</>,
       "Una sola participación por persona: un mismo participante solo puede ganar un premio, aunque tenga varias cuentas. Quedan excluidas las cuentas creadas en serie, con direcciones desechables o de forma automatizada. Una suscripción de pago (Pro o Lifetime) no es necesaria y no da más posibilidades.",
     ]],
     ["Premios", [
       "Premio 1: una consola PlayStation 5, edición estándar (valor comercial orientativo en Francia: 649,99 € IVA incluido).",
       "Premio 2: una camiseta NBA Swingman de Victor Wembanyama (San Antonio Spurs), talla a elegir por el ganador entre las disponibles (valor comercial orientativo en Francia: 104,99 € IVA incluido).",
-      "Cada premio se entrega en el modelo vendido en el país de residencia del ganador. Los premios no se pueden cambiar ni canjear por dinero; si no fuera posible entregar un premio, el Organizador lo sustituirá por otro de valor igual o superior. Los impuestos que correspondan al premio en el país del ganador corren a su cargo.",
+      "Cada premio se compra a un vendedor del país del ganador, en el modelo que se vende allí, o se envía desde Francia. Los premios no se pueden cambiar ni canjear por dinero; si no fuera posible entregar un premio en el país del ganador, el Organizador lo sustituirá por otro premio o una tarjeta regalo de valor equivalente. Los derechos de aduana e impuestos que correspondan al premio en el país del ganador corren a su cargo.",
     ]],
     ["Sorteo", ["El 20 de diciembre de 2026, el Organizador elegirá al azar a dos ganadores entre las cuentas que cumplan las condiciones: el primero gana el premio 1 y el segundo, el premio 2. Se eligen también dos suplentes, de la misma forma y en el mismo orden. Las posibilidades de ganar dependen del número de participaciones válidas."]],
     ["Comunicación a los ganadores y entrega", [
-      "Los ganadores reciben un correo el 20 de diciembre de 2026 en la dirección de su cuenta de Basketlog. Tienen 7 días para responder indicando su nombre y apellidos, una dirección postal en una de las zonas del Sorteo y, para la camiseta, la talla elegida. Se puede pedir un documento de identidad para comprobar la edad y el lugar de residencia.",
+      "Los ganadores reciben un correo el 20 de diciembre de 2026 en la dirección de su cuenta de Basketlog. Tienen 7 días para responder indicando su nombre y apellidos, una dirección postal en un país admitido y, para la camiseta, la talla elegida. Se puede pedir un documento de identidad para comprobar la edad y el lugar de residencia.",
       "Si no responden en ese plazo, o si no cumplen las condiciones, el premio pasa al suplente. Los premios se envían gratis a la dirección indicada en un plazo de 30 días tras la respuesta del ganador. No se garantiza la entrega antes de Navidad.",
       "Con el acuerdo de los ganadores, su nombre y la inicial de su apellido pueden anunciarse en la web y las redes sociales de Basketlog.",
     ]],
@@ -130,18 +131,18 @@ function rules(lang, e, mail, privacy) {
     ["Sponsor", [<>{e.nom}, sole trader (French micro-entreprise), {e.adresse}, SIRET {e.siret}, publisher of Basketlog ({LEGAL.url}) (the “Sponsor”), runs a free giveaway called “Basketlog Christmas Giveaway” (the “Giveaway”).</>]],
     ["Entry period", ["The Giveaway runs from November 26, 2026 to December 19, 2026 at 11:59 p.m. Paris time (5:59 p.m. ET). The drawing takes place on December 20, 2026."]],
     ["Eligibility and how to enter", [
-      "Open to individuals who are 18 or older (or the age of majority in their state of residence, if higher) and legal residents of mainland France (including Corsica), mainland Spain or the Balearic Islands, or the 50 United States and the District of Columbia, except the Sponsor and members of the Sponsor's household. Void where prohibited.",
+      "Open worldwide to individuals who are 18 or older (or the age of majority in their country or state of residence, if higher), except: residents of Brazil, Italy and the province of Quebec, where this type of giveaway requires prior authorization or registration; residents of Cuba, Iran, North Korea, Syria, Russia, Belarus and the occupied territories of Ukraine, which are subject to international sanctions; and the Sponsor and members of the Sponsor's household. Void where prohibited. A winner residing in Canada must correctly answer a mathematical skill-testing question before receiving a prize.",
       <>To enter, hold a free or paid Basketlog account created no later than December 19, 2026 at 11:59 p.m. Paris time, with a valid email address. Accounts opened before the Giveaway started are entered automatically. A member who does not wish to take part can say so at {mail}.</>,
       "Limit one entry per person: a participant can win only one prize, even with several accounts. Accounts created in bulk, with disposable addresses or by automated means are excluded. A paid subscription (Pro or Lifetime) is not required and does not increase the chances of winning.",
     ]],
     ["Prizes", [
       "First prize: one PlayStation 5 console, standard edition (approximate retail value in France: €649.99).",
       "Second prize: one NBA Swingman jersey of Victor Wembanyama (San Antonio Spurs), size chosen by the winner among available sizes (approximate retail value in France: €104.99).",
-      "Each prize is provided in the model sold in the winner's country of residence. Prizes cannot be exchanged or redeemed for cash; if a prize cannot be provided, the Sponsor will substitute a prize of equal or greater value. Any taxes on a prize in the winner's country are the winner's sole responsibility.",
+      "Each prize is ordered from a retailer in the winner's country, in the model sold there, or shipped from France. Prizes cannot be exchanged or redeemed for cash; if a prize cannot be provided or delivered in the winner's country, the Sponsor will substitute a prize or gift card of equivalent value. Any customs duties and taxes on a prize in the winner's country are the winner's sole responsibility.",
     ]],
     ["Drawing", ["On December 20, 2026, the Sponsor will randomly select two winners among eligible accounts: the first wins the first prize, the second wins the second prize. Two alternates are drawn the same way, in the same order. Odds of winning depend on the number of eligible entries received."]],
     ["Winner notification and prize delivery", [
-      "Winners are notified on December 20, 2026 by email, at their Basketlog account address. They have 7 days to reply with their full name, a postal address in an eligible area and, for the jersey, their size. Proof of identity may be requested to verify age and residence.",
+      "Winners are notified on December 20, 2026 by email, at their Basketlog account address. They have 7 days to reply with their full name, a postal address in an eligible country and, for the jersey, their size. Proof of identity may be requested to verify age and residence.",
       "If a winner does not reply within that time or does not meet these rules, the prize goes to the alternate. Prizes are shipped free of charge to the address provided within 30 days of the winner's reply. Delivery before Christmas is not guaranteed.",
       "With the winners' consent, their first name and last initial may be announced on Basketlog's website and social media.",
     ]],
