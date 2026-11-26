@@ -183,60 +183,120 @@ export async function defiOgImage(q, init = {}) {
   );
 }
 
-// Image du jeu de Noël 2026 (page /concours, posts des réseaux) : « og » 1200×630 (aperçu de lien), « portrait »
-// 1080×1350 (Instagram, Facebook), « carre » 1080×1080. Aucun logo de marque ni photo : texte, ballon et paquet cadeau dessinés.
+// Image du jeu de Noël 2026 (page /concours, posts des réseaux), en français, anglais ou espagnol : « og » 1200×630
+// (aperçu de lien), « portrait » 1080×1350 (Instagram, Facebook), « carre » 1080×1080. Aucun logo de marque ni photo.
 const CONCOURS_SIZES = { og: { width: 1200, height: 630 }, portrait: { width: 1080, height: 1350 }, carre: { width: 1080, height: 1080 } };
-const giftBox = (s) => (
-  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: s }}>
-    <div style={{ display: "flex", width: s * 0.56, height: s * 0.17, justifyContent: "space-between" }}>
-      <div style={{ display: "flex", width: s * 0.25, height: s * 0.17, borderRadius: s * 0.09, border: `${Math.round(s * 0.04)}px solid #ffe0c7` }} />
-      <div style={{ display: "flex", width: s * 0.25, height: s * 0.17, borderRadius: s * 0.09, border: `${Math.round(s * 0.04)}px solid #ffe0c7` }} />
-    </div>
-    <div style={{ display: "flex", justifyContent: "center", width: s * 0.94, height: s * 0.2, borderRadius: s * 0.03, background: "#ff7a1a" }}>
-      <div style={{ display: "flex", width: s * 0.13, height: "100%", background: "#ffe0c7" }} />
-    </div>
-    <div style={{ display: "flex", justifyContent: "center", width: s * 0.84, height: s * 0.6, borderRadius: `0 0 ${Math.round(s * 0.03)}px ${Math.round(s * 0.03)}px`, background: "linear-gradient(180deg, #e8650f 0%, #b8400b 100%)" }}>
-      <div style={{ display: "flex", width: s * 0.13, height: "100%", background: "#ffe0c7" }} />
-    </div>
+const CONCOURS_TXT = {
+  fr: { badge: "JEU DE NOËL", label: "À GAGNER", head: "1 PS5", subA: "+ 1 maillot de", c1: "PS5", c2: "Maillot Wemby", date: "Tirage au sort le 20 décembre", cta: "Participe gratuitement", url: "basketlog-app.com/concours", legal: "Sans obligation d'achat · France, Espagne, États-Unis · 18 ans et +" },
+  en: { badge: "CHRISTMAS GIVEAWAY", label: "WIN", head: "A PS5", subA: "+ a jersey of", c1: "PS5", c2: "Wemby jersey", date: "Winners drawn on December 20", cta: "Enter for free", url: "basketlog-app.com/en/concours", legal: "No purchase necessary · Residents of France, Spain and the US · 18+" },
+  es: { badge: "SORTEO DE NAVIDAD", label: "SORTEAMOS", head: "1 PS5", subA: "+ 1 camiseta de", c1: "PS5", c2: "Camiseta de Wemby", date: "Sorteo el 20 de diciembre", cta: "Participa gratis", url: "basketlog-app.com/es/concours", legal: "Sin obligación de compra · Residentes en Francia, España y EE. UU. · +18" },
+};
+// Confettis et flocons (positions en % de l'image), placés sur les bords pour ne jamais toucher le texte.
+const DECO = {
+  tall: {
+    confetti: [[3, 13, "#ff7a1a", 20], [6, 30, "#ffd08a", -30], [2, 49, "#ffffff", 45], [5, 76, "#ff7a1a", -15], [3, 93, "#ffd08a", 60], [94, 15, "#ffd08a", 35], [96, 33, "#ff7a1a", -40], [93, 75, "#ffffff", 15], [95, 91, "#ff7a1a", 50], [47, 1.5, "#ffffff", 70]],
+    snow: [[7, 21, 6], [2, 38, 4], [8, 61, 5], [4, 85, 6], [95, 24, 6], [91, 45, 4], [97, 60, 6], [92, 83, 5], [22, 2, 4], [76, 2, 5]],
+  },
+  wide: {
+    confetti: [[52, 10, "#ff7a1a", 20], [58, 30, "#ffd08a", -30], [54, 55, "#ffffff", 45], [60, 78, "#ff7a1a", -15], [51, 92, "#ffd08a", 60], [97, 8, "#ffd08a", 35], [98, 50, "#ff7a1a", -40], [1.5, 92, "#ffffff", 15], [30, 95, "#ff7a1a", 50], [22, 2, "#ffd08a", -20]],
+    snow: [[56, 18, 5], [61, 44, 4], [53, 70, 6], [59, 88, 5], [2, 22, 4], [97, 30, 5], [97, 72, 5], [45, 4, 4], [40, 96, 4]],
+  },
+};
+let titleFontP;
+function titleFont() {
+  titleFontP ||= readFile(join(process.cwd(), "assets/fonts", "tilt-warp-latin-400-normal.woff"))
+    .then((data) => ({ name: "Tilt Warp", data, weight: 400, style: "normal" }))
+    .catch(() => null);
+  return titleFontP;
+}
+const prizeCard = (icon, iw, ih, label, w, h, fs) => (
+  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: Math.round(h * 0.07), width: w, height: h, borderRadius: Math.round(w * 0.08), border: "2px solid rgba(255,255,255,.14)", backgroundImage: "linear-gradient(160deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.03) 100%)", boxShadow: "0 24px 60px rgba(0,0,0,.45)" }}>
+    <img src={icon} width={iw} height={ih} alt="" />
+    <div style={{ display: "flex", fontSize: fs, fontWeight: 800, color: "#fff" }}>{label}</div>
   </div>
 );
-export async function concoursOgImage(format = "og", init = {}) {
-  const f = await fonts();
+export async function concoursOgImage(format = "og", init = {}, lang = "fr") {
+  const [f, tf] = await Promise.all([fonts(), titleFont()]);
+  const { GAMEPAD_SVG, JERSEY_SVG, ARROW_SVG } = await import("./concours-art.js");
+  const T = CONCOURS_TXT[lang] || CONCOURS_TXT.en;
   const fmt = CONCOURS_SIZES[format] ? format : "og";
   const size = CONCOURS_SIZES[fmt];
   const wide = fmt === "og";
-  const k = fmt === "portrait" ? 1 : fmt === "carre" ? 0.86 : 0.58;
+  const k = fmt === "portrait" ? 1 : fmt === "carre" ? 0.82 : 0.62;
   const px = (n) => Math.round(n * k);
-  const align = wide ? "flex-start" : "center";
-  const text = (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: align, gap: px(34) }}>
-      <div style={{ display: "flex", alignItems: "center", gap: px(16), fontSize: px(46), fontWeight: 800, color: "#ff8c3a" }}>
-        <img src={BALL} width={px(58)} height={px(58)} alt="" />
-        Basketlog
-      </div>
-      <div style={{ display: "flex", padding: `${px(12)}px ${px(30)}px`, borderRadius: 999, background: "#ff7a1a", color: "#fff", fontSize: px(34), fontWeight: 800, letterSpacing: px(3) }}>JEU DE NOËL</div>
-      {fmt === "portrait" ? giftBox(250) : null}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: align, lineHeight: 1.02 }}>
-        <div style={{ display: "flex", fontSize: px(176), fontWeight: 800, color: "#ffe0c7" }}>1 PS5</div>
-        <div style={{ display: "flex", fontSize: px(64), fontWeight: 800, color: "#fff", marginTop: px(8) }}>+ 1 maillot de</div>
-        <div style={{ display: "flex", fontSize: px(84), fontWeight: 800, letterSpacing: px(-2), color: "#ff7a1a" }}>Victor Wembanyama</div>
-        <div style={{ display: "flex", fontSize: px(64), fontWeight: 800, color: "#fff", marginTop: px(6) }}>à gagner</div>
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", alignItems: align, gap: px(10) }}>
-        <div style={{ display: "flex", fontSize: px(40), fontWeight: 800, color: "#fff" }}>Gratuit : crée ton compte Basketlog</div>
-        <div style={{ display: "flex", fontSize: px(40), fontWeight: 500, color: "rgba(255,255,255,.85)" }}>Tirage au sort le 20 décembre</div>
-        <div style={{ display: "flex", fontSize: px(40), fontWeight: 800, color: "#ff8c3a" }}>basketlog-app.com/concours</div>
-      </div>
-      <div style={{ display: "flex", fontSize: px(26), fontWeight: 500, color: "rgba(255,255,255,.6)" }}>Sans obligation d&apos;achat · France métropolitaine · 18 ans et plus</div>
+  const title = tf ? "Tilt Warp" : f ? "Inter" : "sans-serif";
+  const D = wide ? DECO.wide : DECO.tall;
+  const deco = [
+    ...D.snow.map(([x, y, r], i) => <div key={`s${i}`} style={{ position: "absolute", left: `${x}%`, top: `${y}%`, width: px(r * 2), height: px(r * 2), borderRadius: 999, background: "rgba(255,255,255,.55)" }} />),
+    ...D.confetti.map(([x, y, c, a], i) => <div key={`c${i}`} style={{ position: "absolute", left: `${x}%`, top: `${y}%`, width: px(26), height: px(10), borderRadius: px(4), background: c, opacity: 0.85, transform: `rotate(${a}deg)` }} />),
+  ];
+  const brand = (
+    <div style={{ display: "flex", alignItems: "center", gap: px(14), fontSize: px(40), fontWeight: 800, color: "#fff" }}>
+      <img src={BALL} width={px(52)} height={px(52)} alt="" />
+      Basketlog
     </div>
   );
+  const badge = <div style={{ display: "flex", padding: `${px(12)}px ${px(26)}px`, borderRadius: 999, background: "rgba(255,122,26,.16)", border: "2px solid rgba(255,140,58,.7)", color: "#ffb27a", fontSize: px(26), fontWeight: 800, letterSpacing: px(3) }}>{T.badge}</div>;
+  const hero = (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: wide ? "flex-start" : "center" }}>
+      <div style={{ display: "flex", fontSize: px(34), fontWeight: 800, letterSpacing: px(10), color: "#ff8c3a" }}>{T.label}</div>
+      <div style={{ display: "flex", fontFamily: title, fontSize: px(200), lineHeight: 1, color: "#fff", textShadow: "0 10px 50px rgba(255,122,26,.55)", marginTop: px(6) }}>{T.head}</div>
+      <div style={{ display: "flex", fontSize: px(48), fontWeight: 800, color: "#fff", marginTop: px(10) }}>{T.subA}</div>
+      <div style={{ display: "flex", fontFamily: title, fontSize: px(82), lineHeight: 1.05, color: "#ff7a1a" }}>Victor Wembanyama</div>
+    </div>
+  );
+  const cards = (cw, ch) => (
+    <div style={{ display: "flex", gap: px(28) }}>
+      {prizeCard(GAMEPAD_SVG, Math.round(cw * 0.66), Math.round(cw * 0.66 * 150 / 240), T.c1, cw, ch, px(34))}
+      {prizeCard(JERSEY_SVG, Math.round(ch * 0.56 * 200 / 240), Math.round(ch * 0.56), T.c2, cw, ch, px(34))}
+    </div>
+  );
+  const bottom = (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: wide ? "flex-start" : "center", gap: px(18) }}>
+      <div style={{ display: "flex", alignItems: "center", gap: px(14), fontSize: px(40), fontWeight: 800, color: "#fff" }}>
+        <div style={{ display: "flex", width: px(16), height: px(16), borderRadius: 999, background: "#ff7a1a" }} />
+        {T.date}
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: px(16), padding: `${px(20)}px ${px(40)}px`, borderRadius: 999, backgroundImage: "linear-gradient(90deg, #ff6a00 0%, #ff9a3c 100%)", boxShadow: "0 14px 40px rgba(255,106,0,.45)", fontSize: px(38), fontWeight: 800, color: "#fff" }}>
+        {T.cta}
+        <img src={ARROW_SVG} width={px(34)} height={px(34)} alt="" />
+      </div>
+      <div style={{ display: "flex", fontSize: px(34), fontWeight: 800, color: "#ffb27a" }}>{T.url}</div>
+      <div style={{ display: "flex", fontSize: px(22), fontWeight: 500, color: "rgba(255,255,255,.55)", marginTop: px(4) }}>{T.legal}</div>
+    </div>
+  );
+  const bg = {
+    backgroundColor: "#050b1d",
+    backgroundImage: "radial-gradient(circle at 50% 42%, rgba(255,110,20,.38) 0%, rgba(255,110,20,0) 46%), radial-gradient(circle at 88% 6%, rgba(255,190,120,.22) 0%, rgba(255,190,120,0) 32%), linear-gradient(180deg, #0b1636 0%, #050b1d 100%)",
+  };
+  const body = wide ? (
+    <div style={{ display: "flex", width: "100%", height: "100%", alignItems: "center", justifyContent: "space-between", padding: "44px 64px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: px(30) }}>
+        <div style={{ display: "flex", alignItems: "center", gap: px(24) }}>{brand}{badge}</div>
+        {hero}
+        {bottom}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+        {prizeCard(GAMEPAD_SVG, 250, 156, T.c1, 360, 230, 28)}
+        {prizeCard(JERSEY_SVG, 120, 144, T.c2, 360, 230, 28)}
+      </div>
+    </div>
+  ) : (
+    <div style={{ display: "flex", flexDirection: "column", width: "100%", height: "100%", alignItems: "center", justifyContent: "space-between", padding: `${px(64)}px ${px(64)}px ${px(56)}px` }}>
+      <div style={{ display: "flex", width: "100%", alignItems: "center", justifyContent: "space-between" }}>{brand}{badge}</div>
+      {hero}
+      {cards(px(440), px(fmt === "portrait" ? 330 : 280))}
+      {bottom}
+    </div>
+  );
+  const fontList = [...(f || []), ...(tf ? [tf] : [])];
   return new ImageResponse(
     (
-      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: wide ? "space-between" : "center", padding: wide ? "0 80px" : "60px", background: "radial-gradient(circle at 50% 32%, #3a1a06 0%, #040817 64%)", color: "#fff", fontFamily: f ? "Inter" : "sans-serif" }}>
-        {text}
-        {wide ? giftBox(300) : null}
+      <div style={{ position: "relative", display: "flex", width: "100%", height: "100%", color: "#fff", fontFamily: f ? "Inter" : "sans-serif", ...bg }}>
+        {deco}
+        {body}
       </div>
     ),
-    { ...size, ...(f ? { fonts: f } : {}), ...init }
+    { ...size, ...(fontList.length ? { fonts: fontList } : {}), ...init }
   );
 }

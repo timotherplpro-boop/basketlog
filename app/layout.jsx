@@ -30,6 +30,7 @@ import SiteFooter from "../components/SiteFooter";
 import SiteChrome from "../components/SiteChrome";
 import ContestBar from "../components/ContestBar";
 import { CONCOURS, concoursOuvert } from "../lib/concours";
+import { stripLang } from "../lib/i18n";
 import { COOKIE, decodeSession, aiReady } from "../lib/pro";
 import { homeTitle } from "../lib/seo";
 
@@ -90,7 +91,7 @@ export default async function RootLayout({ children }) {
   const member = !!sess?.uid;
   const preview = sess?.admin && sess?.preview ? sess.preview : null; // admin qui regarde le site comme un client
   // Bandeau du jeu de Noël : pages françaises, inscriptions ouvertes, pas sur la page du jeu, pas si le visiteur l'a fermé.
-  const contestBar = L.fr && concoursOuvert() && !jar.get("bl_cbar") && !(path || "").startsWith(CONCOURS.path);
+  const contestBar = (L.fr || L.en || L.es) && concoursOuvert() && !jar.get("bl_cbar") && !stripLang(path || "/").startsWith(CONCOURS.path);
   return (
     <html lang={L.lang}>
       <head>
@@ -112,7 +113,7 @@ export default async function RootLayout({ children }) {
           <FxProvider fx={fx}>
           <JsonLd data={SITE_LD} />
           <Analytics />
-          <SiteChrome member={member}>{contestBar && <ContestBar />}<Nav /></SiteChrome>
+          <SiteChrome member={member}>{contestBar && <ContestBar lang={L.lang} href={L.href(CONCOURS.path)} />}<Nav /></SiteChrome>
           {children}
           <SiteChrome member={member}><SiteFooter L={L} /></SiteChrome>
           <WelcomeToast />

@@ -4,7 +4,7 @@ const nextConfig = {
   // Ne pas annoncer « x-powered-by: Next.js » dans les réponses.
   poweredByHeader: false,
   // Polices des images de partage, lues au moment de générer l'image (lib/og.jsx).
-  outputFileTracingIncludes: { "/api/og": ["./assets/fonts/*"], "/opengraph-image": ["./assets/fonts/*"] },
+  outputFileTracingIncludes: { "/api/og": ["./assets/fonts/*"], "/api/og/concours": ["./assets/fonts/*"], "/opengraph-image": ["./assets/fonts/*"] },
   // Robots (Google, Bing, IA…) : titres, descriptions et balises dans le <head> dès le premier octet,
   // sans streaming. Les visiteurs gardent le rendu en streaming, plus rapide.
   htmlLimitedBots: /bot|crawl|spider|slurp|Google|Bing|yandex|baidu|Lighthouse|facebookexternalhit|facebookcatalog|WhatsApp|Twitter|LinkedIn|Slack|Discord|SkypeUriPreview|vkShare|quora|tumblr|ia_archiver|Yeti|Perplexity|ChatGPT|Claude|Applebot/i,
