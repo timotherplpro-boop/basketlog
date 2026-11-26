@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import AuthButton from "../../components/AuthButton";
+// Participation réservée aux abonnés Pro ou Lifetime : le bouton mène à la page des formules.
 import { LEGAL } from "../../lib/legal";
 import { pageMeta } from "../../lib/seo";
 import { getL } from "../../lib/lang-server";
@@ -8,51 +8,51 @@ import { COOKIE, decodeSession } from "../../lib/pro";
 import { CONCOURS, concoursOuvert } from "../../lib/concours";
 import { GAMEPAD_SVG, JERSEY_SVG } from "../../lib/concours-art";
 
-// Jeu de Noël 2026 (décision de Tim, 26/11/2026 ; ouvert au monde entier à sa demande, 18 h 36) : présentation, bouton de
+// Jeu de Noël 2026 (décision de Tim, 26/11/2026 ; ouvert au monde entier à sa demande, 18 h 36 ; achat de l'abonnement Pro obligatoire à sa demande, 20 h 43, risque légal hors de France signalé) : présentation, bouton de
 // participation et règlement complet en français, anglais et espagnol. Exclus : Brésil, Italie et Québec (tirage promotionnel
 // soumis à autorisation ou enregistrement préalable) et pays sous sanctions internationales. La page portugaise (surtout
 // lue au Brésil) n'est pas indexée et le règlement y est en anglais.
 const C = {
   fr: {
     metaTitle: "Jeu de Noël : 1 PS5 et 1 maillot de Wembanyama à gagner – Basketlog",
-    metaDesc: "Jeu gratuit et sans obligation d'achat : crée ton compte Basketlog avant le 19 décembre 2026 pour tenter de gagner une PS5 ou un maillot de Victor Wembanyama. Tirage au sort le 20 décembre.",
+    metaDesc: "Abonne-toi à Basketlog Pro (9,99 €/mois) avant le 19 décembre 2026 pour tenter de gagner une PS5 ou un maillot de Victor Wembanyama. Tirage au sort le 20 décembre.",
     badge: "Jeu de Noël", label: "À gagner", head: "1 PS5", subA: "+ 1 maillot de", c1: "Console PS5", c2: "Maillot de Wemby",
     date: "Tirage au sort le 20 décembre 2026",
-    intro: "Pour participer, il suffit d'avoir un compte Basketlog gratuit, créé au plus tard le 19 décembre 2026 à 23 h 59 (heure de Paris). Déjà inscrit ? Tu participes automatiquement, abonné ou non.",
-    cta: "Créer mon compte gratuit et participer", already: "Déjà un compte ? Tu participes déjà.",
-    member: "✅ Tu participes : ton compte est inscrit au tirage du 20 décembre.", memberLink: "Voir les matchs de ce soir",
+    intro: "Pour participer, il faut être abonné à Basketlog Pro (9,99 €/mois) ou Lifetime, avec un abonnement payé et actif le 19 décembre 2026 à 23 h 59 (heure de Paris). Déjà Pro ? Tu participes automatiquement.",
+    cta: "Passer Pro et participer", already: "Déjà Pro ? Connecte-toi : tu participes déjà.",
+    member: "✅ Tu participes : ton abonnement Pro t'inscrit au tirage du 20 décembre.", memberLink: "Voir les matchs de ce soir", memberFree: "Ton compte est gratuit : passe Pro pour participer au tirage du 20 décembre.",
     closed: "Les inscriptions sont closes. Les gagnants du tirage du 20 décembre sont prévenus par e-mail.",
-    small: "Gratuit et sans obligation d'achat · Ouvert aux personnes majeures du monde entier, sauf exceptions du règlement · Un abonnement ne donne aucune chance de plus.",
+    small: "Achat de l'abonnement Pro obligatoire (9,99 €/mois) · Ouvert aux personnes majeures du monde entier, sauf exceptions du règlement · Une seule chance par personne.",
     stepsTitle: "Comment participer",
-    steps: [["Crée ton compte", "Gratuit, en 30 secondes, avec ton adresse e-mail."], ["C'est tout", "Ton compte est inscrit tout seul au tirage. Abonné ou non, chaque membre a une seule chance."], ["Tirage le 20 décembre", "Deux gagnants sont tirés au sort et prévenus par e-mail le jour même."]],
+    steps: [["Passe Pro", "9,99 €/mois, en quelques clics. Déjà Pro ou Lifetime ? Rien à faire."], ["C'est tout", "Ton abonnement t'inscrit tout seul au tirage. Chaque abonné a une seule chance."], ["Tirage le 20 décembre", "Deux gagnants sont tirés au sort et prévenus par e-mail le jour même."]],
     rulesTitle: "Règlement du jeu", rulesToggle: "Lire le règlement complet",
   },
   en: {
     metaTitle: "Christmas giveaway: win a PS5 and a Victor Wembanyama jersey – Basketlog",
-    metaDesc: "Free giveaway, no purchase necessary: create your Basketlog account by December 19, 2026 for a chance to win a PS5 or a Victor Wembanyama jersey. Winners drawn on December 20.",
+    metaDesc: "Subscribe to Basketlog Pro (€9.99/month) by December 19, 2026 for a chance to win a PS5 or a Victor Wembanyama jersey. Winners drawn on December 20.",
     badge: "Christmas giveaway", label: "Win", head: "A PS5", subA: "+ a jersey of", c1: "PS5 console", c2: "Wemby jersey",
     date: "Winners drawn on December 20, 2026",
-    intro: "To enter, all you need is a free Basketlog account created by December 19, 2026 at 11:59 p.m. Paris time (5:59 p.m. ET). Already a member? You're in automatically, subscriber or not.",
-    cta: "Create my free account and enter", already: "Already have an account? You're already in.",
-    member: "✅ You're in: your account is entered in the December 20 drawing.", memberLink: "See tonight's games",
+    intro: "To enter, you need a paid, active Basketlog Pro (€9.99/month) or Lifetime subscription on December 19, 2026 at 11:59 p.m. Paris time (5:59 p.m. ET). Already Pro? You're in automatically.",
+    cta: "Go Pro and enter", already: "Already Pro? Log in: you're already in.",
+    member: "✅ You're in: your Pro subscription enters you in the December 20 drawing.", memberLink: "See tonight's games", memberFree: "Your account is free: go Pro to enter the December 20 drawing.",
     closed: "Entries are closed. Winners of the December 20 drawing are notified by email.",
-    small: "No purchase necessary · Open to adults worldwide, with the exceptions listed in the rules · A subscription does not increase your chances.",
+    small: "Purchase of a Pro subscription required (€9.99/month) · Open to adults worldwide, with the exceptions listed in the rules · One chance per person.",
     stepsTitle: "How to enter",
-    steps: [["Create your account", "Free, in 30 seconds, with your email address."], ["That's it", "Your account is entered automatically. Subscriber or not, every member gets one chance."], ["Drawing on December 20", "Two winners are drawn at random and notified by email the same day."]],
+    steps: [["Go Pro", "€9.99/month, in a few clicks. Already Pro or Lifetime? Nothing to do."], ["That's it", "Your subscription enters you automatically. Every subscriber gets one chance."], ["Drawing on December 20", "Two winners are drawn at random and notified by email the same day."]],
     rulesTitle: "Official rules", rulesToggle: "Read the official rules",
   },
   es: {
     metaTitle: "Sorteo de Navidad: gana una PS5 y una camiseta de Wembanyama – Basketlog",
-    metaDesc: "Sorteo gratis y sin obligación de compra: crea tu cuenta de Basketlog antes del 19 de diciembre de 2026 para ganar una PS5 o una camiseta de Victor Wembanyama. Sorteo el 20 de diciembre.",
+    metaDesc: "Suscríbete a Basketlog Pro (9,99 €/mes) antes del 19 de diciembre de 2026 para ganar una PS5 o una camiseta de Victor Wembanyama. Sorteo el 20 de diciembre.",
     badge: "Sorteo de Navidad", label: "Sorteamos", head: "1 PS5", subA: "+ 1 camiseta de", c1: "Consola PS5", c2: "Camiseta de Wemby",
     date: "Sorteo el 20 de diciembre de 2026",
-    intro: "Para participar, solo necesitas una cuenta gratuita de Basketlog creada como muy tarde el 19 de diciembre de 2026 a las 23:59 (hora de Madrid). ¿Ya tienes cuenta? Participas automáticamente, seas suscriptor o no.",
-    cta: "Crear mi cuenta gratis y participar", already: "¿Ya tienes cuenta? Ya participas.",
-    member: "✅ Participas: tu cuenta está inscrita en el sorteo del 20 de diciembre.", memberLink: "Ver los partidos de esta noche",
+    intro: "Para participar, necesitas una suscripción a Basketlog Pro (9,99 €/mes) o Lifetime, pagada y activa el 19 de diciembre de 2026 a las 23:59 (hora de Madrid). ¿Ya eres Pro? Participas automáticamente.",
+    cta: "Hacerme Pro y participar", already: "¿Ya eres Pro? Inicia sesión: ya participas.",
+    member: "✅ Participas: tu suscripción Pro te inscribe en el sorteo del 20 de diciembre.", memberLink: "Ver los partidos de esta noche", memberFree: "Tu cuenta es gratuita: hazte Pro para participar en el sorteo del 20 de diciembre.",
     closed: "La participación está cerrada. Los ganadores del sorteo del 20 de diciembre reciben un correo.",
-    small: "Gratis y sin obligación de compra · Abierto a mayores de edad de todo el mundo, salvo las excepciones de las bases · Una suscripción no da más posibilidades.",
+    small: "Compra de la suscripción Pro obligatoria (9,99 €/mes) · Abierto a mayores de edad de todo el mundo, salvo las excepciones de las bases · Una sola oportunidad por persona.",
     stepsTitle: "Cómo participar",
-    steps: [["Crea tu cuenta", "Gratis, en 30 segundos, con tu correo electrónico."], ["Ya está", "Tu cuenta entra sola en el sorteo. Suscriptor o no, cada miembro tiene una sola oportunidad."], ["Sorteo el 20 de diciembre", "Se eligen dos ganadores al azar y se les avisa por correo el mismo día."]],
+    steps: [["Hazte Pro", "9,99 €/mes, en pocos clics. ¿Ya eres Pro o Lifetime? No tienes que hacer nada."], ["Ya está", "Tu suscripción te inscribe sola en el sorteo. Cada suscriptor tiene una sola oportunidad."], ["Sorteo el 20 de diciembre", "Se eligen dos ganadores al azar y se les avisa por correo el mismo día."]],
     rulesTitle: "Bases legales", rulesToggle: "Leer las bases legales",
   },
 };
@@ -60,28 +60,28 @@ const C = {
 C.pt = {
   ...C.en,
   metaTitle: "Sorteio de Natal da Basketlog: um PS5 e uma camisa de Wembanyama",
-  metaDesc: "Sorteio de Natal da Basketlog (um PS5 e uma camisa de Victor Wembanyama), aberto no mundo todo, exceto no Brasil, na Itália e no Québec.",
+  metaDesc: "Sorteio de Natal da Basketlog (um PS5 e uma camisa de Victor Wembanyama) para assinantes Pro, aberto no mundo todo, exceto no Brasil, na Itália e no Québec.",
   badge: "Sorteio de Natal", label: "Prêmios", head: "Um PS5", subA: "+ uma camisa de", c1: "Console PS5", c2: "Camisa do Wemby",
   date: "Sorteio em 20 de dezembro de 2026",
-  intro: "Para participar, basta ter uma conta grátis da Basketlog criada até 19 de dezembro de 2026. O sorteio é aberto a maiores de idade no mundo todo, exceto no Brasil, onde esse tipo de sorteio exige autorização prévia do governo.",
-  cta: "Criar minha conta grátis e participar", already: "Já tem conta? Você já participa.",
-  member: "✅ Sua conta está inscrita no sorteio de 20 de dezembro (exceto residentes no Brasil).", memberLink: "Ver os jogos desta noite",
+  intro: "Para participar, é preciso ter uma assinatura Basketlog Pro (9,99 €/mês) ou Lifetime paga e ativa em 19 de dezembro de 2026. O sorteio é aberto a maiores de idade no mundo todo, exceto no Brasil, onde esse tipo de sorteio exige autorização prévia do governo.",
+  cta: "Virar Pro e participar", already: "Já é Pro? Entre na sua conta: você já participa.",
+  member: "✅ Sua assinatura Pro está inscrita no sorteio de 20 de dezembro (exceto residentes no Brasil).", memberLink: "Ver os jogos desta noite", memberFree: "Sua conta é gratuita: vire Pro para participar do sorteio de 20 de dezembro (exceto residentes no Brasil).",
   closed: "As inscrições estão encerradas.",
-  small: "Sem obrigação de compra · Aberto no mundo todo, exceto Brasil, Itália, Québec e países sob sanções · Uma assinatura não dá mais chances.",
+  small: "Compra da assinatura Pro obrigatória · Aberto no mundo todo, exceto Brasil, Itália, Québec e países sob sanções · Uma única chance por pessoa.",
   stepsTitle: "Como funciona",
-  steps: [["Crie sua conta", "Grátis, em 30 segundos, com seu e-mail."], ["Pronto", "Sua conta entra sozinha no sorteio. Assinante ou não, cada membro tem uma única chance."], ["Sorteio em 20 de dezembro", "Dois ganhadores são sorteados e avisados por e-mail no mesmo dia."]],
+  steps: [["Vire Pro", "9,99 €/mês, em poucos cliques. Já é Pro ou Lifetime? Nada a fazer."], ["Pronto", "Sua assinatura entra sozinha no sorteio. Cada assinante tem uma única chance."], ["Sorteio em 20 de dezembro", "Dois ganhadores são sorteados e avisados por e-mail no mesmo dia."]],
   rulesTitle: "Regulamento oficial (em inglês)", rulesToggle: "Ler o regulamento oficial",
 };
 
 // Règlement : [titre, paragraphes]. e = éditeur du site (lib/legal.js), mail = lien vers l'adresse de contact.
 function rules(lang, e, mail, privacy) {
   if (lang === "fr") return [
-    ["Organisateur", [<>Basketlog ({LEGAL.url}), {e.adresse}, SIRET {e.siret}, contact : {mail} (« l&apos;Organisateur »), organise un jeu gratuit et sans obligation d&apos;achat intitulé « Jeu de Noël Basketlog » (« le Jeu »).</>]],
+    ["Organisateur", [<>Basketlog ({LEGAL.url}), {e.adresse}, SIRET {e.siret}, contact : {mail} (« l&apos;Organisateur »), organise un jeu avec obligation d&apos;achat, réservé aux abonnés Basketlog Pro et Lifetime, intitulé « Jeu de Noël Basketlog » (« le Jeu »).</>]],
     ["Durée", ["Le Jeu est ouvert du 26 novembre 2026 au 19 décembre 2026 à 23 h 59 (heure de Paris). Le tirage au sort a lieu le 20 décembre 2026."]],
     ["Qui peut participer et comment", [
       "Le Jeu est ouvert à toute personne physique majeure (18 ans révolus, ou l'âge de la majorité de son pays ou État de résidence s'il est plus élevé), quel que soit son pays de résidence, à l'exception : des résidents du Brésil, d'Italie et de la province de Québec, où ce type de jeu demande une autorisation ou un enregistrement préalable ; des résidents de Cuba, d'Iran, de Corée du Nord, de Syrie, de Russie, de Biélorussie et des territoires occupés d'Ukraine, soumis à des sanctions internationales ; de l'Organisateur et des membres de son foyer. Le Jeu est nul là où la loi l'interdit. Un gagnant résidant au Canada doit répondre correctement à une question d'arithmétique avant de recevoir son lot.",
-      <>Pour participer, il faut détenir un compte Basketlog, gratuit ou payant, créé au plus tard le 19 décembre 2026 à 23 h 59 avec une adresse e-mail valide. Les comptes ouverts avant le début du Jeu participent automatiquement. Un membre qui ne souhaite pas participer peut le signaler à {mail}.</>,
-      "Une seule participation par personne : un même participant ne peut gagner qu'un lot, même avec plusieurs comptes. Les comptes créés en série, avec des adresses jetables ou de façon automatisée sont exclus. Un abonnement payant (Pro ou Lifetime) n'est pas nécessaire et ne donne aucune chance supplémentaire.",
+      <>Pour participer, il faut détenir un compte Basketlog avec un abonnement Pro (9,99 € par mois) ou un accès Lifetime, payé et actif le 19 décembre 2026 à 23 h 59 (heure de Paris) ; la seule période d&apos;essai ne suffit pas. Les abonnés Pro et Lifetime participent automatiquement. Un abonné qui ne souhaite pas participer peut le signaler à {mail}.</>,
+      "Une seule participation par personne : un même participant ne peut gagner qu'un lot, même avec plusieurs comptes ou abonnements. Les comptes créés en série, avec des adresses jetables ou de façon automatisée sont exclus. Chaque abonné a une seule chance, quelle que soit sa formule (Pro ou Lifetime) ou la date de son abonnement.",
     ]],
     ["Lots", [
       "Lot n° 1 : une console PlayStation 5, édition standard (valeur commerciale indicative en France : 649,99 € TTC).",
@@ -102,12 +102,12 @@ function rules(lang, e, mail, privacy) {
     ]],
   ];
   if (lang === "es") return [
-    ["Organizador", [<>Basketlog ({LEGAL.url}), {e.adresse}, SIRET {e.siret}, contacto: {mail} (el «Organizador»), organiza un sorteo gratuito y sin obligación de compra llamado «Sorteo de Navidad de Basketlog» (el «Sorteo»).</>]],
+    ["Organizador", [<>Basketlog ({LEGAL.url}), {e.adresse}, SIRET {e.siret}, contacto: {mail} (el «Organizador»), organiza un sorteo con obligación de compra, reservado a los suscriptores de Basketlog Pro y Lifetime, llamado «Sorteo de Navidad de Basketlog» (el «Sorteo»).</>]],
     ["Duración", ["El Sorteo está abierto del 26 de noviembre de 2026 al 19 de diciembre de 2026 a las 23:59 (hora de Madrid). El sorteo se realiza el 20 de diciembre de 2026."]],
     ["Quién puede participar y cómo", [
       "El Sorteo está abierto en todo el mundo a toda persona física mayor de edad (18 años, o la mayoría de edad de su país o estado de residencia si es superior), salvo: los residentes en Brasil, Italia y la provincia de Quebec, donde este tipo de sorteo requiere una autorización o un registro previo; los residentes en Cuba, Irán, Corea del Norte, Siria, Rusia, Bielorrusia y los territorios ocupados de Ucrania, sujetos a sanciones internacionales; y el Organizador y los miembros de su hogar. El Sorteo es nulo donde la ley lo prohíba. Un ganador residente en Canadá debe responder correctamente a una pregunta de cálculo antes de recibir su premio.",
-      <>Para participar, basta con tener una cuenta de Basketlog, gratuita o de pago, creada como muy tarde el 19 de diciembre de 2026 a las 23:59 con una dirección de correo válida. Las cuentas abiertas antes del inicio del Sorteo participan automáticamente. Quien no desee participar puede indicarlo en {mail}.</>,
-      "Una sola participación por persona: un mismo participante solo puede ganar un premio, aunque tenga varias cuentas. Quedan excluidas las cuentas creadas en serie, con direcciones desechables o de forma automatizada. Una suscripción de pago (Pro o Lifetime) no es necesaria y no da más posibilidades.",
+      <>Para participar, hay que tener una cuenta de Basketlog con una suscripción Pro (9,99 € al mes) o un acceso Lifetime, pagado y activo el 19 de diciembre de 2026 a las 23:59 (hora de Madrid); el periodo de prueba por sí solo no basta. Los suscriptores Pro y Lifetime participan automáticamente. Quien no desee participar puede indicarlo en {mail}.</>,
+      "Una sola participación por persona: un mismo participante solo puede ganar un premio, aunque tenga varias cuentas o suscripciones. Quedan excluidas las cuentas creadas en serie, con direcciones desechables o de forma automatizada. Cada suscriptor tiene una sola oportunidad, sea cual sea su fórmula (Pro o Lifetime) o la fecha de su suscripción.",
     ]],
     ["Premios", [
       "Premio 1: una consola PlayStation 5, edición estándar (valor comercial orientativo en Francia: 649,99 € IVA incluido).",
@@ -128,12 +128,12 @@ function rules(lang, e, mail, privacy) {
     ]],
   ];
   return [
-    ["Sponsor", [<>Basketlog ({LEGAL.url}), {e.adresse}, SIRET {e.siret}, contact: {mail} (the “Sponsor”), runs a free giveaway called “Basketlog Christmas Giveaway” (the “Giveaway”).</>]],
+    ["Sponsor", [<>Basketlog ({LEGAL.url}), {e.adresse}, SIRET {e.siret}, contact: {mail} (the “Sponsor”), runs a giveaway reserved for paying Basketlog Pro and Lifetime subscribers, called “Basketlog Christmas Giveaway” (the “Giveaway”). A purchase is required to enter.</>]],
     ["Entry period", ["The Giveaway runs from November 26, 2026 to December 19, 2026 at 11:59 p.m. Paris time (5:59 p.m. ET). The drawing takes place on December 20, 2026."]],
     ["Eligibility and how to enter", [
       "Open worldwide to individuals who are 18 or older (or the age of majority in their country or state of residence, if higher), except: residents of Brazil, Italy and the province of Quebec, where this type of giveaway requires prior authorization or registration; residents of Cuba, Iran, North Korea, Syria, Russia, Belarus and the occupied territories of Ukraine, which are subject to international sanctions; and the Sponsor and members of the Sponsor's household. Void where prohibited. A winner residing in Canada must correctly answer a mathematical skill-testing question before receiving a prize.",
-      <>To enter, hold a free or paid Basketlog account created no later than December 19, 2026 at 11:59 p.m. Paris time, with a valid email address. Accounts opened before the Giveaway started are entered automatically. A member who does not wish to take part can say so at {mail}.</>,
-      "Limit one entry per person: a participant can win only one prize, even with several accounts. Accounts created in bulk, with disposable addresses or by automated means are excluded. A paid subscription (Pro or Lifetime) is not required and does not increase the chances of winning.",
+      <>To enter, hold a Basketlog account with a paid, active Pro subscription (€9.99 per month) or Lifetime access on December 19, 2026 at 11:59 p.m. Paris time; a trial period alone does not qualify. Pro and Lifetime subscribers are entered automatically. A subscriber who does not wish to take part can say so at {mail}.</>,
+      "Limit one entry per person: a participant can win only one prize, even with several accounts or subscriptions. Accounts created in bulk, with disposable addresses or by automated means are excluded. Each subscriber gets one chance, whatever the plan (Pro or Lifetime) or subscription date.",
     ]],
     ["Prizes", [
       "First prize: one PlayStation 5 console, standard edition (approximate retail value in France: €649.99).",
@@ -171,7 +171,9 @@ export async function generateMetadata() {
 export default async function ConcoursPage() {
   const L = await getL();
   const T = C[L.lang] || C.en;
-  const member = !!decodeSession((await cookies()).get(COOKIE)?.value)?.uid;
+  const session = decodeSession((await cookies()).get(COOKIE)?.value);
+  const member = !!session?.uid;
+  const pro = member && ["pro", "lifetime"].includes(session?.tier);
   const open = concoursOuvert();
   const mail = <a href={`mailto:${LEGAL.email}`}>{LEGAL.email}</a>;
   const privacy = (label) => <Link href={L.href("/confidentialite")}>{label}</Link>;
@@ -201,12 +203,12 @@ export default async function ConcoursPage() {
         <p className="concours-intro">{T.intro}</p>
         {!open ? (
           <p className="concours-ok">{T.closed}</p>
-        ) : member ? (
+        ) : pro ? (
           <p className="concours-ok">{T.member} <Link href={L.href("/app/matchs")}>{T.memberLink}</Link></p>
         ) : (
           <div className="concours-cta">
-            <AuthButton mode="inscription" source="concours" className="btn-solid concours-btn">{T.cta}</AuthButton>
-            {T.already && <p>{T.already}</p>}
+            <Link href={L.href("/pro")} className="btn-solid concours-btn">{T.cta}</Link>
+            <p>{member ? T.memberFree : T.already}</p>
           </div>
         )}
         <p className="concours-small">{T.small}</p>
@@ -225,7 +227,7 @@ export default async function ConcoursPage() {
         <h2>{T.rulesTitle}</h2>
         <details>
           <summary>{T.rulesToggle}</summary>
-          {!L.fr && !L.es && <p className="concours-caps">NO PURCHASE NECESSARY. A PURCHASE OR PAYMENT OF ANY KIND WILL NOT INCREASE YOUR CHANCES OF WINNING. VOID WHERE PROHIBITED.</p>}
+          {!L.fr && !L.es && <p className="concours-caps">PURCHASE REQUIRED: A PAID BASKETLOG PRO OR LIFETIME SUBSCRIPTION IS NEEDED TO ENTER. VOID WHERE PROHIBITED.</p>}
           {R.map(([title, paras], i) => (
             <div key={title} className="concours-rule">
               <h3>{i + 1}. {title}</h3>

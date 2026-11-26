@@ -187,9 +187,9 @@ export async function defiOgImage(q, init = {}) {
 // (aperçu de lien), « portrait » 1080×1350 (Instagram, Facebook), « carre » 1080×1080. Aucun logo de marque ni photo.
 const CONCOURS_SIZES = { og: { width: 1200, height: 630 }, portrait: { width: 1080, height: 1350 }, carre: { width: 1080, height: 1080 } };
 const CONCOURS_TXT = {
-  fr: { badge: "JEU DE NOËL", label: "À GAGNER", head: "1 PS5", subA: "+ 1 maillot de", c1: "PS5", c2: "Maillot Wemby", date: "Tirage au sort le 20 décembre", cta: "Participe gratuitement", url: "basketlog-app.com/concours", legal: "Sans obligation d'achat · Monde entier, voir règlement · 18 ans et +" },
-  en: { badge: "CHRISTMAS GIVEAWAY", label: "WIN", head: "A PS5", subA: "+ a jersey of", c1: "PS5", c2: "Wemby jersey", date: "Winners drawn on December 20", cta: "Enter for free", url: "basketlog-app.com/en/concours", legal: "No purchase necessary · Open worldwide, see official rules · 18+" },
-  es: { badge: "SORTEO DE NAVIDAD", label: "SORTEAMOS", head: "1 PS5", subA: "+ 1 camiseta de", c1: "PS5", c2: "Camiseta de Wemby", date: "Sorteo el 20 de diciembre", cta: "Participa gratis", url: "basketlog-app.com/es/concours", legal: "Sin obligación de compra · Todo el mundo, ver bases · +18" },
+  fr: { badge: "JEU DE NOËL", label: "À GAGNER", head: "1 PS5", subA: "+ 1 maillot de", c1: "PS5", c2: "Maillot Wemby", date: "Tirage au sort le 20 décembre", cta: "Passe Pro et participe", url: "basketlog-app.com/concours", legal: "Abonnement Pro requis (9,99 €/mois) · Voir règlement · 18 ans et +" },
+  en: { badge: "CHRISTMAS GIVEAWAY", label: "WIN", head: "A PS5", subA: "+ a jersey of", c1: "PS5", c2: "Wemby jersey", date: "Winners drawn on December 20", cta: "Go Pro to enter", url: "basketlog-app.com/en/concours", legal: "Pro subscription required (€9.99/mo) · See official rules · 18+" },
+  es: { badge: "SORTEO DE NAVIDAD", label: "SORTEAMOS", head: "1 PS5", subA: "+ 1 camiseta de", c1: "PS5", c2: "Camiseta de Wemby", date: "Sorteo el 20 de diciembre", cta: "Hazte Pro y participa", url: "basketlog-app.com/es/concours", legal: "Suscripción Pro obligatoria (9,99 €/mes) · Ver bases · +18" },
 };
 // Confettis et flocons (positions en % de l'image), placés sur les bords pour ne jamais toucher le texte.
 const DECO = {

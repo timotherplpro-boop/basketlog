@@ -5,9 +5,9 @@ import { useState } from "react";
 // Bandeau du jeu de Noël, au-dessus de la barre de navigation des pages françaises, anglaises et espagnoles (affiché par
 // app/layout.jsx tant que les inscriptions sont ouvertes). La croix le masque 30 jours : cookie bl_cbar, lu par le layout.
 const TXT = {
-  fr: { title: "Jeu de Noël", full: "1 PS5 + 1 maillot de Victor Wembanyama à gagner · gratuit, tirage le 20 décembre", short: "PS5 + maillot Wemby à gagner", close: "Masquer le bandeau du jeu de Noël" },
-  en: { title: "Christmas giveaway", full: "win a PS5 + a Victor Wembanyama jersey · free, drawing on December 20", short: "win a PS5 + Wemby jersey", close: "Hide the Christmas giveaway banner" },
-  es: { title: "Sorteo de Navidad", full: "gana una PS5 + una camiseta de Victor Wembanyama · gratis, sorteo el 20 de diciembre", short: "PS5 + camiseta de Wemby", close: "Ocultar el banner del sorteo de Navidad" },
+  fr: { title: "Jeu de Noël", full: "1 PS5 + 1 maillot de Victor Wembanyama à gagner · réservé aux abonnés Pro, tirage le 20 décembre", short: "PS5 + maillot Wemby à gagner", close: "Masquer le bandeau du jeu de Noël" },
+  en: { title: "Christmas giveaway", full: "win a PS5 + a Victor Wembanyama jersey · for Pro subscribers, drawing on December 20", short: "win a PS5 + Wemby jersey", close: "Hide the Christmas giveaway banner" },
+  es: { title: "Sorteo de Navidad", full: "gana una PS5 + una camiseta de Victor Wembanyama · para suscriptores Pro, sorteo el 20 de diciembre", short: "PS5 + camiseta de Wemby", close: "Ocultar el banner del sorteo de Navidad" },
 };
 
 export default function ContestBar({ lang = "fr", href = "/concours" }) {
