@@ -182,3 +182,61 @@ export async function defiOgImage(q, init = {}) {
     { ...OG_SIZE, ...(f ? { fonts: f } : {}), ...init }
   );
 }
+
+// Image du jeu de Noël 2026 (page /concours, posts des réseaux) : « og » 1200×630 (aperçu de lien), « portrait »
+// 1080×1350 (Instagram, Facebook), « carre » 1080×1080. Aucun logo de marque ni photo : texte, ballon et paquet cadeau dessinés.
+const CONCOURS_SIZES = { og: { width: 1200, height: 630 }, portrait: { width: 1080, height: 1350 }, carre: { width: 1080, height: 1080 } };
+const giftBox = (s) => (
+  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: s }}>
+    <div style={{ display: "flex", width: s * 0.56, height: s * 0.17, justifyContent: "space-between" }}>
+      <div style={{ display: "flex", width: s * 0.25, height: s * 0.17, borderRadius: s * 0.09, border: `${Math.round(s * 0.04)}px solid #ffe0c7` }} />
+      <div style={{ display: "flex", width: s * 0.25, height: s * 0.17, borderRadius: s * 0.09, border: `${Math.round(s * 0.04)}px solid #ffe0c7` }} />
+    </div>
+    <div style={{ display: "flex", justifyContent: "center", width: s * 0.94, height: s * 0.2, borderRadius: s * 0.03, background: "#ff7a1a" }}>
+      <div style={{ display: "flex", width: s * 0.13, height: "100%", background: "#ffe0c7" }} />
+    </div>
+    <div style={{ display: "flex", justifyContent: "center", width: s * 0.84, height: s * 0.6, borderRadius: `0 0 ${Math.round(s * 0.03)}px ${Math.round(s * 0.03)}px`, background: "linear-gradient(180deg, #e8650f 0%, #b8400b 100%)" }}>
+      <div style={{ display: "flex", width: s * 0.13, height: "100%", background: "#ffe0c7" }} />
+    </div>
+  </div>
+);
+export async function concoursOgImage(format = "og", init = {}) {
+  const f = await fonts();
+  const fmt = CONCOURS_SIZES[format] ? format : "og";
+  const size = CONCOURS_SIZES[fmt];
+  const wide = fmt === "og";
+  const k = fmt === "portrait" ? 1 : fmt === "carre" ? 0.86 : 0.58;
+  const px = (n) => Math.round(n * k);
+  const align = wide ? "flex-start" : "center";
+  const text = (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: align, gap: px(34) }}>
+      <div style={{ display: "flex", alignItems: "center", gap: px(16), fontSize: px(46), fontWeight: 800, color: "#ff8c3a" }}>
+        <img src={BALL} width={px(58)} height={px(58)} alt="" />
+        Basketlog
+      </div>
+      <div style={{ display: "flex", padding: `${px(12)}px ${px(30)}px`, borderRadius: 999, background: "#ff7a1a", color: "#fff", fontSize: px(34), fontWeight: 800, letterSpacing: px(3) }}>JEU DE NOËL</div>
+      {fmt === "portrait" ? giftBox(250) : null}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: align, lineHeight: 1.02 }}>
+        <div style={{ display: "flex", fontSize: px(176), fontWeight: 800, color: "#ffe0c7" }}>1 PS5</div>
+        <div style={{ display: "flex", fontSize: px(64), fontWeight: 800, color: "#fff", marginTop: px(8) }}>+ 1 maillot de</div>
+        <div style={{ display: "flex", fontSize: px(84), fontWeight: 800, letterSpacing: px(-2), color: "#ff7a1a" }}>Victor Wembanyama</div>
+        <div style={{ display: "flex", fontSize: px(64), fontWeight: 800, color: "#fff", marginTop: px(6) }}>à gagner</div>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: align, gap: px(10) }}>
+        <div style={{ display: "flex", fontSize: px(40), fontWeight: 800, color: "#fff" }}>Gratuit : crée ton compte Basketlog</div>
+        <div style={{ display: "flex", fontSize: px(40), fontWeight: 500, color: "rgba(255,255,255,.85)" }}>Tirage au sort le 20 décembre</div>
+        <div style={{ display: "flex", fontSize: px(40), fontWeight: 800, color: "#ff8c3a" }}>basketlog-app.com/concours</div>
+      </div>
+      <div style={{ display: "flex", fontSize: px(26), fontWeight: 500, color: "rgba(255,255,255,.6)" }}>Sans obligation d&apos;achat · France métropolitaine · 18 ans et plus</div>
+    </div>
+  );
+  return new ImageResponse(
+    (
+      <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: wide ? "space-between" : "center", padding: wide ? "0 80px" : "60px", background: "radial-gradient(circle at 50% 32%, #3a1a06 0%, #040817 64%)", color: "#fff", fontFamily: f ? "Inter" : "sans-serif" }}>
+        {text}
+        {wide ? giftBox(300) : null}
+      </div>
+    ),
+    { ...size, ...(f ? { fonts: f } : {}), ...init }
+  );
+}

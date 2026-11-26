@@ -99,5 +99,7 @@ export default async function sitemap() {
       .map((p) => playerPath(p.name)).filter((p) => !seen.has(p) && seen.add(p)).slice(0, 100).map((p) => u(p, 0.5, "daily"));
   } catch {}
 
-  return [...[...pages, ...teams, ...nba, ...el, ...arts, ...players].flatMap(both), ...ncaaEn];
+  // Jeu de Noël 2026 : réservé à la France, donc seulement l'adresse française (les autres langues sont en noindex).
+  const concours = [{ url: `${SITE}/concours`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 }];
+  return [...[...pages, ...teams, ...nba, ...el, ...arts, ...players].flatMap(both), ...ncaaEn, ...concours];
 }
