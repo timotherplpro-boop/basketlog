@@ -319,6 +319,9 @@ async function actuBackground(url) {
     return null;
   }
 }
+// Version 2 (Tim, 26/11 22 h 08 : « des posts plus qualitatifs avec un visuel qui parle du sujet ») : en plus du titre,
+// le joueur ou l'équipe du jour (w), 1 à 3 stats en très gros (n : « 44 PTS|16 REB »), le score (m : « Spurs|111|116|Blazers »,
+// le vainqueur ressort en blanc) et les couleurs des deux équipes (c : « C4CED4,E03A3E »). Tous facultatifs.
 export async function actuOgImage(a, format = "og", init = {}) {
   const fmt = ACTU_SIZES[format] ? format : "og";
   const { width, height } = ACTU_SIZES[fmt];
@@ -327,20 +330,65 @@ export async function actuOgImage(a, format = "og", init = {}) {
   const k = tall ? 1 : fmt === "thumb" ? 0.68 : 1;
   const px = (n) => Math.round(n * k);
   const title = String(a.t || "");
-  const titleSize = tall ? (title.length > 70 ? 58 : title.length > 45 ? 68 : 80) : px(title.length > 70 ? 44 : title.length > 45 ? 52 : 60);
+  const stats = String(a.n || "").split("|").map((s) => s.trim()).filter(Boolean).slice(0, 3)
+    .map((s) => { const m = s.match(/^([+-]?[\d.,]+\s?%?)\s*(.*)$/); return m ? { v: m[1].trim(), u: m[2].trim() } : { v: s, u: "" }; });
+  const sc = String(a.m || "").split("|").map((s) => s.trim());
+  const score = sc.length === 4 && sc.every(Boolean) ? sc : null;
+  const [ca, cb] = String(a.c || "").split(",").map((h) => (/^[0-9a-f]{6}$/i.test(h.trim()) ? `#${h.trim()}` : "#ff8c3a"));
+  const winA = score ? Number(score[1]) >= Number(score[2]) : true;
+  const label = String(a.l || "ACTU NBA").slice(0, 28);
+  const who = String(a.w || "").slice(0, 40);
+  const rich = !!(stats.length || score || who);
+  const titleSize = tall
+    ? (rich ? (title.length > 60 ? 50 : 58) : title.length > 70 ? 58 : title.length > 45 ? 68 : 80)
+    : px(rich ? (title.length > 60 ? 32 : 38) : title.length > 70 ? 44 : title.length > 45 ? 52 : 60);
+  const statSize = tall ? (stats.length > 2 ? 120 : 150) : px(stats.length > 2 ? 74 : 92);
+  const team = (name, pts, color, win, right) => (
+    <div style={{ display: "flex", alignItems: "center", gap: px(tall ? 16 : 12), flexDirection: right ? "row-reverse" : "row" }}>
+      <div style={{ display: "flex", width: px(tall ? 12 : 9), height: px(tall ? 52 : 38), borderRadius: 6, background: color }} />
+      <div style={{ display: "flex", fontSize: px(tall ? 32 : 24), fontWeight: 800, color: win ? "#ffffff" : "#8f98ab", letterSpacing: 1 }}>{name.toUpperCase()}</div>
+      <div style={{ display: "flex", fontSize: px(tall ? 56 : 40), fontWeight: 800, color: win ? "#ffffff" : "#8f98ab" }}>{pts}</div>
+    </div>
+  );
   return new ImageResponse(
     (
       <div style={{ display: "flex", position: "relative", width, height, background: "radial-gradient(circle at 70% 30%, #5a2608 0%, #040817 65%)", fontFamily: "Inter" }}>
-        {bg && <img src={bg} width={width} height={height} style={{ position: "absolute", left: 0, top: 0, width, height, objectFit: "cover" }} alt="" />}
-        <div style={{ position: "absolute", left: 0, top: 0, width, height, display: "flex", background: tall ? "linear-gradient(180deg, rgba(4,8,23,.55) 0%, rgba(4,8,23,0) 22%, rgba(4,8,23,0) 42%, rgba(4,8,23,.88) 70%, #040817 100%)" : "linear-gradient(90deg, rgba(4,8,23,.94) 0%, rgba(4,8,23,.78) 48%, rgba(4,8,23,.1) 100%)" }} />
-        <div style={{ position: "absolute", left: px(tall ? 56 : 60), top: px(tall ? 52 : 46), display: "flex", alignItems: "center", gap: px(14) }}>
-          <img src={BALL} width={px(54)} height={px(54)} alt="" />
-          <div style={{ display: "flex", fontSize: px(38), fontWeight: 800, color: "#ff8c3a" }}>Basketlog</div>
+        {bg && <img src={bg} width={tall ? width : rich ? Math.round(width * 0.62) : width} height={height} style={{ position: "absolute", right: 0, top: 0, width: tall ? width : rich ? Math.round(width * 0.62) : width, height, objectFit: "cover" }} alt="" />}
+        <div style={{ position: "absolute", left: 0, top: 0, width, height, display: "flex", background: tall
+          ? (rich ? "linear-gradient(180deg, rgba(4,8,23,.6) 0%, rgba(4,8,23,0) 16%, rgba(4,8,23,0) 30%, rgba(4,8,23,.82) 47%, #040817 62%)" : "linear-gradient(180deg, rgba(4,8,23,.55) 0%, rgba(4,8,23,0) 22%, rgba(4,8,23,0) 42%, rgba(4,8,23,.88) 70%, #040817 100%)")
+          : (rich ? "linear-gradient(90deg, #040817 0%, #040817 40%, rgba(4,8,23,.7) 52%, rgba(4,8,23,.05) 75%)" : "linear-gradient(90deg, rgba(4,8,23,.94) 0%, rgba(4,8,23,.78) 48%, rgba(4,8,23,.1) 100%)") }} />
+        <div style={{ position: "absolute", left: px(tall ? 56 : 52), right: px(tall ? 56 : 52), top: px(tall ? 50 : 40), display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: px(14) }}>
+            <img src={BALL} width={px(tall ? 54 : 46)} height={px(tall ? 54 : 46)} alt="" />
+            <div style={{ display: "flex", fontSize: px(tall ? 38 : 32), fontWeight: 800, color: "#ff8c3a" }}>Basketlog</div>
+          </div>
+          {tall && <div style={{ display: "flex", padding: "8px 18px", borderRadius: 999, border: "2px solid rgba(255,140,58,.75)", background: "rgba(4,8,23,.55)", color: "#ffb27a", fontSize: 24, fontWeight: 800, letterSpacing: 2 }}>{label}</div>}
         </div>
-        <div style={{ position: "absolute", left: px(tall ? 56 : 60), right: tall ? 56 : Math.round(width * 0.42), bottom: px(tall ? 70 : 52), display: "flex", flexDirection: "column", gap: px(18) }}>
-          <div style={{ display: "flex", alignSelf: "flex-start", padding: `${px(7)}px ${px(16)}px`, borderRadius: 999, border: "2px solid rgba(255,140,58,.75)", background: "rgba(255,122,26,.18)", color: "#ffb27a", fontSize: px(22), fontWeight: 800, letterSpacing: 2 }}>ACTU NBA</div>
+        <div style={{ position: "absolute", left: px(tall ? 56 : 52), right: tall ? 56 : Math.round(width * (rich ? 0.44 : 0.42)), bottom: px(tall ? 52 : 36), display: "flex", flexDirection: "column", gap: px(tall ? 22 : 14) }}>
+          {!tall && <div style={{ display: "flex", alignSelf: "flex-start", padding: `${px(6)}px ${px(14)}px`, borderRadius: 999, border: "2px solid rgba(255,140,58,.75)", background: "rgba(255,122,26,.18)", color: "#ffb27a", fontSize: px(18), fontWeight: 800, letterSpacing: 2 }}>{label}</div>}
+          {who && <div style={{ display: "flex", fontSize: px(tall ? 30 : 22), fontWeight: 800, color: "#ff8c3a", letterSpacing: px(4) }}>{who.toUpperCase()}</div>}
+          {stats.length > 0 && (
+            <div style={{ display: "flex", gap: px(tall ? 34 : 24), alignItems: "flex-end" }}>
+              {stats.map((s, idx) => (
+                <div key={idx} style={{ display: "flex", flexDirection: "column" }}>
+                  <div style={{ display: "flex", fontSize: statSize, fontWeight: 800, color: "#ffffff", lineHeight: 0.92, letterSpacing: -2 }}>{s.v}</div>
+                  {s.u && <div style={{ display: "flex", fontSize: px(tall ? 30 : 20), fontWeight: 800, color: "#ffb27a", letterSpacing: px(3), marginTop: px(6) }}>{s.u.toUpperCase()}</div>}
+                </div>
+              ))}
+            </div>
+          )}
+          {score && (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: `${px(tall ? 18 : 12)}px ${px(tall ? 26 : 18)}px`, borderRadius: px(22), border: "2px solid rgba(255,255,255,.14)", background: "rgba(255,255,255,.07)" }}>
+              {team(score[0], score[1], ca, winA, false)}
+              <div style={{ display: "flex", fontSize: px(tall ? 22 : 16), fontWeight: 800, color: "#8f98ab", letterSpacing: 2 }}>FINAL</div>
+              {team(score[3], score[2], cb, !winA, true)}
+            </div>
+          )}
           <div style={{ display: "flex", fontFamily: tf ? "Tilt Warp" : "Inter", fontSize: titleSize, fontWeight: tf ? 400 : 800, lineHeight: 1.08, color: "#ffffff" }}>{title}</div>
-          <div style={{ display: "flex", fontSize: px(tall ? 34 : 28), fontWeight: 800, color: "#ff8c3a" }}>basketlog-app.com</div>
+          <div style={{ display: "flex", alignItems: "center", gap: px(14) }}>
+            {tall && <div style={{ display: "flex", fontSize: 24, fontWeight: 500, color: "#c9d0dd" }}>Probabilités de victoire gratuites chaque soir</div>}
+            <div style={{ display: "flex", fontSize: px(tall ? 28 : 24), fontWeight: 800, color: "#ff8c3a" }}>basketlog-app.com</div>
+          </div>
         </div>
       </div>
     ),

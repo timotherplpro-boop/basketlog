@@ -90,13 +90,14 @@ export async function GET(req) {
   // Actu du jour (?actu=1, compte admin seulement ; demande de Tim, 26/11/2026 21 h 45 : un visuel fait par IA sur
   // l'actualité, chaque jour, sur chaque réseau, avec des mots-dièse). Paramètres : t (titre sur l'image), x (texte de la
   // page et de Telegram), i (adresse https de l'image de fond), b (texte Bluesky, 300 signes au plus, mots-dièse compris).
+  // Visuel version 2 (facultatif) : w (joueur ou équipe), n (stats « 44 PTS|16 REB »), m (score « Spurs|111|116|Blazers »), c (couleurs « C4CED4,E03A3E »), l (étiquette).
   // &dry=1 : rend seulement le jeton et les adresses (page /actu, images og, portrait, thumb) sans rien publier.
   // Publie sur Bluesky (carte avec l'image, lien vers la page) et sur la chaîne Telegram (photo + légende).
   if (sp.get("actu") === "1") {
     if (who !== "admin") return json({ error: "interdit" }, 401);
     let k;
     try {
-      k = actuToken({ t: sp.get("t"), x: sp.get("x") || "", i: sp.get("i") });
+      k = actuToken({ t: sp.get("t"), x: sp.get("x") || "", i: sp.get("i"), w: sp.get("w"), n: sp.get("n"), m: sp.get("m"), c: sp.get("c"), l: sp.get("l") });
     } catch (e) {
       return json({ ok: false, error: e.message }, 400);
     }
@@ -111,9 +112,12 @@ export async function GET(req) {
     if (b && len <= 300 && cfg.bluesky) {
       try {
         const facets = [];
-        for (const m of b.matchAll(/https?:\/\/[^\s]+/g)) {
+        // Liens : adresses complètes et « basketlog-app.com… » écrit sans https (cliquable aussi).
+        for (const m of b.matchAll(/https?:\/\/[^\s]+|\bbasketlog-app\.com(?:\/[^\s]*)?/g)) {
+          if (m.index > 0 && b[m.index - 1] === "/") continue;
           const s0 = enc.encode(b.slice(0, m.index)).length;
-          facets.push({ index: { byteStart: s0, byteEnd: s0 + enc.encode(m[0]).length }, features: [{ $type: "app.bsky.richtext.facet#link", uri: m[0] }] });
+          const uri = /^https?:/.test(m[0]) ? m[0] : `https://${m[0]}`;
+          facets.push({ index: { byteStart: s0, byteEnd: s0 + enc.encode(m[0]).length }, features: [{ $type: "app.bsky.richtext.facet#link", uri }] });
         }
         for (const m of b.matchAll(/(^|\s)#([\p{L}\p{N}_]+)/gu)) {
           const at = m.index + m[1].length;
