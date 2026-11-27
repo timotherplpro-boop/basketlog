@@ -1979,3 +1979,8 @@ html { scroll-behavior: smooth; }
 .actu-page .actu-visuel { width: 100%; height: auto; border-radius: 18px; display: block; margin-bottom: 20px; }
 .actu-page h1 { font-size: clamp(24px, 4vw, 34px); line-height: 1.15; margin: 0 0 14px; }
 .actu-page p { color: var(--muted); line-height: 1.55; }
+
+/* Fenêtre « analyse complète » : case des CGV et lien vers les formules (27/11/2026) */
+.ulk-agree { margin: 10px 0 8px; font-size: 12.5px; line-height: 1.45; text-align: left; }
+.ulk-cta.plan-wait { filter: saturate(.55) brightness(.85); }
+.ulk-more { display: block; margin-top: 8px; font-size: 13px; text-align: center; color: inherit; opacity: .75; text-decoration: underline; }

@@ -4,6 +4,7 @@
 // réussite du modèle tirée du bilan, membres Whop (à partir de +100) ou matchs analysés, vrai compte à rebours.
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import Link from "next/link";
 import { track } from "../lib/analytics";
 import { exitAllowed, exitMark, proUrlWithCode } from "../lib/exit-offer-ui";
 import { localStore } from "../lib/safe-store";
@@ -38,6 +39,11 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
   const boxRef = useRef(null);
   const [now, setNow] = useState(() => Date.now());
   const [mounted, setMounted] = useState(false);
+  // Essai Pro en un clic depuis la fenêtre (Tim, 27/11/2026 : « il faut absolument qu'on fasse plus de ventes ») : la case
+  // des CGV et de la renonciation au droit de rétractation (obligatoire, jamais cochée d'avance, même texte que sur /pro)
+  // est ici, et le bouton mène directement au paiement (/paiement?plan=pro) au lieu de repasser par la page des formules.
+  const [agree, setAgree] = useState(false);
+  const [nudge, setNudge] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
   useFocusTrap(boxRef, mounted, null); // Tab reste dans la fenêtre (Échap est géré plus bas)
@@ -157,7 +163,25 @@ export default function UnlockModal({ state, tier, href, proof, match, league = 
           </div>
         )}
 
-        <a href={href} className="btn-solid ulk-cta" onClick={onCta}>{trial ? `🎁 ${tt.cta}` : L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo", "Desbloquear a análise completa")}</a>
+        {trial ? (<>
+          <label className={`pro-agree ulk-agree ${nudge && !agree ? "nudge" : ""}`}>
+            <input type="checkbox" checked={agree} onChange={(e) => { setAgree(e.target.checked); setNudge(false); }} />
+            {L.t(
+              <span>J&apos;accepte les <Link href="/cgv" target="_blank">CGV</Link> et les <Link href="/cgu" target="_blank">CGU</Link>, et je demande l&apos;accès immédiat à mes analyses : je reconnais perdre mon droit de rétractation de 14 jours.</span>,
+              <span>I accept the <Link href={L.href("/cgv")} target="_blank">Terms of Sale</Link> and <Link href={L.href("/cgu")} target="_blank">Terms of Use</Link>, and I request immediate access to my analyses: I acknowledge that I lose my 14-day right of withdrawal.</span>,
+              <span>Acepto las <Link href={L.href("/cgv")} target="_blank">Condiciones de venta</Link> y las <Link href={L.href("/cgu")} target="_blank">Condiciones de uso</Link>, y pido el acceso inmediato a mis análisis: reconozco que pierdo mi derecho de desistimiento de 14 días.</span>, <span>Aceito as <Link href={L.href("/cgv")} target="_blank">Condições de venda</Link> e os <Link href={L.href("/cgu")} target="_blank">Termos de uso</Link>, e peço o acesso imediato às minhas análises: reconheço que perco meu direito de arrependimento de 14 dias.</span>
+            )}
+          </label>
+          {nudge && !agree && <p className="pro-agree-hint" role="alert">{L.t("Coche la case ci-dessus pour continuer vers le paiement.", "Tick the box above to continue to checkout.", "Marca la casilla de arriba para continuar con el pago.", "Marque a caixa acima para continuar com o pagamento.")}</p>}
+          <a href={L.href("/paiement?plan=pro")} className={`btn-solid ulk-cta ${agree ? "" : "plan-wait"}`} aria-disabled={!agree} onClick={(e) => {
+            if (!agree) { e.preventDefault(); setNudge(true); return; }
+            onCta?.();
+            track("Clic abonnement", { formule: "pro", source: "fenetre_analyse" });
+          }}>🎁 {tt.cta}</a>
+          <a href={href} className="ulk-more" onClick={onCta}>{L.t("Voir toutes les formules", "See all plans", "Ver todos los planes", "Ver todos os planos")}</a>
+        </>) : (
+          <a href={href} className="btn-solid ulk-cta" onClick={onCta}>{L.t("Débloquer l'analyse complète", "Unlock the full analysis", "Desbloquear el análisis completo", "Desbloquear a análise completa")}</a>
+        )}
         <small className="ulk-foot">{foot}</small>
         </>)}
       </div>
