@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { track } from "../lib/analytics";
 import { isStandalone } from "../lib/pwa";
 import { localStore } from "../lib/safe-store";
-import { inviteDue, invitePathOk, markShown, noteOpen, noteSeen, snoozeInvite } from "../lib/push-invite";
+import { SESSION_KEY, inviteDue, invitePathOk, markShown, noteOpen, noteSeen, snoozeInvite } from "../lib/push-invite";
 import { PUSH_EVENT, activatePush, pushState } from "./PushOptIn";
 import { useL } from "./LangProvider";
 
@@ -35,8 +35,12 @@ export default function PushInvite() {
     const store = localStore();
     if (!store) return;
     let alive = true;
+    // Lancement de l'appli (nouvelle session) : toujours une nouvelle ouverture. Un rechargement de page garde la session.
+    let launch = false;
+    try { launch = !sessionStorage.getItem(SESSION_KEY); sessionStorage.setItem(SESSION_KEY, "1"); } catch { /* règle des 30 minutes seule */ }
     const check = async () => {
-      const s = noteOpen(store);
+      const s = noteOpen(store, Date.now(), launch);
+      launch = false;
       if (!inviteDue(s)) { setDue(0); return; }
       const st = await pushState();
       if (alive) setDue(st === "off" ? s.n : 0);

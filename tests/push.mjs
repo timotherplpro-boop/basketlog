@@ -60,6 +60,10 @@ export async function pushTests({ ok, ko, eq }) {
   eq("Retour avant 30 min : même ouverture", readInvite(st).n, 1);
   const s2 = noteOpen(st, t0 + 20 * min + OPEN_GAP);
   eq("Retour après 30 min d'absence : 2e ouverture, invitation proposée", [s2.n, inviteDue(s2, t0 + 20 * min + OPEN_GAP)], [2, true]);
+  const cold = memStore();
+  noteOpen(cold, t0, true);
+  const c2 = noteOpen(cold, t0 + 2 * min, true); // appli fermée puis relancée 2 minutes plus tard
+  eq("Appli relancée (nouvelle session) : 2e ouverture même sans 30 min d'écart", [c2.n, inviteDue(c2, t0 + 2 * min)], [2, true]);
   eq("« affichée » une seule fois par ouverture", [markShown(st), markShown(st)], [true, false]);
   const t1 = t0 + 2 * day;
   snoozeInvite(st, t1);
