@@ -16,6 +16,10 @@ if (!games.length) { console.log(JSON.stringify({ empty: true })); process.exit(
 const PROMO = "🎁 Analyse complète : 3 jours à 1 €, puis 9,99 €/mois (+ taxes) 👉 basketlog-app.com/pro";
 const PROMO_LONG = "🎁 Analyse complète : 3 jours à 1 €, puis 9,99 €/mois (+ taxes) 👉 https://basketlog-app.com/pro";
 const PROMO_EN = "🎁 Full analysis: 3 days for €1, then €9.99/mo (+ tax) 👉 basketlog-app.com/en/pro";
+// Rappel du jeu de Noël sous les posts du soir jusqu'au 19/12/2026 inclus (Tim, 27/11 10 h 56 : « lance tout »).
+const CONTEST_ON = Date.now() <= Date.parse("2026-12-19T23:59:59+01:00");
+const CONTEST = "🎄 Jeu de Noël : 1 PS5 + 1 maillot de Wemby à gagner (abonnés Pro) 👉 basketlog-app.com/concours";
+const CONTEST_LONG = "🎄 Jeu de Noël : 1 PS5 + 1 maillot de Wemby à gagner (abonnés Pro) 👉 https://basketlog-app.com/concours";
 const pct = (p) => Math.round(p * 100);
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const MOIS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
@@ -48,16 +52,19 @@ const xLen = (s) => {
 const TAGS_X = "#NBA #Basket";
 const TAGS_LONG = "#NBA #Basket #Basketball #nbafrance";
 
-function xPost(nFav, withClosest, withQuestion) {
+function xPost(nFav, withClosest, withQuestion, withContest = false) {
   const favs = byFav.slice(0, nFav);
   const parts = ["Les plus gros favoris NBA de cette nuit 🏀", "", ...favs.map((r) => r.ligne)];
   if (withClosest && closest && !favs.includes(closest)) parts.push("", `Match le plus serré : ${closest.ligne}`);
   parts.push("", `${matchsMot}, gratuit${n === 1 ? "" : "s"} → basketlog-app.com/app/matchs`);
   if (withQuestion) parts.push("Qui gagne selon toi ? 👇");
-  parts.push("", PROMO, "", TAGS_X);
+  // Jusqu'au 19/12 : sur X, la ligne du jeu (qui vise aussi l'abonnement Pro) remplace celle de l'offre quand les deux ne
+  // tiennent pas ensemble dans 280 signes ; la ligne de l'offre reste mot pour mot sur Facebook et LinkedIn.
+  parts.push("", withContest ? CONTEST : PROMO, "", TAGS_X);
   return parts.join("\n");
 }
 const xCandidates = [];
+if (CONTEST_ON) for (let k = Math.min(3, n); k >= 1; k--) xCandidates.push(xPost(k, false, true, true), xPost(k, false, false, true));
 for (let k = Math.min(4, n); k >= 1; k--) {
   xCandidates.push(xPost(k, true, true), xPost(k, false, true), xPost(k, false, false));
 }
@@ -77,7 +84,9 @@ if (closest && n > 4 && !byFav.slice(0, 4).includes(closest)) longParts.push("",
 if (bilanNuit) longParts.push("", bilanNuit);
 longParts.push("", `Probabilités de victoire des ${n} match${n === 1 ? "" : "s"}, gratuites → https://basketlog-app.com/app/matchs`);
 if (shortUrl) longParts.push(`Les matchs de cette nuit en 15 secondes ▶️ ${shortUrl}`);
-longParts.push("", "Qui gagne selon toi ? 👇", "", PROMO_LONG, "", TAGS_LONG);
+longParts.push("", "Qui gagne selon toi ? 👇", "", PROMO_LONG);
+if (CONTEST_ON) longParts.push("", CONTEST_LONG);
+longParts.push("", TAGS_LONG);
 
 const description = [
   "Probabilité de victoire de chaque match NBA de cette nuit, enregistrée avant le coup d'envoi :",
@@ -85,6 +94,7 @@ const description = [
   "",
   "Tous les matchs, gratuits 👉 https://basketlog-app.com/app/matchs",
   PROMO_LONG,
+  ...(CONTEST_ON ? [CONTEST_LONG] : []),
   "",
   "#NBA #basket #nbafrance #shorts #Basketlog",
 ].join("\n");
