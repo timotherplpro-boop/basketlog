@@ -26,6 +26,7 @@ import LangProvider from "../components/LangProvider";
 import { FxProvider } from "../lib/use-currency";
 import { getCurrency } from "../lib/currency-server";
 import InstallApp from "../components/InstallApp";
+import PushInvite from "../components/PushInvite";
 import SiteFooter from "../components/SiteFooter";
 import SiteChrome from "../components/SiteChrome";
 import ContestBar from "../components/ContestBar";
@@ -125,6 +126,8 @@ export default async function RootLayout({ children }) {
           <PaymentReturn />
           <CookieBanner />
           <InstallApp />
+          {/* Appli installée, dès la 2e ouverture : invitation aux notifications du soir (carte en bas, non bloquante) */}
+          <PushInvite />
           {preview && <PreviewBar tier={preview} />}
           </FxProvider>
         </LangProvider>
