@@ -11,6 +11,7 @@ import { TERMS } from "../lib/glossary.js";
 import { monthsOf } from "../lib/months.js";
 import { ncaaState, ncaaStateOf, ncaaDay } from "../lib/ncaa";
 import { ncaaGamePath, ncaaTeamPath } from "../lib/ncaa-model.js";
+import { actuList } from "../lib/actu";
 
 export const revalidate = 3600; // régénéré chaque heure, avec les matchs à venir
 
@@ -102,5 +103,16 @@ export default async function sitemap() {
   // Jeu de Noël 2026 : ouvert au monde entier sauf quelques pays ; la page portugaise (surtout lue au Brésil, exclu) est en noindex.
   const cAlt = { languages: { fr: `${SITE}/concours`, en: `${SITE}/en/concours`, es: `${SITE}/es/concours`, "x-default": `${SITE}/en/concours` } };
   const concours = ["/concours", "/en/concours", "/es/concours"].map((p, i) => ({ url: `${SITE}${p}`, lastModified: new Date(), changeFrequency: "daily", priority: i ? 0.7 : 0.8, alternates: cAlt }));
-  return [...[...pages, ...teams, ...nba, ...el, ...arts, ...players].flatMap(both), ...ncaaEn, ...concours];
+  // Actu du jour (27/11) : la page « Actu NBA » et les articles /actu/<post Bluesky>-<titre>, en français seulement (pas de
+  // version /en ni /es). Même source que la page /actu (flux Bluesky en cache 1 h) ; IndexNow les reçoit avec le sitemap.
+  let actu = [];
+  try {
+    const list = await actuList();
+    const day = (iso) => (iso && !isNaN(Date.parse(iso)) ? new Date(iso) : new Date()); // date invalide : le sitemap entier planterait
+    actu = [
+      { url: `${SITE}/actu`, lastModified: day(list[0]?.at), changeFrequency: "daily", priority: 0.7 },
+      ...list.map((x, i) => ({ url: `${SITE}${x.path}`, lastModified: day(x.at), changeFrequency: i ? "weekly" : "daily", priority: i < 7 ? 0.7 : 0.5 })),
+    ];
+  } catch {}
+  return [...[...pages, ...teams, ...nba, ...el, ...arts, ...players].flatMap(both), ...ncaaEn, ...concours, ...actu];
 }

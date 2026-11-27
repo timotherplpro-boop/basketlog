@@ -128,7 +128,8 @@ export async function GET(req) {
         const thumb = await blueskyThumb(sess, urls.thumb);
         out.bluesky = await sendBluesky(sess, { text: b, facets, langs: ["fr"], url: urls.page, title: a.t, description: a.x.replace(/\s+/g, " ").slice(0, 200) }, thumb);
         const rkey = String(out.bluesky || "").split("/").pop();
-        if (/^[a-z0-9]{10,20}$/.test(rkey)) out.short = actuShortUrls(rkey);
+        // short.page : adresse propre de l'article (/actu/<rkey>-<titre>), à mettre dans les posts X, LinkedIn, Facebook.
+        if (/^[a-z0-9]{10,20}$/.test(rkey)) out.short = actuShortUrls(rkey, a.t);
       } catch (e) {
         out.errors.push(`bluesky : ${e.message}`);
       }

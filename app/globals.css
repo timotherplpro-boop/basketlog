@@ -1991,6 +1991,30 @@ html { scroll-behavior: smooth; }
 .actu-page .actu-visuel { width: 100%; height: auto; border-radius: 18px; display: block; margin-bottom: 20px; }
 .actu-page h1 { font-size: clamp(24px, 4vw, 34px); line-height: 1.15; margin: 0 0 14px; }
 .actu-page p { color: var(--muted); line-height: 1.55; }
+/* Articles /actu/<id> et page « Actu NBA » (/actu), 27/11/2026 */
+.actu-page .actu-wrap { max-width: 640px; margin: 0 auto; padding: 24px 20px 48px; }
+.actu-page .actu-wrap h1 { margin-bottom: 8px; }
+.actu-page .actu-kicker { display: block; margin: 0 0 8px; font-size: 12.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--orange); }
+.actu-page .actu-kicker a { color: inherit; text-decoration: none; }
+.actu-page .actu-faits { margin: 22px 0; padding: 16px 18px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); }
+.actu-page .actu-faits p { margin: 0; }
+.actu-page .actu-qui { font-weight: 800; color: var(--text); margin-bottom: 8px !important; }
+.actu-page .actu-stats { display: flex; flex-wrap: wrap; gap: 8px 26px; margin: 0; padding: 0; list-style: none; color: var(--muted); }
+.actu-page .actu-stats strong { display: block; font-family: var(--mono); font-size: 28px; line-height: 1.15; color: var(--text); }
+.actu-page .actu-score { margin-top: 12px !important; font-size: 18px; color: var(--text) !important; }
+.actu-page .actu-score strong { font-family: var(--mono); }
+.actu-page .actu-cta { margin-top: 26px; }
+.actu-page .actu-autres { margin-top: 34px; }
+.actu-page .actu-autres h2 { font-size: 18px; margin: 0 0 8px; }
+.actu-page .actu-autres ul, .actu-page .actu-items { list-style: none; margin: 0 0 12px; padding: 0; }
+.actu-page .actu-autres li, .actu-page .actu-items li { padding: 10px 0; border-bottom: 1px solid var(--line); line-height: 1.4; }
+.actu-page .actu-autres li span, .actu-page .actu-items time { color: var(--dim); font-size: 13px; }
+.actu-page .actu-items time { display: block; margin-bottom: 2px; }
+.actu-page .actu-une { display: flex; flex-direction: column; gap: 6px; margin: 18px 0 14px; color: var(--text); text-decoration: none; }
+.actu-page .actu-une img { width: 100%; height: auto; border-radius: 16px; display: block; margin-bottom: 8px; }
+.actu-page .actu-une strong { font-size: 21px; line-height: 1.25; }
+.actu-page .actu-une span:not(.actu-kicker) { color: var(--muted); line-height: 1.5; }
+.actu-page .actu-une:hover strong { color: var(--orange); }
 
 /* Fenêtre « analyse complète » : case des CGV et lien vers les formules (27/11/2026) */
 .ulk-agree { margin: 10px 0 8px; font-size: 12.5px; line-height: 1.45; text-align: left; }
