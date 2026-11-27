@@ -4,7 +4,8 @@ import { COOKIE, PREVIEW_TIERS, cookieOptions, decodeSession, displayName, encod
 import { adminData, dbRpc, getRole } from "../../../lib/roles";
 import { LANGS, mk } from "../../../lib/i18n";
 import { CODE_RE, cleanPct, randomChars, suggestCode } from "../../../lib/promo";
-import { describeProblems, disablePromo, ensurePromo, whopPromoReady } from "../../../lib/whop-promo";
+import { describeProblems, disablePromo, ensureBlackFriday, ensurePromo, whopPromoReady } from "../../../lib/whop-promo";
+import { BF, bfLive } from "../../../lib/black-friday";
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +54,18 @@ async function whopSync({ id, code, pct }) {
     const r = await ensurePromo({ code, pct });
     if (id) { try { await dbRpc("basketlog_admin_promo_whop", { p_id: id, p_ok: true }); } catch { /* le bouton « Créer chez Whop » adopte le code déjà créé */ } }
     return { state: r.state };
+  } catch (e) {
+    return { state: "error", kind: e?.kind || "network", problems: e?.problems, deactivated: e?.deactivated, detail: e?.detail };
+  }
+}
+// Code Black Friday (lib/black-friday.js) chez Whop : créé s'il n'existe pas, sinon simplement renvoyé (idempotent). Ne lève jamais.
+// expiration : « whop » (Whop l'applique à BF.END) ou « site » (Whop n'a pas accepté expires_at : le site refuse le code après
+// BF.END et la tâche quotidienne /api/cron/relance le désactive chez Whop).
+async function bfSync() {
+  if (!whopPromoReady()) return { state: "manual" };
+  try {
+    const r = await ensureBlackFriday();
+    return { state: r.state, promo: r.promo, expiration: r.promo.expires_at ? "whop" : "site", ...(r.promo.expiryRefused ? { expiryRefused: true } : {}) };
   } catch (e) {
     return { state: "error", kind: e?.kind || "network", problems: e?.problems, deactivated: e?.deactivated, detail: e?.detail };
   }
@@ -278,6 +291,12 @@ export async function POST(req) {
         if (!target) return err(t("Créateur introuvable.", "Creator not found.", "Creador no encontrado.", "Creador no encontrado."));
         const res = await dbRpc("basketlog_admin_promo_off", { p_uid: target.uid, p_inv_code: target.inv });
         extra = { supprimes: shownAll(await retireAll(Array.isArray(res?.supprimes) ? res.supprimes : [])) };
+        break;
+      }
+      // Black Friday : crée le code BLACKFRIDAY chez Whop (ou le renvoie s'il existe déjà). Corps : { "action": "bf_creer" }.
+      case "bf_creer": {
+        if (!bfLive()) return err(t("L'offre Black Friday est terminée.", "The Black Friday offer has ended.", "La oferta del Black Friday ha terminado.", "La oferta del Black Friday ha terminado."));
+        extra = { whop: shown(await bfSync(), BF.CODE) };
         break;
       }
       case "lister":

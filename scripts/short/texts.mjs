@@ -17,7 +17,15 @@ const PROMO = "🎁 Analyse complète : 3 jours à 1 €, puis 9,99 €/mois (+ 
 const PROMO_LONG = "🎁 Analyse complète : 3 jours à 1 €, puis 9,99 €/mois (+ taxes) 👉 https://basketlog-app.com/pro";
 const PROMO_EN = "🎁 Full analysis: 3 days for €1, then €9.99/mo (+ tax) 👉 basketlog-app.com/en/pro";
 // Rappel du jeu de Noël sous les posts du soir jusqu'au 19/12/2026 inclus (Tim, 27/11 10 h 56 : « lance tout »).
-const CONTEST_ON = Date.now() <= Date.parse("2026-12-19T23:59:59+01:00");
+// TEXTS_NOW (date ISO) : pour les tests, simule un autre jour.
+const NOW = process.env.TEXTS_NOW ? Date.parse(process.env.TEXTS_NOW) : Date.now();
+const CONTEST_ON = NOW <= Date.parse("2026-12-19T23:59:59+01:00");
+// Black Friday (Tim, 27/11 19 h 23) : jusqu'au lundi 30/11/2026 23:59:59 (Paris), même date et même code que lib/black-friday.js
+// (script autonome : recopiés ici, un test les compare). La ligne Black Friday s'ajoute à celle du jeu quand la longueur le permet,
+// et passe en priorité sinon.
+const BF_ON = NOW <= Date.parse("2026-11-30T22:59:59Z");
+const BF = "🖤 Black Friday : -30 % sur Pro et Lifetime avec le code BLACKFRIDAY 👉 basketlog-app.com/pro?code=BLACKFRIDAY";
+const BF_LONG = "🖤 Black Friday : -30 % sur Pro et Lifetime avec le code BLACKFRIDAY 👉 https://basketlog-app.com/pro?code=BLACKFRIDAY";
 const CONTEST = "🎄 Jeu de Noël : 1 PS5 + 1 maillot de Wemby à gagner (abonnés Pro) 👉 basketlog-app.com/concours";
 const CONTEST_LONG = "🎄 Jeu de Noël : 1 PS5 + 1 maillot de Wemby à gagner (abonnés Pro) 👉 https://basketlog-app.com/concours";
 const pct = (p) => Math.round(p * 100);
@@ -52,7 +60,7 @@ const xLen = (s) => {
 const TAGS_X = "#NBA #Basket";
 const TAGS_LONG = "#NBA #Basket #Basketball #nbafrance";
 
-function xPost(nFav, withClosest, withQuestion, withContest = false) {
+function xPost(nFav, withClosest, withQuestion, withContest = false, withBf = false) {
   const favs = byFav.slice(0, nFav);
   const parts = ["Les plus gros favoris NBA de cette nuit 🏀", "", ...favs.map((r) => r.ligne)];
   if (withClosest && closest && !favs.includes(closest)) parts.push("", `Match le plus serré : ${closest.ligne}`);
@@ -60,15 +68,20 @@ function xPost(nFav, withClosest, withQuestion, withContest = false) {
   if (withQuestion) parts.push("Qui gagne selon toi ? 👇");
   // Jusqu'au 19/12 : sur X, la ligne du jeu (qui vise aussi l'abonnement Pro) remplace celle de l'offre quand les deux ne
   // tiennent pas ensemble dans 280 signes ; la ligne de l'offre reste mot pour mot sur Facebook et LinkedIn.
-  parts.push("", withContest ? CONTEST : PROMO, "", TAGS_X);
+  // Black Friday (jusqu'au 30/11) : sa ligne s'ajoute à celle du jeu quand les deux tiennent ; sinon elle reste seule.
+  if (withBf) parts.push("", BF);
+  if (!withBf || withContest) parts.push("", withContest ? CONTEST : PROMO);
+  parts.push("", TAGS_X);
   return parts.join("\n");
 }
 const xCandidates = [];
-if (CONTEST_ON) for (let k = Math.min(3, n); k >= 1; k--) xCandidates.push(xPost(k, false, true, true), xPost(k, false, false, true));
+if (BF_ON && CONTEST_ON) for (let k = Math.min(3, n); k >= 1; k--) xCandidates.push(xPost(k, false, true, true, true), xPost(k, false, false, true, true));
+if (BF_ON) for (let k = Math.min(3, n); k >= 1; k--) xCandidates.push(xPost(k, false, true, false, true), xPost(k, false, false, false, true));
+if (CONTEST_ON && !BF_ON) for (let k = Math.min(3, n); k >= 1; k--) xCandidates.push(xPost(k, false, true, true), xPost(k, false, false, true));
 for (let k = Math.min(4, n); k >= 1; k--) {
   xCandidates.push(xPost(k, true, true), xPost(k, false, true), xPost(k, false, false));
 }
-const x = xCandidates.find((t) => xLen(t) <= 280) || xPost(1, false, false);
+const x = xCandidates.find((t) => xLen(t) <= 280) || xPost(1, false, false, false, BF_ON);
 
 // Ancienne version anglaise (avant le 24/11/2026), gardée au besoin.
 function xPostEn(nFav) {
@@ -85,6 +98,7 @@ if (bilanNuit) longParts.push("", bilanNuit);
 longParts.push("", `Probabilités de victoire des ${n} match${n === 1 ? "" : "s"}, gratuites → https://basketlog-app.com/app/matchs`);
 if (shortUrl) longParts.push(`Les matchs de cette nuit en 15 secondes ▶️ ${shortUrl}`);
 longParts.push("", "Qui gagne selon toi ? 👇", "", PROMO_LONG);
+if (BF_ON) longParts.push("", BF_LONG);
 if (CONTEST_ON) longParts.push("", CONTEST_LONG);
 longParts.push("", TAGS_LONG);
 
@@ -94,6 +108,7 @@ const description = [
   "",
   "Tous les matchs, gratuits 👉 https://basketlog-app.com/app/matchs",
   PROMO_LONG,
+  ...(BF_ON ? [BF_LONG] : []),
   ...(CONTEST_ON ? [CONTEST_LONG] : []),
   "",
   "#NBA #basket #nbafrance #shorts #Basketlog",

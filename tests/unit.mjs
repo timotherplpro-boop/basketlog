@@ -16,6 +16,7 @@ import { RESET_TOKEN_RE, accountIdOf, accountUid, clientIp, inAppBrowser, isAcco
 import { GoogleAuthError, exchangeCode, googleAuthUrl, readIdToken } from "../lib/google-auth.js";
 import { mailReady, resetEmail, sendMail } from "../lib/mail.js";
 import { newsletterTests } from "./newsletter.mjs";
+import { blackFridayTests } from "./black-friday.mjs";
 import { accueilTests } from "./accueil.mjs";
 import { widgetTests } from "./widget.mjs";
 import { creatorGainsTests } from "./creator-gains.mjs";
@@ -601,6 +602,7 @@ export async function unit() {
   await pushTests({ ok, ko, eq });
   await passTests({ ok, ko, eq });
   await relanceTests({ ok, ko, eq });
+  await blackFridayTests({ ok, ko, eq });
   await actuTests({ ok, ko, eq });
   await parrainageTests({ ok, ko, eq });
 await currencyTests({ ok, ko, eq });

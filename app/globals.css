@@ -1924,6 +1924,10 @@ html { scroll-behavior: smooth; }
 .contest-bar-link:hover .contest-bar-go { transform: translateX(3px); }
 .contest-bar-x { position: absolute; right: 6px; top: 5px; width: 30px; height: 30px; border: 0; border-radius: 8px; background: rgba(0, 0, 0, .22); color: #fff; font-size: 20px; line-height: 1; cursor: pointer; }
 .contest-bar ~ .nav { top: 40px; }
+/* Black Friday (components/BlackFridayBar.jsx) : bandeau noir et orange, empilé au-dessus de celui du jeu quand les deux sont là */
+.bf-bar { background: linear-gradient(90deg, #040817 0%, #1a0f05 45%, #7c2d05 100%); border-bottom: 1px solid rgba(249, 115, 22, .55); }
+.bf-bar .contest-bar-link b { color: #f97316; }
+.contest-bar ~ .contest-bar ~ .nav { top: 80px; }
 @media (max-width: 760px) { .contest-bar { font-size: 13px; padding-left: 10px; } .contest-bar-full { display: none; } .contest-bar-short { display: inline; } }
 @media (max-width: 400px) { .contest-bar { font-size: 12.5px; padding-right: 42px; } .contest-bar-gift { margin-right: 6px; } }
 

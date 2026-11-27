@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { socialDay, recapDay } from "../../../../lib/social-day";
-import { blueskyProfile, ogImageUrl, RECAP_MARK, launchPosts, POWER_MARK, powerPosts, CONCOURS_MARK, concoursPost } from "../../../../lib/social";
+import { blueskyProfile, ogImageUrl, RECAP_MARK, launchPosts, POWER_MARK, powerPosts, CONCOURS_MARK, concoursPost, bfPost } from "../../../../lib/social";
 import { powerRankings } from "../../../../lib/data";
 import { GROUPS, nationalPosts } from "../../../../lib/nationals.js";
 import { nationalBase, nationalFrom } from "../../../../lib/nationals-data";
@@ -8,6 +8,7 @@ import { sendTelegramPhoto } from "../../../../lib/social-send";
 import { actuToken, readActu, actuUrls, actuShortUrls } from "../../../../lib/actu";
 import { socialConfig, socialStatus, sendTelegram, telegramCheck, blueskySession, blueskyThumb, sendBluesky, blueskyPostedSince, blueskySetProfile } from "../../../../lib/social-send";
 import { COOKIE, currentSession } from "../../../../lib/pro";
+import { BF_MARK, bfLive } from "../../../../lib/black-friday";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -269,6 +270,37 @@ export async function GET(req) {
     } catch (e) {
       return json({ ok: false, error: e.message });
     }
+  }
+  // Black Friday (?bf=1, compte admin seulement ; ?bf=1&dry=1 : aperçu sans rien publier) : une seule annonce, sur Bluesky et sur la
+  // chaîne Telegram française, avec le lien basketlog-app.com/pro?code=BLACKFRIDAY (Telegram : avec le visuel portrait). Refusée
+  // après la fin de l'offre. Anti-doublon : un message Bluesky du compte qui commence par « 🖤 BLACK FRIDAY » dans les 7 derniers jours
+  // bloque l'envoi (Bluesky et Telegram). Sans Bluesky branché, rien ne détecte un doublon sur Telegram : n'appeler qu'une fois.
+  if (sp.get("bf") === "1") {
+    if (who !== "admin") return json({ error: "interdit" }, 401);
+    if (!bfLive()) return json({ ok: false, skipped: "l'offre Black Friday est terminée" });
+    const post = bfPost();
+    const chat = cfg.telegram ? cfg.telegram.chats.fr || Object.values(cfg.telegram.chats)[0] : null;
+    if (sp.get("dry") === "1") return json({ ok: true, dry: true, bluesky: { branche: !!cfg.bluesky, signes: [...post.text].length, post }, telegram: { branche: !!cfg.telegram, chat, html: post.html, visuel: `${post.url.split("/pro")[0]}/bf/og?f=portrait&lang=fr` } });
+    const out = { ok: true, bluesky: null, telegram: null, errors: [] };
+    if (cfg.bluesky) {
+      try {
+        const s = await blueskySession(cfg.bluesky);
+        if (await blueskyPostedSince(s, new Date(Date.now() - 7 * 86400e3).toISOString(), BF_MARK)) return json({ ok: true, skipped: "déjà publié" });
+        const thumb = await blueskyThumb(s, post.image);
+        out.bluesky = { uri: await sendBluesky(s, post, thumb), thumb: !!thumb };
+      } catch (e) { out.errors.push(`bluesky : ${e.message}`); }
+    }
+    if (cfg.telegram && chat) {
+      const visuel = "https://basketlog-app.com/bf/og?f=portrait&lang=fr";
+      try {
+        out.telegram = { chat, result: await sendTelegramPhoto(cfg.telegram.token, chat, visuel, post.html) };
+      } catch {
+        try { out.telegram = { chat, result: await sendTelegram(cfg.telegram.token, chat, post.html, post.url), sansVisuel: true }; } catch (e) { out.errors.push(`telegram : ${e.message}`); }
+      }
+    }
+    if (!cfg.bluesky && !cfg.telegram) return json({ ok: false, skipped: "aucun compte branché" });
+    out.ok = out.errors.length === 0;
+    return json({ ...out, at: new Date().toISOString() });
   }
   if (sp.get("check") === "1") {
     const check = { status: socialStatus(cfg), telegram: {}, bluesky: null };

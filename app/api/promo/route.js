@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { dbRpc } from "../../../lib/roles";
 import { CODE_RE, cleanCode } from "../../../lib/promo";
 import { promoMonths } from "../../../lib/whop-promo";
-import { liveOffer } from "../../../lib/exit-offer";
+import { liveBf, liveOffer } from "../../../lib/exit-offer";
+import { BF } from "../../../lib/black-friday";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,12 @@ const out = (body, status = 200) => NextResponse.json(body, { status, headers: {
 export async function GET(req) {
   const code = cleanCode(new URL(req.url).searchParams.get("code") || "");
   if (!CODE_RE.test(code)) return out({ ok: false, raison: "format" });
+  // Offre Black Friday (lib/black-friday.js) : acceptée jusqu'à son terme, seulement quand Whop confirme le code (-30 %, 2 paiements).
+  if (code === BF.CODE) {
+    const bf = await liveBf();
+    if (bf.ok) return out({ ok: true, code: bf.code, pct: bf.pct, mois: bf.mois });
+    return bf.why === "network" ? out({ ok: false, raison: "indisponible" }, 503) : out({ ok: false, raison: "inconnu" });
+  }
   let down = false;
   try {
     const list = await dbRpc("basketlog_admin_promos");

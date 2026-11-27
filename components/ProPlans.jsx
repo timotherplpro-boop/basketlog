@@ -4,9 +4,10 @@ import Link from "next/link";
 import { useProStatus } from "../lib/useProStatus";
 import { track } from "../lib/analytics";
 import { useL } from "./LangProvider";
-import { price, money, amountOf, curOf, shown, fxNote, PRO_TRIAL_DAYS, PRO_TRIAL_PRICE } from "../lib/pricing";
+import { price, money, amountOf, curOf, convert, shown, fxNote, PRO_TRIAL_DAYS, PRO_TRIAL_PRICE } from "../lib/pricing";
 import { pctOf } from "../lib/i18n";
 import { CODE_RE, cleanCode, discounted, withPromo } from "../lib/promo";
+import { BF, bfLive } from "../lib/black-friday";
 import SwitchWatch from "./SwitchWatch";
 import ContestNote from "./ContestNote";
 import { ProExitIntent } from "./ExitOffer";
@@ -26,17 +27,25 @@ const Icon = ({ name }) => {
 // `promo` : code promo de créateur appliqué sur la page ({ pct, mois } : remise en % et nombre de paiements remisés, 0 = tous) ;
 // le prix plein s'affiche alors barré (`old`). Quand la remise ne couvre que les premiers paiements d'un abonnement, la carte
 // l'annonce comme telle (« 11,19 € le 1er mois », puis « puis 13,99 €/mois ») : jamais un prix remisé présenté comme définitif.
-const PLANS = (L, ai, cur, promo = null) => {
+// `trialOk` : la personne peut prendre l'essai Pro. Avec l'essai, le 1er paiement d'un code qui remise 2 paiements ou plus
+// (Black Friday : BLACKFRIDAY, 2 paiements) est l'essai (1 € -> 0,70 €) : il ne reste alors que `mois - 1` mois de Pro remisés
+// après l'essai (« 6,99 € le 1er mois, puis 9,99 €/mois »). Pour 0 (tous les paiements) et 1 (codes des créateurs), l'affichage
+// reste celui d'avant.
+const PLANS = (L, ai, cur, promo = null, trialOk = true) => {
   const pct = promo?.pct || 0;
   const mois = promo?.mois ?? 0;
   const show = (id) => (pct ? money(discounted(amountOf(id, cur), pct), curOf(cur), L) : price(id, cur, L));
   const was = (id) => (pct ? price(id, cur, L) : null);
-  const limited = pct > 0 && mois >= 1;
+  const withTrial = pct > 0 && mois >= 2 && PRO_TRIAL_DAYS > 0 && trialOk;
+  const cycles = withTrial ? mois - 1 : mois; // mois de Pro remisés une fois l'essai passé
+  const trialShown = withTrial ? money(discounted(convert(PRO_TRIAL_PRICE, cur), pct), curOf(cur), L) : shown(PRO_TRIAL_PRICE, cur, L);
+  const limited = pct > 0 && cycles >= 1;
   const per = !limited ? L.t("/mois", "/month", "/mes", "/mês")
-    : mois === 1 ? L.t("le 1er mois", "first month", "el primer mes", "o primeiro mês")
-    : L.t(`/mois pendant ${mois} mois`, `/month for ${mois} months`, `/mes durante ${mois} meses`, `/mês durante ${mois} meses`);
-  const sep = limited && mois === 1 ? " " : ""; // « 11,19 € le 1er mois » mais « 11,19 €/mois »
+    : cycles === 1 ? L.t("le 1er mois", "first month", "el primer mes", "o primeiro mês")
+    : L.t(`/mois pendant ${cycles} mois`, `/month for ${cycles} months`, `/mes durante ${cycles} meses`, `/mês durante ${cycles} meses`);
+  const sep = limited && cycles === 1 ? " " : ""; // « 11,19 € le 1er mois » mais « 11,19 €/mois »
   const then = (id) => (limited ? L.t(`puis ${price(id, cur, L)}/mois`, `then ${price(id, cur, L)}/month`, `luego ${price(id, cur, L)}/mes`, `depois ${price(id, cur, L)}/mês`) : null);
+  const trialThen = withTrial ? L.t(`, puis ${price("pro", cur, L)}/mois`, `, then ${price("pro", cur, L)}/month`, `, luego ${price("pro", cur, L)}/mes`, `, depois ${price("pro", cur, L)}/mês`) : "";
   return [
   {
     // 19/11/2026 : Starter n'est plus vendu (choix de Tim) ; la carte Gratuit le remplace. Les abonnés Starter gardent leur accès.
@@ -52,8 +61,8 @@ const PLANS = (L, ai, cur, promo = null) => {
   },
   {
     id: "pro", name: "Pro", icon: "crown", price: show("pro"), old: was("pro"), per, then: then("pro"), sub: L.t("Pour les passionnés de basket", "For basketball fans", "Para los apasionados del baloncesto", "Para os apaixonados por basquete"), badge: L.t("Populaire", "Popular", "Popular", "Popular"),
-    trial: PRO_TRIAL_DAYS ? L.t(`${PRO_TRIAL_DAYS} jours à ${shown(PRO_TRIAL_PRICE, cur, L)}, puis ${show("pro")}${sep}${per} + taxes. Résiliable à tout moment.`, `${PRO_TRIAL_DAYS} days for ${shown(PRO_TRIAL_PRICE, cur, L)}, then ${show("pro")}${sep}${per} + tax. Cancel anytime.`, `${PRO_TRIAL_DAYS} días por ${shown(PRO_TRIAL_PRICE, cur, L)}, luego ${show("pro")}${sep}${per} + impuestos. Cancela cuando quieras.`, `${PRO_TRIAL_DAYS} dias por ${shown(PRO_TRIAL_PRICE, cur, L)}, depois ${show("pro")}${sep}${per} + impostos. Cancele quando quiser.`) : null,
-    ctaTrial: PRO_TRIAL_DAYS ? L.t(`Essai ${PRO_TRIAL_DAYS} jours à ${shown(PRO_TRIAL_PRICE, cur, L)}`, `Start ${PRO_TRIAL_DAYS}-day trial for ${shown(PRO_TRIAL_PRICE, cur, L)}`, `Prueba ${PRO_TRIAL_DAYS} días por ${shown(PRO_TRIAL_PRICE, cur, L)}`, `Teste ${PRO_TRIAL_DAYS} dias por ${shown(PRO_TRIAL_PRICE, cur, L)}`) : null,
+    trial: PRO_TRIAL_DAYS ? L.t(`${PRO_TRIAL_DAYS} jours à ${trialShown}, puis ${show("pro")}${sep}${per}${trialThen} + taxes. Résiliable à tout moment.`, `${PRO_TRIAL_DAYS} days for ${trialShown}, then ${show("pro")}${sep}${per}${trialThen} + tax. Cancel anytime.`, `${PRO_TRIAL_DAYS} días por ${trialShown}, luego ${show("pro")}${sep}${per}${trialThen} + impuestos. Cancela cuando quieras.`, `${PRO_TRIAL_DAYS} dias por ${trialShown}, depois ${show("pro")}${sep}${per}${trialThen} + impostos. Cancele quando quiser.`) : null,
+    ctaTrial: PRO_TRIAL_DAYS ? L.t(`Essai ${PRO_TRIAL_DAYS} jours à ${trialShown}`, `Start ${PRO_TRIAL_DAYS}-day trial for ${trialShown}`, `Prueba ${PRO_TRIAL_DAYS} días por ${trialShown}`, `Teste ${PRO_TRIAL_DAYS} dias por ${trialShown}`) : null,
     cta: `${L.t("Débloquer", "Unlock", "Desbloquear", "Desbloquear")} - ${show("pro")}${sep}${per}`,
     items: [
       ["ok", L.t("Analyses illimitées", "Unlimited analyses", "Análisis ilimitados", "Análises ilimitadas")],
@@ -124,10 +133,11 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
   const [promoOpen, setPromoOpen] = useState(false);
   const [promoInput, setPromoInput] = useState("");
   const [promoState, setPromoState] = useState("idle"); // idle | checking | invalid | down
-  const applyPromo = useCallback(async (raw) => {
+  // silent : application automatique (Black Friday) : si Whop ne confirme pas le code, rien ne s'affiche.
+  const applyPromo = useCallback(async (raw, { silent = false } = {}) => {
     const code = cleanCode(raw);
-    if (!CODE_RE.test(code)) { setPromo(null); setPromoState("invalid"); return; }
-    setPromoState("checking");
+    if (!CODE_RE.test(code)) { if (!silent) { setPromo(null); setPromoState("invalid"); } return; }
+    if (!silent) setPromoState("checking");
     try {
       const res = await fetch(`/api/promo?code=${encodeURIComponent(code)}`, { cache: "no-store" });
       const j = await res.json().catch(() => ({}));
@@ -137,14 +147,13 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
         setPromo({ code: j.code, pct: j.pct, mois });
         setPromoInput(j.code);
         setPromoState("idle");
-        track("Code promo", { etape: "appliqué", code: j.code, remise: j.pct });
-      } else {
+        track("Code promo", { etape: silent ? "appliqué automatiquement" : "appliqué", code: j.code, remise: j.pct });
+      } else if (!silent) {
         setPromo(null);
         setPromoState(res.status >= 500 ? "down" : "invalid");
       }
     } catch {
-      setPromo(null);
-      setPromoState("down");
+      if (!silent) { setPromo(null); setPromoState("down"); }
     }
   }, []);
   useEffect(() => {
@@ -152,6 +161,9 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
       const q = new URLSearchParams(window.location.search);
       const c = q.get("code") || q.get("promo");
       if (c) { setPromoOpen(true); setPromoInput(cleanCode(c)); applyPromo(c); }
+      // Black Friday : sans autre code dans l'adresse, BLACKFRIDAY est appliqué tout seul (vérifié par /api/promo ; sans
+      // confirmation de Whop, rien ne s'affiche et la page reste telle quelle).
+      else if (bfLive()) applyPromo(BF.CODE, { silent: true });
     } catch { /* adresse illisible : pas de code pré-rempli */ }
   }, [applyPromo]);
   // Avant le paiement : acceptation des CGV et demande d'accès immédiat (renonciation à la rétractation, art. L221-28 13°).
@@ -264,7 +276,7 @@ export default function ProPlans({ checkout, loginReady, notice, ai = false, cur
       {nudge && !agree && <p className="pro-agree-hint" role="alert">{L.t("Coche la case ci-dessus pour continuer vers le paiement.", "Tick the box above to continue to checkout.", "Marca la casilla de arriba para continuar con el pago.", "Marque a caixa acima para continuar com o pagamento.")}</p>}
       <ContestNote L={L} className="contest-note contest-note-plans" />
       <div className="plans" id="plans">
-        {PLANS(L, ai, cur, promo).map((p, i) => {
+        {PLANS(L, ai, cur, promo, trialOk).map((p, i) => {
           const url = checkout[p.id];
           return (
             <article key={p.id} className={`plan plan-${p.id} reveal-in${payer === p.id ? " plan-picked" : ""}`} style={{ animationDelay: `${i * 90}ms` }}>

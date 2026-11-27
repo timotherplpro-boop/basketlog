@@ -31,6 +31,9 @@ import PushInvite from "../components/PushInvite";
 import SiteFooter from "../components/SiteFooter";
 import SiteChrome from "../components/SiteChrome";
 import ContestBar from "../components/ContestBar";
+import BlackFridayBar from "../components/BlackFridayBar";
+import { bfLive, bfPath } from "../lib/black-friday";
+import { liveBf } from "../lib/exit-offer";
 import { CONCOURS, concoursOuvert } from "../lib/concours";
 import { stripLang } from "../lib/i18n";
 import { COOKIE, decodeSession, aiReady } from "../lib/pro";
@@ -94,6 +97,13 @@ export default async function RootLayout({ children }) {
   const preview = sess?.admin && sess?.preview ? sess.preview : null; // admin qui regarde le site comme un client
   // Bandeau du jeu de Noël : pages françaises, inscriptions ouvertes, pas sur la page du jeu, pas si le visiteur l'a fermé.
   const contestBar = (L.fr || L.en || L.es) && concoursOuvert() && !jar.get("bl_cbar") && !stripLang(path || "/").startsWith(CONCOURS.path);
+  // Bandeau Black Friday (au-dessus de celui du jeu, qui reste) : jusqu'à BF.END, seulement si Whop confirme le code (mêmes
+  // vérifications que /api/promo, gardées en mémoire 5 minutes) ; la vérification n'attend jamais plus de 1,5 s (sans réponse : pas de bandeau).
+  let bfBar = false;
+  if (bfLive() && !jar.get("bl_bfbar") && !stripLang(path || "/").startsWith("/paiement")) {
+    const ok = await Promise.race([liveBf().then((r) => r.ok === true).catch(() => false), new Promise((r) => setTimeout(() => r(false), 1500))]);
+    bfBar = ok;
+  }
   return (
     <html lang={L.lang}>
       <head>
@@ -115,7 +125,7 @@ export default async function RootLayout({ children }) {
           <FxProvider fx={fx}>
           <JsonLd data={SITE_LD} />
           <Analytics />
-          <SiteChrome member={member}>{contestBar && <ContestBar lang={L.lang} href={L.href(CONCOURS.path)} />}<Nav /></SiteChrome>
+          <SiteChrome member={member}>{bfBar && <BlackFridayBar lang={L.lang} href={bfPath(L.lang)} />}{contestBar && <ContestBar lang={L.lang} href={L.href(CONCOURS.path)} />}<Nav /></SiteChrome>
           {children}
           <SiteChrome member={member}><SiteFooter L={L} /></SiteChrome>
           <WelcomeToast />

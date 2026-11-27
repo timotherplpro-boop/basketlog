@@ -16,7 +16,7 @@ export async function GET(req) {
   const s = decodeSession(req.cookies.get(COOKIE)?.value);
   const admin = s?.role === "admin" || s?.admin === true;
   if (admin && new URL(req.url).searchParams.get("diagnostic")) {
-    const o = await liveOffer({ fresh: true });
+    const o = await liveOffer({ fresh: true, blackFriday: true });
     const body = o.ok
       ? { actif: true, code: o.code, pct: o.pct, mois: o.mois }
       : {
@@ -33,7 +33,7 @@ export async function GET(req) {
         };
     return NextResponse.json(body, { headers: { "Cache-Control": "no-store" } });
   }
-  const o = await liveOffer();
+  const o = await liveOffer({ blackFriday: true });
   return NextResponse.json(o.ok ? { code: o.code, pct: o.pct, mois: o.mois } : {}, {
     headers: { "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=600" },
   });

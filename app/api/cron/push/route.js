@@ -3,6 +3,7 @@ import { socialDay } from "../../../../lib/social-day";
 import { pushMessage, PUSH_LANGS } from "../../../../lib/push-text";
 import { pushConfigured, pushEnabled, pushList, pushMark, pushRemove, sendPush } from "../../../../lib/push";
 import { COOKIE, currentSession } from "../../../../lib/pro";
+import { BF, bfLive, bfPush } from "../../../../lib/black-friday";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -52,6 +53,28 @@ export async function GET(req) {
       }));
     }
     return json({ concours: true, sent, gone, failed, abonnes: subs0.length });
+  }
+  // Annonce du Black Friday (?bf=1, compte admin seulement) : une seule notification à chaque abonné, dans sa langue (fr, en, es, pt),
+  // avec le lien /pro?code=BLACKFRIDAY de sa langue. ?bf=1&dry=1 : aperçu (textes, nombre d'abonnés par langue), rien n'est envoyé.
+  // Refusée après la fin de l'offre. Texte dans lib/black-friday.js (bfPush).
+  if (q.get("bf") === "1") {
+    if (who.who !== "admin") return json({ error: "Accès refusé." }, 403);
+    if (!bfLive()) return json({ error: "L'offre Black Friday est terminée." }, 410);
+    const txt = Object.fromEntries(PUSH_LANGS.map((l) => [l, bfPush(l)]));
+    let subsB = [];
+    try { subsB = await pushList(); } catch (e) { return json({ error: `Base : ${e.message}` }, 502); }
+    const parLangue = {};
+    for (const s of subsB) { const l = txt[s.l] ? s.l : "fr"; parLangue[l] = (parLangue[l] || 0) + 1; }
+    if (q.get("dry") === "1") return json({ dry: true, abonnes: subsB.length, parLangue, messages: txt });
+    let sent = 0, gone = 0, failed = 0;
+    for (let i = 0; i < subsB.length; i += 20) {
+      await Promise.all(subsB.slice(i, i + 20).map(async (s) => {
+        const r = await sendPush({ endpoint: s.e, keys: { p256dh: s.k, auth: s.a } }, { ...txt[txt[s.l] ? s.l : "fr"], tag: `black-friday-${BF.CODE.toLowerCase()}-2026` });
+        if (r.ok) sent++; else if (r.gone) gone++; else failed++;
+        try { if (r.gone) await pushRemove(s.e); } catch {}
+      }));
+    }
+    return json({ bf: true, sent, gone, failed, abonnes: subsB.length, parLangue });
   }
   const test = q.get("test") === "1" && who.who === "admin";
 

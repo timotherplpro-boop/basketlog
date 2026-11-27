@@ -9,6 +9,7 @@ import { checkoutFor, price } from "../../lib/pricing";
 import { getCurrency } from "../../lib/currency-server";
 import { cookies } from "next/headers";
 import { SWITCH_COOKIE } from "../../lib/switch";
+import { bfLive } from "../../lib/black-friday";
 
 export async function generateMetadata() {
   const L = await getL();
@@ -21,6 +22,8 @@ export async function generateMetadata() {
     ),
     path: "/pro",
     L,
+    // Black Friday : la carte de partage (X, LinkedIn, Facebook) montre le visuel de l'offre, avec ou sans ?code=BLACKFRIDAY.
+    ...(bfLive() ? { image: `/bf/og?f=og&lang=${L.lang}` } : {}),
   });
 }
 

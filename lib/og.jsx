@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { BF, BF_PRICES, bfEur, bfLang } from "./black-friday.js";
 
 // Image de partage (réseaux sociaux, messageries, page de paiement) dans les trois langues.
 // Polices Inter du site (500 et 800) chargées depuis assets/fonts : sans elles, le moteur d'image n'a
@@ -527,5 +528,70 @@ export async function actuOgImage(a, format = "og", init = {}) {
       </div>
     ),
     { width, height, fonts: [...(f || []), ...(tf ? [tf] : [])], ...init }
+  );
+}
+
+// ---------- Visuel Black Friday (27/11/2026, Tim : « fais le Black Friday ») ----------
+// Servi par /bf/og (hors de /api/, que robots.txt ferme aux robots) : ?f=portrait (1080×1350, Instagram, Facebook), carre
+// (1080×1080) ou og (1200×630, aperçu de lien X et LinkedIn, og:image de /pro pendant l'offre) ; ?lang=fr (défaut), en, es, pt.
+// Fond bleu nuit et orange Basketlog, aucun joueur, aucun visage, aucun logo d'équipe ni de la NBA. Toutes les valeurs de style
+// sont des nombres ou des chaînes écrits ici : jamais undefined (le moteur d'image plante sur « reading 'trim' »).
+const BF_SIZES = { portrait: { width: 1080, height: 1350 }, carre: { width: 1080, height: 1080 }, og: { width: 1200, height: 630 } };
+const ARROW =
+  "data:image/svg+xml;base64," +
+  Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 24"><path d="M2 12h40M31 3l11 9-11 9" fill="none" stroke="#f97316" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`).toString("base64");
+const BF_TXT = {
+  fr: { label: "BLACK FRIDAY", sub: "Pro et Lifetime", code: "code", until: "jusqu'au 30/11", life: "Lifetime", first: "1er mois Pro" },
+  en: { label: "BLACK FRIDAY", sub: "Pro and Lifetime", code: "code", until: "until Nov 30", life: "Lifetime", first: "Pro 1st month" },
+  es: { label: "BLACK FRIDAY", sub: "Pro y Lifetime", code: "código", until: "hasta el 30/11", life: "Lifetime", first: "1.er mes Pro" },
+  pt: { label: "BLACK FRIDAY", sub: "Pro e Lifetime", code: "código", until: "até 30/11", life: "Lifetime", first: "1º mês Pro" },
+};
+export async function bfOgImage(format = "og", init = {}, lang = "fr") {
+  const [f, tf] = await Promise.all([fonts(), titleFont()]);
+  const l = bfLang(lang);
+  const T = BF_TXT[l];
+  const fmt = BF_SIZES[format] ? format : "og";
+  const { width, height } = BF_SIZES[fmt];
+  const wide = fmt === "og";
+  const k = fmt === "portrait" ? 1 : fmt === "carre" ? 0.82 : 0.56;
+  const px = (n) => Math.round(n * k);
+  const title = tf ? "Tilt Warp" : f ? "Inter" : "sans-serif";
+  const big = l === "en" ? `-${BF.PCT}%` : `-${BF.PCT} %`;
+  const P = BF_PRICES;
+  const row = (label, was, now) => (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: px(16), fontSize: px(34), fontWeight: 500, color: "#c9d1e3" }}>
+      <div style={{ display: "flex", fontWeight: 800, color: "#ffffff" }}>{label}</div>
+      <div style={{ display: "flex", textDecoration: "line-through", color: "#8f98ab" }}>{bfEur(was, l)}</div>
+      <img src={ARROW} width={px(44)} height={px(22)} alt="" />
+      <div style={{ display: "flex", fontWeight: 800, color: "#ffffff" }}>{bfEur(now, l)}</div>
+    </div>
+  );
+  const glow = (pos, size, al) => <div style={{ position: "absolute", ...pos, width: size, height: size, display: "flex", borderRadius: size, background: `radial-gradient(circle, rgba(249,115,22,${al}) 0%, rgba(4,8,23,0) 65%)` }} />;
+  return new ImageResponse(
+    (
+      <div style={{ position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width, height, background: "#040817", color: "#ffffff", fontFamily: f ? "Inter" : "sans-serif" }}>
+        {glow({ left: Math.round(width * 0.5 - width * 0.45), top: Math.round(height * 0.5 - width * 0.45) }, Math.round(width * 0.9), 0.38)}
+        <div style={{ position: "absolute", top: px(46), left: 0, width, display: "flex", alignItems: "center", justifyContent: "center", gap: px(14), fontSize: px(38), fontWeight: 800 }}>
+          <img src={BALL} width={px(50)} height={px(50)} alt="" />
+          <div style={{ display: "flex" }}>Basketlog</div>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: wide ? px(40) : px(20) }}>
+          <div style={{ display: "flex", padding: `${px(10)}px ${px(30)}px`, borderRadius: 999, border: `${px(3)}px solid #f97316`, background: "rgba(249,115,22,.16)", color: "#ffb27a", fontSize: px(40), fontWeight: 800, letterSpacing: px(6) }}>{T.label}</div>
+          <div style={{ display: "flex", marginTop: px(wide ? 10 : 18), fontFamily: title, fontSize: px(wide ? 330 : 300), lineHeight: 1, color: "#f97316", textShadow: "0 12px 60px rgba(249,115,22,.5)" }}>{big}</div>
+          <div style={{ display: "flex", marginTop: px(4), fontSize: px(60), fontWeight: 800 }}>{T.sub}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: px(16), marginTop: px(26), padding: `${px(14)}px ${px(34)}px`, borderRadius: px(18), background: "#f97316", color: "#040817", fontSize: px(46), fontWeight: 800 }}>
+            <div style={{ display: "flex", fontWeight: 500 }}>{T.code}</div>
+            <div style={{ display: "flex", letterSpacing: px(2) }}>{BF.CODE}</div>
+          </div>
+          <div style={{ display: "flex", marginTop: px(16), fontSize: px(32), fontWeight: 500, color: "#c9d1e3" }}>{T.until}</div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: px(10), marginTop: px(wide ? 18 : 32) }}>
+            {row(T.life, P.lifetimeWas, P.lifetime)}
+            {row(T.first, P.proWas, P.pro)}
+          </div>
+        </div>
+        <div style={{ position: "absolute", bottom: px(40), left: 0, width, display: "flex", justifyContent: "center", fontSize: px(34), fontWeight: 800, color: "#8f98ab" }}>basketlog-app.com</div>
+      </div>
+    ),
+    { width, height, ...(f || tf ? { fonts: [...(f || []), ...(tf ? [tf] : [])] } : {}), ...init }
   );
 }
