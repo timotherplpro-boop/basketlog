@@ -5,7 +5,7 @@ import { powerRankings } from "../../../../lib/data";
 import { GROUPS, nationalPosts } from "../../../../lib/nationals.js";
 import { nationalBase, nationalFrom } from "../../../../lib/nationals-data";
 import { sendTelegramPhoto } from "../../../../lib/social-send";
-import { actuToken, readActu, actuUrls } from "../../../../lib/actu";
+import { actuToken, readActu, actuUrls, actuShortUrls } from "../../../../lib/actu";
 import { socialConfig, socialStatus, sendTelegram, telegramCheck, blueskySession, blueskyThumb, sendBluesky, blueskyPostedSince, blueskySetProfile } from "../../../../lib/social-send";
 import { COOKIE, currentSession } from "../../../../lib/pro";
 
@@ -127,6 +127,8 @@ export async function GET(req) {
         const sess = await blueskySession(cfg.bluesky);
         const thumb = await blueskyThumb(sess, urls.thumb);
         out.bluesky = await sendBluesky(sess, { text: b, facets, langs: ["fr"], url: urls.page, title: a.t, description: a.x.replace(/\s+/g, " ").slice(0, 200) }, thumb);
+        const rkey = String(out.bluesky || "").split("/").pop();
+        if (/^[a-z0-9]{10,20}$/.test(rkey)) out.short = actuShortUrls(rkey);
       } catch (e) {
         out.errors.push(`bluesky : ${e.message}`);
       }
@@ -135,7 +137,7 @@ export async function GET(req) {
       const chat = cfg.telegram.chats.fr || Object.values(cfg.telegram.chats)[0];
       const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
       const tags = (b.match(/#[\p{L}\p{N}_]+/gu) || []).join(" ");
-      const cap = `<b>${esc(a.t)}</b>\n\n${esc(a.x).slice(0, 760)}\n\n👉 <a href="${urls.page}">basketlog-app.com</a>${tags ? `\n${esc(tags)}` : ""}`;
+      const cap = `<b>${esc(a.t)}</b>\n\n${esc(a.x).slice(0, 760)}\n\n👉 <a href="${(out.short || urls).page}">basketlog-app.com</a>${tags ? `\n${esc(tags)}` : ""}`;
       try {
         out.telegram = await sendTelegramPhoto(cfg.telegram.token, chat, urls.portrait, cap);
       } catch (e) {

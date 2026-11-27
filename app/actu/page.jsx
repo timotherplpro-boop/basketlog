@@ -1,14 +1,13 @@
 import Link from "next/link";
-import { readActu, actuUrls } from "../../lib/actu";
+import { resolveActu } from "../../lib/actu";
 import { CONCOURS, concoursOuvert } from "../../lib/concours";
 
 // Page de l'actu du jour (lien des posts X et LinkedIn, dont l'aperçu montre le visuel). Non indexée : le contenu vient
 // d'un jeton signé (lib/actu.js), pas d'une page éditoriale du site.
 export async function generateMetadata({ searchParams }) {
-  const k = ((await searchParams) || {}).k;
-  const a = readActu(k);
-  if (!a) return { title: "Basketlog", robots: { index: false, follow: true } };
-  const u = actuUrls(k);
+  const got = await resolveActu((await searchParams) || {});
+  if (!got) return { title: "Basketlog", robots: { index: false, follow: true } };
+  const { a, urls: u } = got;
   const desc = a.x.replace(/\s+/g, " ").slice(0, 200);
   return {
     title: `${a.t} – Basketlog`,
@@ -21,8 +20,8 @@ export async function generateMetadata({ searchParams }) {
 }
 
 export default async function ActuPage({ searchParams }) {
-  const k = ((await searchParams) || {}).k;
-  const a = readActu(k);
+  const got = await resolveActu((await searchParams) || {});
+  const a = got?.a;
   if (!a) {
     return (
       <main className="app-page actu-page">
@@ -31,7 +30,7 @@ export default async function ActuPage({ searchParams }) {
       </main>
     );
   }
-  const u = actuUrls(k);
+  const u = got.urls;
   return (
     <main className="app-page actu-page">
       <article>
