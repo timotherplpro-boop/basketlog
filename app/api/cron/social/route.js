@@ -181,6 +181,22 @@ export async function GET(req) {
     return json({ ok: !!set.ok && !!setDesc.ok, chat, title, before: before.result?.title || null, description: desc || null, error: set.ok ? (setDesc.ok ? undefined : setDesc.description) : set.description });
   }
 
+  // Ligne du jeu de Noël dans la description de la chaîne Telegram française (compte admin seulement ; Tim, 27/11 :
+  // « lance tout ») : ?tgbio=1 l'ajoute (une fois), ?tgbio=0 l'enlève (après le 19/12). 255 signes au plus.
+  if (sp.get("tgbio") === "1" || sp.get("tgbio") === "0") {
+    if (who !== "admin") return json({ error: "interdit" }, 401);
+    if (!cfg.telegram) return json({ ok: false, skipped: "bot Telegram non branché" });
+    const chat = cfg.telegram.chats.fr || Object.values(cfg.telegram.chats)[0];
+    const tg = (method, body) => fetch(`https://api.telegram.org/bot${cfg.telegram.token}/${method}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).then((r) => r.json()).catch((e) => ({ ok: false, description: e.message }));
+    const before = (await tg("getChat", { chat_id: chat })).result?.description || "";
+    const line = "🎄 Jeu de Noël : PS5 + maillot de Wemby à gagner (abonnés Pro) 👉 basketlog-app.com/concours";
+    const base = before.split("\n").filter((l) => !l.startsWith("🎄 Jeu de Noël")).join("\n").trim();
+    const desc = sp.get("tgbio") === "1" ? `${base}\n\n${line}` : base;
+    if ([...desc].length > 255) return json({ ok: false, error: `description trop longue (${[...desc].length} signes)`, before });
+    const set = desc === before ? { ok: true, unchanged: true } : await tg("setChatDescription", { chat_id: chat, description: desc });
+    return json({ ok: !!set.ok, before, description: desc, error: set.ok ? undefined : set.description });
+  }
+
   // Suppression d'un post du compte (compte admin seulement) : ?tgdel=<n° du message de la chaîne Telegram française>
   // et/ou ?bskydel=<identifiant du post Bluesky, la fin de l'adresse at://…/app.bsky.feed.post/…>. Sert à remplacer un
   // post raté (Tim, 26/11 22 h 15 : « Remplacer et publier partout »).

@@ -9,6 +9,7 @@ import { SWITCH_COOKIE, SWITCH_TARGETS, SWITCH_TTL_MS, makeIntent, readIntent, r
 import { CODE_RE, cleanCode, cleanPct, discounted, mergePromos, randomChars, suggestCode, withPromo } from "../lib/promo.js";
 import { asPct, checkPromo, describeProblem, describeProblems, promoMonths, whopPromoReady } from "../lib/whop-promo.js";
 import { BSKY_BIO_MAX, BSKY_MAX, BSKY_NAME_MAX, blueskyPost, blueskyProfile, elPick, graphemes, launchPosts, nbaPick, socialPosts, telegramText } from "../lib/social.js";
+import { concoursOuvert } from "../lib/concours.js";
 import { blueskySetProfile, socialConfig, socialStatus } from "../lib/social-send.js";
 import { MIN_PASSWORD, fakeVerify, hashPassword, passwordProblem, verifyPassword } from "../lib/password.js";
 import { RESET_TOKEN_RE, accountIdOf, accountUid, clientIp, inAppBrowser, isAccountSession, limitKey, localName, maskEmail, newResetToken, normEmail, sameOrigin, tokenHash, whopUidOf } from "../lib/auth-utils.js";
@@ -281,7 +282,7 @@ export async function unit() {
 
   // --- Profil Bluesky : texte (lib/social.js) et écriture (lib/social-send.js, appels simulés)
   const bp = blueskyProfile();
-  eq(`Profil Bluesky : nom (${BSKY_NAME_MAX}) et présentation (${BSKY_BIO_MAX}) dans les limites, en français seulement (24/11/2026)`, [bp.displayName, graphemes(bp.displayName) <= BSKY_NAME_MAX, graphemes(bp.description) <= BSKY_BIO_MAX, bp.description.split("\n").length, /Free|gratis/.test(bp.description)], ["Basketlog", true, true, 3, false]);
+  eq(`Profil Bluesky : nom (${BSKY_NAME_MAX}) et présentation (${BSKY_BIO_MAX}) dans les limites, en français seulement (24/11/2026)`, [bp.displayName, graphemes(bp.displayName) <= BSKY_NAME_MAX, graphemes(bp.description) <= BSKY_BIO_MAX, bp.description.split("\n").length, /Free|gratis/.test(bp.description)], ["Basketlog", true, true, concoursOuvert() ? 4 : 3, false]);
   eq("Profil Bluesky : adresse du site avec https:// (cliquable) et logo du site", [bp.description.endsWith("https://basketlog-app.com"), bp.avatarUrl], [true, "https://basketlog-app.com/icons/icon-512.png"]);
   eq("Profil Bluesky : ni vocabulaire de paris, ni « IA »", /\b(paris|parier|mise|cotes?|bets?|betting|odds|apuestas?|cuotas?)\b/i.test(bp.description) || /\bIA\b/.test(bp.description), false);
   const realFetch = globalThis.fetch;
