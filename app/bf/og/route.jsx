@@ -6,5 +6,5 @@ import { bfOgImage } from "../../../lib/og";
 export async function GET(req) {
   const q = new URL(req.url).searchParams;
   const lang = ["fr", "en", "es", "pt"].includes(q.get("lang")) ? q.get("lang") : "fr";
-  return bfOgImage(q.get("f") || q.get("format") || "og", { headers: { "Cache-Control": "public, max-age=86400, s-maxage=604800" } }, lang);
+  return bfOgImage(q.get("f") || q.get("format") || "og", { headers: { "Access-Control-Allow-Origin": "*", "Cache-Control": "public, max-age=86400, s-maxage=604800" } }, lang);
 }
