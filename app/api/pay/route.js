@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import { SITE } from "../../../lib/site";
 import { checkoutFor } from "../../../lib/pricing";
 import { mk } from "../../../lib/i18n";
-import { safeNext } from "../../../lib/pro";
+import { COOKIE, decodeSession, safeNext } from "../../../lib/pro";
 import { sameOrigin, clientIp } from "../../../lib/auth-utils";
 import { allowed } from "../../../lib/comptes";
 import { PAY_COOKIE, PAY_NEXT_COOKIE, PAY_PLANS, createCheckout, newPayToken, payTag, planIdOf } from "../../../lib/whop-pay";
+import { REF_COOKIE, refUid } from "../../../lib/parrainage";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 15;
@@ -27,9 +28,15 @@ export async function POST(req) {
   const planId = planIdOf(checkoutFor(cur)[plan]);
   if (!planId) return no(503, "config");
   const token = newPayToken();
+  // Arrivé par un lien de parrainage (cookie posé par /api/parrainage, 30 jours) : le code part dans les métadonnées du
+  // paiement, pour que /api/cron/parrainage récompense le parrain au premier vrai paiement. Jamais son propre lien.
+  const ref = req.cookies.get(REF_COOKIE)?.value || "";
+  const parrain = ref ? refUid(ref) : null;
+  const me = parrain ? decodeSession(req.cookies.get(COOKIE)?.value) : null;
+  const meta = parrain && !(me?.uid && (me.uid === parrain || me.whop === parrain)) ? { parrain: ref } : null;
   let session;
   try {
-    session = await createCheckout({ planId, tag: payTag(token), plan, redirectUrl: `${SITE}/api/pay/retour` });
+    session = await createCheckout({ planId, tag: payTag(token), plan, redirectUrl: `${SITE}/api/pay/retour`, meta });
   } catch (e) {
     console.warn(`[paiement] configuration Whop refusée : ${String(e?.message || e).slice(0, 240)}`);
     return no(e?.kind === "nokey" ? 503 : 502, e?.kind === "nokey" ? "config" : "whop");

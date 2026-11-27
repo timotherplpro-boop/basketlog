@@ -15,6 +15,7 @@ import { track } from "../lib/analytics";
 import { switchDoneText } from "../lib/switch-text";
 import { openAuth } from "../lib/auth-client";
 import NewsletterSettings from "./NewsletterSettings";
+import ParrainagePanel from "./ParrainagePanel";
 
 // Page Whop où l'on retrouve ses commandes (repli quand le site ne peut pas lire ou modifier l'abonnement) et réglages du compte Whop.
 const WHOP_ORDERS = "https://whop.com/@me/settings/orders/";
@@ -575,6 +576,9 @@ export default function AccountPanel() {
           </div>
         )}
       </section>
+
+      {/* ---------- Parrainage : lien personnel, mois offerts (masqué pour les créateurs) ---------- */}
+      {!preview && !isCreator && <ParrainagePanel />}
 
       {/* ---------- Newsletter du dimanche (n'apparaît que lorsqu'elle est ouverte) ---------- */}
       {!preview && <NewsletterSettings />}

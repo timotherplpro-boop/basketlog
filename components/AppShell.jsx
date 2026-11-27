@@ -24,6 +24,7 @@ const I = {
   money: <><rect width="20" height="12" x="2" y="6" rx="2" /><circle cx="12" cy="12" r="2" /><path d="M6 12h.01M18 12h.01" /></>,
   sliders: <><path d="M21 4h-7" /><path d="M10 4H3" /><path d="M21 12h-9" /><path d="M8 12H3" /><path d="M21 20h-5" /><path d="M12 20H3" /><path d="M14 2v4" /><path d="M8 10v4" /><path d="M16 18v4" /></>,
   globe: <><circle cx="12" cy="12" r="10" /><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" /><path d="M2 12h20" /></>,
+  gift: <><rect x="3" y="8" width="18" height="4" rx="1" /><path d="M12 8v13" /><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" /><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 8 0 0 1 12 8a4.8 8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5" /></>,
 };
 const Icon = ({ name }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>{I[name]}</svg>
@@ -133,6 +134,8 @@ export default function AppShell({ session, ai = false, children }) {
             <div><b>{name || L.t("Mon compte", "My account", "Mi cuenta", "Minha conta")}</b><small>{plan}</small></div>
           </div>
           <Link href={L.href("/app/compte")} className={`sb-link ${p.startsWith("/app/compte") ? "on" : ""}`} aria-current={p.startsWith("/app/compte") ? "page" : undefined}><Icon name="sliders" />{L.t("Mon compte et abonnement", "My account and subscription", "Mi cuenta y suscripción", "Minha conta e assinatura")}</Link>
+          {/* Parrainage (lib/parrainage.js) : 1 mois de Pro offert par ami abonné ; pas pour les créateurs, qui ont leur code promo */}
+          {role !== "createur" && <Link href={L.href("/app/compte#parrainage")} className="sb-link"><Icon name="gift" />{L.t("Inviter un ami", "Invite a friend", "Invitar a un amigo", "Convidar um amigo")}</Link>}
           <a href={`/api/pro/logout?next=${encodeURIComponent(L.href("/"))}`} className="sb-link big"><Icon name="logout" />{L.t("Déconnexion", "Log out", "Cerrar sesión", "Sair")}</a>
           <PushOptIn variant="link" source="barre_laterale" />
           <a href="mailto:contact@basketlog-app.com" className="sb-link"><Icon name="mail" />Support</a>

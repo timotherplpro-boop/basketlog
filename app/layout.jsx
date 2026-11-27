@@ -13,6 +13,7 @@ import Nav from "../components/Nav";
 import Analytics from "../components/Analytics";
 import CookieBanner from "../components/CookieBanner";
 import WelcomeToast from "../components/WelcomeToast";
+import ParrainCapture from "../components/ParrainCapture";
 import Onboarding from "../components/Onboarding";
 import SourceAsk from "../components/SourceAsk";
 import AuthHost from "../components/AuthHost";
@@ -118,6 +119,8 @@ export default async function RootLayout({ children }) {
           {children}
           <SiteChrome member={member}><SiteFooter L={L} /></SiteChrome>
           <WelcomeToast />
+          {/* Arrivée par un lien de parrainage (?parrain=…) : code gardé 30 jours pour le paiement, message d'accueil */}
+          <ParrainCapture />
           {/* Questions d'accueil après l'inscription, et « comment as-tu connu Basketlog ? » après le paiement : ouvertes par WelcomeToast */}
           <Onboarding />
           <SourceAsk />

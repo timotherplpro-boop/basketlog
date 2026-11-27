@@ -29,6 +29,7 @@ import { pushTests } from "./push.mjs";
 import { passTests } from "./pass.mjs";
 import { relanceTests } from "./relance.mjs";
 import { actuTests } from "./actu.mjs";
+import { parrainageTests } from "./parrainage.mjs";
 import { currencyTests, fxTests } from "./currency.mjs";
 
 export async function unit() {
@@ -601,6 +602,7 @@ export async function unit() {
   await passTests({ ok, ko, eq });
   await relanceTests({ ok, ko, eq });
   await actuTests({ ok, ko, eq });
+  await parrainageTests({ ok, ko, eq });
 await currencyTests({ ok, ko, eq });
 await fxTests({ ok, ko, eq });
 
