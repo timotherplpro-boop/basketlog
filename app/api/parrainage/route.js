@@ -15,6 +15,8 @@ export const maxDuration = 25;
 // GET ?lang=xx : lien personnel du compte connecté et ses mois offerts, pour « Mon compte » (le nom des codes Whop n'est jamais renvoyé).
 // POST { action: "arrivee", code } : un visiteur arrive par un lien ; le code est vérifié puis gardé 30 jours dans un cookie
 //   httpOnly, repris au paiement (app/api/pay). Son propre lien ne compte pas.
+// POST { action: "verifier", code } : contrôle du code sans poser de cookie (pas encore d'accord aux cookies).
+// POST { action: "retirer" } : efface le cookie bl_parrain quand l'accord aux cookies est retiré.
 // POST { action: "ajouter" } : ajoute un mois en attente (30 jours) à l'abonnement Pro du compte connecté.
 const json = (body, status = 200) => NextResponse.json(body, { status, headers: { "Cache-Control": "no-store" } });
 const no = (status, error) => json({ ok: false, error }, status);
@@ -59,6 +61,22 @@ export async function POST(req) {
     if (s?.uid && (s.uid === uid || s.whop === uid)) return json({ ok: true, self: true });
     const res = json({ ok: true });
     res.cookies.set(REF_COOKIE, code, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: REF_DAYS * 86400 });
+    return res;
+  }
+
+  // Décision de Tim (27/11/2026, « oui fais tout ») : le cookie bl_parrain n'est posé qu'avec l'accord du bandeau cookies
+  // (components/ParrainCapture.jsx). « verifier » : contrôle du code sans rien poser (l'ami n'a pas encore accepté).
+  if (body?.action === "verifier") {
+    const uid = refUid(String(body.code || "").slice(0, 100));
+    if (!uid) return no(400, "code");
+    const s = decodeSession(req.cookies.get(COOKIE)?.value);
+    return json({ ok: true, self: !!(s?.uid && (s.uid === uid || s.whop === uid)) });
+  }
+
+  // « retirer » : l'accord aux cookies est retiré, le lien de parrainage gardé est effacé.
+  if (body?.action === "retirer") {
+    const res = json({ ok: true });
+    if (req.cookies.get(REF_COOKIE)?.value) res.cookies.set(REF_COOKIE, "", { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 0 });
     return res;
   }
 

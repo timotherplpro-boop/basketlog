@@ -16,7 +16,7 @@ const TRACEURS = [
   ["bl_consent", "Stockage local", "Mémoriser ton choix sur les cookies", "Nécessaire", "6 mois"],
   ["bl_pro", "Cookie", "Garder ta session connectée (compte Basketlog ou Whop ; cookie signé, inaccessible aux scripts)", "Nécessaire", "60 jours"],
   ["bl_switch", "Cookie", "Retenir un changement de formule en cours pendant que tu paies chez Whop (cookie signé, inaccessible aux scripts ; supprimé dès que le changement est terminé ou annulé)", "Nécessaire", "12 heures"],
-  ["bl_parrain", "Cookie", "Retenir le lien de parrainage par lequel tu es arrivé, pour offrir un mois de Pro à l'ami qui t'a invité si tu t'abonnes (posé seulement après un clic sur un lien d'invitation ; inaccessible aux scripts)", "Nécessaire", "30 jours"],
+  ["bl_parrain", "Cookie", "Retenir le lien de parrainage par lequel tu es arrivé, pour offrir un mois de Pro à l'ami qui t'a invité si tu t'abonnes (posé seulement si tu acceptes les cookies, après un clic sur un lien d'invitation ; inaccessible aux scripts)", "Consentement", "30 jours"],
   ["whop_state, whop_pkce", "Cookie", "Sécuriser la connexion avec Whop", "Nécessaire", "10 minutes"],
   ["g_state, g_pkce, g_nonce, g_next, g_lang", "Cookie", "Sécuriser la connexion avec Google et te ramener sur la page d'où tu viens", "Nécessaire", "10 minutes"],
   ["bl_paiement", "Stockage local", "Te proposer d'activer ton abonnement quand tu reviens sur Basketlog après un paiement chez Whop", "Nécessaire", "48 heures"],
@@ -33,7 +33,7 @@ function CookiesFr() {
     <LegalDoc
       title="Politique de cookies"
       path="/cookies"
-      intro="Un cookie est un petit fichier déposé dans ton navigateur. Basketlog en utilise très peu : ceux qui font fonctionner le site, et, seulement si tu l'acceptes, ceux de la mesure d'audience. Aucun cookie publicitaire."
+      intro="Un cookie est un petit fichier déposé dans ton navigateur. Basketlog en utilise très peu : ceux qui font fonctionner le site, et, seulement si tu l'acceptes, ceux de la mesure d'audience et du parrainage. Aucun cookie publicitaire."
     >
       <Sec n={1} title="Les traceurs utilisés">
         <div className="legal-table-wrap">
@@ -70,7 +70,7 @@ const TRACKERS_EN = [
   ["bl_consent", "Local storage", "Remember your cookie choice", "Necessary", "6 months"],
   ["bl_pro", "Cookie", "Keep your session logged in (Basketlog or Whop account; signed cookie, not accessible to scripts)", "Necessary", "60 days"],
   ["bl_switch", "Cookie", "Remember a plan change in progress while you pay on Whop (signed cookie, not accessible to scripts; deleted as soon as the change is completed or cancelled)", "Necessary", "12 hours"],
-  ["bl_parrain", "Cookie", "Remember the referral link you arrived through, so the friend who invited you gets a free month of Pro if you subscribe (set only after clicking an invitation link; not accessible to scripts)", "Necessary", "30 days"],
+  ["bl_parrain", "Cookie", "Remember the referral link you arrived through, so the friend who invited you gets a free month of Pro if you subscribe (set only if you accept cookies, after clicking an invitation link; not accessible to scripts)", "Consent", "30 days"],
   ["whop_state, whop_pkce", "Cookie", "Secure the login with Whop", "Necessary", "10 minutes"],
   ["g_state, g_pkce, g_nonce, g_next, g_lang", "Cookie", "Secure the login with Google and bring you back to the page you came from", "Necessary", "10 minutes"],
   ["bl_paiement", "Local storage", "Offer to activate your subscription when you come back to Basketlog after paying on Whop", "Necessary", "48 hours"],
@@ -88,7 +88,7 @@ function CookiesEn({ L }) {
       title="Cookie policy"
       path="/cookies"
       L={L}
-      intro="A cookie is a small file stored in your browser. Basketlog uses very few: those that make the website work and, only if you accept them, those for audience measurement. No advertising cookies. This English version is a translation provided for convenience; in case of any discrepancy, the French version prevails."
+      intro="A cookie is a small file stored in your browser. Basketlog uses very few: those that make the website work and, only if you accept them, those for audience measurement and referrals. No advertising cookies. This English version is a translation provided for convenience; in case of any discrepancy, the French version prevails."
     >
       <Sec n={1} title="Trackers used">
         <div className="legal-table-wrap">
@@ -125,7 +125,7 @@ const TRACKERS_ES = [
   ["bl_consent", "Almacenamiento local", "Recordar tu elección sobre las cookies", "Necesaria", "6 meses"],
   ["bl_pro", "Cookie", "Mantener abierta tu sesión (cuenta de Basketlog o de Whop; cookie firmada, inaccesible para los scripts)", "Necesaria", "60 días"],
   ["bl_switch", "Cookie", "Recordar un cambio de plan en curso mientras pagas en Whop (cookie firmada, inaccesible para los scripts; se elimina en cuanto el cambio se completa o se cancela)", "Necesaria", "12 horas"],
-  ["bl_parrain", "Cookie", "Recordar el enlace de invitación por el que llegaste, para regalar un mes de Pro al amigo que te invitó si te suscribes (solo tras hacer clic en un enlace de invitación; inaccesible para los scripts)", "Necesaria", "30 días"],
+  ["bl_parrain", "Cookie", "Recordar el enlace de invitación por el que llegaste, para regalar un mes de Pro al amigo que te invitó si te suscribes (solo si aceptas las cookies, tras hacer clic en un enlace de invitación; inaccesible para los scripts)", "Consentimiento", "30 días"],
   ["whop_state, whop_pkce", "Cookie", "Proteger el inicio de sesión con Whop", "Necesaria", "10 minutos"],
   ["g_state, g_pkce, g_nonce, g_next, g_lang", "Cookie", "Proteger el inicio de sesión con Google y devolverte a la página de la que vienes", "Necesaria", "10 minutos"],
   ["bl_paiement", "Almacenamiento local", "Proponerte activar tu suscripción cuando vuelves a Basketlog después de pagar en Whop", "Necesaria", "48 horas"],
@@ -143,7 +143,7 @@ function CookiesEs({ L }) {
       title="Política de cookies"
       path="/cookies"
       L={L}
-      intro="Una cookie es un pequeño archivo que se guarda en tu navegador. Basketlog usa muy pocas: las que hacen funcionar el sitio y, solo si las aceptas, las de medición de audiencia. Ninguna cookie publicitaria. Esta versión en español es una traducción que se ofrece para tu comodidad; en caso de discrepancia, prevalece la versión francesa."
+      intro="Una cookie es un pequeño archivo que se guarda en tu navegador. Basketlog usa muy pocas: las que hacen funcionar el sitio y, solo si las aceptas, las de medición de audiencia y de invitaciones. Ninguna cookie publicitaria. Esta versión en español es una traducción que se ofrece para tu comodidad; en caso de discrepancia, prevalece la versión francesa."
     >
       <Sec n={1} title="Los rastreadores que usamos">
         <div className="legal-table-wrap">
