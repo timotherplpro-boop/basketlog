@@ -30,6 +30,29 @@ export async function GET(req) {
   if (!who) return json({ error: "Accès refusé." }, 403);
   if (!pushConfigured()) return json({ error: "Clés VAPID ou base non configurées." }, 503);
   const q = req.nextUrl.searchParams;
+  // Annonce du jeu de Noël (?concours=1, compte admin seulement ; Tim, 27/11/2026 10 h 56 : « lance tout ») : une seule
+  // notification à chaque abonné FR, EN ou ES (pas en portugais : le Brésil est exclu du jeu). ?concours=1&dry=1 : aperçu.
+  if (q.get("concours") === "1") {
+    if (who.who !== "admin") return json({ error: "Accès refusé." }, 403);
+    const txt = {
+      fr: { title: "🎄 Jeu de Noël Basketlog", body: "1 PS5 + 1 maillot de Wemby à gagner ! Réservé aux abonnés Pro, tirage le 20 décembre →", url: "/concours?utm_source=push&utm_medium=notification&utm_campaign=noel" },
+      en: { title: "🎄 Basketlog Christmas giveaway", body: "Win a PS5 + a Wemby jersey! For Pro members, draw on December 20 →", url: "/en/concours?utm_source=push&utm_medium=notification&utm_campaign=noel" },
+      es: { title: "🎄 Sorteo de Navidad Basketlog", body: "¡Gana una PS5 + una camiseta de Wemby! Para suscriptores Pro, sorteo el 20 de diciembre →", url: "/es/concours?utm_source=push&utm_medium=notification&utm_campaign=noel" },
+    };
+    let subs0 = [];
+    try { subs0 = await pushList(); } catch (e) { return json({ error: `Base : ${e.message}` }, 502); }
+    const targets0 = subs0.filter((s) => txt[s.l || "fr"]);
+    if (q.get("dry") === "1") return json({ dry: true, abonnes: subs0.length, cibles: targets0.length, messages: txt });
+    let sent = 0, gone = 0, failed = 0;
+    for (let i = 0; i < targets0.length; i += 20) {
+      await Promise.all(targets0.slice(i, i + 20).map(async (s) => {
+        const r = await sendPush({ endpoint: s.e, keys: { p256dh: s.k, auth: s.a } }, { ...txt[s.l || "fr"], tag: "concours-noel-2026" });
+        if (r.ok) sent++; else if (r.gone) gone++; else failed++;
+        try { if (r.gone) await pushRemove(s.e); } catch {}
+      }));
+    }
+    return json({ concours: true, sent, gone, failed, abonnes: subs0.length });
+  }
   const test = q.get("test") === "1" && who.who === "admin";
 
   const day = await socialDay();
