@@ -4,6 +4,7 @@ import { pushMessage, PUSH_LANGS } from "../../../../lib/push-text";
 import { pushConfigured, pushEnabled, pushList, pushMark, pushRemove, sendPush } from "../../../../lib/push";
 import { COOKIE, currentSession } from "../../../../lib/pro";
 import { BF, bfLive, bfPush } from "../../../../lib/black-friday";
+import { jgPush } from "../../../../lib/jour-gratuit";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -75,6 +76,27 @@ export async function GET(req) {
       }));
     }
     return json({ bf: true, sent, gone, failed, abonnes: subsB.length, parLangue });
+  }
+  // Annonce du jour gratuit de Basketlog Pro (?jour=1, compte admin, demandée par Tim le 28/11/2026) : une notification à chaque
+  // abonné, dans sa langue (fr, en, es, pt), avec le lien /pro de sa langue. ?jour=1&dry=1 : aperçu (textes, abonnés par langue).
+  // Pas de contrôle anti-doublon côté serveur : n'appeler qu'une fois (le tag regroupe les doublons sur l'appareil).
+  if (q.get("jour") === "1") {
+    if (who.who !== "admin") return json({ error: "Accès refusé." }, 403);
+    const txt = Object.fromEntries(PUSH_LANGS.map((l) => [l, jgPush(l)]));
+    let subsJ = [];
+    try { subsJ = await pushList(); } catch (e) { return json({ error: `Base : ${e.message}` }, 502); }
+    const parLangue = {};
+    for (const s of subsJ) { const l = txt[s.l] ? s.l : "fr"; parLangue[l] = (parLangue[l] || 0) + 1; }
+    if (q.get("dry") === "1") return json({ dry: true, abonnes: subsJ.length, parLangue, messages: txt });
+    let sent = 0, gone = 0, failed = 0;
+    for (let i = 0; i < subsJ.length; i += 20) {
+      await Promise.all(subsJ.slice(i, i + 20).map(async (s) => {
+        const r = await sendPush({ endpoint: s.e, keys: { p256dh: s.k, auth: s.a } }, { ...txt[txt[s.l] ? s.l : "fr"], tag: "jour-gratuit-2026-11" });
+        if (r.ok) sent++; else if (r.gone) gone++; else failed++;
+        try { if (r.gone) await pushRemove(s.e); } catch {}
+      }));
+    }
+    return json({ jour: true, sent, gone, failed, abonnes: subsJ.length, parLangue });
   }
   const test = q.get("test") === "1" && who.who === "admin";
 

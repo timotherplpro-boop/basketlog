@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { socialDay, recapDay } from "../../../../lib/social-day";
-import { blueskyProfile, ogImageUrl, RECAP_MARK, launchPosts, POWER_MARK, powerPosts, CONCOURS_MARK, concoursPost, bfPost } from "../../../../lib/social";
+import { blueskyProfile, ogImageUrl, RECAP_MARK, launchPosts, POWER_MARK, powerPosts, CONCOURS_MARK, concoursPost, bfPost, jgPost } from "../../../../lib/social";
 import { powerRankings } from "../../../../lib/data";
 import { GROUPS, nationalPosts } from "../../../../lib/nationals.js";
 import { nationalBase, nationalFrom } from "../../../../lib/nationals-data";
@@ -9,6 +9,7 @@ import { actuToken, readActu, actuUrls, actuShortUrls } from "../../../../lib/ac
 import { socialConfig, socialStatus, sendTelegram, telegramCheck, blueskySession, blueskyThumb, sendBluesky, blueskyPostedSince, blueskySetProfile } from "../../../../lib/social-send";
 import { COOKIE, currentSession } from "../../../../lib/pro";
 import { BF_MARK, bfLive } from "../../../../lib/black-friday";
+import { JG_MARK, JG_IMAGE } from "../../../../lib/jour-gratuit";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -293,6 +294,36 @@ export async function GET(req) {
     }
     if (cfg.telegram && chat) {
       const visuel = "https://basketlog-app.com/bf/og?f=portrait&lang=fr";
+      try {
+        out.telegram = { chat, result: await sendTelegramPhoto(cfg.telegram.token, chat, visuel, post.html) };
+      } catch {
+        try { out.telegram = { chat, result: await sendTelegram(cfg.telegram.token, chat, post.html, post.url), sansVisuel: true }; } catch (e) { out.errors.push(`telegram : ${e.message}`); }
+      }
+    }
+    if (!cfg.bluesky && !cfg.telegram) return json({ ok: false, skipped: "aucun compte branché" });
+    out.ok = out.errors.length === 0;
+    return json({ ...out, at: new Date().toISOString() });
+  }
+  // Annonce du jour gratuit de Basketlog Pro (?jour=1, compte admin ; ?jour=1&dry=1 : aperçu sans rien publier), demandée par Tim
+  // le 28/11/2026 : une seule annonce, sur Bluesky et sur la chaîne Telegram française (avec le visuel portrait), lien
+  // basketlog-app.com/pro. Anti-doublon : un message Bluesky du compte qui commence par « 🎁 1 JOUR GRATUIT » dans les 7 derniers
+  // jours bloque l'envoi (Bluesky et Telegram). Sans Bluesky branché, rien ne détecte un doublon sur Telegram : n'appeler qu'une fois.
+  if (sp.get("jour") === "1") {
+    if (who !== "admin") return json({ error: "interdit" }, 401);
+    const post = jgPost();
+    const chat = cfg.telegram ? cfg.telegram.chats.fr || Object.values(cfg.telegram.chats)[0] : null;
+    const visuel = `${JG_IMAGE}?f=portrait&lang=fr`;
+    if (sp.get("dry") === "1") return json({ ok: true, dry: true, bluesky: { branche: !!cfg.bluesky, signes: [...post.text].length, post }, telegram: { branche: !!cfg.telegram, chat, html: post.html, visuel } });
+    const out = { ok: true, bluesky: null, telegram: null, errors: [] };
+    if (cfg.bluesky) {
+      try {
+        const s = await blueskySession(cfg.bluesky);
+        if (await blueskyPostedSince(s, new Date(Date.now() - 7 * 86400e3).toISOString(), JG_MARK)) return json({ ok: true, skipped: "déjà publié" });
+        const thumb = await blueskyThumb(s, post.image);
+        out.bluesky = { uri: await sendBluesky(s, post, thumb), thumb: !!thumb };
+      } catch (e) { out.errors.push(`bluesky : ${e.message}`); }
+    }
+    if (cfg.telegram && chat) {
       try {
         out.telegram = { chat, result: await sendTelegramPhoto(cfg.telegram.token, chat, visuel, post.html) };
       } catch {
