@@ -28,7 +28,7 @@ export async function fxTests({ ok, ko, eq }) {
   eq("Zone euro : euros", price("pro", { cur: "EUR" }, FR).replace(/\s/g, " "), "9,99 €");
   eq("Sans taux : euros", price("pro", { cur: "USD" }, EN), "€9.99");
   const t = trialTexts(EN, fx);
-  if (t.cta === "Start 3-day trial for $1.16" && t.line.includes("then $11.59/mo") && t.line.includes("Billed in euros: €1 then €9.99/mo.")) ok("Texte d'essai converti + paiement en euros"); else ko("Texte d'essai", t.cta + " | " + t.line);
+  if (t.cta === "Try Pro free for 1 day" && t.line.startsWith("1 free day (card required), then $11.59/mo") && t.line.includes("Billed in euros: €9.99/mo after the trial.")) ok("Texte d'essai (1 jour gratuit) converti + paiement en euros"); else ko("Texte d'essai", t.cta + " | " + t.line);
   if (!/\$9\.99|9,99 \$/.test(t.line + t.cta + fxNote(EN, fx) + fxNote(FR, fx))) ok("Jamais « $9.99 »"); else ko("$9.99", "présent");
   eq("Pas de note en zone euro", fxNote(FR, { cur: "EUR" }), "");
   eq("Taux aberrant refusé", cleanRate(12), null);

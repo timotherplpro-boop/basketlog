@@ -60,10 +60,10 @@ export default function ParrainCapture() {
   return (
     <div className="welcome-toast" role="status" onClick={() => setShow(false)}>
       {L.t(
-        "Un ami t'invite sur Basketlog 🏀 Les probabilités de victoire NBA sont gratuites chaque soir, et l'analyse complète s'essaie 3 jours pour 1 €. ",
-        "A friend invited you to Basketlog 🏀 NBA win probabilities are free every night, and you can try the full analysis for 3 days for €1. ",
-        "Un amigo te invita a Basketlog 🏀 Las probabilidades de victoria de la NBA son gratis cada noche, y el análisis completo se prueba 3 días por 1 €. ",
-        "Um amigo convidou você para o Basketlog 🏀 As probabilidades de vitória da NBA são grátis toda noite, e a análise completa pode ser testada por 3 dias por 1 €. ",
+        "Un ami t'invite sur Basketlog 🏀 Les probabilités de victoire NBA sont gratuites chaque soir, et l'analyse complète s'essaie 1 jour gratuitement. ",
+        "A friend invited you to Basketlog 🏀 NBA win probabilities are free every night, and you can try the full analysis free for 1 day. ",
+        "Un amigo te invita a Basketlog 🏀 Las probabilidades de victoria de la NBA son gratis cada noche, y el análisis completo se prueba 1 día gratis. ",
+        "Um amigo convidou você para o Basketlog 🏀 As probabilidades de vitória da NBA são grátis toda noite, e a análise completa pode ser testada por 1 dia grátis. ",
       )}
       <Link href={L.href("/pro")} style={{ color: "inherit", fontWeight: 700 }}>{L.t("Voir l'offre", "See the offer", "Ver la oferta", "Ver a oferta")}</Link>
     </div>

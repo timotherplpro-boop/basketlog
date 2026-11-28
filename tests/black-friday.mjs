@@ -26,7 +26,7 @@ export async function blackFridayTests({ ok, ko, eq }) {
 
   // --- Calcul des prix (mêmes arrondis que l'affichage de /pro : discounted de lib/promo.js)
   eq("Prix remisés : essai 0,70 €, 1er mois 6,99 €, Lifetime 69,99 €", [discounted(1, 30), discounted(9.99, 30), discounted(99.99, 30)], [0.7, 6.99, 69.99]);
-  eq("Prix de l'offre = prix remisés de /pro", BF_PRICES, { trialWas: 1, trial: 0.7, proWas: 9.99, pro: 6.99, lifetimeWas: 99.99, lifetime: 69.99 });
+  eq("Prix de l'offre = prix remisés de /pro (essai : 1 jour gratuit depuis le 28/11)", BF_PRICES, { trialWas: 0, trial: 0, proWas: 9.99, pro: 6.99, lifetimeWas: 99.99, lifetime: 69.99 });
   eq("Formats : euros en français et en espagnol, €69.99 en anglais", [bfEur(0.7, "fr"), bfEur(69.99, "es"), bfEur(99.99, "en"), bfEur(6.99, "pt")], ["0,70 €", "69,99 €", "€99.99", "6,99 €"]);
   const fx = { cur: "USD", rate: 1.16 };
   eq("Hors zone euro : l'essai remisé est converti puis remisé au centime (jamais 9,99 $)", [convert(1, fx), discounted(convert(1, fx), 30), discounted(convert(9.99, fx), 30)], [1.16, 0.81, 8.11]);
@@ -147,7 +147,7 @@ export async function blackFridayTests({ ok, ko, eq }) {
   const post = bfPost();
   eq(`Annonce Bluesky : ≤ ${BSKY_MAX} signes, commence par la marque anti-doublon, lien /pro?code=BLACKFRIDAY`, [graphemes(post.text) <= BSKY_MAX, post.text.startsWith("🖤 BLACK FRIDAY"), post.url], [true, true, "https://basketlog-app.com/pro?code=BLACKFRIDAY"]);
   eq("Annonce Bluesky : le lien et les mots-dièse tombent pile (octets)", post.facets.every((f) => { const t = dec.decode(enc.encode(post.text).slice(f.index.byteStart, f.index.byteEnd)); const ft = f.features[0]; return ft.uri ? t === ft.uri.replace(/^https?:\/\//, "") : t === `#${ft.tag}`; }), true);
-  eq("Annonce Telegram : lien HTML, prix remisés et mention hors taxes", [post.html.includes('<a href="https://basketlog-app.com/pro?code=BLACKFRIDAY">'), post.html.includes("69,99 €") && post.html.includes("0,70 €") && post.html.includes("6,99 €"), post.html.includes("hors taxes")], [true, true, true]);
+  eq("Annonce Telegram : lien HTML, prix remisés et mention hors taxes", [post.html.includes('<a href="https://basketlog-app.com/pro?code=BLACKFRIDAY">'), post.html.includes("69,99 €") && post.html.includes("1 jour gratuit") && post.html.includes("6,99 €"), post.html.includes("hors taxes")], [true, true, true]);
   eq("Annonce : visuel Black Friday hors de /api/", post.image.includes("/bf/og") && !post.image.includes("/api/"), true);
 
   // --- Newsletter

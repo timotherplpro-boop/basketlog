@@ -13,9 +13,9 @@ if (!games.length) { console.log(JSON.stringify({ empty: true })); process.exit(
 
 // 24/11/2026 : Tim repasse tous ses réseaux en français (« tout ») : posts X / Facebook / LinkedIn, titre et description du
 // Short YouTube en français, liens vers la version française du site. Les textes anglais restent en *_en au besoin.
-const PROMO = "🎁 Analyse complète : 3 jours à 1 €, puis 9,99 €/mois (+ taxes) 👉 basketlog-app.com/pro";
-const PROMO_LONG = "🎁 Analyse complète : 3 jours à 1 €, puis 9,99 €/mois (+ taxes) 👉 https://basketlog-app.com/pro";
-const PROMO_EN = "🎁 Full analysis: 3 days for €1, then €9.99/mo (+ tax) 👉 basketlog-app.com/en/pro";
+const PROMO = "🎁 Analyse complète : 1 jour gratuit, puis 9,99 €/mois (+ taxes) 👉 basketlog-app.com/pro";
+const PROMO_LONG = "🎁 Analyse complète : 1 jour gratuit, puis 9,99 €/mois (+ taxes) 👉 https://basketlog-app.com/pro";
+const PROMO_EN = "🎁 Full analysis: 1 free day, then €9.99/mo (+ tax) 👉 basketlog-app.com/en/pro";
 // Rappel du jeu de Noël sous les posts du soir jusqu'au 19/12/2026 inclus (Tim, 27/11 10 h 56 : « lance tout »).
 // TEXTS_NOW (date ISO) : pour les tests, simule un autre jour.
 const NOW = process.env.TEXTS_NOW ? Date.parse(process.env.TEXTS_NOW) : Date.now();

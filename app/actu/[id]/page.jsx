@@ -87,7 +87,7 @@ export default async function ActuArticle({ params }) {
         )}
         <div className="actu-cta">
           <p><Link href="/app/matchs" className="btn-solid">Voir les probabilités des matchs de ce soir (gratuit)</Link></p>
-          <p><Link href="/pro">Basketlog Pro : l&apos;analyse complète de chaque match, essai de 3 jours à 1 €, puis 9,99 €/mois →</Link></p>
+          <p><Link href="/pro">Basketlog Pro : l&apos;analyse complète de chaque match, 1 jour gratuit, puis 9,99 €/mois →</Link></p>
           <ContestNote L={FR} />
         </div>
         {others.length > 0 && (

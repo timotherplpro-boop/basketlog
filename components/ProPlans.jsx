@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useProStatus } from "../lib/useProStatus";
 import { track } from "../lib/analytics";
 import { useL } from "./LangProvider";
-import { price, money, amountOf, curOf, convert, shown, fxNote, PRO_TRIAL_DAYS, PRO_TRIAL_PRICE } from "../lib/pricing";
+import { price, money, amountOf, curOf, convert, shown, fxNote, PRO_TRIAL_DAYS, PRO_TRIAL_PRICE, trialFree, trialLabel, trialCta, cardNote } from "../lib/pricing";
 import { pctOf } from "../lib/i18n";
 import { CODE_RE, cleanCode, discounted, withPromo } from "../lib/promo";
 import { BF, bfLive } from "../lib/black-friday";
@@ -37,15 +37,18 @@ const PLANS = (L, ai, cur, promo = null, trialOk = true) => {
   const show = (id) => (pct ? money(discounted(amountOf(id, cur), pct), curOf(cur), L) : price(id, cur, L));
   const was = (id) => (pct ? price(id, cur, L) : null);
   const withTrial = pct > 0 && mois >= 2 && PRO_TRIAL_DAYS > 0 && trialOk;
-  const cycles = withTrial ? mois - 1 : mois; // mois de Pro remisés une fois l'essai passé
-  const trialShown = withTrial ? money(discounted(convert(PRO_TRIAL_PRICE, cur), pct), curOf(cur), L) : shown(PRO_TRIAL_PRICE, cur, L);
+  // Essai gratuit (depuis le 28/11/2026) : il n'y a plus de paiement d'essai, tous les mois du code sont des mois de Pro
+  // (vérifié sur la page de paiement Whop le 28/11 : BLACKFRIDAY = « 30 % de réduction, 2 premiers mois » après le jour gratuit).
+  const cycles = withTrial && !trialFree() ? mois - 1 : mois; // mois de Pro remisés une fois l'essai passé
+  const trialShown = trialFree() ? null : withTrial ? money(discounted(convert(PRO_TRIAL_PRICE, cur), pct), curOf(cur), L) : shown(PRO_TRIAL_PRICE, cur, L);
+  const trialHead = trialLabel(L, cur, trialShown) + cardNote(L); // « 1 jour gratuit (carte demandée) » ou « 3 jours à 0,70 € »
   const limited = pct > 0 && cycles >= 1;
   const per = !limited ? L.t("/mois", "/month", "/mes", "/mês")
     : cycles === 1 ? L.t("le 1er mois", "first month", "el primer mes", "o primeiro mês")
     : L.t(`/mois pendant ${cycles} mois`, `/month for ${cycles} months`, `/mes durante ${cycles} meses`, `/mês durante ${cycles} meses`);
   const sep = limited && cycles === 1 ? " " : ""; // « 11,19 € le 1er mois » mais « 11,19 €/mois »
   const then = (id) => (limited ? L.t(`puis ${price(id, cur, L)}/mois`, `then ${price(id, cur, L)}/month`, `luego ${price(id, cur, L)}/mes`, `depois ${price(id, cur, L)}/mês`) : null);
-  const trialThen = withTrial ? L.t(`, puis ${price("pro", cur, L)}/mois`, `, then ${price("pro", cur, L)}/month`, `, luego ${price("pro", cur, L)}/mes`, `, depois ${price("pro", cur, L)}/mês`) : "";
+  const trialThen = limited ? L.t(`, puis ${price("pro", cur, L)}/mois`, `, then ${price("pro", cur, L)}/month`, `, luego ${price("pro", cur, L)}/mes`, `, depois ${price("pro", cur, L)}/mês`) : "";
   return [
   {
     // 19/11/2026 : Starter n'est plus vendu (choix de Tim) ; la carte Gratuit le remplace. Les abonnés Starter gardent leur accès.
@@ -61,8 +64,8 @@ const PLANS = (L, ai, cur, promo = null, trialOk = true) => {
   },
   {
     id: "pro", name: "Pro", icon: "crown", price: show("pro"), old: was("pro"), per, then: then("pro"), sub: L.t("Pour les passionnés de basket", "For basketball fans", "Para los apasionados del baloncesto", "Para os apaixonados por basquete"), badge: L.t("Populaire", "Popular", "Popular", "Popular"),
-    trial: PRO_TRIAL_DAYS ? L.t(`${PRO_TRIAL_DAYS} jours à ${trialShown}, puis ${show("pro")}${sep}${per}${trialThen} + taxes. Résiliable à tout moment.`, `${PRO_TRIAL_DAYS} days for ${trialShown}, then ${show("pro")}${sep}${per}${trialThen} + tax. Cancel anytime.`, `${PRO_TRIAL_DAYS} días por ${trialShown}, luego ${show("pro")}${sep}${per}${trialThen} + impuestos. Cancela cuando quieras.`, `${PRO_TRIAL_DAYS} dias por ${trialShown}, depois ${show("pro")}${sep}${per}${trialThen} + impostos. Cancele quando quiser.`) : null,
-    ctaTrial: PRO_TRIAL_DAYS ? L.t(`Essai ${PRO_TRIAL_DAYS} jours à ${trialShown}`, `Start ${PRO_TRIAL_DAYS}-day trial for ${trialShown}`, `Prueba ${PRO_TRIAL_DAYS} días por ${trialShown}`, `Teste ${PRO_TRIAL_DAYS} dias por ${trialShown}`) : null,
+    trial: PRO_TRIAL_DAYS ? L.t(`${trialHead}, puis ${show("pro")}${sep}${per}${trialThen} + taxes. Résiliable à tout moment.`, `${trialHead}, then ${show("pro")}${sep}${per}${trialThen} + tax. Cancel anytime.`, `${trialHead}, luego ${show("pro")}${sep}${per}${trialThen} + impuestos. Cancela cuando quieras.`, `${trialHead}, depois ${show("pro")}${sep}${per}${trialThen} + impostos. Cancele quando quiser.`) : null,
+    ctaTrial: PRO_TRIAL_DAYS ? trialCta(L, cur, trialShown) : null,
     cta: `${L.t("Débloquer", "Unlock", "Desbloquear", "Desbloquear")} - ${show("pro")}${sep}${per}`,
     items: [
       ["ok", L.t("Analyses illimitées", "Unlimited analyses", "Análisis ilimitados", "Análises ilimitadas")],

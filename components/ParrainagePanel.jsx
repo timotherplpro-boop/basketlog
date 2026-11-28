@@ -94,10 +94,10 @@ export default function ParrainagePanel() {
     <section className="panel acc-sec" id="parrainage" aria-labelledby="acc-par">
       <h2 id="acc-par">{T("Parrainage : 1 mois de Pro offert", "Referrals: 1 free month of Pro", "Invita a un amigo: 1 mes de Pro gratis", "Indicação: 1 mês de Pro grátis")}</h2>
       <p className="acc-help">{T(
-        `Invite tes amis avec ton lien personnel. Quand un ami s'abonne à Basketlog Pro (après son essai de 3 jours à 1 €), tu gagnes 1 mois de Pro offert : ${data.days} jours gratuits ajoutés à ton abonnement. Jusqu'à ${data.max} mois offerts par an.`,
-        `Invite your friends with your personal link. When a friend subscribes to Basketlog Pro (after their 3-day trial for €1), you get 1 free month of Pro: ${data.days} free days added to your subscription. Up to ${data.max} free months a year.`,
-        `Invita a tus amigos con tu enlace personal. Cuando un amigo se suscribe a Basketlog Pro (después de su prueba de 3 días por 1 €), ganas 1 mes de Pro gratis: ${data.days} días gratis añadidos a tu suscripción. Hasta ${data.max} meses gratis al año.`,
-        `Convide seus amigos com seu link pessoal. Quando um amigo assina o Basketlog Pro (depois do teste de 3 dias por 1 €), você ganha 1 mês de Pro grátis: ${data.days} dias grátis adicionados à sua assinatura. Até ${data.max} meses grátis por ano.`,
+        `Invite tes amis avec ton lien personnel. Quand un ami s'abonne à Basketlog Pro (après son jour gratuit), tu gagnes 1 mois de Pro offert : ${data.days} jours gratuits ajoutés à ton abonnement. Jusqu'à ${data.max} mois offerts par an.`,
+        `Invite your friends with your personal link. When a friend subscribes to Basketlog Pro (after their free day), you get 1 free month of Pro: ${data.days} free days added to your subscription. Up to ${data.max} free months a year.`,
+        `Invita a tus amigos con tu enlace personal. Cuando un amigo se suscribe a Basketlog Pro (después de su día gratis), ganas 1 mes de Pro gratis: ${data.days} días gratis añadidos a tu suscripción. Hasta ${data.max} meses gratis al año.`,
+        `Convide seus amigos com seu link pessoal. Quando um amigo assina o Basketlog Pro (depois do dia grátis), você ganha 1 mês de Pro grátis: ${data.days} dias grátis adicionados à sua assinatura. Até ${data.max} meses grátis por ano.`,
       )}</p>
       {msg && <div className={msg.ok ? "adm-notice ok" : "adm-err"} role={msg.ok ? "status" : "alert"}>{msg.text}</div>}
       <div className="acc-form">
@@ -122,7 +122,7 @@ export default function ParrainagePanel() {
         </button>
       ) : (
         <p className="acc-note">
-          {T("Ton mois offert s'ajoute à un abonnement Pro : prends l'essai Pro (3 jours pour 1 €, puis 9,99 €/mois, résiliable à tout moment), puis reviens ici pour ajouter tes 30 jours gratuits avant ton prochain paiement. ", "Your free month is added to a Pro subscription: start the Pro trial (3 days for €1, then €9.99/month, cancel anytime), then come back here to add your 30 free days before your next payment. ", "Tu mes gratis se añade a una suscripción Pro: empieza la prueba Pro (3 días por 1 €, luego 9,99 €/mes, cancela cuando quieras) y vuelve aquí para añadir tus 30 días gratis antes de tu próximo pago. ", "Seu mês grátis é adicionado a uma assinatura Pro: comece o teste Pro (3 dias por 1 €, depois 9,99 €/mês, cancele quando quiser) e volte aqui para adicionar seus 30 dias grátis antes do próximo pagamento. ")}
+          {T("Ton mois offert s'ajoute à un abonnement Pro : prends l'essai Pro (1 jour gratuit, puis 9,99 €/mois, résiliable à tout moment), puis reviens ici pour ajouter tes 30 jours gratuits avant ton prochain paiement. ", "Your free month is added to a Pro subscription: start the Pro trial (1 free day, then €9.99/month, cancel anytime), then come back here to add your 30 free days before your next payment. ", "Tu mes gratis se añade a una suscripción Pro: empieza la prueba Pro (1 día gratis, luego 9,99 €/mes, cancela cuando quieras) y vuelve aquí para añadir tus 30 días gratis antes de tu próximo pago. ", "Seu mês grátis é adicionado a uma assinatura Pro: comece o teste Pro (1 dia grátis, depois 9,99 €/mês, cancele quando quiser) e volte aqui para adicionar seus 30 dias grátis antes do próximo pagamento. ")}
           <Link href={L.href("/pro")}>{T("Voir Basketlog Pro", "See Basketlog Pro", "Ver Basketlog Pro", "Ver o Basketlog Pro")}</Link>
         </p>
       ))}
