@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ncaaGameBySlug, ncaaLg } from "../../../lib/ncaa";
-import { ncaaGamePath, ncaaTeamPath, LEAGUES, ncaaWords } from "../../../lib/ncaa-model";
+import { ncaaGamePath, ncaaTeamPath, LEAGUES, ncaaWords, topIds } from "../../../lib/ncaa-model";
 import AppTabs from "../../../components/AppTabs";
 import Crumbs from "../../../components/Crumbs";
 import QuickFaq from "../../../components/QuickFaq";
@@ -26,6 +26,7 @@ export async function generateMetadata({ params }) {
   const f = await ncaaGameBySlug(slug, lg).catch(() => null);
   if (!f) return { title: L.t("Match NCAA – Basketlog", "College basketball game – Basketlog", "Partido NCAA – Basketlog", "Jogo NCAA – Basketlog"), robots: { index: false } };
   const { g } = f;
+  const top = topIds(f.st);
   const d = fmtDate(L, isoOf(g.d), L.en ? { month: "short", day: "numeric" } : { day: "numeric", month: "short" }).replace(/\.$/, "");
   const fav = g.pHome >= 0.5 ? g.home : g.away, pf = pctOf(Math.max(g.pHome, 1 - g.pHome), L);
   const done = g.state === "post" && g.hs != null;
@@ -49,6 +50,8 @@ export async function generateMetadata({ params }) {
       `${g.away.name} ${g.n ? "contra" : "na casa do"} ${g.home.name}, basquete universitário${fem ? " feminino" : ""} (NCAA): ${nm(fav)} favorito com ${pf}, margem prevista de ${numOf(Math.abs(g.margin), L, 1)} pontos. Notas, campanhas e últimos resultados.`
     ),
     path: ncaaGamePath(g, C.base),
+    // Indexé seulement entre deux écoles du top 25 (voir NCAA_TOP).
+    noindex: !(top.has(g.home.id) && top.has(g.away.id)),
     L,
   });
 }

@@ -4,7 +4,7 @@ import { mvpRace, royRace, rookiesOf, production } from "../lib/awards.js";
 import { monthsOf, monthOk, seasonOfMonth } from "../lib/months.js";
 import { apiPredictions } from "../lib/api-v1.js";
 import { TERMS, termOf, tr } from "../lib/glossary.js";
-import { ncaaRatings, ncaaProb, ncaaRecord, ncaaRecords, NCAA, NCAAW, LEAGUES, ncaaWords, ncaaSlug, ncaaGamePath, ncaaTeamPath, parseNcaaSlug } from "../lib/ncaa-model.js";
+import { ncaaRatings, ncaaProb, ncaaRecord, ncaaRecords, NCAA, NCAAW, LEAGUES, ncaaWords, ncaaSlug, ncaaGamePath, ncaaTeamPath, parseNcaaSlug, topIds, NCAA_TOP } from "../lib/ncaa-model.js";
 import { mk } from "../lib/i18n.js";
 import PRIOR_W from "../lib/ncaaw-prior.json" with { type: "json" };
 import { calibration } from "../lib/calibration.js";
@@ -117,4 +117,11 @@ export async function awardsTests({ ok, ko, eq }) {
   eq("calibration : 50-60 %", JSON.stringify([cb[0].n, cb[0].ok]), JSON.stringify([1, 1]));
   eq("calibration : 70-80 % (visiteur favori compris)", JSON.stringify([cb[2].n, cb[2].ok, Math.round(cb[2].announced * 1000)]), JSON.stringify([2, 1, 735]));
   eq("calibration : 100 % dans 90-100 %", cb[4].n, 1);
+  // NCAA : seules les 25 écoles les mieux notées restent indexées (décision du 28/11/2026).
+  const stT = { d1: Array.from({ length: 40 }, (_, i) => String(i)), ratings: Object.fromEntries(Array.from({ length: 40 }, (_, i) => [String(i), i])) };
+  const topT = topIds(stT);
+  eq("NCAA : top 25 indexé", [NCAA_TOP, topT.size].join(","), "25,25");
+  eq("NCAA : les mieux notées gardées", [topT.has("39"), topT.has("15"), topT.has("14")].join(","), "true,true,false");
+  eq("NCAA : état absent sans erreur", topIds(null).size, 0);
 }
+

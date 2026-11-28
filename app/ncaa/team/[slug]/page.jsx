@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ncaaTeamBySlug, ncaaLg } from "../../../../lib/ncaa";
-import { ncaaGamePath, ncaaTeamPath, LEAGUES, ncaaWords } from "../../../../lib/ncaa-model";
+import { ncaaGamePath, ncaaTeamPath, LEAGUES, ncaaWords, NCAA_TOP } from "../../../../lib/ncaa-model";
 import { nbaToday, seasonForDate } from "../../../../lib/espn";
 import AppTabs from "../../../../components/AppTabs";
 import Crumbs from "../../../../components/Crumbs";
@@ -52,6 +52,7 @@ export async function generateMetadata({ params }) {
       `${t.name}, basquete universitário${fem ? " feminino" : ""} ${s}: campanha ${rec.w}-${rec.l}, ${rank}º de ${st.d1.length} no ranking do Basketlog${nx && p != null ? `, ${pctOf(p, L)} contra ${opp}` : ""}. Próximos jogos e resultados.`
     ),
     path: ncaaTeamPath(t, C.base),
+    noindex: rank > NCAA_TOP,
     L,
   });
 }

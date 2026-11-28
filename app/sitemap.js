@@ -10,7 +10,7 @@ import { pairPath } from "../lib/matchup.js";
 import { TERMS } from "../lib/glossary.js";
 import { monthsOf } from "../lib/months.js";
 import { ncaaState, ncaaStateOf, ncaaDay } from "../lib/ncaa";
-import { ncaaGamePath, ncaaTeamPath } from "../lib/ncaa-model.js";
+import { ncaaGamePath, ncaaTeamPath, topIds } from "../lib/ncaa-model.js";
 import { actuList } from "../lib/actu";
 
 export const revalidate = 3600; // régénéré chaque heure, avec les matchs à venir
@@ -38,21 +38,21 @@ export default async function sitemap() {
     u("/mentions-legales", 0.2, "yearly"), u("/cgu", 0.2, "yearly"), u("/cgv", 0.2, "yearly"), u("/confidentialite", 0.2, "yearly"), u("/cookies", 0.2, "yearly"),
   ];
   pages.push(...TERMS.map((x) => u(`/app/lexique/${x.slug}`, 0.4, "monthly")), ...monthsOf(seasonForDate(nbaToday()), nbaToday()).map((m) => u(`/app/bilan/${m}`, 0.5, "daily")));
-  // NCAA : fiches des écoles de 1re division et matchs d'aujourd'hui à après-demain.
+  // NCAA : les 25 écoles les mieux notées et leurs matchs entre elles, d'aujourd'hui à après-demain (décision du 28/11, voir NCAA_TOP).
   let ncaa = [];
   try {
     const st = await ncaaState();
-    const d1 = new Set(st.d1);
+    const d1 = topIds(st);
     ncaa = Object.values(st.meta).filter((t) => t.slug && d1.has(t.id)).map((t) => u(`/ncaa/team/${t.slug}`, 0.5, "daily"));
     const today = nbaToday();
     const lists = await Promise.all([0, 1, 2].map((i) => ncaaDay(shiftDate(today, i)).catch(() => [])));
     for (const g of lists.flat()) if (d1.has(g.home.id) && d1.has(g.away.id)) ncaa.push(u(ncaaGamePath(g), 0.6, "hourly"));
   } catch {}
-  // Basket universitaire féminin : les 100 écoles les mieux notées (exploration limitée) et les matchs d'aujourd'hui à après-demain.
+  // Basket universitaire féminin : idem, top 25.
   try {
     const st = await ncaaStateOf("w");
-    const d1 = new Set(st.d1);
-    ncaa.push(...st.d1.filter((id) => st.meta[id]?.slug).sort((a, b) => st.ratings[b] - st.ratings[a]).slice(0, 100).map((id) => u(ncaaTeamPath(st.meta[id], "/ncaaw"), 0.4, "daily")));
+    const d1 = topIds(st);
+    ncaa.push(...[...d1].filter((id) => st.meta[id]?.slug).map((id) => u(ncaaTeamPath(st.meta[id], "/ncaaw"), 0.4, "daily")));
     const today = nbaToday();
     const lists = await Promise.all([0, 1, 2].map((i) => ncaaDay(shiftDate(today, i), "w").catch(() => [])));
     for (const g of lists.flat()) if (d1.has(g.home.id) && d1.has(g.away.id)) ncaa.push(u(ncaaGamePath(g, "/ncaaw"), 0.5, "hourly"));
