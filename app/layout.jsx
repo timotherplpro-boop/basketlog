@@ -71,6 +71,11 @@ const SITE_LD = [
     // Logo carré en PNG (512 px) : format conseillé par Google pour le logo de marque dans les résultats.
     logo: { "@type": "ImageObject", url: `${SITE}/icons/icon-512.png`, width: 512, height: 512 },
     description: "Analyse basket et pronostics statistiques des matchs NBA et EuroLeague.",
+    // Qui est derrière le site (page /a-propos) : signal de confiance demandé par les consignes qualité de Google.
+    founder: { "@type": "Person", name: "Tim" },
+    foundingDate: "2026",
+    email: "contact@basketlog-app.com",
+    areaServed: ["FR", "ES", "US"],
     // Comptes officiels de la marque (leur bio renvoie vers le site) : aide Google à relier « Basketlog » au site.
     sameAs: ["https://x.com/Basketlog", "https://www.youtube.com/@basketlog", "https://www.tiktok.com/@basketlog", "https://www.tiktok.com/@basketlogapp", "https://t.me/basketlog", "https://bsky.app/profile/basketlog.bsky.social", "https://www.linkedin.com/company/basketlog", "https://www.instagram.com/basketlog_app/", "https://www.facebook.com/profile.php?id=61596281440513"],
   },

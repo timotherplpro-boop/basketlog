@@ -65,6 +65,7 @@ export default function SiteFooter({ L, compact = false }) {
           <Link href={L.href("/app/euroleague")}>{L.t("Pronostics EuroLeague", "EuroLeague predictions", "Pronósticos Euroliga", "Palpites Euroliga")}</Link>
           <Link href={L.href("/app/bilan")}>{L.t("Taux de réussite", "Track record", "Porcentaje de acierto", "Taxa de acerto")}</Link>
           <Link href={L.href("/methode")}>{L.t("Méthode", "Methodology", "Metodología", "Metodologia")}</Link>
+          <Link href={L.href("/a-propos")}>{L.t("À propos", "About", "Sobre nosotros", "Sobre")}</Link>
           <Link href={L.href("/meilleurs-sites-pronostics-nba")}>{L.t("Meilleurs sites de pronostics NBA", "Best NBA prediction sites", "Mejores webs de pronósticos NBA", "Melhores sites de palpites NBA")}</Link>
           <Link href={L.href("/app/lexique")}>{L.t("Lexique du basket", "Basketball glossary", "Glosario de baloncesto", "Glossário de basquete")}</Link>
           <Link href={L.href("/app/donnees")}>{L.t("API et données gratuites", "Free API and data", "API y datos gratis", "API e dados grátis")}</Link>
