@@ -129,7 +129,8 @@ export async function GET(req) {
         const thumb = await blueskyThumb(sess, urls.thumb);
         out.bluesky = await sendBluesky(sess, { text: b, facets, langs: ["fr"], url: urls.page, title: a.t, description: a.x.replace(/\s+/g, " ").slice(0, 200) }, thumb);
         const rkey = String(out.bluesky || "").split("/").pop();
-        // short.page : adresse propre de l'article (/actu/<rkey>-<titre>), à mettre dans les posts X, LinkedIn, Facebook.
+        // short.share : lien à mettre dans les posts X, LinkedIn, Facebook (mène au site, carte X avec le visuel).
+        // short.page : article indexable (/actu/<rkey>-<titre>), pour Google et la liste /actu.
         if (/^[a-z0-9]{10,20}$/.test(rkey)) out.short = actuShortUrls(rkey, a.t);
       } catch (e) {
         out.errors.push(`bluesky : ${e.message}`);
@@ -139,7 +140,7 @@ export async function GET(req) {
       const chat = cfg.telegram.chats.fr || Object.values(cfg.telegram.chats)[0];
       const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
       const tags = (b.match(/#[\p{L}\p{N}_]+/gu) || []).join(" ");
-      const cap = `<b>${esc(a.t)}</b>\n\n${esc(a.x).slice(0, 760)}\n\n👉 <a href="${(out.short || urls).page}">basketlog-app.com</a>${tags ? `\n${esc(tags)}` : ""}`;
+      const cap = `<b>${esc(a.t)}</b>\n\n${esc(a.x).slice(0, 760)}\n\n👉 <a href="${out.short?.share || urls.page}">basketlog-app.com</a>${tags ? `\n${esc(tags)}` : ""}`;
       try {
         out.telegram = await sendTelegramPhoto(cfg.telegram.token, chat, urls.portrait, cap);
       } catch (e) {

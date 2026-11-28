@@ -34,6 +34,7 @@ export async function actuTests({ ok, ko, eq }) {
   // --- Adresses courtes de ?actu=1 : short.page = adresse propre
   const s = actuShortUrls("3n3bs5ep3km2s", t);
   eq("short.page : adresse propre de l'article", s.page, `https://basketlog-app.com/actu/${id}`);
+  eq("short.share : lien de partage des posts (mène au site)", s.share, "https://basketlog-app.com/actu?b=3n3bs5ep3km2s");
   eq("short : visuels toujours par ?b=", [s.og, s.portrait, s.thumb], ["og", "portrait", "thumb"].map((f) => `https://basketlog-app.com/actu/og?b=3n3bs5ep3km2s&f=${f}`));
 
   // --- Date de publication : date du jeton, avec l'heure du post Bluesky le même jour
